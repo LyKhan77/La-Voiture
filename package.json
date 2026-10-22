@@ -1,0 +1,7 @@
+{
+  "name": "la-voiture",
+  "private": true,
+  "devDependencies": {
+    "@genex-ai/cli-demo": "^1.36.9"
+  }
+}

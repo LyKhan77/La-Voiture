@@ -1,0 +1,20 @@
+{
+  "project_name": "Character model sheet, 4 turnaround views showing front, back, three-quarters, and side profile in one image of Shinjiro Ono, 34-year-old grizzled Japanese touge drifting veteran and GT3 racer. Short spiky black hair with slight grey touches, white racing headband hachimaki tied around forehead, rugged weathered face with small scar on chin, intense disciplined warrior gaze. Wearing a classic white and burning sunset-orange racing suit with dark gunmetal reinforced shoulders, scarred driving gloves, durable racing boots. Holding a classic gloss-white helmet with orange sunburst graphics in both hands. Crisp cel-shaded anime style, thick black manga ink outlines, halftone Ben-Day dot shading, sharp geometric shadows, neutral grey studio background",
+  "folder": "20261022_113603_character-model-sheet-4-turnar_01a161e5",
+  "root_task_id": "01a161e5-0cba-7171-b3da-4c2b61e94c0a",
+  "created_at": "2026-10-22T04:36:03.397Z",
+  "updated_at": "2026-10-22T04:36:38.073Z",
+  "tasks": [
+    {
+      "task_id": "01a161e5-0cba-7171-b3da-4c2b61e94c0a",
+      "task_type": "text-to-image",
+      "stage": "model",
+      "prompt": "Character model sheet, 4 turnaround views showing front, back, three-quarters, and side profile in one image of Shinjiro Ono, 34-year-old grizzled Japanese touge drifting veteran and GT3 racer. Short spiky black hair with slight grey touches, white racing headband hachimaki tied around forehead, rugged weathered face with small scar on chin, intense disciplined warrior gaze. Wearing a classic white and burning sunset-orange racing suit with dark gunmetal reinforced shoulders, scarred driving gloves, durable racing boots. Holding a classic gloss-white helmet with orange sunburst graphics in both hands. Crisp cel-shaded anime style, thick black manga ink outlines, halftone Ben-Day dot shading, sharp geometric shadows, neutral grey studio background",
+      "status": "SUCCEEDED",
+      "files": [
+        "model.png"
+      ],
+      "created_at": "2026-10-22T04:36:38.072Z"
+    }
+  ]
+}

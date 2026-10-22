@@ -1,0 +1,20 @@
+{
+  "project_name": "Bust-up close-up anime portrait of this exact character, Gianluca Moretti, 31-year-old Italian GT3 racing maestro. Exact matching handsome Mediterranean features, wavy styled dark brown hair with distinguished silver streaks at temples, neat designer stubble beard, smoldering amber-brown eyes, charming charismatic smile, exact same royal cobalt-blue and liquid chrome racing collar with subtle Italian tricolor piping, pit radio mic clipped to collar. Thick black manga ink outlines, halftone Ben-Day dot shading, dynamic speed lines, cel-shaded anime style, isolated solid background",
+  "folder": "20261022_113212_bust-up-close-up-anime-portrai_01a161e1",
+  "root_task_id": "01a161e1-8493-7174-9f7e-2165b950874d",
+  "created_at": "2026-10-22T04:32:12.113Z",
+  "updated_at": "2026-10-22T04:32:47.241Z",
+  "tasks": [
+    {
+      "task_id": "01a161e1-8493-7174-9f7e-2165b950874d",
+      "task_type": "image-to-image",
+      "stage": "model",
+      "prompt": "Bust-up close-up anime portrait of this exact character, Gianluca Moretti, 31-year-old Italian GT3 racing maestro. Exact matching handsome Mediterranean features, wavy styled dark brown hair with distinguished silver streaks at temples, neat designer stubble beard, smoldering amber-brown eyes, charming charismatic smile, exact same royal cobalt-blue and liquid chrome racing collar with subtle Italian tricolor piping, pit radio mic clipped to collar. Thick black manga ink outlines, halftone Ben-Day dot shading, dynamic speed lines, cel-shaded anime style, isolated solid background",
+      "status": "SUCCEEDED",
+      "files": [
+        "model.png"
+      ],
+      "created_at": "2026-10-22T04:32:47.240Z"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/circuit_radar_2d.gd" id="1_radar"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_frame"]
+bg_color = Color(0.0549, 0.0667, 0.0941, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.957, 0.961, 0.969, 1)
+
+[node name="CircuitRadar2D" type="Control"]
+custom_minimum_size = Vector2(300, 200)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 300.0
+offset_bottom = 200.0
+mouse_filter = 2
+script = ExtResource("1_radar")
+
+[node name="Frame" type="Panel" parent="."]
+layout_mode = 0
+offset_right = 300.0
+offset_bottom = 200.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_frame")
+
+[node name="Track" type="Line2D" parent="."]
+width = 3.0
+default_color = Color(0.957, 0.961, 0.969, 1)
+joint_mode = 0
+
+[node name="Dots" type="Control" parent="."]
+layout_mode = 0
+offset_right = 300.0
+offset_bottom = 200.0
+mouse_filter = 2

@@ -1,0 +1,20 @@
+{
+  "project_name": "Character model sheet, 4 turnaround views showing front, back, three-quarters, and side profile in one image of Gianluca Moretti, 31-year-old charismatic Italian GT3 racing maestro. Handsome chiseled Mediterranean features, wavy styled dark brown hair with distinguished silver streaks at temples, neat designer stubble beard, smoldering amber-brown eyes, confident charming smile. Wearing a tailored royal cobalt-blue and liquid mirror-chrome racing suit with subtle Italian tricolor piping, white leather driving gloves, luxury racing boots. Holding a glossy royal blue helmet with aerodynamic chrome fin accents under his arm. Crisp cel-shaded anime style, thick black manga ink outlines, halftone Ben-Day dot shading, sharp geometric shadows, neutral grey studio background",
+  "folder": "20261022_113128_character-model-sheet-4-turnar_01a161e0",
+  "root_task_id": "01a161e0-d945-7071-b6ee-df72824e6436",
+  "created_at": "2026-10-22T04:31:28.081Z",
+  "updated_at": "2026-10-22T04:32:03.016Z",
+  "tasks": [
+    {
+      "task_id": "01a161e0-d945-7071-b6ee-df72824e6436",
+      "task_type": "text-to-image",
+      "stage": "model",
+      "prompt": "Character model sheet, 4 turnaround views showing front, back, three-quarters, and side profile in one image of Gianluca Moretti, 31-year-old charismatic Italian GT3 racing maestro. Handsome chiseled Mediterranean features, wavy styled dark brown hair with distinguished silver streaks at temples, neat designer stubble beard, smoldering amber-brown eyes, confident charming smile. Wearing a tailored royal cobalt-blue and liquid mirror-chrome racing suit with subtle Italian tricolor piping, white leather driving gloves, luxury racing boots. Holding a glossy royal blue helmet with aerodynamic chrome fin accents under his arm. Crisp cel-shaded anime style, thick black manga ink outlines, halftone Ben-Day dot shading, sharp geometric shadows, neutral grey studio background",
+      "status": "SUCCEEDED",
+      "files": [
+        "model.png"
+      ],
+      "created_at": "2026-10-22T04:32:03.016Z"
+    }
+  ]
+}

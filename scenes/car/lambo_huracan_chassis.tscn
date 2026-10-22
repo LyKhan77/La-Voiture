@@ -1,0 +1,38 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/modular_car_assembler.gd" id="1_asm"]
+[ext_resource type="PackedScene" path="res://assets/cars/lambo_huracan/lambo_huracan_body.glb" id="2_body"]
+[ext_resource type="Material" path="res://materials/lambo_huracan_toon_body.tres" id="3_toon_mat"]
+[ext_resource type="Material" path="res://materials/toon_carbon_aero.tres" id="4_carbon"]
+
+[node name="LamboHuracanChassis" type="Node3D" node_paths=PackedStringArray("base_body_mesh")]
+script = ExtResource("1_asm")
+car_name = "Lamborghini Huracan GT3 EVO2"
+team_name = "Oni Works"
+base_body_mesh = NodePath("BodyShell/LamboBody/LamboHuracan_Body")
+keeps_original_paint = true
+
+[node name="BodyShell" type="Node3D" parent="."]
+
+[node name="LamboBody" parent="BodyShell" instance=ExtResource("2_body")]
+
+[node name="LamboHuracan_Body" parent="BodyShell/LamboBody" index="0"]
+surface_material_override/0 = ExtResource("3_toon_mat")
+surface_material_override/1 = ExtResource("4_carbon")
+
+[node name="Sockets" type="Node3D" parent="."]
+
+[node name="Socket_Wheel_FL" type="Marker3D" parent="Sockets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.875, 0.33, 1.289)
+
+[node name="Socket_Wheel_FR" type="Marker3D" parent="Sockets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.875, 0.33, 1.289)
+
+[node name="Socket_Wheel_RL" type="Marker3D" parent="Sockets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.868, 0.33, -1.289)
+
+[node name="Socket_Wheel_RR" type="Marker3D" parent="Sockets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.868, 0.33, -1.289)
+
+[node name="Socket_Cockpit" type="Marker3D" parent="Sockets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.72, 0.05)

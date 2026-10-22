@@ -1,0 +1,20 @@
+{
+  "project_name": "Character model sheet, 4 turnaround views showing front, back, three-quarters, and side profile in one image of Dante Vance, 29-year-old cyberpunk GT3 team leader and racer. Sharp chiseled angular jawline, slicked-back dark undercut with deep purple faded sides, glowing violet cybernetic optic eye with digital reticle on right eye, calculating calm smirk. Wearing high-collar matte void-black techwear racing suit with glowing ultraviolet circuit seams, magnetic harness clips, and black armored racing boots. Holding a matte black GT3 racing helmet with glowing violet polarized visor and HUD telemetry graphics. Crisp cel-shaded anime style, thick black manga ink outlines, halftone Ben-Day dot shading, sharp geometric shadows, neutral grey studio background",
+  "folder": "20261022_112737_character-model-sheet-4-turnar_01a161dd",
+  "root_task_id": "01a161dd-5541-700a-85f5-0d8133e93983",
+  "created_at": "2026-10-22T04:27:37.674Z",
+  "updated_at": "2026-10-22T04:28:10.452Z",
+  "tasks": [
+    {
+      "task_id": "01a161dd-5541-700a-85f5-0d8133e93983",
+      "task_type": "text-to-image",
+      "stage": "model",
+      "prompt": "Character model sheet, 4 turnaround views showing front, back, three-quarters, and side profile in one image of Dante Vance, 29-year-old cyberpunk GT3 team leader and racer. Sharp chiseled angular jawline, slicked-back dark undercut with deep purple faded sides, glowing violet cybernetic optic eye with digital reticle on right eye, calculating calm smirk. Wearing high-collar matte void-black techwear racing suit with glowing ultraviolet circuit seams, magnetic harness clips, and black armored racing boots. Holding a matte black GT3 racing helmet with glowing violet polarized visor and HUD telemetry graphics. Crisp cel-shaded anime style, thick black manga ink outlines, halftone Ben-Day dot shading, sharp geometric shadows, neutral grey studio background",
+      "status": "SUCCEEDED",
+      "files": [
+        "model.png"
+      ],
+      "created_at": "2026-10-22T04:28:10.450Z"
+    }
+  ]
+}

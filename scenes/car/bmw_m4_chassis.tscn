@@ -1,0 +1,38 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/modular_car_assembler.gd" id="1_asm"]
+[ext_resource type="PackedScene" path="res://assets/cars/bmw_m4/bmw_m4_body.glb" id="2_body"]
+[ext_resource type="Material" path="res://materials/bmw_m4_toon_body.tres" id="3_toon_mat"]
+[ext_resource type="Material" path="res://materials/toon_carbon_aero.tres" id="4_carbon"]
+
+[node name="BMWM4Chassis" type="Node3D" node_paths=PackedStringArray("base_body_mesh")]
+script = ExtResource("1_asm")
+car_name = "BMW M4 GT3"
+team_name = "Zero Hour"
+base_body_mesh = NodePath("BodyShell/BMWBody/BMWM4_Body")
+keeps_original_paint = true
+
+[node name="BodyShell" type="Node3D" parent="."]
+
+[node name="BMWBody" parent="BodyShell" instance=ExtResource("2_body")]
+
+[node name="BMWM4_Body" parent="BodyShell/BMWBody" index="0"]
+surface_material_override/0 = ExtResource("3_toon_mat")
+surface_material_override/1 = ExtResource("4_carbon")
+
+[node name="Sockets" type="Node3D" parent="."]
+
+[node name="Socket_Wheel_FL" type="Marker3D" parent="Sockets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.847, 0.33, 1.299)
+
+[node name="Socket_Wheel_FR" type="Marker3D" parent="Sockets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.847, 0.33, 1.299)
+
+[node name="Socket_Wheel_RL" type="Marker3D" parent="Sockets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.847, 0.33, -1.299)
+
+[node name="Socket_Wheel_RR" type="Marker3D" parent="Sockets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.847, 0.33, -1.299)
+
+[node name="Socket_Cockpit" type="Marker3D" parent="Sockets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.72, 0.05)

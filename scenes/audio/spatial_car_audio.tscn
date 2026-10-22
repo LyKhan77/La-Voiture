@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/audio/spatial_car_audio.gd" id="1_audio"]
+[ext_resource type="Script" path="res://scripts/audio/engine_audio_3d.gd" id="2_engine"]
+[ext_resource type="Script" path="res://scripts/audio/tire_audio_3d.gd" id="3_tire"]
+
+[node name="SpatialCarAudio" type="Node3D"]
+script = ExtResource("1_audio")
+
+[node name="Engine" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 1.2)
+script = ExtResource("2_engine")
+
+[node name="Tire" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+script = ExtResource("3_tire")
+
+[node name="Kerb" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)

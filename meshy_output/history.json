@@ -1,0 +1,149 @@
+{
+  "version": 1,
+  "projects": [
+    {
+      "folder": "20261022_112737_character-model-sheet-4-turnar_01a161dd",
+      "prompt": "Character model sheet, 4 turnaround views showing front, back, three-quarters, and side profile in one image of Dante Vance, 29-year-old cyberpunk GT3 team leader and racer. Sharp chiseled angular jawline, slicked-back dark undercut with deep purple faded sides, glowing violet cybernetic optic eye with digital reticle on right eye, calculating calm smirk. Wearing high-collar matte void-black techwear racing suit with glowing ultraviolet circuit seams, magnetic harness clips, and black armored racing boots. Holding a matte black GT3 racing helmet with glowing violet polarized visor and HUD telemetry graphics. Crisp cel-shaded anime style, thick black manga ink outlines, halftone Ben-Day dot shading, sharp geometric shadows, neutral grey studio background",
+      "task_type": "text-to-image",
+      "root_task_id": "01a161dd-5541-700a-85f5-0d8133e93983",
+      "created_at": "2026-10-22T04:27:37.674Z",
+      "updated_at": "2026-10-22T04:28:10.452Z",
+      "task_count": 1
+    },
+    {
+      "folder": "20261022_112826_bust-up-close-up-anime-portrai_01a161de",
+      "prompt": "Bust-up close-up anime portrait of this exact character, Dante Vance, 29-year-old cyberpunk GT3 team leader and racer. Exact same chiseled jawline, slicked-back dark undercut with purple fade, exact same glowing violet cybernetic optic eye with digital reticle on right eye, calm confident calculating smirk, exact same high-collar matte black techwear racing suit with glowing ultraviolet circuit seams, pit radio mic clipped to collar. Thick black manga ink outlines, halftone Ben-Day dot shading, dynamic speed lines, cel-shaded anime style, isolated solid background",
+      "task_type": "image-to-image",
+      "root_task_id": "01a161de-1270-701b-bc05-2635842d293b",
+      "created_at": "2026-10-22T04:28:26.310Z",
+      "updated_at": "2026-10-22T04:29:01.816Z",
+      "task_count": 1
+    },
+    {
+      "folder": "20261022_112911_character-model-sheet-4-turnar_01a161de",
+      "prompt": "Character model sheet, 4 turnaround views showing front, back, three-quarters, and side profile in one image of Zane Cross, 21-year-old cyberpunk GT3 prodigy driver. Wild spiky acid-chartreuse and electric-purple two-tone hair, glowing neon biometric barcode tattoo on side of neck, AR smart visor monocle over left eye, cocky grinning expression. Wearing an oversized ultraviolet techwear racing utility vest with neon green straps over black fireproof racing undersuit, cybernetic fingerless gloves, chunky techwear sneakers. A matte purple racing helmet with glowing neon green glitch wave stencils resting on the floor. Crisp cel-shaded anime style, thick black manga ink outlines, halftone Ben-Day dot shading, sharp geometric shadows, neutral grey studio background",
+      "task_type": "text-to-image",
+      "root_task_id": "01a161de-c505-7523-bc7d-055a9a2397d5",
+      "created_at": "2026-10-22T04:29:11.823Z",
+      "updated_at": "2026-10-22T04:29:46.648Z",
+      "task_count": 1
+    },
+    {
+      "folder": "20261022_112955_bust-up-close-up-anime-portrai_01a161df",
+      "prompt": "Bust-up close-up anime portrait of this exact character, Zane Cross, 21-year-old cyberpunk GT3 prodigy driver. Exact matching wild spiky acid-chartreuse and electric-purple two-tone hair, exact same AR smart visor monocle over left eye, glowing biometric barcode tattoo on neck, cocky cheeky smirk, exact same ultraviolet techwear racing collar with neon green straps, pit radio mic clipped to collar. Thick black manga ink outlines, halftone Ben-Day dot shading, dynamic speed lines, cel-shaded anime style, isolated solid background",
+      "task_type": "image-to-image",
+      "root_task_id": "01a161df-6e28-7302-8d53-a3c84ee4bdf2",
+      "created_at": "2026-10-22T04:29:55.301Z",
+      "updated_at": "2026-10-22T04:31:15.305Z",
+      "task_count": 1
+    },
+    {
+      "folder": "20261022_113128_character-model-sheet-4-turnar_01a161e0",
+      "prompt": "Character model sheet, 4 turnaround views showing front, back, three-quarters, and side profile in one image of Gianluca Moretti, 31-year-old charismatic Italian GT3 racing maestro. Handsome chiseled Mediterranean features, wavy styled dark brown hair with distinguished silver streaks at temples, neat designer stubble beard, smoldering amber-brown eyes, confident charming smile. Wearing a tailored royal cobalt-blue and liquid mirror-chrome racing suit with subtle Italian tricolor piping, white leather driving gloves, luxury racing boots. Holding a glossy royal blue helmet with aerodynamic chrome fin accents under his arm. Crisp cel-shaded anime style, thick black manga ink outlines, halftone Ben-Day dot shading, sharp geometric shadows, neutral grey studio background",
+      "task_type": "text-to-image",
+      "root_task_id": "01a161e0-d945-7071-b6ee-df72824e6436",
+      "created_at": "2026-10-22T04:31:28.081Z",
+      "updated_at": "2026-10-22T04:32:03.016Z",
+      "task_count": 1
+    },
+    {
+      "folder": "20261022_113212_bust-up-close-up-anime-portrai_01a161e1",
+      "prompt": "Bust-up close-up anime portrait of this exact character, Gianluca Moretti, 31-year-old Italian GT3 racing maestro. Exact matching handsome Mediterranean features, wavy styled dark brown hair with distinguished silver streaks at temples, neat designer stubble beard, smoldering amber-brown eyes, charming charismatic smile, exact same royal cobalt-blue and liquid chrome racing collar with subtle Italian tricolor piping, pit radio mic clipped to collar. Thick black manga ink outlines, halftone Ben-Day dot shading, dynamic speed lines, cel-shaded anime style, isolated solid background",
+      "task_type": "image-to-image",
+      "root_task_id": "01a161e1-8493-7174-9f7e-2165b950874d",
+      "created_at": "2026-10-22T04:32:12.113Z",
+      "updated_at": "2026-10-22T04:32:47.241Z",
+      "task_count": 1
+    },
+    {
+      "folder": "20261022_113257_character-model-sheet-4-turnar_01a161e2",
+      "prompt": "Character model sheet, 4 turnaround views showing front, back, three-quarters, and side profile in one image of Pierre Mercier, 22-year-old Monégasque racing prodigy. Sleek straight blonde hair with sharp side-parting, cool piercing crystal-blue eyes, refined aristocratic jawline, calm composed stoic expression. Wearing a tailored bone-white and royal cobalt-blue racing suit with platinum thread embroidery and geometric trim, white racing gloves, polished white racing boots. Holding a minimalist pearl-white GT3 racing helmet with platinum geometric crest under his arm. Crisp cel-shaded anime style, thick black manga ink outlines, halftone Ben-Day dot shading, sharp geometric shadows, neutral grey studio background",
+      "task_type": "text-to-image",
+      "root_task_id": "01a161e2-34b5-77d8-9bcf-2a96036bc901",
+      "created_at": "2026-10-22T04:32:57.021Z",
+      "updated_at": "2026-10-22T04:33:31.510Z",
+      "task_count": 1
+    },
+    {
+      "folder": "20261022_113340_bust-up-close-up-anime-portrai_01a161e2",
+      "prompt": "Bust-up close-up anime portrait of this exact character, Pierre Mercier, 22-year-old Monégasque racing prodigy. Exact matching sleek straight blonde hair with sharp side-parting, cool piercing crystal-blue eyes, refined aristocratic jawline, calm stoic perfectionist expression, exact same bone-white and royal cobalt-blue tailored racing collar with platinum embroidery, pit radio mic clipped to collar. Thick black manga ink outlines, halftone Ben-Day dot shading, dynamic speed lines, cel-shaded anime style, isolated solid background",
+      "task_type": "image-to-image",
+      "root_task_id": "01a161e2-de2d-7559-9419-6f89c68bdd4a",
+      "created_at": "2026-10-22T04:33:40.554Z",
+      "updated_at": "2026-10-22T04:34:18.843Z",
+      "task_count": 1
+    },
+    {
+      "folder": "20261022_113429_character-model-sheet-4-turnar_01a161e3",
+      "prompt": "Character model sheet, 4 turnaround views showing front, back, three-quarters, and side profile in one image of Ren Mishima, 25-year-old Japanese street racer and GT3 driver known as The Ghost of C1. Messy layered jet-black anime hair with burning amber highlighted tips, stylish amber-tinted frameless driving glasses, intense focused eyes, cool smirk. Wearing a dark gunmetal grey techwear racing suit with glowing sunset-amber hazard stripes, Japanese kanji street racing decals on sleeves, high-grip black racing sneakers. A matte gunmetal GT3 helmet with sunset-amber mirror visor resting on his hip. Crisp cel-shaded anime style, thick black manga ink outlines, halftone Ben-Day dot shading, sharp geometric shadows, neutral grey studio background",
+      "task_type": "text-to-image",
+      "root_task_id": "01a161e3-9d83-75ff-9b1b-0c3030d85424",
+      "created_at": "2026-10-22T04:34:29.413Z",
+      "updated_at": "2026-10-22T04:35:09.268Z",
+      "task_count": 1
+    },
+    {
+      "folder": "20261022_113517_bust-up-close-up-anime-portrai_01a161e4",
+      "prompt": "Bust-up close-up anime portrait of this exact character, Ren Mishima, 25-year-old Japanese street racer known as The Ghost of C1. Exact matching messy layered jet-black anime hair with burning amber highlighted tips, exact same amber-tinted frameless driving glasses, intense focused eyes, confident smirk, exact same dark gunmetal techwear racing collar with glowing sunset-amber hazard stripes, pit radio mic clipped to collar. Thick black manga ink outlines, halftone Ben-Day dot shading, dynamic speed lines, cel-shaded anime style, isolated solid background",
+      "task_type": "image-to-image",
+      "root_task_id": "01a161e4-59fd-73ad-a3a6-aebb22419ac9",
+      "created_at": "2026-10-22T04:35:17.776Z",
+      "updated_at": "2026-10-22T04:35:52.133Z",
+      "task_count": 1
+    },
+    {
+      "folder": "20261022_113603_character-model-sheet-4-turnar_01a161e5",
+      "prompt": "Character model sheet, 4 turnaround views showing front, back, three-quarters, and side profile in one image of Shinjiro Ono, 34-year-old grizzled Japanese touge drifting veteran and GT3 racer. Short spiky black hair with slight grey touches, white racing headband hachimaki tied around forehead, rugged weathered face with small scar on chin, intense disciplined warrior gaze. Wearing a classic white and burning sunset-orange racing suit with dark gunmetal reinforced shoulders, scarred driving gloves, durable racing boots. Holding a classic gloss-white helmet with orange sunburst graphics in both hands. Crisp cel-shaded anime style, thick black manga ink outlines, halftone Ben-Day dot shading, sharp geometric shadows, neutral grey studio background",
+      "task_type": "text-to-image",
+      "root_task_id": "01a161e5-0cba-7171-b3da-4c2b61e94c0a",
+      "created_at": "2026-10-22T04:36:03.397Z",
+      "updated_at": "2026-10-22T04:36:38.073Z",
+      "task_count": 1
+    },
+    {
+      "folder": "20261022_113646_bust-up-close-up-anime-portrai_01a161e5",
+      "prompt": "Bust-up close-up anime portrait of this exact character, Shinjiro Ono, 34-year-old grizzled Japanese touge veteran racer. Exact matching short spiky black hair with grey touches, white racing headband hachimaki tied across forehead, rugged weathered face with small scar on chin, intense disciplined warrior eyes, exact same white and burning sunset-orange racing collar with gunmetal padded trim, pit radio mic clipped to collar. Thick black manga ink outlines, halftone Ben-Day dot shading, dynamic speed lines, cel-shaded anime style, isolated solid background",
+      "task_type": "image-to-image",
+      "root_task_id": "01a161e5-b427-7346-a594-ee1145440752",
+      "created_at": "2026-10-22T04:36:46.473Z",
+      "updated_at": "2026-10-22T04:37:27.227Z",
+      "task_count": 1
+    },
+    {
+      "folder": "20261022_113738_character-model-sheet-4-turnar_01a161e6",
+      "prompt": "Character model sheet, 4 turnaround views showing front, back, three-quarters, and side profile in one image of Arthur Sterling Jr., 27-year-old aristocratic British gentleman GT3 racer known as Lord of the Apex. Immaculate blonde hair with classic sharp side-parting, piercing sapphire-blue eyes, clean-shaven chiseled aristocratic jawline, confident composed gentleman smirk. Wearing a tailored bespoke Oxford navy-blue and ivory-cream racing suit with fine champagne-gold pinstripes and golden lion heraldry crest embroidery, white leather driving gloves, luxury racing boots. Holding a dark Oxford navy racing helmet with gold heraldic lion stencil under his arm. Crisp cel-shaded anime style, thick black manga ink outlines, halftone Ben-Day dot shading, sharp geometric shadows, neutral grey studio background",
+      "task_type": "text-to-image",
+      "root_task_id": "01a161e6-7f11-70c2-be41-ec418ab3c3c8",
+      "created_at": "2026-10-22T04:37:38.202Z",
+      "updated_at": "2026-10-22T04:38:09.287Z",
+      "task_count": 1
+    },
+    {
+      "folder": "20261022_113818_bust-up-close-up-anime-portrai_01a161e7",
+      "prompt": "Bust-up close-up anime portrait of this exact character, Arthur Sterling Jr., 27-year-old British gentleman racer known as Lord of the Apex. Exact matching blonde hair with sharp side-parting, piercing sapphire-blue eyes, clean-shaven aristocratic jawline, confident composed gentleman smirk, exact same Oxford navy and ivory-cream racing collar with champagne-gold pinstripe trim and lion crest, pit radio mic clipped to collar. Thick black manga ink outlines, halftone Ben-Day dot shading, dynamic speed lines, cel-shaded anime style, isolated solid background",
+      "task_type": "image-to-image",
+      "root_task_id": "01a161e7-1cb8-7685-aea9-914b42421c42",
+      "created_at": "2026-10-22T04:38:18.742Z",
+      "updated_at": "2026-10-22T04:38:49.015Z",
+      "task_count": 1
+    },
+    {
+      "folder": "20261022_113858_character-model-sheet-4-turnar_01a161e7",
+      "prompt": "Character model sheet, 4 turnaround views showing front, back, three-quarters, and side profile in one image of Harrison Croft, 30-year-old gritty Yorkshire endurance driver known as The Yorkshire Hammer. Short rugged brown buzz-crop hair, weathered stubble jaw, small scar on left cheekbone, resolute unyielding determined gaze. Wearing a heavy-duty reinforced Oxford navy-blue racing suit with diamond-quilted shoulder pads and durable carbon-fiber knuckles gloves, sturdy industrial racing boots. Holding a scuffed matte navy helmet with faded silver Union Jack stencil under his arm. Crisp cel-shaded anime style, thick black manga ink outlines, halftone Ben-Day dot shading, sharp geometric shadows, neutral grey studio background",
+      "task_type": "text-to-image",
+      "root_task_id": "01a161e7-b8a3-73cc-acf5-f908c55ca685",
+      "created_at": "2026-10-22T04:38:58.478Z",
+      "updated_at": "2026-10-22T04:39:33.352Z",
+      "task_count": 1
+    },
+    {
+      "folder": "20261022_113941_bust-up-close-up-anime-portrai_01a161e8",
+      "prompt": "Bust-up close-up anime portrait of this exact character, Harrison Croft, 30-year-old gritty Yorkshire endurance driver known as The Yorkshire Hammer. Exact matching short rugged brown buzz-crop hair, weathered stubble jaw, small scar on left cheekbone, resolute unyielding determined gaze, exact same heavy-duty Oxford navy racing collar with quilted shoulder trim, pit radio mic clipped to collar. Thick black manga ink outlines, halftone Ben-Day dot shading, dynamic speed lines, cel-shaded anime style, isolated solid background",
+      "task_type": "image-to-image",
+      "root_task_id": "01a161e8-6134-74d8-826e-3fc00fd523bf",
+      "created_at": "2026-10-22T04:39:41.763Z",
+      "updated_at": "2026-10-22T04:40:16.218Z",
+      "task_count": 1
+    }
+  ]
+}

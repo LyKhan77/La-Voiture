@@ -1,0 +1,20 @@
+{
+  "project_name": "Bust-up close-up anime portrait of this exact character, Ren Mishima, 25-year-old Japanese street racer known as The Ghost of C1. Exact matching messy layered jet-black anime hair with burning amber highlighted tips, exact same amber-tinted frameless driving glasses, intense focused eyes, confident smirk, exact same dark gunmetal techwear racing collar with glowing sunset-amber hazard stripes, pit radio mic clipped to collar. Thick black manga ink outlines, halftone Ben-Day dot shading, dynamic speed lines, cel-shaded anime style, isolated solid background",
+  "folder": "20261022_113517_bust-up-close-up-anime-portrai_01a161e4",
+  "root_task_id": "01a161e4-59fd-73ad-a3a6-aebb22419ac9",
+  "created_at": "2026-10-22T04:35:17.776Z",
+  "updated_at": "2026-10-22T04:35:52.133Z",
+  "tasks": [
+    {
+      "task_id": "01a161e4-59fd-73ad-a3a6-aebb22419ac9",
+      "task_type": "image-to-image",
+      "stage": "model",
+      "prompt": "Bust-up close-up anime portrait of this exact character, Ren Mishima, 25-year-old Japanese street racer known as The Ghost of C1. Exact matching messy layered jet-black anime hair with burning amber highlighted tips, exact same amber-tinted frameless driving glasses, intense focused eyes, confident smirk, exact same dark gunmetal techwear racing collar with glowing sunset-amber hazard stripes, pit radio mic clipped to collar. Thick black manga ink outlines, halftone Ben-Day dot shading, dynamic speed lines, cel-shaded anime style, isolated solid background",
+      "status": "SUCCEEDED",
+      "files": [
+        "model.png"
+      ],
+      "created_at": "2026-10-22T04:35:52.132Z"
+    }
+  ]
+}

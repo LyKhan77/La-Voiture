@@ -1,0 +1,63 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/anime_radio_cutin.gd" id="1_radio"]
+
+[node name="AnimeRadioCutIn" type="CanvasLayer"]
+layer = 30
+script = ExtResource("1_radio")
+
+[node name="Banner" type="Control" parent="."]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 32.0
+offset_top = -234.0
+offset_right = 492.0
+offset_bottom = -84.0
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="Backdrop" type="Control" parent="Banner"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="PortraitFrame" type="Panel" parent="Banner"]
+visible = false
+offset_left = 18.0
+offset_top = 23.0
+offset_right = 122.0
+offset_bottom = 127.0
+mouse_filter = 2
+
+[node name="Portrait" type="TextureRect" parent="Banner/PortraitFrame"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Speaker" type="Label" parent="Banner"]
+offset_left = 142.0
+offset_top = 12.0
+offset_right = 430.0
+offset_bottom = 34.0
+mouse_filter = 2
+
+[node name="Speech" type="Label" parent="Banner"]
+offset_left = 142.0
+offset_top = 38.0
+offset_right = 430.0
+offset_bottom = 138.0
+mouse_filter = 2
+autowrap_mode = 3
+clip_text = false

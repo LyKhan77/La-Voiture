@@ -1,0 +1,47 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Material" path="res://materials/toon_carbon_aero.tres" id="1_mat"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tire"]
+albedo_color = Color(0.12, 0.12, 0.14, 1)
+roughness = 0.95
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_tire"]
+material = SubResource("StandardMaterial3D_tire")
+top_radius = 0.34
+bottom_radius = 0.34
+height = 0.32
+radial_segments = 32
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_rim"]
+material = ExtResource("1_mat")
+top_radius = 0.24
+bottom_radius = 0.24
+height = 0.33
+radial_segments = 24
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nut"]
+albedo_color = Color(0.9, 0.1, 0.2, 1)
+metallic = 0.8
+roughness = 0.2
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_nut"]
+material = SubResource("StandardMaterial3D_nut")
+top_radius = 0.05
+bottom_radius = 0.05
+height = 0.35
+radial_segments = 16
+
+[node name="WheelCenterlock" type="Node3D"]
+
+[node name="TireRubber" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("CylinderMesh_tire")
+
+[node name="AlloyRim" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("CylinderMesh_rim")
+
+[node name="CenterNut" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("CylinderMesh_nut")

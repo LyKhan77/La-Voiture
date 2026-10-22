@@ -1,0 +1,53 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Material" path="res://materials/toon_carbon_aero.tres" id="1_mat"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_mainblade"]
+material = ExtResource("1_mat")
+size = Vector3(1.98, 0.045, 0.44)
+
+[sub_resource type="BoxMesh" id="BoxMesh_secondaryflap"]
+material = ExtResource("1_mat")
+size = Vector3(1.98, 0.025, 0.22)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gurney"]
+material = ExtResource("1_mat")
+size = Vector3(1.98, 0.03, 0.015)
+
+[sub_resource type="BoxMesh" id="BoxMesh_swanbracket2"]
+material = ExtResource("1_mat")
+size = Vector3(0.045, 0.52, 0.24)
+
+[sub_resource type="BoxMesh" id="BoxMesh_evoendplate"]
+material = ExtResource("1_mat")
+size = Vector3(0.025, 0.46, 0.65)
+
+[node name="WingTier2" type="Node3D"]
+
+[node name="MainBlade" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.985, 0.174, 0, -0.174, 0.985, 0, 0.46, 0)
+mesh = SubResource("BoxMesh_mainblade")
+
+[node name="UpperFlap" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.940, 0.342, 0, -0.342, 0.940, 0, 0.54, -0.14)
+mesh = SubResource("BoxMesh_secondaryflap")
+
+[node name="GurneyFlap" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.59, -0.25)
+mesh = SubResource("BoxMesh_gurney")
+
+[node name="SwanNeckL" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.966, -0.259, 0, 0.259, 0.966, -0.52, 0.24, 0.08)
+mesh = SubResource("BoxMesh_swanbracket2")
+
+[node name="SwanNeckR" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.966, -0.259, 0, 0.259, 0.966, 0.52, 0.24, 0.08)
+mesh = SubResource("BoxMesh_swanbracket2")
+
+[node name="EndplateL" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.99, 0.46, -0.05)
+mesh = SubResource("BoxMesh_evoendplate")
+
+[node name="EndplateR" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.99, 0.46, -0.05)
+mesh = SubResource("BoxMesh_evoendplate")

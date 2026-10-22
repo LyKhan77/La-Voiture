@@ -1,0 +1,20 @@
+{
+  "project_name": "Bust-up close-up anime portrait of this exact character, Pierre Mercier, 22-year-old Monégasque racing prodigy. Exact matching sleek straight blonde hair with sharp side-parting, cool piercing crystal-blue eyes, refined aristocratic jawline, calm stoic perfectionist expression, exact same bone-white and royal cobalt-blue tailored racing collar with platinum embroidery, pit radio mic clipped to collar. Thick black manga ink outlines, halftone Ben-Day dot shading, dynamic speed lines, cel-shaded anime style, isolated solid background",
+  "folder": "20261022_113340_bust-up-close-up-anime-portrai_01a161e2",
+  "root_task_id": "01a161e2-de2d-7559-9419-6f89c68bdd4a",
+  "created_at": "2026-10-22T04:33:40.554Z",
+  "updated_at": "2026-10-22T04:34:18.843Z",
+  "tasks": [
+    {
+      "task_id": "01a161e2-de2d-7559-9419-6f89c68bdd4a",
+      "task_type": "image-to-image",
+      "stage": "model",
+      "prompt": "Bust-up close-up anime portrait of this exact character, Pierre Mercier, 22-year-old Monégasque racing prodigy. Exact matching sleek straight blonde hair with sharp side-parting, cool piercing crystal-blue eyes, refined aristocratic jawline, calm stoic perfectionist expression, exact same bone-white and royal cobalt-blue tailored racing collar with platinum embroidery, pit radio mic clipped to collar. Thick black manga ink outlines, halftone Ben-Day dot shading, dynamic speed lines, cel-shaded anime style, isolated solid background",
+      "status": "SUCCEEDED",
+      "files": [
+        "model.png"
+      ],
+      "created_at": "2026-10-22T04:34:18.842Z"
+    }
+  ]
+}

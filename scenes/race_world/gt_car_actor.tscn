@@ -1,0 +1,43 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/gt_car_actor.gd" id="1_actor"]
+[ext_resource type="PackedScene" path="res://scenes/car/base_chassis.tscn" id="2_chassis"]
+[ext_resource type="PackedScene" path="res://scenes/audio/spatial_car_audio.tscn" id="3_audio"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_car"]
+size = Vector3(2, 1.2, 4.6)
+
+[node name="GtCarActor" type="Node3D"]
+script = ExtResource("1_actor")
+
+[node name="Body" type="AnimatableBody3D" parent="."]
+collision_layer = 2
+collision_mask = 0
+sync_to_physics = false
+
+[node name="Shape" type="CollisionShape3D" parent="Body"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+shape = SubResource("BoxShape3D_car")
+
+[node name="Chassis" parent="." instance=ExtResource("2_chassis")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0)
+
+[node name="SpatialCarAudio" parent="." instance=ExtResource("3_audio")]
+
+[node name="FrontSensor" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, -2.3)
+enabled = false
+target_position = Vector3(0, 0, -14)
+collision_mask = 2
+
+[node name="LeftSensor" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+enabled = false
+target_position = Vector3(-3, 0, 0)
+collision_mask = 2
+
+[node name="RightSensor" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+enabled = false
+target_position = Vector3(3, 0, 0)
+collision_mask = 2

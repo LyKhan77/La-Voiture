@@ -1,0 +1,20 @@
+{
+  "project_name": "Character model sheet, 4 turnaround views showing front, back, three-quarters, and side profile in one image of Zane Cross, 21-year-old cyberpunk GT3 prodigy driver. Wild spiky acid-chartreuse and electric-purple two-tone hair, glowing neon biometric barcode tattoo on side of neck, AR smart visor monocle over left eye, cocky grinning expression. Wearing an oversized ultraviolet techwear racing utility vest with neon green straps over black fireproof racing undersuit, cybernetic fingerless gloves, chunky techwear sneakers. A matte purple racing helmet with glowing neon green glitch wave stencils resting on the floor. Crisp cel-shaded anime style, thick black manga ink outlines, halftone Ben-Day dot shading, sharp geometric shadows, neutral grey studio background",
+  "folder": "20261022_112911_character-model-sheet-4-turnar_01a161de",
+  "root_task_id": "01a161de-c505-7523-bc7d-055a9a2397d5",
+  "created_at": "2026-10-22T04:29:11.823Z",
+  "updated_at": "2026-10-22T04:29:46.648Z",
+  "tasks": [
+    {
+      "task_id": "01a161de-c505-7523-bc7d-055a9a2397d5",
+      "task_type": "text-to-image",
+      "stage": "model",
+      "prompt": "Character model sheet, 4 turnaround views showing front, back, three-quarters, and side profile in one image of Zane Cross, 21-year-old cyberpunk GT3 prodigy driver. Wild spiky acid-chartreuse and electric-purple two-tone hair, glowing neon biometric barcode tattoo on side of neck, AR smart visor monocle over left eye, cocky grinning expression. Wearing an oversized ultraviolet techwear racing utility vest with neon green straps over black fireproof racing undersuit, cybernetic fingerless gloves, chunky techwear sneakers. A matte purple racing helmet with glowing neon green glitch wave stencils resting on the floor. Crisp cel-shaded anime style, thick black manga ink outlines, halftone Ben-Day dot shading, sharp geometric shadows, neutral grey studio background",
+      "status": "SUCCEEDED",
+      "files": [
+        "model.png"
+      ],
+      "created_at": "2026-10-22T04:29:46.648Z"
+    }
+  ]
+}

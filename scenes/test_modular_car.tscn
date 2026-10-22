@@ -1,0 +1,124 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/test_modular_car.gd" id="1_test"]
+[ext_resource type="PackedScene" path="res://scenes/car/base_chassis.tscn" id="2_chassis"]
+[ext_resource type="PackedScene" path="res://scenes/vfx/manga_smoke_emitter.tscn" id="3_smoke"]
+
+[sub_resource type="Environment" id="Environment_show"]
+background_mode = 1
+background_color = Color(0.04, 0.045, 0.065, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.35, 0.38, 0.45, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_floor"]
+size = Vector2(40, 40)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
+albedo_color = Color(0.08, 0.09, 0.12, 1)
+roughness = 0.9
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.055, 0.067, 0.094, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.8, 1, 0, 1)
+shadow_color = Color(0, 0, 0, 1)
+shadow_size = 6
+shadow_offset = Vector2(5, 5)
+
+[node name="TestModularCar" type="Node3D"]
+script = ExtResource("1_test")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_show")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, -0.353, 0.353, 0, 0.707, 0.707, -0.5, -0.612, 0.612, 5, 8, 5)
+light_color = Color(1, 0.98, 0.95, 1)
+light_energy = 1.4
+shadow_enabled = true
+
+[node name="RimLight" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.707, 0, -0.707, 0, 1, 0, 0.707, 0, -0.707, -5, 3, -5)
+light_color = Color(0, 0.94, 1, 1)
+light_energy = 0.8
+
+[node name="Floor" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("PlaneMesh_floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_floor")
+
+[node name="BaseChassis" parent="." instance=ExtResource("2_chassis")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="SmokeRL" parent="." instance=ExtResource("3_smoke")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.98, 0.35, -1.06)
+
+[node name="SmokeRR" parent="." instance=ExtResource("3_smoke")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.98, 0.35, -1.06)
+
+[node name="CameraPivot" type="Node3D" parent="."]
+transform = Transform3D(0.866, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866, 0, 0.6, 0)
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot"]
+transform = Transform3D(1, 0, 0, 0, 0.94, 0.342, 0, -0.342, 0.94, 0, 2.2, 5.8)
+fov = 42.0
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Panel" type="PanelContainer" parent="UI"]
+offset_left = 32.0
+offset_top = 32.0
+offset_right = 520.0
+offset_bottom = 290.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="UI/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="UI/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 1, 0, 1)
+theme_override_font_sizes/font_size = 18
+text = "04 // MODULAR CAR SHOWROOM · PORSCHE 911 GT3"
+
+[node name="PartsStatus" type="Label" parent="UI/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.96, 0.97, 1)
+theme_override_font_sizes/font_size = 14
+text = "[ T1 Splitter ]  [ T1 Swan-Neck ]  [ Diffuser: ON ]"
+
+[node name="HSeparator" type="HSeparator" parent="UI/Panel/VBox"]
+layout_mode = 2
+
+[node name="DownforceLabel" type="Label" parent="UI/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.94, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "DOWNFORCE : +25.0 %"
+
+[node name="DragLabel" type="Label" parent="UI/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.96, 0.97, 1)
+theme_override_font_sizes/font_size = 15
+text = "DRAG COEFF: 1.00 x"
+
+[node name="WeightLabel" type="Label" parent="UI/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0, 1)
+theme_override_font_sizes/font_size = 15
+text = "MASS DELTA: -13.5 KG"
+
+[node name="HSeparator2" type="HSeparator" parent="UI/Panel/VBox"]
+layout_mode = 2
+
+[node name="ControlsHelp" type="Label" parent="UI/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.58, 0.61, 0.68, 1)
+theme_override_font_sizes/font_size = 12
+text = "[1] Soft (Red)   [2] Medium (Yellow)   [3] Hard (White)   [4] Wet (Cyan)
+[5] Pitstop Wheel Detach   [SPACE] Burnout Smoke + Spin
+[R] Toggle Auto-Orbit Turntable"

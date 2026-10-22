@@ -1,0 +1,20 @@
+{
+  "project_name": "Character model sheet, 4 turnaround views showing front, back, three-quarters, and side profile in one image of Harrison Croft, 30-year-old gritty Yorkshire endurance driver known as The Yorkshire Hammer. Short rugged brown buzz-crop hair, weathered stubble jaw, small scar on left cheekbone, resolute unyielding determined gaze. Wearing a heavy-duty reinforced Oxford navy-blue racing suit with diamond-quilted shoulder pads and durable carbon-fiber knuckles gloves, sturdy industrial racing boots. Holding a scuffed matte navy helmet with faded silver Union Jack stencil under his arm. Crisp cel-shaded anime style, thick black manga ink outlines, halftone Ben-Day dot shading, sharp geometric shadows, neutral grey studio background",
+  "folder": "20261022_113858_character-model-sheet-4-turnar_01a161e7",
+  "root_task_id": "01a161e7-b8a3-73cc-acf5-f908c55ca685",
+  "created_at": "2026-10-22T04:38:58.478Z",
+  "updated_at": "2026-10-22T04:39:33.352Z",
+  "tasks": [
+    {
+      "task_id": "01a161e7-b8a3-73cc-acf5-f908c55ca685",
+      "task_type": "text-to-image",
+      "stage": "model",
+      "prompt": "Character model sheet, 4 turnaround views showing front, back, three-quarters, and side profile in one image of Harrison Croft, 30-year-old gritty Yorkshire endurance driver known as The Yorkshire Hammer. Short rugged brown buzz-crop hair, weathered stubble jaw, small scar on left cheekbone, resolute unyielding determined gaze. Wearing a heavy-duty reinforced Oxford navy-blue racing suit with diamond-quilted shoulder pads and durable carbon-fiber knuckles gloves, sturdy industrial racing boots. Holding a scuffed matte navy helmet with faded silver Union Jack stencil under his arm. Crisp cel-shaded anime style, thick black manga ink outlines, halftone Ben-Day dot shading, sharp geometric shadows, neutral grey studio background",
+      "status": "SUCCEEDED",
+      "files": [
+        "model.png"
+      ],
+      "created_at": "2026-10-22T04:39:33.351Z"
+    }
+  ]
+}

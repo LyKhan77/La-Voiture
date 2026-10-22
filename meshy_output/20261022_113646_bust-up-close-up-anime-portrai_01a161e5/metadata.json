@@ -1,0 +1,20 @@
+{
+  "project_name": "Bust-up close-up anime portrait of this exact character, Shinjiro Ono, 34-year-old grizzled Japanese touge veteran racer. Exact matching short spiky black hair with grey touches, white racing headband hachimaki tied across forehead, rugged weathered face with small scar on chin, intense disciplined warrior eyes, exact same white and burning sunset-orange racing collar with gunmetal padded trim, pit radio mic clipped to collar. Thick black manga ink outlines, halftone Ben-Day dot shading, dynamic speed lines, cel-shaded anime style, isolated solid background",
+  "folder": "20261022_113646_bust-up-close-up-anime-portrai_01a161e5",
+  "root_task_id": "01a161e5-b427-7346-a594-ee1145440752",
+  "created_at": "2026-10-22T04:36:46.473Z",
+  "updated_at": "2026-10-22T04:37:27.227Z",
+  "tasks": [
+    {
+      "task_id": "01a161e5-b427-7346-a594-ee1145440752",
+      "task_type": "image-to-image",
+      "stage": "model",
+      "prompt": "Bust-up close-up anime portrait of this exact character, Shinjiro Ono, 34-year-old grizzled Japanese touge veteran racer. Exact matching short spiky black hair with grey touches, white racing headband hachimaki tied across forehead, rugged weathered face with small scar on chin, intense disciplined warrior eyes, exact same white and burning sunset-orange racing collar with gunmetal padded trim, pit radio mic clipped to collar. Thick black manga ink outlines, halftone Ben-Day dot shading, dynamic speed lines, cel-shaded anime style, isolated solid background",
+      "status": "SUCCEEDED",
+      "files": [
+        "model.png"
+      ],
+      "created_at": "2026-10-22T04:37:27.226Z"
+    }
+  ]
+}

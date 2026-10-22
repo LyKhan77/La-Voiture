@@ -1,0 +1,20 @@
+{
+  "project_name": "Character model sheet, 4 turnaround views showing front, back, three-quarters, and side profile in one image of Pierre Mercier, 22-year-old Monégasque racing prodigy. Sleek straight blonde hair with sharp side-parting, cool piercing crystal-blue eyes, refined aristocratic jawline, calm composed stoic expression. Wearing a tailored bone-white and royal cobalt-blue racing suit with platinum thread embroidery and geometric trim, white racing gloves, polished white racing boots. Holding a minimalist pearl-white GT3 racing helmet with platinum geometric crest under his arm. Crisp cel-shaded anime style, thick black manga ink outlines, halftone Ben-Day dot shading, sharp geometric shadows, neutral grey studio background",
+  "folder": "20261022_113257_character-model-sheet-4-turnar_01a161e2",
+  "root_task_id": "01a161e2-34b5-77d8-9bcf-2a96036bc901",
+  "created_at": "2026-10-22T04:32:57.021Z",
+  "updated_at": "2026-10-22T04:33:31.510Z",
+  "tasks": [
+    {
+      "task_id": "01a161e2-34b5-77d8-9bcf-2a96036bc901",
+      "task_type": "text-to-image",
+      "stage": "model",
+      "prompt": "Character model sheet, 4 turnaround views showing front, back, three-quarters, and side profile in one image of Pierre Mercier, 22-year-old Monégasque racing prodigy. Sleek straight blonde hair with sharp side-parting, cool piercing crystal-blue eyes, refined aristocratic jawline, calm composed stoic expression. Wearing a tailored bone-white and royal cobalt-blue racing suit with platinum thread embroidery and geometric trim, white racing gloves, polished white racing boots. Holding a minimalist pearl-white GT3 racing helmet with platinum geometric crest under his arm. Crisp cel-shaded anime style, thick black manga ink outlines, halftone Ben-Day dot shading, sharp geometric shadows, neutral grey studio background",
+      "status": "SUCCEEDED",
+      "files": [
+        "model.png"
+      ],
+      "created_at": "2026-10-22T04:33:31.510Z"
+    }
+  ]
+}

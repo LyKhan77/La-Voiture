@@ -1,0 +1,79 @@
+# La Voiture — Master Implementation Roadmap & ToDo Tracker
+
+> **Spesifikasi Terkait:** [PRD Suite](file:///D:/Occupation/Porto/genex/La_Voiture/PRD/README.md) · [DESIGN.md](file:///D:/Occupation/Porto/genex/La_Voiture/DESIGN.md) · [Full-Car-Component-Guide.md](file:///D:/Occupation/Porto/genex/La_Voiture/Full-Car-Component-Guide.md) · [Technical Plan](file:///D:/Occupation/Porto/genex/La_Voiture/docs/superpowers/plans/2026-10-20-la-voiture-implementation-roadmap.md)
+
+---
+
+## Ringkasan Progres Fase
+
+- [x] **Fase 1: Inisialisasi Proyek Godot 4 & Core Simulation Math Engine**
+  - [x] `Task 1.1`: Inisialisasi `project.godot` & struktur direktori
+  - [x] `Task 1.2`: Model data telemetri (`CarState.gd`, `TireModel.gd`, `FuelModel.gd`)
+  - [x] `Task 1.3`: Deterministic sub-stepping simulation engine (Fast-Forward 16x)
+  - [x] `Task 1.4`: Script pengujian otomatis Headless Simulation Runner
+- [x] **Fase 2: UI Pit Wall Command Center & Manga Styling ([DESIGN.md](file:///D:/Occupation/Porto/genex/La_Voiture/DESIGN.md))**
+  - [x] `Task 2.1`: Shader Halftone Screentone & token warna antarmuka
+  - [x] `Task 2.2`: Live Timing Tower 20 mobil dengan seleksi Snap-Invert
+  - [x] `Task 2.3`: Driver Strategy Deck (telemetri 4 sudut ban & tombol Box)
+  - [x] `Task 2.4`: Banner Anime Radio Cut-In & Ticker Marquee berjalan
+- [x] **Fase 3: Lintasan 3D Ribbon & Kinematic Vehicle Actor**
+  - [x] `Task 3.1`: Track ribbon spline 3 lajur (Inside, Optimal, Outside)
+  - [x] `Task 3.2`: Kinematic dynamic car actor dengan sensor raycast
+  - [x] `Task 3.3`: Integrasi 2D Circuit Radar di layar Pit Wall
+- [x] **Fase 4: Pipeline Mobil 3D Modular & Shader Anime Toon ([Full-Car-Component-Guide.md](file:///D:/Occupation/Porto/genex/La_Voiture/Full-Car-Component-Guide.md))**
+  - [x] `Task 4.1`: Shader Toon Cel-Shaded & Inverted-Hull Ink Outline
+  - [x] `Task 4.2`: Sistem Universal Socket (`Marker3D`) untuk part modular
+  - [x] `Task 4.3`: Slicing mobil GT3 pertama (Blender MCP + Meshy AI) tanpa overlap
+  - [x] `Task 4.4`: Partikel asap ban 2D manga & sayap grafiti ERS (NFS Unbound)
+- [x] **Fase 5: AI Rival Strategist, Cuaca Dinamis, & Safety Car Engine**
+  - [x] `Task 5.1`: AI Rival Race Director (pohon keputusan undercut/overcut & histeresis cuaca)
+  - [x] `Task 5.2`: Sistem cuaca hujan dinamis, akumulasi air trek & pendinginan ban
+  - [x] `Task 5.3`: Safety Car virtual, yellow flags, pembatas kecepatan 120 km/jam & cheap pit stops
+  - [x] `Task 5.4`: Shader aspal basah (puddle gloss), manga rain 3D & widget radar cuaca di Pit Wall
+- [x] **Fase 5.5: 3D Master Assembly, Adaptive Track Physics, Pitstop 3D & Race Weekend**
+  - [x] `Task 5.5.1`: Adaptive Track Dynamics (spline curvature κ, dynamic apex clipping, grip-adaptive braking)
+  - [x] `Task 5.5.2`: 190-pair Multi-Car Cyclic Match Collider & Lateral Repulsion Physics (zero ghosting, FIA racing room)
+  - [x] `Task 5.5.3`: Prosedur Alur Balapan Resmi (5 Red Lights FIA countdown start sequence & rules)
+  - [x] `Task 5.5.4`: Pit Lane Terpisah, Speed Limiter 80 km/jam, dan Scene Pitstop 3D (hydraulic jack 15cm, tire swap 4 kru, lollipop release)
+  - [x] `Task 5.5.5`: 3D Trackside Environment Low-Poly (kerb merah-putih, Armco barrier, gantry start, 10 stall pit garasi)
+  - [x] `Task 5.5.6`: Master Car Assembly (pemasangan sasis modular Porsche 911 GT3 + velg BBS FI-R ke car_actor.tscn menggantikan BoxMesh)
+- [x] **Fase 5.6 - 5.8: Port Sim GT, Dinamika Sasis 3D, Anime Graffiti VFX & Fused Tactical HUD**
+  - [x] `Task 5.6`: Port penuh `race.ts` ke GDScript (`scripts/gt/`): gerak kontinu s & lateral (tanpa lajur kaku), kecepatan realistis puncak 287 km/jam (lap 79.6 - 88.0s), 5 kompon ban (S/M/H/I/W), tebing ban 75% & puncture 96%, 5 tahap bensin (sputter & DNF), AI lateral & racing room 2.4m, 190-pair SAT contact resolver
+  - [x] `Task 5.7`: Dinamika sasis 3D & suite VFX lengkap (`GtCarActor` + `RaceVfx`): roda depan membelok adaptif (roda belakang statis), sasis roll/dive/squat dengan filter 2-tahap `ease2` bebas getar, tag grafiti anime brutalisme di atas mobil (`graffiti_tag.gd`), hujan manga 3D, riak genangan air, percikan spray, asap ban, ribbon slipstream, letupan api knalpot, lampu malam, dan Safety Car fisik
+  - [x] `Task 5.8`: Fused Master HUD 1920x1080 (`scripts/hud/`): Strip Tactical Deck bawah (1888x140px, dual driver tabs, 5 Pace, 3 Fuel, 4 ERS, tire selector + BOX THIS LAP, collapsible `M`), Drawer Telemetri instrumen lengkap (`T`), kartu rekomendasi taktis hybrid (Accept/Dismiss), Live Timing Tower 20 baris (INT/GAP/LAST via Tab), dan Radio Cut-In anime
+- [x] **Fase 6: Audio Soundscape Genex & Polishing Balapan Penuh**
+  - [x] `Task 6.1`: Layout 5 bus audio (`Master`, `Music`, `SFX`, `UI`, `Radio` dengan filter bandpass 1850 Hz + distorsi), suara mesin 3D modulasi pitch RPM (1200 - 8500 RPM) & volume, decit ban limit lateral G > 1.8G, kerb rumble, dan letupan knalpot saat upshift
+  - [x] `Task 6.2`: Transmisi radio dinamis dengan music ducking (-8 dB), efek squelch in/out, overlay ganda untuk Driver (kiri) dan Engineer (kanan) dengan potret manga terpisah, serta 64 klip suara radio TTS (Kokoro-82M) yang mencakup 100% panggilan radio sim
+  - [x] `Task 6.3`: Umpan balik audio taktil (klik tombol Tactical Deck, Timing Tower, Telemetry Drawer, beep start gantry, buzzer lights out, dan deru 8 tembakan pit gun 3D)
+  - [x] `Task 6.4`: Layar selebrasi podium juara akhir pekan balap (`podium_screen.tscn`) dengan tangga P1-P3 beranimasi, trofi, confetti, stempel ungu fastest lap (+1 poin), tabel poin konstruktor FIA GT3, dan tombol Restart/Exit to HQ
+- [x] **Vertical Slice Status: LENGKAP & DAPAT DIMAINKAN PENUH**
+  - Seluruh 10 test suite proyek (257+ assertions) berstatus 100% PASS tanpa regresi. Balapan akhir pekan penuh dari lampu start, strategi pitstop, cuaca hujan 3D, hingga podium juara berfungsi utuh.
+- [ ] **Fase 7: Ekspansi Multi-Manufacturer GT3 & Roster Kendaraan**
+  - [x] `Task 7.1A`: Rekonstruksi 3D Multi-View bodi Audi R8 LMS GT3 via Meshy AI (`assets/cars/audi_r8/raw/audi_r8_raw.glb` + tekstur PBR)
+  - [x] `Task 7.1B`: Pembersihan bodi & spakbor di Blender (`refine_car.py`), pembuatan scene sasis `audi_r8_chassis.tscn`, shader `toon_car_paint.gdshader`, dan integrasi multi-chassis ke `GtCarActor` (SELESAI - Laporan Eksekutif FASE 7)
+  - [x] `Task 7.2`: Batch Generasi Fondasi 3D Mentah 8 Mobil GT3 via Meshy AI Multi-Image (`assets/cars/<car>/raw/`) + 4 PBR Maps
+  - [ ] `Task 7.3`: Batch Body Refining (Blender `refine_car.py`), Sasis Modular (`.tscn`), dan Integrasi `CHASSIS_BY_TEAM` untuk 8 Mobil GT3 (Handoff Executor `TASK-MULTI-CAR-REFINING-AND-ASSEMBLY.md`)
+- [ ] **Fase 8: Driver Character Roster & Comms Visuals (2D/3D)**
+  - [x] `Task 8.1`: Perumusan karakterisasi lengkap 20 pembalap + 10 Team Principal (`DRIVER-CHARACTERIZATION-ROSTER.md` & `CHARACTER-IMAGE-PROMPTS.md`)
+  - [x] `Task 8.2`: Generasi aset karakter Tim 0 (Apex Racing: Kaze Ryu & Sora Ren) & Tim 1 (Neon Drift: Makoto Ito & Axel Vale) via Meshy AI
+  - [x] `Task 8.3`: Generasi sisa 16 karakter pembalap (Tim 2 s/d Tim 9) dengan alur baru 2-Step Reference Workflow (4-View Turnaround Full Body -> 2D Comms Radio Portrait)
+  - [ ] `Task 8.4`: Integrasi 2D Radio Portrait ke `RaceHud.RADIO_DOCK` dan persiapan 3D Character Rig untuk `podium_screen.tscn` / HQ Factory
+- [x] **Fase 9: Main Menu, Pre-Race Configuration, 3D Pitstop Garage & Manga Transition Flow**
+  - [x] `Task 9.1`: Perumusan Dokumen Spesifikasi Desain (`docs/superpowers/specs/2026-10-22-main-menu-and-garage-flow-design.md`) & Rencana Implementasi (`docs/superpowers/plans/2026-10-22-main-menu-and-garage-flow-plan.md`)
+  - [x] `Task 9.2`: Model Data `RaceConfigData` & Modal Pengaturan Grafis/Audio (`scenes/ui/settings_modal.tscn`); pilihan display, preset, outline, halftone, VFX, dan lima bus diterapkan langsung serta disimpan ke `user://presentation.cfg`.
+  - [x] `Task 9.3`: Layar Menu Utama (`scenes/ui/main_menu.tscn`) & Konfigurasi Balapan (`scenes/ui/race_setup_menu.tscn`); modal credits/quit, career nonaktif, pilihan 3/5/10 lap, empat cuaca, dan tiga waktu.
+  - [x] `Task 9.4`: 3D Pitstop Garage 10-Stall Dolly Track, Orbit Turntable & Kartu Duo Pembalap 2D (`scenes/ui/garage_team_select.tscn`); seluruh model dan 20 potret dimuat sebelum pergantian tim, dua ban awal independen, radar prakiraan memakai profil cuaca balapan yang sama.
+  - [x] `Task 9.5`: Animasi Transisi Balapan Manga Komik (`scenes/ui/manga_race_transition.tscn`) & Integrasi Game Loop Penuh; negatif tepat satu frame render, tiga panel, halftone, fly-through dengan sim/countdown ditahan, lima lampu FIA, dan podium kembali ke HQ.
+  - [x] `Task 9.6`: `tests/test_main_menu_flow.gd`: **64 assertions, 0 FAIL**; **20 suite headless, 0 FAIL**, termasuk seluruh 19 suite sebelumnya. Smoke native menjalankan balapan monsoon malam tiga lap sampai chequered flag, podium, dan HQ.
+  - Konfigurasi menyimpan seed per exhibition agar peluang hujan 60% berganti antar-event tetapi restart tetap reproducible; pembalap lawan juga menerima ban yang sesuai grid basah. Pemetaan pabrikan `GtCarActor` diselaraskan dengan roster garasi.
+  - Verifikasi dolly native 1080p/High, RTX 3050 Laptop GPU: 520 frame, median **16.668 ms**, p95 **16.729 ms**, maksimum **17.198 ms**, **60 FPS**. Preload potret menghilangkan hitch pemuatan pertama yang sebelumnya mencapai 62.572 ms.
+  - Keputusan integrasi trek: kartu menampilkan spesifikasi venue **3.840 km / 14 turns / clockwise**, tetapi radar diberi label data spline aktual (**sekitar 4.16 km / 9 bends / anticlockwise**, elevasi datar). Geometri/physics trek lama tidak diubah; radar menduplikasi Curve3D sebelum baking agar tidak mengubah resource simulasi bersama.
+- [x] **Fase 10: Upgrade Lingkungan Sirkuit Hybrid Prosedural (Apex Ring International)**
+  - [x] `Task 10.1`: Permukaan jalan & kerb: `shaders/road_asphalt.gdshader` (grit cel, keausan cat, genangan/riak hujan), kerb 3D sawtooth crest +0,05 m, runoff tarmac berpita biru/putih, gravel trap, dan alur karet di sepanjang racing line (`scripts/world/enhanced_track_geometry.gd`).
+  - [x] `Task 10.2`: Furnitur trackside via 4 `MultiMeshInstance3D` (`scripts/world/trackside_furniture_builder.gd`): Armco triple-rib 4 m dengan bukaan pit, Tecpro di Turn 1/hairpin/chicane, papan rem 150/100/50 m (shader 7-segmen), 28 menara lampu sorot 18 m.
+  - [x] `Task 10.3`: Hero architecture di `scenes/race_world/paddock/`: gedung pit 2 lantai + lounge kaca, tribun 3 tingkat atap kantilever + Jumbotron leaderboard live + 1.484 penonton, menara kontrol 4 lantai; gantry start truss ganda yang menaungi trek dan pit lane (`start_gantry.gd`).
+  - [x] `Task 10.4`: Cincin gunung R≈1500 m berkabut + bintang (`scenes/race_world/mountain_vista.tscn`), 1.100 pohon anime dengan goyangan angin (`foliage_scatter.gd`, `wind_foliage.gdshader`), dan `circuit_lighting_controller.gd` yang menyinkronkan Day/Sunset/Night (lampu sorot, jendela, kabut, bintang) dengan `RaceConfigData.time_of_day`.
+  - [x] `Task 10.5`: `tests/test_track_environment.gd`: **37 assertions, 0 FAIL**; **21 suite headless (20 lama + 1 baru), 0 FAIL**. Spline `track_circuit.tscn` tidak diubah (dijaga test). Estimasi anggaran: ~90 draw call (< 180) dan 253 ribu segitiga (< 350 ribu).
+  - Smoke native 1080p/High, 20 mobil, RTX 3050 Laptop GPU (vsync mati): median **3,04 ms** (Day) s.d. **4,87 ms** (Monsoon Night), p95 8,0–9,8 ms; balapan 3 lap penuh di 8× selesai (median 4,15 ms). Spike tunggal > 20 ms (4–6 per menit) sudah ada di kode asli pada detik yang sama, jadi bukan regresi fase ini.
+  - [x] `Task 10.6`: Putaran umpan balik pengguna. Pagar tidak lagi menembus jalan di seberang atau berdiri di pit lane (`SurfaceGeometry.max_extent`, #B1/#B2); tiga garis lajur cat dihapus karena sirkuit GT asli hanya punya garis tepi dan garis start (#S10); pit lane dirancang ulang (aspal satu material dengan jalan, dinding pit + crash cushion, fast lane 4,6 m, mobil lewat ke mobil box 3,3 m, ruang kru 2,05/2,00 m, mobil masuk dan keluar di lateral 5,2 m, bukan racing line, nomor box, perlengkapan garasi lengkap, gedung pit mengikuti muka garasi); kru 13 orang per tim siaga di garasi, berjalan keluar saat mobil mendekat, bekerja di roda, lalu pulang (`pit_crew_figure.gd`, `pitstop_choreographer.gd`); kamera pit close-up dipindah; minimap HUD dengan nomor pembalap, pita sektor S1/S2/S3, chip sektor mobil yang diikuti, dan bendera kuning per sektor (`circuit_radar_2d.gd`). Test baru: `tests/test_pit_lane.gd` (19) dan `tests/test_circuit_minimap.gd` (7); `test_track_environment` kini 40 assertion. **23 suite headless (20 lama + 3 baru), 0 FAIL.** Estimasi anggaran: ~108 draw call (< 180), 289 ribu segitiga (< 350 ribu); Day native median 3,35 ms (298 FPS).
+  - Laporan: `executor-report/reports/FASE-10-TRACK-ENVIRONMENT-UPGRADE-REPORT.md` (bagian 9 = putaran umpan balik); bukti visual `executor-report/screenshots/phases/phase-10-*.png` dan `phase-10-feedback-*.png`.

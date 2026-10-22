@@ -1,0 +1,20 @@
+{
+  "project_name": "Character model sheet, 4 turnaround views showing front, back, three-quarters, and side profile in one image of Arthur Sterling Jr., 27-year-old aristocratic British gentleman GT3 racer known as Lord of the Apex. Immaculate blonde hair with classic sharp side-parting, piercing sapphire-blue eyes, clean-shaven chiseled aristocratic jawline, confident composed gentleman smirk. Wearing a tailored bespoke Oxford navy-blue and ivory-cream racing suit with fine champagne-gold pinstripes and golden lion heraldry crest embroidery, white leather driving gloves, luxury racing boots. Holding a dark Oxford navy racing helmet with gold heraldic lion stencil under his arm. Crisp cel-shaded anime style, thick black manga ink outlines, halftone Ben-Day dot shading, sharp geometric shadows, neutral grey studio background",
+  "folder": "20261022_113738_character-model-sheet-4-turnar_01a161e6",
+  "root_task_id": "01a161e6-7f11-70c2-be41-ec418ab3c3c8",
+  "created_at": "2026-10-22T04:37:38.202Z",
+  "updated_at": "2026-10-22T04:38:09.287Z",
+  "tasks": [
+    {
+      "task_id": "01a161e6-7f11-70c2-be41-ec418ab3c3c8",
+      "task_type": "text-to-image",
+      "stage": "model",
+      "prompt": "Character model sheet, 4 turnaround views showing front, back, three-quarters, and side profile in one image of Arthur Sterling Jr., 27-year-old aristocratic British gentleman GT3 racer known as Lord of the Apex. Immaculate blonde hair with classic sharp side-parting, piercing sapphire-blue eyes, clean-shaven chiseled aristocratic jawline, confident composed gentleman smirk. Wearing a tailored bespoke Oxford navy-blue and ivory-cream racing suit with fine champagne-gold pinstripes and golden lion heraldry crest embroidery, white leather driving gloves, luxury racing boots. Holding a dark Oxford navy racing helmet with gold heraldic lion stencil under his arm. Crisp cel-shaded anime style, thick black manga ink outlines, halftone Ben-Day dot shading, sharp geometric shadows, neutral grey studio background",
+      "status": "SUCCEEDED",
+      "files": [
+        "model.png"
+      ],
+      "created_at": "2026-10-22T04:38:09.287Z"
+    }
+  ]
+}

@@ -1,0 +1,450 @@
+[
+	{
+		"id": "eng_chequered_p1",
+		"speaker": "engineer",
+		"pattern": "^Chequered flag! P1\\. Solid job today\\.$",
+		"file": "res://assets/audio/radio/voice/eng_chequered_p1.wav",
+		"spoken": "Chequered flag! P one. Solid job today."
+	},
+	{
+		"id": "eng_chequered_p2",
+		"speaker": "engineer",
+		"pattern": "^Chequered flag! P2\\. Solid job today\\.$",
+		"file": "res://assets/audio/radio/voice/eng_chequered_p2.wav",
+		"spoken": "Chequered flag! P two. Solid job today."
+	},
+	{
+		"id": "eng_chequered_p3",
+		"speaker": "engineer",
+		"pattern": "^Chequered flag! P3\\. Solid job today\\.$",
+		"file": "res://assets/audio/radio/voice/eng_chequered_p3.wav",
+		"spoken": "Chequered flag! P three. Solid job today."
+	},
+	{
+		"id": "eng_chequered",
+		"speaker": "engineer",
+		"pattern": "^Chequered flag! P\\d+\\. Solid job today\\.$",
+		"file": "res://assets/audio/radio/voice/eng_chequered.wav",
+		"spoken": "Chequered flag! Solid job today."
+	},
+	{
+		"id": "eng_passing",
+		"speaker": "engineer",
+		"pattern": "^Passing \\w+! Excellent drive\\.$",
+		"file": "res://assets/audio/radio/voice/eng_passing.wav",
+		"spoken": "Great move! Excellent drive."
+	},
+	{
+		"id": "eng_ecu_limp",
+		"speaker": "engineer",
+		"pattern": "^ECU Limp Mode active! Conserve what's left to reach the pit box!$",
+		"file": "res://assets/audio/radio/voice/eng_ecu_limp.wav",
+		"spoken": "E C U limp mode active! Conserve what's left to reach the pit box!"
+	},
+	{
+		"id": "eng_fuel_critical",
+		"speaker": "engineer",
+		"pattern": "^Fuel critical! Switch to CONSERVE immediately or we won't see the chequered flag!$",
+		"file": "res://assets/audio/radio/voice/eng_fuel_critical.wav",
+		"spoken": "Fuel critical! Switch to conserve immediately, or we won't see the chequered flag!"
+	},
+	{
+		"id": "eng_good_stop_wing",
+		"speaker": "engineer",
+		"pattern": "^Good stop: [\\d.]+s\\. Wing replaced, Out now, watch pit exit\\.$",
+		"file": "res://assets/audio/radio/voice/eng_good_stop_wing.wav",
+		"spoken": "Good stop. Wing replaced. Out now, watch pit exit."
+	},
+	{
+		"id": "eng_good_stop",
+		"speaker": "engineer",
+		"pattern": "^Good stop: [\\d.]+s\\. Out now, watch pit exit\\.$",
+		"file": "res://assets/audio/radio/voice/eng_good_stop.wav",
+		"spoken": "Good stop. Out now, watch pit exit."
+	},
+	{
+		"id": "eng_drs_on",
+		"speaker": "engineer",
+		"pattern": "^Race Control: DRS has been ENABLED\\.$",
+		"file": "res://assets/audio/radio/voice/eng_drs_on.wav",
+		"spoken": "Race Control. D R S has been enabled."
+	},
+	{
+		"id": "eng_drs_off_wet",
+		"speaker": "engineer",
+		"pattern": "^Race Control: DRS DISABLED - WET TRACK\\.$",
+		"file": "res://assets/audio/radio/voice/eng_drs_off_wet.wav",
+		"spoken": "Race Control. D R S disabled. Wet track."
+	},
+	{
+		"id": "eng_drs_off_safety",
+		"speaker": "engineer",
+		"pattern": "^Race Control: DRS DISABLED - SAFETY PROTOCOL\\.$",
+		"file": "res://assets/audio/radio/voice/eng_drs_off_safety.wav",
+		"spoken": "Race Control. D R S disabled. Safety protocol."
+	},
+	{
+		"id": "eng_box_soft",
+		"speaker": "engineer",
+		"pattern": "^Box this lap, confirm SOFT tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_box_soft.wav",
+		"spoken": "Box this lap, confirm soft tyres."
+	},
+	{
+		"id": "eng_box_medium",
+		"speaker": "engineer",
+		"pattern": "^Box this lap, confirm MEDIUM tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_box_medium.wav",
+		"spoken": "Box this lap, confirm medium tyres."
+	},
+	{
+		"id": "eng_box_hard",
+		"speaker": "engineer",
+		"pattern": "^Box this lap, confirm HARD tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_box_hard.wav",
+		"spoken": "Box this lap, confirm hard tyres."
+	},
+	{
+		"id": "eng_box_intermediate",
+		"speaker": "engineer",
+		"pattern": "^Box this lap, confirm INTERMEDIATE tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_box_intermediate.wav",
+		"spoken": "Box this lap, confirm intermediate tyres."
+	},
+	{
+		"id": "eng_box_wet",
+		"speaker": "engineer",
+		"pattern": "^Box this lap, confirm WET tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_box_wet.wav",
+		"spoken": "Box this lap, confirm wet tyres."
+	},
+	{
+		"id": "eng_affirmative",
+		"speaker": "engineer",
+		"pattern": "^Affirmative, executing .+\\.$",
+		"file": "res://assets/audio/radio/voice/eng_affirmative.wav",
+		"spoken": "Affirmative, executing."
+	},
+	{
+		"id": "eng_strat_rain_wet",
+		"speaker": "engineer",
+		"pattern": "^Heavy rain on track \\(\\d+% water\\)\\. Suggest box this lap for WET tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_strat_rain_wet.wav",
+		"spoken": "Heavy rain on track. Suggest box this lap for wet tyres."
+	},
+	{
+		"id": "eng_strat_damp_inter",
+		"speaker": "engineer",
+		"pattern": "^Track is damp \\(\\d+% water\\)\\. Suggest box this lap for INTERMEDIATE tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_strat_damp_inter.wav",
+		"spoken": "Track is damp. Suggest box this lap for intermediate tyres."
+	},
+	{
+		"id": "eng_strat_drying_hard",
+		"speaker": "engineer",
+		"pattern": "^Track drying rapidly \\(\\d+% water\\)\\. Suggest box this lap for HARD tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_strat_drying_hard.wav",
+		"spoken": "Track is drying fast. Suggest box this lap for hard tyres."
+	},
+	{
+		"id": "eng_strat_drying_soft",
+		"speaker": "engineer",
+		"pattern": "^Track drying rapidly \\(\\d+% water\\)\\. Suggest box this lap for SOFT tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_strat_drying_soft.wav",
+		"spoken": "Track is drying fast. Suggest box this lap for soft tyres."
+	},
+	{
+		"id": "eng_strat_wear_hard",
+		"speaker": "engineer",
+		"pattern": "^Tyre wear critical \\(\\d+%\\)\\. Suggest box this lap for HARD tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_strat_wear_hard.wav",
+		"spoken": "Tyre wear is critical. Suggest box this lap for hard tyres."
+	},
+	{
+		"id": "eng_strat_wear_medium",
+		"speaker": "engineer",
+		"pattern": "^Tyre wear critical \\(\\d+%\\)\\. Suggest box this lap for MEDIUM tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_strat_wear_medium.wav",
+		"spoken": "Tyre wear is critical. Suggest box this lap for medium tyres."
+	},
+	{
+		"id": "eng_strat_wear_soft",
+		"speaker": "engineer",
+		"pattern": "^Tyre wear critical \\(\\d+%\\)\\. Suggest box this lap for SOFT tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_strat_wear_soft.wav",
+		"spoken": "Tyre wear is critical. Suggest box this lap for soft tyres."
+	},
+	{
+		"id": "eng_tactic_sc_hard",
+		"speaker": "engineer",
+		"pattern": "^Safety Car deployed! Cheap pit stop window open\\. Suggest box for HARD tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_tactic_sc_hard.wav",
+		"spoken": "Safety car deployed! Cheap pit stop window open. Suggest box for hard tyres."
+	},
+	{
+		"id": "eng_tactic_sc_soft",
+		"speaker": "engineer",
+		"pattern": "^Safety Car deployed! Cheap pit stop window open\\. Suggest box for SOFT tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_tactic_sc_soft.wav",
+		"spoken": "Safety car deployed! Cheap pit stop window open. Suggest box for soft tyres."
+	},
+	{
+		"id": "eng_tactic_wing",
+		"speaker": "engineer",
+		"pattern": "^Front wing aero damage \\(\\d+%\\)\\. Suggest box this lap to replace wing and tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_tactic_wing.wav",
+		"spoken": "Front wing aero damage. Suggest box this lap to replace the wing and tyres."
+	},
+	{
+		"id": "eng_tactic_full_wet",
+		"speaker": "engineer",
+		"pattern": "^Standing water critical \\(\\d+%\\)\\. Suggest box immediately for Full WET tyres!$",
+		"file": "res://assets/audio/radio/voice/eng_tactic_full_wet.wav",
+		"spoken": "Standing water is critical. Suggest box immediately for full wet tyres!"
+	},
+	{
+		"id": "eng_tactic_inter",
+		"speaker": "engineer",
+		"pattern": "^Track damp \\(\\d+% water\\)\\. Suggest box for Intermediate tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_tactic_inter.wav",
+		"spoken": "Track is damp. Suggest box for intermediate tyres."
+	},
+	{
+		"id": "eng_tactic_dry_hard",
+		"speaker": "engineer",
+		"pattern": "^Track is dry \\(.+\\)\\. Switch to HARD slicks!$",
+		"file": "res://assets/audio/radio/voice/eng_tactic_dry_hard.wav",
+		"spoken": "Track is dry. Switch to hard slicks!"
+	},
+	{
+		"id": "eng_tactic_dry_medium",
+		"speaker": "engineer",
+		"pattern": "^Track is dry \\(.+\\)\\. Switch to MEDIUM slicks!$",
+		"file": "res://assets/audio/radio/voice/eng_tactic_dry_medium.wav",
+		"spoken": "Track is dry. Switch to medium slicks!"
+	},
+	{
+		"id": "eng_tactic_dry_soft",
+		"speaker": "engineer",
+		"pattern": "^Track is dry \\(.+\\)\\. Switch to SOFT slicks!$",
+		"file": "res://assets/audio/radio/voice/eng_tactic_dry_soft.wav",
+		"spoken": "Track is dry. Switch to soft slicks!"
+	},
+	{
+		"id": "eng_tactic_wear_hard",
+		"speaker": "engineer",
+		"pattern": "^Tyre wear at \\d+%\\. Suggest box for HARD tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_tactic_wear_hard.wav",
+		"spoken": "Tyre wear is high. Suggest box for hard tyres."
+	},
+	{
+		"id": "eng_tactic_wear_soft",
+		"speaker": "engineer",
+		"pattern": "^Tyre wear at \\d+%\\. Suggest box for SOFT tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_tactic_wear_soft.wav",
+		"spoken": "Tyre wear is high. Suggest box for soft tyres."
+	},
+	{
+		"id": "eng_tactic_temps",
+		"speaker": "engineer",
+		"pattern": "^Tyre temps critical \\(\\d+ C\\)\\. Suggest switching pace to LIGHT to cool tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_tactic_temps.wav",
+		"spoken": "Tyre temps are critical. Suggest switching pace to light to cool the tyres."
+	},
+	{
+		"id": "eng_tactic_slipstream",
+		"speaker": "engineer",
+		"pattern": "^DRS slipstream behind \\w+ \\(.+\\)! Deploy OVERTAKE ERS to pass\\?$",
+		"file": "res://assets/audio/radio/voice/eng_tactic_slipstream.wav",
+		"spoken": "D R S slipstream, he's right ahead! Deploy overtake E R S to pass?"
+	},
+	{
+		"id": "eng_weather_alert",
+		"speaker": "engineer",
+		"pattern": "^Weather radar alert: .+ hitting the circuit! Track water \\d+%, track temp \\d+ C\\.$",
+		"file": "res://assets/audio/radio/voice/eng_weather_alert.wav",
+		"spoken": "Weather radar alert! Rain is hitting the circuit."
+	},
+	{
+		"id": "eng_weather_incoming",
+		"speaker": "engineer",
+		"pattern": "^Radar update: rain front approaching in about 1 lap \\(wind \\d+ km/h\\)\\. Prepare INTERMEDIATE tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_weather_incoming.wav",
+		"spoken": "Radar update: rain front approaching in about one lap. Prepare intermediate tyres."
+	},
+	{
+		"id": "eng_weather_dry_line",
+		"speaker": "engineer",
+		"pattern": "^Dry racing line has formed \\(.+\\)\\. Slick crossover window is OPEN!$",
+		"file": "res://assets/audio/radio/voice/eng_weather_dry_line.wav",
+		"spoken": "Dry racing line has formed. Slick crossover window is open!"
+	},
+	{
+		"id": "eng_yellow_contact_1",
+		"speaker": "engineer",
+		"pattern": "^Yellow Flag Sector 1\\. Contact between \\w+ and \\w+\\.$",
+		"file": "res://assets/audio/radio/voice/eng_yellow_contact_1.wav",
+		"spoken": "Yellow flag, sector one. Contact on track."
+	},
+	{
+		"id": "eng_yellow_contact_2",
+		"speaker": "engineer",
+		"pattern": "^Yellow Flag Sector 2\\. Contact between \\w+ and \\w+\\.$",
+		"file": "res://assets/audio/radio/voice/eng_yellow_contact_2.wav",
+		"spoken": "Yellow flag, sector two. Contact on track."
+	},
+	{
+		"id": "eng_yellow_contact_3",
+		"speaker": "engineer",
+		"pattern": "^Yellow Flag Sector 3\\. Contact between \\w+ and \\w+\\.$",
+		"file": "res://assets/audio/radio/voice/eng_yellow_contact_3.wav",
+		"spoken": "Yellow flag, sector three. Contact on track."
+	},
+	{
+		"id": "eng_sc_stopped",
+		"speaker": "engineer",
+		"pattern": "^Safety Car deployed! \\w+ is stopped on track\\. Cheap pit stop window open!$",
+		"file": "res://assets/audio/radio/voice/eng_sc_stopped.wav",
+		"spoken": "Safety car deployed! A car is stopped on track. Cheap pit stop window open!"
+	},
+	{
+		"id": "eng_yellow_spin_1",
+		"speaker": "engineer",
+		"pattern": "^Yellow Flag Sector 1\\. Car #\\d+ \\(\\w+\\) spun out\\.$",
+		"file": "res://assets/audio/radio/voice/eng_yellow_spin_1.wav",
+		"spoken": "Yellow flag, sector one. A car has spun out."
+	},
+	{
+		"id": "eng_yellow_spin_2",
+		"speaker": "engineer",
+		"pattern": "^Yellow Flag Sector 2\\. Car #\\d+ \\(\\w+\\) spun out\\.$",
+		"file": "res://assets/audio/radio/voice/eng_yellow_spin_2.wav",
+		"spoken": "Yellow flag, sector two. A car has spun out."
+	},
+	{
+		"id": "eng_yellow_spin_3",
+		"speaker": "engineer",
+		"pattern": "^Yellow Flag Sector 3\\. Car #\\d+ \\(\\w+\\) spun out\\.$",
+		"file": "res://assets/audio/radio/voice/eng_yellow_spin_3.wav",
+		"spoken": "Yellow flag, sector three. A car has spun out."
+	},
+	{
+		"id": "eng_vsc_1",
+		"speaker": "engineer",
+		"pattern": "^Virtual Safety Car deployed! Debris in Sector 1\\. Reduce delta\\.$",
+		"file": "res://assets/audio/radio/voice/eng_vsc_1.wav",
+		"spoken": "Virtual safety car deployed! Debris in sector one. Reduce delta."
+	},
+	{
+		"id": "eng_vsc_2",
+		"speaker": "engineer",
+		"pattern": "^Virtual Safety Car deployed! Debris in Sector 2\\. Reduce delta\\.$",
+		"file": "res://assets/audio/radio/voice/eng_vsc_2.wav",
+		"spoken": "Virtual safety car deployed! Debris in sector two. Reduce delta."
+	},
+	{
+		"id": "eng_vsc_3",
+		"speaker": "engineer",
+		"pattern": "^Virtual Safety Car deployed! Debris in Sector 3\\. Reduce delta\\.$",
+		"file": "res://assets/audio/radio/voice/eng_vsc_3.wav",
+		"spoken": "Virtual safety car deployed! Debris in sector three. Reduce delta."
+	},
+	{
+		"id": "eng_sc_wall",
+		"speaker": "engineer",
+		"pattern": "^Safety Car deployed! #\\d+ \\(\\w+\\) heavily in the wall\\. Cheap pit stop window open!$",
+		"file": "res://assets/audio/radio/voice/eng_sc_wall.wav",
+		"spoken": "Safety car deployed! A car is heavily in the wall. Cheap pit stop window open!"
+	},
+	{
+		"id": "drv_touched",
+		"speaker": "driver",
+		"pattern": "^We touched with \\w+! Front wing damage!$",
+		"file": "res://assets/audio/radio/voice/drv_touched.wav",
+		"spoken": "We touched! Front wing damage!"
+	},
+	{
+		"id": "drv_spun_contact",
+		"speaker": "driver",
+		"pattern": "^I spun after contact with \\w+! Tyres cooked!$",
+		"file": "res://assets/audio/radio/voice/drv_spun_contact.wav",
+		"spoken": "I spun after contact! Tyres are cooked!"
+	},
+	{
+		"id": "drv_heavy_crash",
+		"speaker": "driver",
+		"pattern": "^Heavy crash! I'm out of the race, suspension sheared off!$",
+		"file": "res://assets/audio/radio/voice/drv_heavy_crash.wav",
+		"spoken": "Heavy crash! I'm out of the race, suspension sheared off!"
+	},
+	{
+		"id": "drv_lost_rear_5",
+		"speaker": "driver",
+		"pattern": "^I lost the rear at Turn 5! Spun out, tyres flat-spotted!$",
+		"file": "res://assets/audio/radio/voice/drv_lost_rear_5.wav",
+		"spoken": "I lost the rear at turn 5! Spun out, tyres flat-spotted!"
+	},
+	{
+		"id": "drv_lost_rear_9",
+		"speaker": "driver",
+		"pattern": "^I lost the rear at Turn 9! Spun out, tyres flat-spotted!$",
+		"file": "res://assets/audio/radio/voice/drv_lost_rear_9.wav",
+		"spoken": "I lost the rear at turn 9! Spun out, tyres flat-spotted!"
+	},
+	{
+		"id": "drv_lost_rear_13",
+		"speaker": "driver",
+		"pattern": "^I lost the rear at Turn 13! Spun out, tyres flat-spotted!$",
+		"file": "res://assets/audio/radio/voice/drv_lost_rear_13.wav",
+		"spoken": "I lost the rear at turn 13! Spun out, tyres flat-spotted!"
+	},
+	{
+		"id": "drv_barrier",
+		"speaker": "driver",
+		"pattern": "^Hit the barrier! Front wing is broken, handling like a boat!$",
+		"file": "res://assets/audio/radio/voice/drv_barrier.wav",
+		"spoken": "Hit the barrier! Front wing is broken, handling like a boat!"
+	},
+	{
+		"id": "drv_massive_crash",
+		"speaker": "driver",
+		"pattern": "^Massive crash! I'm into the wall, car is destroyed!$",
+		"file": "res://assets/audio/radio/voice/drv_massive_crash.wav",
+		"spoken": "Massive crash! I'm into the wall, car is destroyed!"
+	},
+	{
+		"id": "drv_oversteer",
+		"speaker": "driver",
+		"pattern": "^Had a snap of oversteer! Lost some time\\.$",
+		"file": "res://assets/audio/radio/voice/drv_oversteer.wav",
+		"spoken": "Had a snap of oversteer! Lost some time."
+	},
+	{
+		"id": "drv_engine_died",
+		"speaker": "driver",
+		"pattern": "^Engine died! No fuel, no fuel! I'm stopping on the grass!$",
+		"file": "res://assets/audio/radio/voice/drv_engine_died.wav",
+		"spoken": "Engine died! No fuel, no fuel! I'm stopping on the grass!"
+	},
+	{
+		"id": "drv_puncture",
+		"speaker": "driver",
+		"pattern": "^Puncture! The tyre has delaminated!$",
+		"file": "res://assets/audio/radio/voice/drv_puncture.wav",
+		"spoken": "Puncture! The tyre has delaminated!"
+	},
+	{
+		"id": "drv_blowout",
+		"speaker": "driver",
+		"pattern": "^I'm spinning! Tyre blew out on the high speed section!$",
+		"file": "res://assets/audio/radio/voice/drv_blowout.wav",
+		"spoken": "I'm spinning! Tyre blew out on the high speed section!"
+	},
+	{
+		"id": "drv_suspension",
+		"speaker": "driver",
+		"pattern": "^Suspension has snapped from the flat tyre! I can't steer, retiring the car!$",
+		"file": "res://assets/audio/radio/voice/drv_suspension.wav",
+		"spoken": "Suspension has snapped from the flat tyre! I can't steer, retiring the car!"
+	}
+]

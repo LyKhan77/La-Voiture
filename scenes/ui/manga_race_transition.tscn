@@ -1,0 +1,124 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/manga_race_transition.gd" id="1_transition"]
+[ext_resource type="Shader" path="res://shaders/manga_snapshot_invert.gdshader" id="2_snapshot"]
+[ext_resource type="Shader" path="res://shaders/manga_halftone_wipe.gdshader" id="3_wipe"]
+[ext_resource type="Shader" path="res://shaders/manga_speedlines.gdshader" id="4_speedlines"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_snapshot"]
+shader = ExtResource("2_snapshot")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_wipe"]
+shader = ExtResource("3_wipe")
+shader_parameter/progress = 0.0
+shader_parameter/ink_alpha = 1.0
+shader_parameter/ink = Color(0.019608, 0.019608, 0.019608, 1)
+shader_parameter/dot_spacing = 12.0
+shader_parameter/center = Vector2(0.52, 0.44)
+shader_parameter/edge_band = 0.18
+shader_parameter/dot_angle = 0.42
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_speedlines"]
+shader = ExtResource("4_speedlines")
+shader_parameter/line_color = Color(0.02, 0.02, 0.03, 0.6)
+shader_parameter/ray_count = 64.0
+shader_parameter/inner = 0.1
+shader_parameter/outer = 0.85
+
+[node name="MangaRaceTransition" type="CanvasLayer"]
+layer = 200
+script = ExtResource("1_transition")
+
+[node name="Blocker" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="Backdrop" type="ColorRect" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.035294, 0.039216, 0.058824, 1)
+
+[node name="Snapshot" type="TextureRect" parent="."]
+material = SubResource("ShaderMaterial_snapshot")
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Flash" type="ColorRect" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.956863, 0.960784, 0.968627, 1)
+
+[node name="CutIn" type="Node2D" parent="."]
+visible = false
+
+[node name="Panels" type="Node2D" parent="CutIn"]
+
+[node name="Speedlines" type="ColorRect" parent="CutIn"]
+material = SubResource("ShaderMaterial_speedlines")
+z_index = -5
+offset_right = 1920.0
+offset_bottom = 1080.0
+mouse_filter = 2
+
+[node name="Wipe" type="ColorRect" parent="."]
+visible = false
+material = SubResource("ShaderMaterial_wipe")
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ErrorBox" type="CenterContainer" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Box" type="VBoxContainer" parent="ErrorBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(520, 0)
+theme_override_constants/separation = 22
+
+[node name="Message" type="Label" parent="ErrorBox/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.956863, 0.960784, 0.968627, 1)
+theme_override_font_sizes/font_size = 30
+text = "The race scene could not be loaded."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Back" type="Button" parent="ErrorBox/Box"]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "BACK TO MENU"
+
+[node name="EngineRoar" type="AudioStreamPlayer" parent="."]
+bus = &"SFX"

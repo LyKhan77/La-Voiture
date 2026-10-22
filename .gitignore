@@ -1,0 +1,37 @@
+# Dot directories (agent metadata, IDE configs, platform caches)
+.*/
+!.gitignore
+!.gdignore
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+node_modules/
+
+# Godot engine cache and local import metadata
+.godot/
+
+# Temporary directories and transient outputs
+temp/
+*.stackdump
+*.dmp
+*.log
+crash*.log
+
+# Python cache & compiled bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS & Editor generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Local execution logs & transient scratch dumps
+scratch/logs/
+scratch/audio_raw/

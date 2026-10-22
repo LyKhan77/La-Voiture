@@ -1,0 +1,13 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/wheel_controller.gd" id="1_ctrl"]
+[ext_resource type="PackedScene" path="res://assets/cars/parts/gt3_wheel_master.glb" id="2_glb"]
+[ext_resource type="Material" path="res://materials/tire_stripe_wet.tres" id="3_stripe"]
+
+[node name="WheelWet" type="Node3D"]
+script = ExtResource("1_ctrl")
+
+[node name="Model" parent="." instance=ExtResource("2_glb")]
+
+[node name="GT3_SidewallStripe" parent="Model/GT3_Wheel_Assembly/WheelRotating" index="3"]
+surface_material_override/0 = ExtResource("3_stripe")

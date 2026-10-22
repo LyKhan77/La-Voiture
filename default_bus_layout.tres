@@ -1,0 +1,42 @@
+[gd_resource type="AudioBusLayout" format=3 uid="uid://dblici1c6si21"]
+
+[sub_resource type="AudioEffectBandPassFilter" id="AudioEffectBandPassFilter_radio"]
+resource_name = "RadioBandPass"
+cutoff_hz = 1850.0
+resonance = 0.85
+db = 3
+
+[sub_resource type="AudioEffectDistortion" id="AudioEffectDistortion_radio"]
+resource_name = "RadioDistortion"
+drive = 0.28
+post_gain = 1.2
+
+[resource]
+bus/1/name = &"Music"
+bus/1/solo = false
+bus/1/mute = false
+bus/1/bypass_fx = false
+bus/1/volume_db = -4.0
+bus/1/send = &"Master"
+bus/2/name = &"SFX"
+bus/2/solo = false
+bus/2/mute = false
+bus/2/bypass_fx = false
+bus/2/volume_db = 0.0
+bus/2/send = &"Master"
+bus/3/name = &"UI"
+bus/3/solo = false
+bus/3/mute = false
+bus/3/bypass_fx = false
+bus/3/volume_db = -2.0
+bus/3/send = &"Master"
+bus/4/name = &"Radio"
+bus/4/solo = false
+bus/4/mute = false
+bus/4/bypass_fx = false
+bus/4/volume_db = 2.0
+bus/4/send = &"Master"
+bus/4/effect/0/effect = SubResource("AudioEffectBandPassFilter_radio")
+bus/4/effect/0/enabled = true
+bus/4/effect/1/effect = SubResource("AudioEffectDistortion_radio")
+bus/4/effect/1/enabled = true

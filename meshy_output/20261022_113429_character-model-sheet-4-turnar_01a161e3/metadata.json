@@ -1,0 +1,20 @@
+{
+  "project_name": "Character model sheet, 4 turnaround views showing front, back, three-quarters, and side profile in one image of Ren Mishima, 25-year-old Japanese street racer and GT3 driver known as The Ghost of C1. Messy layered jet-black anime hair with burning amber highlighted tips, stylish amber-tinted frameless driving glasses, intense focused eyes, cool smirk. Wearing a dark gunmetal grey techwear racing suit with glowing sunset-amber hazard stripes, Japanese kanji street racing decals on sleeves, high-grip black racing sneakers. A matte gunmetal GT3 helmet with sunset-amber mirror visor resting on his hip. Crisp cel-shaded anime style, thick black manga ink outlines, halftone Ben-Day dot shading, sharp geometric shadows, neutral grey studio background",
+  "folder": "20261022_113429_character-model-sheet-4-turnar_01a161e3",
+  "root_task_id": "01a161e3-9d83-75ff-9b1b-0c3030d85424",
+  "created_at": "2026-10-22T04:34:29.413Z",
+  "updated_at": "2026-10-22T04:35:09.268Z",
+  "tasks": [
+    {
+      "task_id": "01a161e3-9d83-75ff-9b1b-0c3030d85424",
+      "task_type": "text-to-image",
+      "stage": "model",
+      "prompt": "Character model sheet, 4 turnaround views showing front, back, three-quarters, and side profile in one image of Ren Mishima, 25-year-old Japanese street racer and GT3 driver known as The Ghost of C1. Messy layered jet-black anime hair with burning amber highlighted tips, stylish amber-tinted frameless driving glasses, intense focused eyes, cool smirk. Wearing a dark gunmetal grey techwear racing suit with glowing sunset-amber hazard stripes, Japanese kanji street racing decals on sleeves, high-grip black racing sneakers. A matte gunmetal GT3 helmet with sunset-amber mirror visor resting on his hip. Crisp cel-shaded anime style, thick black manga ink outlines, halftone Ben-Day dot shading, sharp geometric shadows, neutral grey studio background",
+      "status": "SUCCEEDED",
+      "files": [
+        "model.png"
+      ],
+      "created_at": "2026-10-22T04:35:09.268Z"
+    }
+  ]
+}

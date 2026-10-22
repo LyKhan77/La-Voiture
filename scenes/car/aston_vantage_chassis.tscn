@@ -1,0 +1,38 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/modular_car_assembler.gd" id="1_asm"]
+[ext_resource type="PackedScene" path="res://assets/cars/aston_vantage/aston_vantage_body.glb" id="2_body"]
+[ext_resource type="Material" path="res://materials/aston_vantage_toon_body.tres" id="3_toon_mat"]
+[ext_resource type="Material" path="res://materials/toon_carbon_aero.tres" id="4_carbon"]
+
+[node name="AstonVantageChassis" type="Node3D" node_paths=PackedStringArray("base_body_mesh")]
+script = ExtResource("1_asm")
+car_name = "Aston Martin Vantage AMR GT3"
+team_name = "Vanta Motors"
+base_body_mesh = NodePath("BodyShell/AstonBody/AstonVantage_Body")
+keeps_original_paint = true
+
+[node name="BodyShell" type="Node3D" parent="."]
+
+[node name="AstonBody" parent="BodyShell" instance=ExtResource("2_body")]
+
+[node name="AstonVantage_Body" parent="BodyShell/AstonBody" index="0"]
+surface_material_override/0 = ExtResource("3_toon_mat")
+surface_material_override/1 = ExtResource("4_carbon")
+
+[node name="Sockets" type="Node3D" parent="."]
+
+[node name="Socket_Wheel_FL" type="Marker3D" parent="Sockets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.815, 0.33, 1.313)
+
+[node name="Socket_Wheel_FR" type="Marker3D" parent="Sockets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.815, 0.33, 1.313)
+
+[node name="Socket_Wheel_RL" type="Marker3D" parent="Sockets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.825, 0.33, -1.313)
+
+[node name="Socket_Wheel_RR" type="Marker3D" parent="Sockets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.825, 0.33, -1.313)
+
+[node name="Socket_Cockpit" type="Marker3D" parent="Sockets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.72, 0.05)

@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/pit_wall/pit_wall_dashboard.tscn" id="1"]
+
+[node name="TestPitWall" type="Node"]
+
+[node name="PitWallDashboard" parent="." instance=ExtResource("1")]

@@ -1,0 +1,37 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Material" path="res://materials/toon_carbon_aero.tres" id="1_mat"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_wingblade"]
+material = ExtResource("1_mat")
+size = Vector3(1.86, 0.04, 0.38)
+
+[sub_resource type="BoxMesh" id="BoxMesh_swanbracket"]
+material = ExtResource("1_mat")
+size = Vector3(0.04, 0.42, 0.18)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wingendplate"]
+material = ExtResource("1_mat")
+size = Vector3(0.02, 0.32, 0.46)
+
+[node name="WingTier1" type="Node3D"]
+
+[node name="WingBlade" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.985, 0.174, 0, -0.174, 0.985, 0, 0.38, 0)
+mesh = SubResource("BoxMesh_wingblade")
+
+[node name="SwanNeckL" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.966, -0.259, 0, 0.259, 0.966, -0.45, 0.20, 0.05)
+mesh = SubResource("BoxMesh_swanbracket")
+
+[node name="SwanNeckR" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.966, -0.259, 0, 0.259, 0.966, 0.45, 0.20, 0.05)
+mesh = SubResource("BoxMesh_swanbracket")
+
+[node name="EndplateL" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.93, 0.38, 0)
+mesh = SubResource("BoxMesh_wingendplate")
+
+[node name="EndplateR" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.93, 0.38, 0)
+mesh = SubResource("BoxMesh_wingendplate")

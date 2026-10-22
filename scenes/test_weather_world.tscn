@@ -1,0 +1,10 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/test_race_world.tscn" id="1_base"]
+[ext_resource type="Script" path="res://scripts/car/weather_race_world.gd" id="2_script"]
+[ext_resource type="PackedScene" path="res://scenes/vfx/manga_rain_3d.tscn" id="3_rain"]
+
+[node name="TestWeatherWorld" instance=ExtResource("1_base")]
+script = ExtResource("2_script")
+
+[node name="MangaRain" parent="." instance=ExtResource("3_rain")]

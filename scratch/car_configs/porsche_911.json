@@ -1,0 +1,20 @@
+{
+  "car": "porsche_911",
+  "raw_glb": "assets/cars/porsche_911/raw/porsche_911_raw.glb",
+  "body_glb": "temp/porsche_911_retopo_trial/porsche_911_body.glb",
+  "texture_dir": "temp/porsche_911_retopo_trial",
+  "mesh_name": "PorscheBody",
+  "paint_material": "PorschePaint",
+  "front_axis_raw": "auto",
+  "length_m": 4.57,
+  "raw_axle": "auto",
+  "axle_z": 0.33,
+  "arch_radius": 0.372,
+  "tub_radius": 0.369,
+  "tub_inner_x": 0.65,
+  "voxel_m": 0.010,
+  "smooth_iterations": 40,
+  "target_tris": 118000,
+  "texture_px": 4096,
+  "detail_zones": []
+}

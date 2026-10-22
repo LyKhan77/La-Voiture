@@ -1,0 +1,23 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3]
+
+[ext_resource type="Shader" path="res://shaders/anime_cel_shaded.gdshader" id="1_toon"]
+[ext_resource type="Shader" path="res://shaders/inverted_hull_outline.gdshader" id="2_outline"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_outline"]
+render_priority = 1
+shader = ExtResource("2_outline")
+shader_parameter/outline_width = 0.014
+shader_parameter/outline_color = Color(0.02, 0.02, 0.02, 1)
+
+[resource]
+render_priority = 0
+next_pass = SubResource("ShaderMaterial_outline")
+shader = ExtResource("1_toon")
+shader_parameter/base_color = Color(0.12, 0.13, 0.16, 1)
+shader_parameter/shadow_tint = Color(0.04, 0.05, 0.08, 1)
+shader_parameter/shadow_threshold = 0.45
+shader_parameter/shadow_smoothness = 0.015
+shader_parameter/rim_threshold = 0.70
+shader_parameter/rim_intensity = 0.25
+shader_parameter/rim_color = Color(0, 0.94, 1, 1)
+shader_parameter/use_livery = false

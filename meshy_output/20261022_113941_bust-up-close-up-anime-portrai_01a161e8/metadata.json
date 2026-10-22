@@ -1,0 +1,20 @@
+{
+  "project_name": "Bust-up close-up anime portrait of this exact character, Harrison Croft, 30-year-old gritty Yorkshire endurance driver known as The Yorkshire Hammer. Exact matching short rugged brown buzz-crop hair, weathered stubble jaw, small scar on left cheekbone, resolute unyielding determined gaze, exact same heavy-duty Oxford navy racing collar with quilted shoulder trim, pit radio mic clipped to collar. Thick black manga ink outlines, halftone Ben-Day dot shading, dynamic speed lines, cel-shaded anime style, isolated solid background",
+  "folder": "20261022_113941_bust-up-close-up-anime-portrai_01a161e8",
+  "root_task_id": "01a161e8-6134-74d8-826e-3fc00fd523bf",
+  "created_at": "2026-10-22T04:39:41.763Z",
+  "updated_at": "2026-10-22T04:40:16.218Z",
+  "tasks": [
+    {
+      "task_id": "01a161e8-6134-74d8-826e-3fc00fd523bf",
+      "task_type": "image-to-image",
+      "stage": "model",
+      "prompt": "Bust-up close-up anime portrait of this exact character, Harrison Croft, 30-year-old gritty Yorkshire endurance driver known as The Yorkshire Hammer. Exact matching short rugged brown buzz-crop hair, weathered stubble jaw, small scar on left cheekbone, resolute unyielding determined gaze, exact same heavy-duty Oxford navy racing collar with quilted shoulder trim, pit radio mic clipped to collar. Thick black manga ink outlines, halftone Ben-Day dot shading, dynamic speed lines, cel-shaded anime style, isolated solid background",
+      "status": "SUCCEEDED",
+      "files": [
+        "model.png"
+      ],
+      "created_at": "2026-10-22T04:40:16.218Z"
+    }
+  ]
+}

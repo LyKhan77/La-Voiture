@@ -1,0 +1,48 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/test_race_world.gd" id="1_world"]
+[ext_resource type="PackedScene" path="res://scenes/race_world/track_circuit.tscn" id="2_track"]
+[ext_resource type="PackedScene" path="res://scenes/pit_wall/circuit_radar_2d.tscn" id="3_radar"]
+
+[sub_resource type="Environment" id="Environment_world"]
+background_mode = 1
+background_color = Color(0.0353, 0.0392, 0.0588, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.7, 0.72, 0.8, 1)
+ambient_light_energy = 0.6
+
+[node name="TestRaceWorld" type="Node3D"]
+script = ExtResource("1_world")
+
+[node name="TrackCircuit" parent="." instance=ExtResource("2_track")]
+
+[node name="Actors" type="Node3D" parent="."]
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+shadow_enabled = true
+directional_shadow_max_distance = 250.0
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_world")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+current = true
+far = 3000.0
+
+[node name="Hud" type="CanvasLayer" parent="."]
+
+[node name="Info" type="Label" parent="Hud"]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 900.0
+offset_bottom = 42.0
+
+[node name="Radar" parent="Hud" instance=ExtResource("3_radar")]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -316.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 216.0
+grow_horizontal = 0

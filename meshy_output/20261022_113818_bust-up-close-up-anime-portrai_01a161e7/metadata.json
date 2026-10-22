@@ -1,0 +1,20 @@
+{
+  "project_name": "Bust-up close-up anime portrait of this exact character, Arthur Sterling Jr., 27-year-old British gentleman racer known as Lord of the Apex. Exact matching blonde hair with sharp side-parting, piercing sapphire-blue eyes, clean-shaven aristocratic jawline, confident composed gentleman smirk, exact same Oxford navy and ivory-cream racing collar with champagne-gold pinstripe trim and lion crest, pit radio mic clipped to collar. Thick black manga ink outlines, halftone Ben-Day dot shading, dynamic speed lines, cel-shaded anime style, isolated solid background",
+  "folder": "20261022_113818_bust-up-close-up-anime-portrai_01a161e7",
+  "root_task_id": "01a161e7-1cb8-7685-aea9-914b42421c42",
+  "created_at": "2026-10-22T04:38:18.742Z",
+  "updated_at": "2026-10-22T04:38:49.015Z",
+  "tasks": [
+    {
+      "task_id": "01a161e7-1cb8-7685-aea9-914b42421c42",
+      "task_type": "image-to-image",
+      "stage": "model",
+      "prompt": "Bust-up close-up anime portrait of this exact character, Arthur Sterling Jr., 27-year-old British gentleman racer known as Lord of the Apex. Exact matching blonde hair with sharp side-parting, piercing sapphire-blue eyes, clean-shaven aristocratic jawline, confident composed gentleman smirk, exact same Oxford navy and ivory-cream racing collar with champagne-gold pinstripe trim and lion crest, pit radio mic clipped to collar. Thick black manga ink outlines, halftone Ben-Day dot shading, dynamic speed lines, cel-shaded anime style, isolated solid background",
+      "status": "SUCCEEDED",
+      "files": [
+        "model.png"
+      ],
+      "created_at": "2026-10-22T04:38:49.015Z"
+    }
+  ]
+}

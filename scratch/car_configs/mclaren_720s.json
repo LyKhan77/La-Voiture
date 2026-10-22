@@ -1,0 +1,63 @@
+{
+  "car": "mclaren_720s",
+  "raw_glb": "assets/cars/mclaren_720s/raw/mclaren_720s_raw.glb",
+  "body_glb": "assets/cars/mclaren_720s/mclaren_720s_body.glb",
+  "texture_dir": "assets/cars/mclaren_720s/textures",
+  "mesh_name": "McLaren720S_Body",
+  "paint_material": "McLaren720S_Paint",
+  "front_axis_raw": "auto",
+  "length_m": 4.55,
+  "raw_axle": "auto",
+  "axle_z": 0.33,
+  "arch_radius": 0.372,
+  "tub_radius": 0.369,
+  "tub_inner_x": 0.65,
+  "voxel_m": 0.01,
+  "smooth_iterations": 40,
+  "target_tris": 118000,
+  "texture_px": 4096,
+  "texture_clean": {
+    "enabled": false,
+    "band_low": 0.22,
+    "band_margin": 0.03,
+    "open_radius": 3,
+    "grow": 2
+  },
+  "ao_distance_m": 0.2,
+  "toon_normals": {
+    "iterations": 30,
+    "feature_angle": 35.0
+  },
+  "detail_zones": [
+    {
+      "name": "front_splitter",
+      "box_min": [
+        -1.25,
+        -2.6,
+        -0.15
+      ],
+      "box_max": [
+        1.25,
+        -1.62,
+        0.42
+      ],
+      "margin": 0.12
+    },
+    {
+      "name": "rear_diffuser",
+      "box_min": [
+        -1.25,
+        1.78,
+        -0.15
+      ],
+      "box_max": [
+        1.25,
+        2.6,
+        0.45
+      ],
+      "margin": 0.12
+    }
+  ],
+  "recalc_normals": true,
+  "debug_precut": true
+}

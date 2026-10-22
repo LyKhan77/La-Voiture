@@ -1,0 +1,111 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/driver_row.gd" id="1_row"]
+
+[node name="DriverRow" type="Control"]
+offset_right = 300.0
+offset_bottom = 34.0
+custom_minimum_size = Vector2(0, 34)
+mouse_filter = 1
+mouse_default_cursor_shape = 2
+script = ExtResource("1_row")
+
+[node name="Divider" type="ColorRect" parent="."]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -1.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+color = Color(1, 1, 1, 0.16)
+
+[node name="Shift" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -11.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+focus_mode = 2
+
+[node name="HardShadow" type="ColorRect" parent="Shift"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 5.0
+offset_bottom = 5.0
+mouse_filter = 2
+color = Color(0.8, 1, 0, 1)
+
+[node name="Fill" type="Panel" parent="Shift"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Tick" type="ColorRect" parent="Shift"]
+visible = false
+clip_contents = true
+anchor_right = 1.0
+offset_bottom = 14.0
+grow_horizontal = 2
+mouse_filter = 2
+color = Color(0.8, 1, 0, 1)
+
+[node name="Ticker" type="Label" parent="Shift/Tick"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_right = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="Pos" type="Label" parent="Shift"]
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_right = 38.0
+grow_vertical = 2
+mouse_filter = 2
+vertical_alignment = 1
+
+[node name="Driver" type="Label" parent="Shift"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_right = -98.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+vertical_alignment = 1
+clip_text = true
+
+[node name="Interval" type="Label" parent="Shift"]
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -98.0
+offset_right = -30.0
+grow_horizontal = 0
+grow_vertical = 2
+mouse_filter = 2
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Compound" type="Label" parent="Shift"]
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -30.0
+offset_right = -8.0
+grow_horizontal = 0
+grow_vertical = 2
+mouse_filter = 2
+horizontal_alignment = 1
+vertical_alignment = 1
