@@ -131,6 +131,7 @@ func _test_manga_speedlines_trigger() -> void:
 func _test_boost_fov_punch() -> void:
 	var director: CameraDirectorScript = world.camera_director
 	director.set_mode(CameraDirectorScript.Mode.CHASE)
+	director.update(1.0) # the overtake in the speedlines test already kicked the lens; let it settle
 	director.update(FRAME)
 	var base: float = world.camera.fov
 	director.punch_fov()

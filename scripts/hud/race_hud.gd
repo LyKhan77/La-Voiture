@@ -34,6 +34,13 @@ const PANEL_REFRESH_FRAMES: int = 3
 const WEATHER_REFRESH_FRAMES: int = 30
 const TICKER_SPEED: float = 45.0
 const TICKER_VIEW_W: float = 1664.0
+const SpeedlinesShader := preload("res://shaders/manga_speedlines.gdshader")
+const SPEEDLINES_LAYER: int = 5
+## Rays appear at 200 km/h and are full at 280: 240 km/h already reads at 0.5.
+const SPEEDLINES_FROM_KMH: float = 200.0
+const SPEEDLINES_FULL_KMH: float = 280.0
+const SPEEDLINES_ALPHA: float = 0.8
+const SPEEDLINES_MIN_VISIBLE: float = 0.02
 
 var world: Node3D
 var race: GtRace
@@ -63,8 +70,13 @@ var dismiss_button: Button
 var tower_mode: int = 0
 var last_radio: Dictionary = {}
 
+## Full-screen ink rays (shaders/manga_speedlines.gdshader) that thicken with speed and during ERS overtake.
+var speedlines_rect: ColorRect
+var speedlines_intensity: float = 0.0
+
 var _frame: int = 0
 var _ticker_x: float = 0.0
+var _last_ers_mode: int = GtTypes.ErsMode.NEUTRAL
 var _tower_column: Label
 
 
@@ -91,6 +103,7 @@ func bind(p_world: Node3D) -> void:
 	drawer.position = Vector2(1598.0, 372.0)
 	_build_card()
 	_build_marquee()
+	_build_speedlines()
 	tape = CautionTape.new()
 	tape.name = "CautionTape"
 	stage.add_child(tape)
@@ -233,6 +246,45 @@ func _build_marquee() -> void:
 	ticker = _text(clip, "LIVE TIMING ONLINE   //   GREEN FLAG   //   %d LAPS   //   [M] DECK  [T] TELEMETRY  [TAB] TOWER  [N] NEXT CAR  [E] ERS  [ ] PACE  [H] HIDE" % race.laps, Vector2(0.0, 12.0), 20, T.INK_BORDER_BLACK, UI.RADIO)
 
 
+func _build_speedlines() -> void:
+	var layer := CanvasLayer.new()
+	layer.name = "SpeedlinesLayer"
+	layer.layer = SPEEDLINES_LAYER
+	add_child(layer)
+	speedlines_rect = ColorRect.new()
+	speedlines_rect.name = "MangaSpeedlines"
+	speedlines_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	speedlines_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var material := ShaderMaterial.new()
+	material.shader = SpeedlinesShader
+	material.set_shader_parameter("ray_count", 72.0)
+	material.set_shader_parameter("inner", 0.35)
+	material.set_shader_parameter("outer", 0.95)
+	speedlines_rect.material = material
+	speedlines_rect.visible = false
+	layer.add_child(speedlines_rect)
+
+
+## 0 below 200 km/h, 1 from 280 km/h, and 1 for as long as the ERS overtake burns.
+static func speedlines_for(speed_mps: float, ers_mode: int) -> float:
+	var by_speed: float = clampf((speed_mps * 3.6 - SPEEDLINES_FROM_KMH) / (SPEEDLINES_FULL_KMH - SPEEDLINES_FROM_KMH), 0.0, 1.0)
+	return 1.0 if ers_mode == GtTypes.ErsMode.OVERTAKE else by_speed
+
+
+func _update_speedlines() -> void:
+	var followed: GtCar = race.get_car(world.followed_id)
+	if followed == null:
+		return
+	# Boost warp: the followed car just switched to overtake, so the lens kicks wide for a moment.
+	if followed.ers_mode == GtTypes.ErsMode.OVERTAKE and _last_ers_mode != GtTypes.ErsMode.OVERTAKE:
+		world.camera_director.punch_fov()
+	_last_ers_mode = followed.ers_mode
+	speedlines_intensity = speedlines_for(followed.v, followed.ers_mode)
+	speedlines_rect.visible = speedlines_intensity > SPEEDLINES_MIN_VISIBLE
+	if speedlines_rect.visible:
+		(speedlines_rect.material as ShaderMaterial).set_shader_parameter("line_color", Color(0.04, 0.04, 0.06, SPEEDLINES_ALPHA * speedlines_intensity))
+
+
 # --- input ---------------------------------------------------------------------------------
 
 func _input(event: InputEvent) -> void:
@@ -360,6 +412,7 @@ func update(delta: float) -> void:
 	if race == null:
 		return
 	_frame += 1
+	_update_speedlines()
 	if _frame % TOWER_REFRESH_FRAMES == 0:
 		_update_tower()
 	if _frame % PANEL_REFRESH_FRAMES == 0:

@@ -33,6 +33,10 @@ const TV_FOV: float = 32.0
 # the 13 crew around the car (they stand 2-3 m from it) blocks the shot. Within 6 m of the stall (test #26).
 const PIT_CAM_OFFSET := Vector3(-2.4, 3.3, -3.8)
 const PIT_FOV: float = 55.0
+## Boost warp: the lens opens this much in FOV_PUNCH_RISE_S, then eases back over FOV_PUNCH_FALL_S.
+const FOV_PUNCH_DEG: float = 3.5
+const FOV_PUNCH_RISE_S: float = 0.08
+const FOV_PUNCH_FALL_S: float = 0.35
 
 var mode: int = Mode.CHASE
 var camera: Camera3D
@@ -49,6 +53,8 @@ var tv_index: int = 0
 var heli_angle: float = 0.0
 var clock_s: float = 0.0
 
+var _punch_age_s: float = INF # seconds since punch_fov(); INF when the lens is at rest
+var _fov_punch_deg: float = 0.0
 var _manual_mode: int = Mode.CHASE
 var _snap: bool = true # next update jumps instead of easing, after a cut
 
@@ -98,6 +104,7 @@ func update(dt: float) -> void:
 	if camera == null or target == null:
 		return
 	clock_s += dt
+	_advance_fov_punch(dt)
 	match active_mode():
 		Mode.CHASE:
 			_update_chase(dt)
@@ -154,8 +161,26 @@ func _update_pit() -> void:
 	camera.look_at(stall * Vector3(0.0, 0.45, 0.0), Vector3.UP)
 
 
+## Kicks the lens wider for a moment (ERS overtake); whichever camera mode runs keeps its own base FOV.
+func punch_fov() -> void:
+	_punch_age_s = 0.0
+
+
+func _advance_fov_punch(dt: float) -> void:
+	if _punch_age_s == INF:
+		return
+	_punch_age_s += dt
+	if _punch_age_s < FOV_PUNCH_RISE_S:
+		_fov_punch_deg = FOV_PUNCH_DEG * (1.0 - pow(2.0, -10.0 * _punch_age_s / FOV_PUNCH_RISE_S)) / (1.0 - pow(2.0, -10.0))
+	elif _punch_age_s < FOV_PUNCH_RISE_S + FOV_PUNCH_FALL_S:
+		_fov_punch_deg = FOV_PUNCH_DEG * (1.0 - smoothstep(0.0, 1.0, (_punch_age_s - FOV_PUNCH_RISE_S) / FOV_PUNCH_FALL_S))
+	else:
+		_fov_punch_deg = 0.0
+		_punch_age_s = INF
+
+
 func _set_lens(fov: float, near: float) -> void:
-	camera.fov = fov
+	camera.fov = fov + _fov_punch_deg
 	camera.near = near
 
 
