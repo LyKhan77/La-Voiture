@@ -40,6 +40,14 @@ const BRAKE_GLOW_FALL: float = 1.2
 ## Time constant of each of the two cascaded low-passes that turn the sim's 20 Hz steps into body motion.
 const BODY_EASE_S: float = 0.07
 const LIVERY_TINT: float = 0.6
+const TAIL_COLOR := Color("#ff1a4b")
+const HEAD_COLOR := Color("#eaf2ff")
+const TAIL_BRAKE_ENERGY: float = 6.5
+const TAIL_NIGHT_ENERGY: float = 1.2
+const TAIL_ATTACK: float = 18.0 # energy per second: a brake light is a switch, not a fade
+const BRAKE_LIGHT_G: float = 0.5
+const NIGHT_LAMPS_ON: float = 0.5
+const LAMP_SIZE := Vector3(0.5, 0.075, 0.05)
 
 var car: GtCar
 var track: GtTrack
@@ -47,6 +55,10 @@ var track: GtTrack
 var external_pose: bool = false
 var brake_glow: float = 0.0
 var steer_visual: float = 0.0
+## Emission of the rear cluster: 6.5 on the brakes, 1.2 resting at night or in the gloom, else dark.
+var taillight_energy: float = 0.0
+## Headlamp emission the weather asks for (RaceVfx writes it); the head slabs and the resting tail glow follow it.
+var night_lights: float = 0.0
 
 # Roll, pitch, yaw and steer as (first, second) stage of ease2().
 var _roll: Vector2 = Vector2.ZERO
@@ -57,6 +69,8 @@ var wheel_controllers: Array[WheelControllerScript] = []
 
 var _wheel_compound: int = -1
 var _livery_team: int = -1
+var _taillight_mat: StandardMaterial3D
+var _headlight_mat: StandardMaterial3D
 
 @onready var chassis: ModularCarAssembler = $Chassis
 @onready var body: AnimatableBody3D = $Body
@@ -73,6 +87,7 @@ func bind(p_car: GtCar, p_track: GtTrack) -> void:
 		_livery_team = car.team_id
 		_apply_livery(car.team_id)
 	mount_wheels(car.compound)
+	_build_lamps()
 	present(1.0, 0.0)
 
 
@@ -145,6 +160,7 @@ func present(alpha: float, dt: float, spin_scale: float = 1.0, audible: bool = t
 		mount_wheels(car.compound)
 	_tilt_chassis(dt)
 	_animate_wheels(dt, spin_scale)
+	_update_lamps(dt)
 	if audio != null:
 		audio.update_from_car(car, audible)
 
@@ -163,6 +179,58 @@ func _tilt_chassis(dt: float) -> void:
 	var pitch: float = _pitch.y
 	var basis := Basis(Vector3(0.0, 0.0, 1.0), roll) * Basis(Vector3(1.0, 0.0, 0.0), -pitch) * Basis(Vector3.UP, PI)
 	chassis.transform = Transform3D(basis, chassis.position)
+
+
+## Two emissive slabs per end, fitted to this chassis' body bounds (the model faces chassis +Z, so the
+## rear is -Z). They ride on the chassis, so they roll and pitch with the body.
+func _build_lamps() -> void:
+	if chassis.get_node_or_null("Lamps") != null or chassis.base_body_mesh == null:
+		return
+	var to_chassis: Transform3D = chassis.global_transform.affine_inverse() * chassis.base_body_mesh.global_transform
+	var bounds: AABB = to_chassis * chassis.base_body_mesh.get_aabb()
+	var lamps := Node3D.new()
+	lamps.name = "Lamps"
+	chassis.add_child(lamps)
+	_taillight_mat = _lamp_material(TAIL_COLOR)
+	_headlight_mat = _lamp_material(HEAD_COLOR)
+	var rear: float = bounds.position.z + 0.08
+	var front: float = bounds.end.z - 0.08
+	for side: float in [-1.0, 1.0]:
+		var x: float = side * bounds.size.x * 0.27
+		_add_lamp(lamps, "Taillight", _taillight_mat, Vector3(x, bounds.position.y + bounds.size.y * 0.55, rear))
+		_add_lamp(lamps, "Headlight", _headlight_mat, Vector3(x, bounds.position.y + bounds.size.y * 0.36, front))
+
+
+func _add_lamp(parent: Node3D, lamp_name: String, material: StandardMaterial3D, at: Vector3) -> void:
+	var lamp := MeshInstance3D.new()
+	lamp.name = lamp_name
+	var slab := BoxMesh.new()
+	slab.size = LAMP_SIZE
+	lamp.mesh = slab
+	lamp.material_override = material
+	lamp.position = at
+	lamp.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	parent.add_child(lamp)
+
+
+func _lamp_material(color: Color) -> StandardMaterial3D:
+	var material := StandardMaterial3D.new()
+	material.albedo_color = color.darkened(0.55)
+	material.emission_enabled = true
+	material.emission = color
+	material.emission_energy_multiplier = 0.0
+	return material
+
+
+## Brake lights snap on above 0.5 G or any pedal; at night and in the gloom the cluster rests lit.
+func _update_lamps(dt: float) -> void:
+	if _taillight_mat == null:
+		return
+	var braking: bool = car.brake > 0.05 or car.longitudinal_g < -BRAKE_LIGHT_G
+	var resting: float = TAIL_NIGHT_ENERGY if night_lights > NIGHT_LAMPS_ON else 0.0
+	taillight_energy = move_toward(taillight_energy, TAIL_BRAKE_ENERGY if braking else resting, maxf(dt, 0.02) * TAIL_ATTACK)
+	_taillight_mat.emission_energy_multiplier = taillight_energy
+	_headlight_mat.emission_energy_multiplier = night_lights
 
 
 func _animate_wheels(dt: float, spin_scale: float) -> void:

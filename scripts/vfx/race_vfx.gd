@@ -21,6 +21,18 @@ const FOLLOWED_SPRAY_SHARE: float = 0.3
 const REAR_WHEELS: Array[Vector3] = [Vector3(-0.98, 0.3, 1.26), Vector3(0.98, 0.3, 1.26)]
 const EXHAUSTS: Array[Vector3] = [Vector3(-0.3, 0.3, 2.3), Vector3(0.3, 0.3, 2.3)]
 const HEADLIGHTS: Array[Vector3] = [Vector3(-0.62, 0.63, -2.12), Vector3(0.62, 0.63, -2.12)]
+const HEAD_COLOR := Color("#eaf2ff")
+const HEAD_BEAM_RANGE_M: float = 45.0
+const HEAD_BEAM_ANGLE_DEG: float = 32.0
+const HEAD_BEAM_ENERGY_SHARE: float = 0.55 # 4.0 lamp energy (night) -> 2.2 beam
+const HEAD_BEAM_FADE_BEGIN_M: float = 70.0
+const HEAD_BEAM_FADE_LENGTH_M: float = 20.0
+## Kerb strike: sparks leave a wheel on the kerb (beyond the audio's kerb offset) above this speed.
+const KERB_SPARK_MIN_V: float = 35.0
+const KERB_SPARK_AMOUNT: int = 18
+const FLAME_POP_S: float = 0.12
+const GRAFFITI_CRIMSON := Color("#ff1a4b")
+const GRAFFITI_ACID := Color("#d8ff00")
 ## Floating graffiti tip over every car: a name tag that flashes up for a moment (a pass, a
 ## selection, a car coming close) and a status sticker (hazard, pit, DRS, brake) while it lasts.
 const TIP_HEIGHT_M: float = 2.6
@@ -50,8 +62,11 @@ var smokes: Dictionary = {} # car id -> Array[GPUParticles3D]
 var wakes: Dictionary = {} # car id -> Array[MeshInstance3D]
 var flames: Dictionary = {} # car id -> Array[MeshInstance3D]
 var tips: Dictionary = {} # car id -> Node3D holding the Code and Status sprites
-var head_lights: Dictionary = {} # car id -> Array[MeshInstance3D]
+var head_lights: Dictionary = {} # car id -> Array[SpotLight3D]
+var kerb_sparks: Dictionary = {} # car id -> GPUParticles3D
 var sparks: Array[GPUParticles3D] = []
+## Headlamp emission the weather asks for this frame (0 by day, up to 4 at night or in a storm).
+var headlight_energy: float = 0.0
 var safety_car_actor: ActorScript
 var rain_intensity: float = 0.0
 var lightning: float = 0.0
@@ -66,8 +81,6 @@ var _tip_status_text: Dictionary = {} # car id -> status shown now
 var _flame_timers: Dictionary = {} # car id -> seconds the pop stays lit
 var _last_gear: Dictionary = {} # car id -> gear
 var _clock: float = 0.0
-var _head_on: StandardMaterial3D
-var _head_off: StandardMaterial3D
 var _sky_material: ProceduralSkyMaterial
 var _environment: Environment
 var _sun: DirectionalLight3D
@@ -80,7 +93,6 @@ func setup(p_world: Node3D) -> void:
 	race = world.race
 	track = world.track
 	_sun = world.get_node("Sun")
-	_build_materials()
 	_build_smoke_mesh()
 	_build_status_textures()
 	_build_weather()
@@ -143,15 +155,10 @@ func _update_weather(delta: float) -> void:
 		_sky_material.sky_horizon_color = top.lerp(Color.WHITE, 0.35).lerp(Color(0.36, 0.4, 0.46), gloom * 0.8)
 		_sky_material.ground_horizon_color = _sky_material.sky_horizon_color
 	var headlights: float = float(tod["headlights"])
-	_head_on.emission_energy_multiplier = 4.0 * maxf(headlights, gloom * 0.6)
+	headlight_energy = 4.0 * maxf(headlights, gloom * 0.6)
 
 
 # --- per car -----------------------------------------------------------------------
-
-func _build_materials() -> void:
-	_head_on = _lamp(Color("#f0f8ff"), 0.0)
-	_head_off = _lamp(Color("#b8bcc6"), 0.0)
-
 
 ## Round, soft-edged puff instead of the flat square of the stock emitter.
 func _build_smoke_mesh() -> void:
@@ -183,6 +190,53 @@ func _lamp(color: Color, energy: float) -> StandardMaterial3D:
 	material.emission = color
 	material.emission_energy_multiplier = energy
 	return material
+
+
+func _flame_cone(radius: float, height: float) -> CylinderMesh:
+	var cone := CylinderMesh.new()
+	cone.top_radius = 0.0
+	cone.bottom_radius = radius
+	cone.height = height
+	cone.radial_segments = 5 # a ragged, hand-cut starburst rather than a smooth cone
+	return cone
+
+
+## Acid-lime and orange streaks thrown back off an outside wheel that rides the kerb.
+func _build_kerb_sparks() -> GPUParticles3D:
+	var streak := QuadMesh.new()
+	streak.size = Vector2(0.03, 0.22)
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	material.vertex_color_use_as_albedo = true
+	material.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	material.billboard_keep_scale = true
+	material.albedo_color = Color.WHITE
+	streak.material = material
+	var ramp := Gradient.new()
+	ramp.set_color(0, GRAFFITI_ACID)
+	ramp.set_color(1, Color("#ffaa00"))
+	var ramp_texture := GradientTexture1D.new()
+	ramp_texture.gradient = ramp
+	var process := ParticleProcessMaterial.new()
+	process.direction = Vector3(0.0, 0.5, 1.0) # up and back: the car runs toward -Z
+	process.spread = 38.0
+	process.initial_velocity_min = 9.0
+	process.initial_velocity_max = 14.0
+	process.gravity = Vector3(0.0, -9.8, 0.0)
+	process.color_initial_ramp = ramp_texture
+	process.particle_flag_align_y = true
+	var sparks_3d := GPUParticles3D.new()
+	sparks_3d.name = "KerbSparks"
+	sparks_3d.amount = KERB_SPARK_AMOUNT
+	sparks_3d.lifetime = 0.22
+	sparks_3d.local_coords = false
+	sparks_3d.emitting = false
+	sparks_3d.position = Vector3(0.0, 0.05, 1.2)
+	sparks_3d.process_material = process
+	sparks_3d.draw_pass_1 = streak
+	sparks_3d.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return sparks_3d
 
 
 func _build_car_effects(actor: ActorScript) -> void:
@@ -224,13 +278,15 @@ func _build_car_effects(actor: ActorScript) -> void:
 	for offset: Vector3 in EXHAUSTS:
 		var flame := MeshInstance3D.new()
 		flame.name = "ExhaustPop"
-		var cone := CylinderMesh.new()
-		cone.top_radius = 0.0
-		cone.bottom_radius = 0.09
-		cone.height = 0.45
-		cone.radial_segments = 6
-		flame.mesh = cone
-		flame.material_override = _lamp(Color("#ff8a1e"), 5.0)
+		# Two-tone comic burst: an acid-yellow shell around a crimson core.
+		flame.mesh = _flame_cone(0.1, 0.5)
+		flame.material_override = _lamp(GRAFFITI_ACID, 5.0)
+		var core := MeshInstance3D.new()
+		core.name = "Core"
+		core.mesh = _flame_cone(0.05, 0.34)
+		core.material_override = _lamp(GRAFFITI_CRIMSON, 6.0)
+		core.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		flame.add_child(core)
 		flame.rotation_degrees = Vector3(90.0, 0.0, 0.0) # tip points to the rear
 		flame.position = offset + Vector3(0.0, 0.0, 0.25)
 		flame.visible = false
@@ -238,21 +294,29 @@ func _build_car_effects(actor: ActorScript) -> void:
 		actor.add_child(flame)
 		flame_list.append(flame)
 	flames[id] = flame_list
-	var heads: Array[MeshInstance3D] = []
+	# The lamps themselves are emissive slabs on the chassis (GtCarActor); these cones only throw the light.
+	var heads: Array[SpotLight3D] = []
 	for offset: Vector3 in HEADLIGHTS:
-		var lamp := MeshInstance3D.new()
-		lamp.name = "Headlight"
-		var lens := SphereMesh.new()
-		lens.radius = 0.1
-		lens.height = 0.2
-		lens.radial_segments = 8
-		lens.rings = 4
-		lamp.mesh = lens
-		lamp.material_override = _head_on
-		lamp.position = offset
-		actor.add_child(lamp)
-		heads.append(lamp)
+		var cone := SpotLight3D.new()
+		cone.name = "HeadlightBeam"
+		cone.position = offset
+		cone.rotation_degrees = Vector3(-4.0, 0.0, 0.0) # the car travels along -Z; tipped a little onto the asphalt
+		cone.light_color = HEAD_COLOR
+		cone.spot_range = HEAD_BEAM_RANGE_M
+		cone.spot_angle = HEAD_BEAM_ANGLE_DEG
+		cone.shadow_enabled = false
+		cone.set_meta(&"no_shadow", true) # PresentationSettings keeps these pooled fill lights shadowless
+		cone.distance_fade_enabled = true
+		cone.distance_fade_begin = HEAD_BEAM_FADE_BEGIN_M
+		cone.distance_fade_length = HEAD_BEAM_FADE_LENGTH_M
+		cone.light_energy = 0.0
+		cone.visible = false
+		actor.add_child(cone)
+		heads.append(cone)
 	head_lights[id] = heads
+	var kerb := _build_kerb_sparks()
+	actor.add_child(kerb)
+	kerb_sparks[id] = kerb
 	tips[id] = _build_tip(actor)
 	_last_gear[id] = actor.car.gear
 
@@ -279,19 +343,30 @@ func _update_car_effects(actor: ActorScript, delta: float, followed: bool) -> vo
 		if wake_visible:
 			(ribbon.material_override as StandardMaterial3D).albedo_color.a = minf(0.55, car.slipstream_factor * 0.65)
 
-	# Exhaust pops on lift-off at speed and on every upshift.
+	# Exhaust pops on lift-off at speed and on every gear change; each pop is a freshly tilted, scaled burst.
 	var timer: float = float(_flame_timers.get(id, 0.0)) - delta
-	var upshift: bool = car.gear > int(_last_gear[id])
+	var shifted: bool = car.gear != int(_last_gear[id])
 	_last_gear[id] = car.gear
-	if upshift or (car.throttle < 0.2 and car.v > 40.0 and car.brake < 0.2 and randf() < 0.08):
-		timer = 0.09
+	if shifted or (car.throttle < 0.2 and car.v > 40.0 and car.brake < 0.2 and randf() < 0.08):
+		timer = FLAME_POP_S
+		for flame: MeshInstance3D in flames[id]:
+			flame.rotation_degrees = Vector3(90.0, 0.0, randf_range(-14.0, 14.0))
+			flame.scale = Vector3(randf_range(0.8, 1.25), randf_range(0.9, 1.5), randf_range(0.8, 1.25))
 	_flame_timers[id] = timer
 	for flame: MeshInstance3D in flames[id]:
 		flame.visible = timer > 0.0 and car.pit == null
 
-	# Headlamps: on at night and in the gloom.
-	for lamp: MeshInstance3D in head_lights[id]:
-		lamp.visible = _head_on.emission_energy_multiplier > 0.5
+	# Headlamps: on at night and in the gloom. The slabs glow on the actor; the cones light the asphalt.
+	actor.night_lights = headlight_energy
+	var beams_on: bool = headlight_energy > 0.5
+	for beam: SpotLight3D in head_lights[id]:
+		beam.visible = beams_on
+		beam.light_energy = headlight_energy * HEAD_BEAM_ENERGY_SHARE
+
+	# A wheel on the kerb strikes sparks off the sawtooth.
+	var kerb := kerb_sparks[id] as GPUParticles3D
+	kerb.emitting = car.v > KERB_SPARK_MIN_V and absf(car.lateral) > SpatialCarAudio.KERB_LATERAL_M and car.pit == null
+	kerb.position.x = signf(car.lateral) * 0.92 # the wheel on the outside lip
 
 	_update_tip(actor, followed, delta)
 
