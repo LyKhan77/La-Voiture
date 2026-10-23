@@ -57,6 +57,7 @@ func _run() -> void:
 	_test_presets_scale_the_heavier_vfx()
 	_test_reduce_motion()
 	_test_vfx_one_shot_sounds()
+	await _test_radio_banner_redraws_only_the_wave()
 	world.race.dispose()
 	world.queue_free()
 	await process_frame
@@ -591,3 +592,31 @@ func _test_race_setup_hero_map() -> void:
 	check(next != null and next.text.contains("CONTINUE") and _skew_of(next, "normal") > 0.1, "race setup C: the continue button is a skewed street plate")
 	setup.queue_free()
 	await process_frame
+
+
+# --- performance: the radio banner caused 30-40 ms spikes by repainting its whole halftone every frame ----
+
+func _test_radio_banner_redraws_only_the_wave() -> void:
+	var cut_in: CanvasLayer = world.hud.radio
+	var banner := cut_in.get_node("Banner") as Control
+	var backdrop := banner.get_node("Backdrop") as Control
+	var wave := banner.get_node_or_null("SoundWave") as Control
+	if wave == null:
+		check(false, "radio banner: the equaliser bars live on their own layer, apart from the static halftone art")
+		return
+	banner.visible = true # a hidden banner is never painted
+	await process_frame
+	await process_frame
+	var counts := {"backdrop": 0, "wave": 0}
+	backdrop.draw.connect(func() -> void: counts["backdrop"] += 1)
+	wave.draw.connect(func() -> void: counts["wave"] += 1)
+	cut_in.set("soundwave_active", true)
+	for _i: int in range(8):
+		cut_in.call("_process", FRAME)
+		await process_frame
+	cut_in.set("soundwave_active", false)
+	check(int(counts["wave"]) >= 5 and int(counts["backdrop"]) <= 1,
+		"radio banner: while the bars move only the bars repaint (wave %d, static art %d redraws in 8 frames)" % [int(counts["wave"]), int(counts["backdrop"])])
+	banner.visible = false
+	var tile: Variant = cut_in.call("_halftone_tile")
+	check(tile is Texture2D and (tile as Texture2D).get_width() == 16, "radio banner: the halftone is one tiled texture, not a thousand circles")

@@ -67,6 +67,9 @@ var _banner_w := BANNER_WIDTH
 var _present := false
 var _hold := HOLD_SEC # how long the banner stays up for the message on screen
 var _tween: Tween
+## The equaliser bars: a layer of their own, so only these ~30 rects repaint while the radio speaks.
+var _wave_layer: Control
+static var halftone_tile: Texture2D # shared by the driver and engineer banners, built on first use
 var _pending: Array = []
 var _docked := false
 var _dock_rect := Rect2()
@@ -104,6 +107,13 @@ func _ready() -> void:
 	_apply_fonts()
 	_ignore_mouse(banner)
 	_backdrop.draw.connect(_draw_backdrop)
+	_wave_layer = Control.new()
+	_wave_layer.name = "SoundWave"
+	_wave_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_wave_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	banner.add_child(_wave_layer)
+	banner.move_child(_wave_layer, _backdrop.get_index() + 1)
+	_wave_layer.draw.connect(_draw_manga_soundwave)
 	banner.resized.connect(_on_banner_resized)
 	get_viewport().size_changed.connect(_on_viewport_resized)
 	_apply_portrait()
@@ -125,7 +135,14 @@ func _process(delta: float) -> void:
 		var target: float = _wave_target(index) if soundwave_active else 0.0
 		var rate: float = WAVE_ATTACK if target > _wave_bars[index] else WAVE_DECAY
 		_wave_bars[index] = lerpf(_wave_bars[index], target, 1.0 - exp(-rate * delta))
+	_wave_layer.queue_redraw()
+
+
+## Layout or accent changed: repaint the static art and the bars. Never called per frame.
+func _redraw_all() -> void:
 	_backdrop.queue_redraw()
+	if _wave_layer != null:
+		_wave_layer.queue_redraw()
 
 
 ## Mean bar height, 0 (flat) to 1.
@@ -267,7 +284,7 @@ func _update_accent() -> void:
 	box.set_content_margin_all(0)
 	box.shadow_offset = Vector2(4, 4)
 	_portrait_frame.add_theme_stylebox_override("panel", box)
-	_backdrop.queue_redraw()
+	_redraw_all()
 
 
 func _apply_fonts() -> void:
@@ -330,7 +347,7 @@ func _refresh_layout() -> void:
 			banner.position = _dock_shown() - Vector2(0.0, DOCK_DROP * _dock_scale)
 		else:
 			banner.position.x = _hidden_x()
-	_backdrop.queue_redraw()
+	_redraw_all()
 
 
 func _draw_backdrop() -> void:
@@ -349,39 +366,44 @@ func _draw_backdrop() -> void:
 	_backdrop.draw_rect(Rect2(3.0, 3.0, w - 6.0, h - 6.0), _accent)
 	_draw_halftone(w, h)
 	_draw_speed_lines(w, h)
-	_draw_manga_soundwave(w, h)
 
 
 ## Equalizer bars on a strip along the bottom edge, under the speech: ink outline, paper fill,
 ## an ink cap on each peak, and a 2 px ink baseline that the bars fall back to when idle.
-func _draw_manga_soundwave(_w: float, h: float) -> void:
-	_backdrop.draw_set_transform_matrix(Transform2D.IDENTITY)
+func _draw_manga_soundwave() -> void:
+	var h := _wave_layer.size.y
 	var base_y := h - 14.0
 	var step := WAVE_BAR_W + WAVE_GAP
 	var span := step * float(WAVE_BARS) - WAVE_GAP
-	_backdrop.draw_rect(Rect2(_wave_x, base_y - 2.0, span, 2.0), T.INK_BORDER_BLACK)
+	_wave_layer.draw_rect(Rect2(_wave_x, base_y - 2.0, span, 2.0), T.INK_BORDER_BLACK)
 	for index: int in range(WAVE_BARS):
 		var height: float = 2.0 + _wave_bars[index] * (WAVE_MAX_H - 2.0)
 		if height <= 2.5:
 			continue
 		var x := _wave_x + float(index) * step
 		var top := base_y - height
-		_backdrop.draw_rect(Rect2(x, top, WAVE_BAR_W, height), T.INK_BORDER_BLACK)
-		_backdrop.draw_rect(Rect2(x + 2.0, top + 3.0, WAVE_BAR_W - 4.0, maxf(height - 3.0, 0.0)), Color("#F4F5F7"))
-		_backdrop.draw_rect(Rect2(x - 1.0, top - 2.0, WAVE_BAR_W + 2.0, 3.0), T.INK_BORDER_BLACK)
+		_wave_layer.draw_rect(Rect2(x, top, WAVE_BAR_W, height), T.INK_BORDER_BLACK)
+		_wave_layer.draw_rect(Rect2(x + 2.0, top + 3.0, WAVE_BAR_W - 4.0, maxf(height - 3.0, 0.0)), Color("#F4F5F7"))
+		_wave_layer.draw_rect(Rect2(x - 1.0, top - 2.0, WAVE_BAR_W + 2.0, 3.0), T.INK_BORDER_BLACK)
 
 
+## Staggered ink dots, painted as one tiled texture (the 16x16 tile below) rather than a circle per dot:
+## a thousand draw_circle polygons repainted every frame cost 30+ ms while the radio was speaking.
 func _draw_halftone(w: float, h: float) -> void:
-	var dot := Color(T.INK_BORDER_BLACK, 0.16)
-	var row := 0
-	var y := 6.0
-	while y < h - 6.0:
-		var x := 8.0 + (4.0 if row % 2 == 1 else 0.0)
-		while x < w - 8.0:
-			_backdrop.draw_circle(Vector2(x, y), 1.4, dot)
-			x += 8.0
-		y += 8.0
-		row += 1
+	_backdrop.draw_texture_rect(_halftone_tile(), Rect2(8.0, 6.0, w - 16.0, h - 12.0), true)
+
+
+static func _halftone_tile() -> Texture2D:
+	if halftone_tile != null:
+		return halftone_tile
+	var image := Image.create(16, 16, false, Image.FORMAT_RGBA8)
+	var ink := Color(T.INK_BORDER_BLACK, 0.16)
+	for dot: Vector2i in [Vector2i(0, 6), Vector2i(8, 6), Vector2i(4, 14), Vector2i(12, 14)]:
+		for dy: int in range(-1, 2):
+			for dx: int in range(-1, 2):
+				image.set_pixel(posmod(dot.x + dx, 16), posmod(dot.y + dy, 16), ink)
+	halftone_tile = ImageTexture.create_from_image(image)
+	return halftone_tile
 
 
 func _draw_speed_lines(w: float, h: float) -> void:
@@ -396,7 +418,7 @@ func _draw_speed_lines(w: float, h: float) -> void:
 
 
 func _on_banner_resized() -> void:
-	_backdrop.queue_redraw()
+	_redraw_all()
 
 
 func _on_viewport_resized() -> void:

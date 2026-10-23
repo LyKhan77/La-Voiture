@@ -52,19 +52,28 @@ Semua 10 sasis `keeps_original_paint = true`, sehingga tidak ada tint livery tam
 - **Suara VFX (Genex SFX):** gemeretak backfire saat downshift dan whoosh boost saat ERS overtake, lewat 4 suara 3D bersama di `RaceVfx`, hanya untuk mobil dalam 60 m dari kamera. (Dihasilkan sebagai MP3 lalu dikonversi ke WAV karena importer MP3 Godot 4.7.2 crash di mode headless; MP3 asli disimpan di `temp/`.)
 - **Garasi:** 10 stall memuat sasis balap dalam ~1.3 detik; tampilan dicek (`fase-8.5-garage-team0/2.png`).
 
-## 4d. Hasil pengukuran native (RTX 3050 Laptop, 1920×1080, hujan badai malam, 20 mobil, vsync off)
+## 4d. Performa: temuan, perbaikan, dan hasil ukur (RTX 3050 Laptop, 1920×1080, hujan badai malam, 20 mobil)
 
-| Preset | FPS rata-rata | frame time rata-rata | p99 | draw call maks |
-| :--- | :--- | :--- | :--- | :--- |
-| LOW | 53 | 19.0 ms | 43 ms | 2937 |
-| MEDIUM | 51 | 19.8 ms | 50 ms | 3310 |
-| HIGH | 48–54 | 18.5–20.8 ms | 31–51 ms | 3417 |
-| ULTRA | 53 | 18.8 ms | 49 ms | 3756 |
+**Metode (profile → temukan satu bottleneck → perbaiki → ukur ulang):**
 
-- **Target 60 FPS (16.66 ms) belum tercapai di semua preset, termasuk LOW.** Frame **terikat CPU**: GPU hanya ~5.3 ms, render-CPU ~1.6 ms, tetapi tick fisika/simulasi ~8 ms dan `_process` ~11 ms per frame.
-- Biaya per panggilan VFX Fase 8.5: `vfx.update` 0.43–0.56 ms, `hud.update` 0.38 ms, `actors.present` 0.30 ms — total ≈ 1.2–1.4 ms, di bawah 8% frame. Matikan audio mesin tidak mengubah hasil, sehingga sumber utama bukan audio. Hot spot di sisi simulasi/skrip adalah temuan lama yang belum dioptimalkan dan perlu sesi profiling sendiri.
-- **Orphan node setelah world dibebaskan: 0** pada semua preset.
-- Smoke test: `scratch/smoke_fase85.gd` (balapan 3 lap, cuaca terberat, malam). Catatan: pengukuran dilakukan ~40 detik pertama balapan, bukan 3 lap penuh.
+1. Ukuran pertama menunjukkan 48–54 FPS di semua preset, termasuk LOW, dengan GPU hanya ~5 ms: gejala beban CPU, bukan resolusi atau metode render.
+2. Garis waktu per detik (`scratch/timeline_fase85.gd`, vsync mati) mengubah gambaran: game sebenarnya berjalan **170–200 FPS (5–6 ms)** hampir sepanjang waktu. Rata-rata buruk berasal dari **lonjakan periodik 30–43 ms yang bertahan ~6 detik, tiap ~24 detik balapan**.
+3. Ablasi: memutus jalur radio (`race.radio_message`) menghilangkan lonjakan sepenuhnya; pemicunya banner radio (cut-in driver/engineer), bukan render, shader, VFX Fase 8.5, atau audio.
+4. **Akar masalah** (`scripts/ui/anime_radio_cutin.gd`): selama gelombang suara aktif, `_process` memanggil `queue_redraw()` pada seluruh latar banner tiap frame, sehingga ±1000 `draw_circle` halftone (tiap lingkaran sebuah poligon), garis kecepatan, dan border digambar ulang tiap frame, di dua banner. Hanya ±14 batang gelombang yang sebenarnya bergerak.
+5. **Perbaikan:** batang gelombang dipindah ke layer sendiri (`Banner/SoundWave`) yang satu-satunya digambar ulang per frame; latar statis hanya digambar saat layout/aksen berubah; halftone diganti **satu tekstur tile 16×16** yang dipakai bersama kedua banner. Tes regresi: `_test_radio_banner_redraws_only_the_wave` (batang 16 gambar ulang, latar statis 0 dalam 8 frame).
+
+| | sebelum | sesudah |
+| :--- | :--- | :--- |
+| Frame time rata-rata (preset High) | 18.5–20.8 ms (48–54 FPS) | **16.67 ms (60 FPS terkunci)**; tanpa batas FPS: 5–6 ms (170–200 FPS) |
+| Lonjakan saat radio bicara | 30–43 ms selama ~6 s, tiap ~24 s | tidak ada (maks. ~23 ms di smoke test) |
+| Draw call maksimum (High) | 3417 | **1075** |
+| Preset LOW / ULTRA | 53 FPS / 53 FPS | 60 FPS / 60 FPS (draw call 670 / 1362) |
+| Orphan node setelah world dibebaskan | 0 | 0 |
+
+- Biaya VFX Fase 8.5 sendiri: `vfx.update` 0.4–0.6 ms, `hud.update` 0.4 ms, `actors.present` 0.3 ms per frame.
+- Bukan masalah metode render atau loading screen: GPU hanya 4–5 ms, dan tidak ada hitch pemuatan yang terukur di garis waktu.
+- Catatan: pengukuran 40 detik pertama balapan (bukan 3 lap penuh); p99 frame time 19–23 ms di bawah vsync terlihat sebagai judder presentasi, bukan beban CPU (kerja per frame 5–6 ms dari anggaran 16.6 ms).
+- Alat: `scratch/smoke_fase85.gd`, `profile_fase85.gd` (ablasi grup node), `timeline_fase85.gd`.
 
 ## 4e. Temuan terbuka
 
@@ -98,5 +107,5 @@ Bukti visual: `screenshots/phases/fase-8.5-*.png` (menu, hover, balap malam, spe
 
 ## 8. Batas yang diketahui
 
-- Smoke test native dijalankan sebagian (40 detik, bukan 3 lap penuh) — lihat bagian 4d; 60 FPS belum tercapai.
+- Smoke test native dijalankan 40 detik pertama balapan (bukan 3 lap penuh) — lihat bagian 4d: 60 FPS terkunci, orphan node 0.
 - Review akhir dilakukan sendiri oleh penulis (tanpa subagent).
