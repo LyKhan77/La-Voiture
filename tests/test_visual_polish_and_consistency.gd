@@ -48,6 +48,10 @@ func _run() -> void:
 	_test_boost_fov_punch()
 	_test_kerb_strike_sparks()
 	_test_graffiti_backfire()
+	_test_kerb_sparks_are_abstract()
+	_test_graffiti_tyre_smoke()
+	_test_flame_bursts_and_wing_pops()
+	_test_speedlines_are_hand_inked()
 	world.race.dispose()
 	world.queue_free()
 	await process_frame
@@ -348,3 +352,63 @@ func _test_speedlines_stay_around_the_car() -> void:
 		"speedlines: centred on the car (%s) and clipped to the HUD-free window (%s)" % [str(center), str(window)])
 	car.v = 0.0
 	hud.update(FRAME)
+
+
+# --- refinement: abstract kerb sparks, graffiti smoke, comic flame bursts, hand-inked speedlines -------
+
+func _test_kerb_sparks_are_abstract() -> void:
+	var emitter := world.vfx.kerb_sparks[world.actors[5].car.id] as GPUParticles3D
+	var stars := emitter.get_node_or_null("KerbStars") as GPUParticles3D
+	var shard := emitter.process_material as ParticleProcessMaterial
+	check(stars != null and shard.scale_max > shard.scale_min * 4.0 and shard.color_initial_ramp != null and shard.hue_variation_max > 0.0
+		and shard.spread >= 45.0 and (emitter.draw_pass_1 as QuadMesh).material.albedo_texture != null,
+		"kerb sparks: uneven ink shards (sizes x%.1f apart, four-colour ramp, wide spread) with sparkle stars, not identical dashes" % (shard.scale_max / shard.scale_min))
+	var car: GtCar = world.actors[5].car
+	car.v = 45.0
+	car.lateral = 6.0
+	world.vfx.update(FRAME)
+	var left_throw: float = shard.direction.x
+	car.lateral = -6.0
+	world.vfx.update(FRAME)
+	var right_throw: float = shard.direction.x
+	check(left_throw * right_throw < 0.0, "kerb sparks: the throw leans away from whichever kerb the wheel is on (%.2f / %.2f)" % [left_throw, right_throw])
+	car.lateral = 0.0
+	car.v = 60.0
+	world.vfx.update(FRAME)
+
+
+func _test_graffiti_tyre_smoke() -> void:
+	var smoke := world.vfx.smokes[world.actors[2].car.id][0] as GPUParticles3D
+	var material := (smoke.draw_pass_1 as QuadMesh).material as StandardMaterial3D
+	var process := smoke.process_material as ParticleProcessMaterial
+	check(material.albedo_texture != null and material.albedo_texture.resource_path.begins_with("res://assets/vfx/")
+		and material.particles_anim_h_frames == 2 and material.particles_anim_v_frames == 2 and process.anim_offset_max >= 0.9,
+		"tyre smoke: puffs are the halftone graffiti swirl sheet, each one a random frame of its 2x2")
+
+
+func _test_flame_bursts_and_wing_pops() -> void:
+	var vfx: RaceVfx = world.vfx
+	var car: GtCar = world.actors[8].car
+	var id: int = car.id
+	var burst := (vfx.flames[id][0] as MeshInstance3D).get_node_or_null("Burst") as MeshInstance3D
+	var wings: Variant = vfx.get("wing_bursts")
+	var wing_list: Array = (wings as Dictionary).get(id, []) if wings is Dictionary else []
+	check(burst != null and (burst.material_override as StandardMaterial3D).albedo_texture.resource_path.begins_with("res://assets/vfx/") and wing_list.size() == 2,
+		"flames: each pop carries a comic flame-burst sprite and two more burst from the wing tips")
+	car.v = 30.0
+	car.gear = 3
+	vfx.update(FRAME)
+	car.gear = 4 # upshift: tailpipes pop, the wing stays quiet
+	vfx.update(FRAME)
+	var quiet: bool = wing_list.size() == 2 and not (wing_list[0] as MeshInstance3D).visible
+	car.gear = 3 # downshift
+	vfx.update(FRAME)
+	var lit: bool = wing_list.size() == 2 and (wing_list[0] as MeshInstance3D).visible and (wing_list[1] as MeshInstance3D).visible
+	vfx.update(0.2)
+	check(quiet and lit and not (wing_list[0] as MeshInstance3D).visible, "flames: the wing tips burst on a downshift only, for 0.12 s")
+
+
+func _test_speedlines_are_hand_inked() -> void:
+	var material := world.hud.speedlines_rect.material as ShaderMaterial
+	check(float(material.get_shader_parameter("variation")) > 0.5 and float(material.get_shader_parameter("accent_share")) > 0.1 and float(material.get_shader_parameter("tone")) > 0.3,
+		"speedlines: uneven hand-inked rays, a share painted lime / cyan / crimson, halftone wedges")

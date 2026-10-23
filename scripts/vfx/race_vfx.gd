@@ -30,9 +30,17 @@ const HEAD_BEAM_FADE_LENGTH_M: float = 20.0
 ## Kerb strike: sparks leave a wheel on the kerb (beyond the audio's kerb offset) above this speed.
 const KERB_SPARK_MIN_V: float = 35.0
 const KERB_SPARK_AMOUNT: int = 18
+const KERB_STAR_AMOUNT: int = 7
 const FLAME_POP_S: float = 0.12
 const GRAFFITI_CRIMSON := Color("#ff1a4b")
 const GRAFFITI_ACID := Color("#d8ff00")
+## Genex sprite sheets (2x2 frames, transparent): halftone graffiti tyre smoke and comic flame bursts.
+const SmokeSheet := preload("res://assets/vfx/2x2-sprite-sheet-of-four-different-anime-cmvkkjc7.png")
+const FlameSheet := preload("res://assets/vfx/2x2-sprite-sheet-of-four-different-manga-cmvkkjfc.png")
+const SHEET_FRAMES: int = 2
+const BURST_SIZE_M: float = 0.7
+const WING_BURST_SIZE_M: float = 0.85
+const TRAIL_WAVE_M: float = 0.32
 ## Lamp VFX: soft glows and a neon ribbon at each lamp anchor. Nothing is modelled on the car body.
 const TAIL_COLOR := Color("#ff1a4b")
 const TRAIL_POINTS: int = 22
@@ -62,6 +70,8 @@ const SPARK_POOL: int = 10
 const SMOKE_LAUNCH_V: float = 18.0
 const GLOOM_SUN_ENERGY: float = 0.4
 
+static var _textures: Dictionary = {} # procedural sprite name -> ImageTexture, drawn once for all cars
+
 var world: Node3D
 var race: GtRace
 var track: GtTrack
@@ -74,6 +84,7 @@ var flames: Dictionary = {} # car id -> Array[MeshInstance3D]
 var tips: Dictionary = {} # car id -> Node3D holding the Code and Status sprites
 var head_lights: Dictionary = {} # car id -> Array[SpotLight3D]
 var kerb_sparks: Dictionary = {} # car id -> GPUParticles3D
+var wing_bursts: Dictionary = {} # car id -> Array[MeshInstance3D], comic flame bursts at the two wing tips
 var tail_trails: Dictionary = {} # car id -> MeshInstance3D (ImmediateMesh ribbon, world space)
 var lamp_glows: Dictionary = {} # car id -> {"tail": Array[MeshInstance3D], "head": Array[MeshInstance3D]}
 var sparks: Array[GPUParticles3D] = []
@@ -91,6 +102,7 @@ var _tip_alpha: Dictionary = {} # car id -> 0..1 fade of the name tag
 var _tip_memory: Dictionary = {} # car id -> what it looked like last frame
 var _tip_status_text: Dictionary = {} # car id -> status shown now
 var _flame_timers: Dictionary = {} # car id -> seconds the pop stays lit
+var _wing_timers: Dictionary = {} # car id -> seconds the wing-tip bursts stay lit
 var _trail_history: Dictionary = {} # car id -> two Array[Vector3] of world points, newest first
 var _glow_mesh: QuadMesh
 var _tail_glow_mesh: QuadMesh
@@ -177,23 +189,17 @@ func _update_weather(delta: float) -> void:
 # --- per car -----------------------------------------------------------------------
 
 ## Round, soft-edged puff instead of the flat square of the stock emitter.
+## Halftone graffiti swirls: each puff shows one random frame of the 2x2 sheet (see _build_car_effects).
 func _build_smoke_mesh() -> void:
-	var gradient := Gradient.new()
-	gradient.set_color(0, Color(1.0, 1.0, 1.0, 0.9))
-	gradient.set_color(1, Color(1.0, 1.0, 1.0, 0.0))
-	var texture := GradientTexture2D.new()
-	texture.gradient = gradient
-	texture.fill = GradientTexture2D.FILL_RADIAL
-	texture.fill_from = Vector2(0.5, 0.5)
-	texture.fill_to = Vector2(0.5, 0.0)
-	texture.width = 64
-	texture.height = 64
 	var material := StandardMaterial3D.new()
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	material.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
-	material.albedo_texture = texture
-	material.albedo_color = Color(0.92, 0.92, 0.95, 0.8)
+	material.particles_anim_h_frames = SHEET_FRAMES
+	material.particles_anim_v_frames = SHEET_FRAMES
+	material.particles_anim_loop = false
+	material.albedo_texture = SmokeSheet
+	material.albedo_color = Color(1.0, 1.0, 1.0, 0.92)
 	_smoke_mesh = QuadMesh.new()
 	_smoke_mesh.size = Vector2(1.3, 1.3)
 	_smoke_mesh.material = material
@@ -254,6 +260,14 @@ func _build_lamp_vfx(actor: ActorScript) -> void:
 			actor.chassis.add_child(flare)
 			glows[kind].append(flare)
 	lamp_glows[id] = glows
+	var wing_list: Array[MeshInstance3D] = []
+	for anchor: Vector3 in actor.lamp_anchors["wing"]:
+		var burst := _burst_sprite("WingBurst", WING_BURST_SIZE_M)
+		burst.position = anchor
+		burst.visible = false
+		actor.chassis.add_child(burst)
+		wing_list.append(burst)
+	wing_bursts[id] = wing_list
 	var ribbon := MeshInstance3D.new()
 	ribbon.name = "TailTrail"
 	ribbon.top_level = true # world-space points: it must not follow the car
@@ -301,11 +315,11 @@ func _update_lamp_vfx(actor: ActorScript) -> void:
 		if line.size() > TRAIL_POINTS:
 			line.pop_back()
 		if line.size() >= 2:
-			_stroke_ribbon(mesh, line, strength)
+			_stroke_ribbon(mesh, line, strength, PI * float(side))
 
 
 ## One camera-facing triangle strip along the points (newest first), tapering and fading with age.
-func _stroke_ribbon(mesh: ImmediateMesh, points: Array, strength: float) -> void:
+func _stroke_ribbon(mesh: ImmediateMesh, points: Array, strength: float, phase: float) -> void:
 	var eye: Vector3 = world.camera.global_position
 	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
 	for index: int in range(points.size()):
@@ -316,6 +330,9 @@ func _stroke_ribbon(mesh: ImmediateMesh, points: Array, strength: float) -> void
 		var across: Vector3 = along.cross(eye - here).normalized()
 		var age: float = float(index) / float(TRAIL_POINTS)
 		var width: float = TRAIL_WIDTH_M * (1.0 - age) * lerpf(0.6, 1.4, strength)
+		# The neon ribbon swims in a loose S as it ages, like the swirling light trails of the concept art.
+		var sway: float = sin(age * 9.0 + _clock * 4.0 + phase) * TRAIL_WAVE_M * age
+		here += across * sway + Vector3.UP * sway * 0.6
 		mesh.surface_set_color(Color(TAIL_COLOR, pow(1.0 - age, 1.5) * lerpf(0.35, 1.0, strength)))
 		mesh.surface_add_vertex(here + across * width)
 		mesh.surface_add_vertex(here - across * width)
@@ -330,6 +347,30 @@ func tail_trail_length(car_id: int) -> float:
 	return total
 
 
+## A camera-facing comic flame burst: one frame of the flame sheet, picked per pop by _pick_burst_frame().
+func _burst_sprite(node_name: String, size_m: float) -> MeshInstance3D:
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	material.billboard_keep_scale = true
+	material.albedo_texture = FlameSheet
+	material.uv1_scale = Vector3(1.0 / float(SHEET_FRAMES), 1.0 / float(SHEET_FRAMES), 1.0)
+	var quad := QuadMesh.new()
+	quad.size = Vector2(size_m, size_m)
+	var sprite := MeshInstance3D.new()
+	sprite.name = node_name
+	sprite.mesh = quad
+	sprite.material_override = material
+	sprite.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return sprite
+
+
+func _pick_burst_frame(sprite: MeshInstance3D) -> void:
+	var frame: int = randi() % (SHEET_FRAMES * SHEET_FRAMES)
+	(sprite.material_override as StandardMaterial3D).uv1_offset = Vector3(float(frame % SHEET_FRAMES), float(frame / SHEET_FRAMES), 0.0) / float(SHEET_FRAMES)
+
+
 func _flame_cone(radius: float, height: float) -> CylinderMesh:
 	var cone := CylinderMesh.new()
 	cone.top_radius = 0.0
@@ -339,44 +380,104 @@ func _flame_cone(radius: float, height: float) -> CylinderMesh:
 	return cone
 
 
-## Acid-lime and orange streaks thrown back off an outside wheel that rides the kerb.
+## Kerb strike: a spray of uneven ink-cut shards (every size, all four spray colours) plus a few slow
+## sparkle stars, thrown up and back off the outside wheel. The throw leans away from the kerb side
+## (see _update_car_effects), so no two bursts and no two sides look alike.
 func _build_kerb_sparks() -> GPUParticles3D:
-	var streak := QuadMesh.new()
-	streak.size = Vector2(0.03, 0.22)
+	var shards := _spark_emitter("KerbSparks", _spark_quad(_shard_texture(), Vector2(0.06, 0.34)), KERB_SPARK_AMOUNT, 0.26, 7.0, 16.0, true)
+	var stars := _spark_emitter("KerbStars", _spark_quad(_star_texture(), Vector2(0.3, 0.3)), KERB_STAR_AMOUNT, 0.4, 2.5, 6.5, false)
+	shards.add_child(stars)
+	return shards
+
+
+func _spark_quad(texture: Texture2D, size: Vector2) -> QuadMesh:
 	var material := StandardMaterial3D.new()
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA # additive blending still reads the flare/vertex alpha
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	material.vertex_color_use_as_albedo = true
-	material.vertex_color_is_srgb = true # the ribbon colour is an sRGB crimson; linear would wash it to pink
+	material.vertex_color_is_srgb = true
 	material.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
 	material.billboard_keep_scale = true
-	material.albedo_color = Color.WHITE
-	streak.material = material
-	var ramp := Gradient.new()
-	ramp.set_color(0, GRAFFITI_ACID)
-	ramp.set_color(1, Color("#ffaa00"))
-	var ramp_texture := GradientTexture1D.new()
-	ramp_texture.gradient = ramp
+	material.albedo_texture = texture
+	var quad := QuadMesh.new()
+	quad.size = size
+	quad.material = material
+	return quad
+
+
+func _spark_emitter(node_name: String, quad: QuadMesh, amount: int, life: float, speed_min: float, speed_max: float, align_to_velocity: bool) -> GPUParticles3D:
+	var palette := Gradient.new()
+	palette.offsets = PackedFloat32Array([0.0, 0.34, 0.66, 1.0])
+	palette.colors = PackedColorArray([GRAFFITI_ACID, Color("#ffaa00"), GRAFFITI_CRIMSON, Color("#00f0ff")])
+	var palette_texture := GradientTexture1D.new()
+	palette_texture.gradient = palette
+	var shrink := Curve.new()
+	shrink.add_point(Vector2(0.0, 1.0))
+	shrink.add_point(Vector2(1.0, 0.0))
+	var shrink_texture := CurveTexture.new()
+	shrink_texture.curve = shrink
 	var process := ParticleProcessMaterial.new()
-	process.direction = Vector3(0.0, 0.5, 1.0) # up and back: the car runs toward -Z
-	process.spread = 38.0
-	process.initial_velocity_min = 9.0
-	process.initial_velocity_max = 14.0
+	process.direction = Vector3(0.0, 0.6, 1.0)
+	process.spread = 55.0
+	process.initial_velocity_min = speed_min
+	process.initial_velocity_max = speed_max
 	process.gravity = Vector3(0.0, -9.8, 0.0)
-	process.color_initial_ramp = ramp_texture
-	process.particle_flag_align_y = true
-	var sparks_3d := GPUParticles3D.new()
-	sparks_3d.name = "KerbSparks"
-	sparks_3d.amount = KERB_SPARK_AMOUNT
-	sparks_3d.lifetime = 0.22
-	sparks_3d.local_coords = false
-	sparks_3d.emitting = false
-	sparks_3d.position = Vector3(0.0, 0.05, 1.2)
-	sparks_3d.process_material = process
-	sparks_3d.draw_pass_1 = streak
-	sparks_3d.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	return sparks_3d
+	process.color_initial_ramp = palette_texture
+	process.scale_min = 0.25
+	process.scale_max = 1.9
+	process.scale_curve = shrink_texture
+	process.hue_variation_min = -0.06
+	process.hue_variation_max = 0.06
+	process.particle_flag_align_y = align_to_velocity
+	if not align_to_velocity:
+		process.angle_min = -180.0
+		process.angle_max = 180.0
+		process.angular_velocity_min = -360.0
+		process.angular_velocity_max = 360.0
+	var emitter := GPUParticles3D.new()
+	emitter.name = node_name
+	emitter.amount = amount
+	emitter.lifetime = life
+	emitter.local_coords = false
+	emitter.emitting = false
+	emitter.position = Vector3(0.0, 0.05, 1.2) if node_name == "KerbSparks" else Vector3.ZERO
+	emitter.process_material = process
+	emitter.draw_pass_1 = quad
+	emitter.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return emitter
+
+
+## A pointed shard: thin tips, fat just below the middle, soft rim. Drawn once.
+static func _shard_texture() -> Texture2D:
+	if _textures.has(&"shard"):
+		return _textures[&"shard"]
+	var image := Image.create(32, 128, false, Image.FORMAT_RGBA8)
+	for y: int in range(128):
+		var along: float = float(y) / 127.0
+		var half: float = 0.5 * pow(1.0 - absf(2.0 * along - 0.8), 1.2) if along < 0.9 else 0.0
+		for x: int in range(32):
+			var across: float = absf(float(x) - 15.5) / 15.5
+			var alpha: float = clampf((half * 2.0 - across) * 4.0, 0.0, 1.0)
+			image.set_pixel(x, y, Color(1.0, 1.0, 1.0, alpha))
+	_textures[&"shard"] = ImageTexture.create_from_image(image)
+	return _textures[&"shard"]
+
+
+## A four-point sparkle (astroid) with a hot soft core. Drawn once.
+static func _star_texture() -> Texture2D:
+	if _textures.has(&"star"):
+		return _textures[&"star"]
+	var image := Image.create(64, 64, false, Image.FORMAT_RGBA8)
+	for y: int in range(64):
+		for x: int in range(64):
+			var px: float = absf((float(x) - 31.5) / 31.5)
+			var py: float = absf((float(y) - 31.5) / 31.5)
+			var arm: float = clampf((1.0 - (sqrt(px) + sqrt(py))) * 5.0, 0.0, 1.0)
+			var core: float = clampf(1.0 - sqrt(px * px + py * py) * 2.4, 0.0, 1.0)
+			image.set_pixel(x, y, Color(1.0, 1.0, 1.0, maxf(arm, core)))
+	_textures[&"star"] = ImageTexture.create_from_image(image)
+	return _textures[&"star"]
 
 
 func _build_car_effects(actor: ActorScript) -> void:
@@ -390,7 +491,13 @@ func _build_car_effects(actor: ActorScript) -> void:
 		var smoke := SmokeScene.instantiate() as GPUParticles3D
 		smoke.position = offset
 		smoke.rotation.y = PI # the scene throws toward -Z; the car's rear is +Z
-		smoke.draw_pass_1 = _smoke_mesh # soft puffs; the scene's own material is shared with the showroom
+		smoke.draw_pass_1 = _smoke_mesh # the scene's own material is shared with the showroom
+		var swirl := smoke.process_material.duplicate() as ParticleProcessMaterial # random frame and spin per puff, for this car only
+		swirl.anim_offset_min = 0.0
+		swirl.anim_offset_max = 1.0
+		swirl.angle_min = -180.0
+		swirl.angle_max = 180.0
+		smoke.process_material = swirl
 		actor.add_child(smoke)
 		smoke_list.append(smoke)
 	smokes[id] = smoke_list
@@ -427,6 +534,7 @@ func _build_car_effects(actor: ActorScript) -> void:
 		core.material_override = _lamp(GRAFFITI_CRIMSON, 6.0)
 		core.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		flame.add_child(core)
+		flame.add_child(_burst_sprite("Burst", BURST_SIZE_M))
 		flame.rotation_degrees = Vector3(90.0, 0.0, 0.0) # tip points to the rear
 		flame.position = offset + Vector3(0.0, 0.0, 0.25)
 		flame.visible = false
@@ -434,7 +542,7 @@ func _build_car_effects(actor: ActorScript) -> void:
 		actor.add_child(flame)
 		flame_list.append(flame)
 	flames[id] = flame_list
-	# The lamps themselves are emissive slabs on the chassis (GtCarActor); these cones only throw the light.
+	# The lamps are VFX (see _build_lamp_vfx); these cones throw the headlight onto the asphalt.
 	var heads: Array[SpotLight3D] = []
 	for offset: Vector3 in HEADLIGHTS:
 		var cone := SpotLight3D.new()
@@ -487,12 +595,23 @@ func _update_car_effects(actor: ActorScript, delta: float, followed: bool) -> vo
 	# Exhaust pops on lift-off at speed and on every gear change; each pop is a freshly tilted, scaled burst.
 	var timer: float = float(_flame_timers.get(id, 0.0)) - delta
 	var shifted: bool = car.gear != int(_last_gear[id])
+	var downshift: bool = car.gear < int(_last_gear[id])
 	_last_gear[id] = car.gear
 	if shifted or (car.throttle < 0.2 and car.v > 40.0 and car.brake < 0.2 and randf() < 0.08):
 		timer = FLAME_POP_S
 		for flame: MeshInstance3D in flames[id]:
 			flame.rotation_degrees = Vector3(90.0, 0.0, randf_range(-14.0, 14.0))
 			flame.scale = Vector3(randf_range(0.8, 1.25), randf_range(0.9, 1.5), randf_range(0.8, 1.25))
+			_pick_burst_frame(flame.get_node("Burst") as MeshInstance3D)
+	var wing_timer: float = float(_wing_timers.get(id, 0.0)) - delta
+	if downshift:
+		wing_timer = FLAME_POP_S
+		for burst: MeshInstance3D in wing_bursts[id]:
+			_pick_burst_frame(burst)
+			burst.rotation_degrees.z = randf_range(-30.0, 30.0)
+	_wing_timers[id] = wing_timer
+	for burst: MeshInstance3D in wing_bursts[id]:
+		burst.visible = wing_timer > 0.0 and car.pit == null
 	_flame_timers[id] = timer
 	for flame: MeshInstance3D in flames[id]:
 		flame.visible = timer > 0.0 and car.pit == null
@@ -508,6 +627,10 @@ func _update_car_effects(actor: ActorScript, delta: float, followed: bool) -> vo
 	var kerb := kerb_sparks[id] as GPUParticles3D
 	kerb.emitting = car.v > KERB_SPARK_MIN_V and absf(car.lateral) > SpatialCarAudio.KERB_LATERAL_M and car.pit == null
 	kerb.position.x = signf(car.lateral) * 0.92 # the wheel on the outside lip
+	var lean: float = -signf(car.lateral) * (0.25 + 0.5 * absf(sin(_clock * 9.0 + float(id)))) # the throw wanders burst to burst
+	for emitter: GPUParticles3D in [kerb, kerb.get_child(0)]:
+		(emitter.process_material as ParticleProcessMaterial).direction = Vector3(lean, 0.6, 1.0)
+	(kerb.get_child(0) as GPUParticles3D).emitting = kerb.emitting
 	_update_lamp_vfx(actor)
 
 	_update_tip(actor, followed, delta)

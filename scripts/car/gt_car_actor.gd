@@ -57,8 +57,8 @@ var steer_visual: float = 0.0
 var taillight_energy: float = 0.0
 ## Headlamp emission the weather asks for (RaceVfx writes it); the resting tail glow follows it.
 var night_lights: float = 0.0
-## Chassis-local lamp points ("tail" / "head", left then right); refreshed by bind().
-var lamp_anchors: Dictionary = {"tail": [], "head": []}
+## Chassis-local effect points ("tail" / "head" lamps, "wing" tips; left then right); refreshed by bind().
+var lamp_anchors: Dictionary = {"tail": [], "head": [], "wing": []}
 
 # Roll, pitch, yaw and steer as (first, second) stage of ease2().
 var _roll: Vector2 = Vector2.ZERO
@@ -182,7 +182,7 @@ func _tilt_chassis(dt: float) -> void:
 ## Where the lamps sit on this body, as chassis-local points: a rough guess from the body bounds, since every
 ## car's real lamps differ. Nothing is drawn here; RaceVfx hangs soft glow and light trails off these points.
 func _find_lamp_anchors() -> void:
-	lamp_anchors = {"tail": [], "head": []}
+	lamp_anchors = {"tail": [], "head": [], "wing": []}
 	if chassis.base_body_mesh == null:
 		return
 	var to_chassis: Transform3D = chassis.global_transform.affine_inverse() * chassis.base_body_mesh.global_transform
@@ -190,6 +190,7 @@ func _find_lamp_anchors() -> void:
 	for side: float in [-1.0, 1.0]:
 		var x: float = side * bounds.size.x * LAMP_SPREAD
 		lamp_anchors["tail"].append(Vector3(x, bounds.position.y + bounds.size.y * 0.42, bounds.position.z + 0.05))
+		lamp_anchors["wing"].append(Vector3(side * bounds.size.x * 0.44, bounds.position.y + bounds.size.y * 0.88, bounds.position.z + 0.15))
 		lamp_anchors["head"].append(Vector3(x, bounds.position.y + bounds.size.y * 0.30, bounds.end.z - 0.05))
 
 

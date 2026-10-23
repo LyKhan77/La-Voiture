@@ -48,6 +48,9 @@ const SPEEDLINES_FULL_RADIUS: float = 0.34
 const SPEEDLINES_END_RADIUS: float = 0.62
 const SPEEDLINES_EDGE_FADE: float = 0.06
 const SPEEDLINES_CAR_LIFT_M: float = 0.7
+const SPEEDLINES_PAINT_SHARE: float = 0.2
+const SPEEDLINES_TONE: float = 0.75
+const SPEEDLINES_SECTORS: float = 54.0
 
 var world: Node3D
 var race: GtRace
@@ -267,11 +270,15 @@ func _build_speedlines() -> void:
 	speedlines_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var material := ShaderMaterial.new()
 	material.shader = SpeedlinesShader
-	material.set_shader_parameter("ray_count", 72.0)
 	material.set_shader_parameter("inner", SPEEDLINES_CLEAR_RADIUS)
 	material.set_shader_parameter("outer", SPEEDLINES_FULL_RADIUS)
 	material.set_shader_parameter("ring_end", SPEEDLINES_END_RADIUS)
 	material.set_shader_parameter("safe_fade", SPEEDLINES_EDGE_FADE)
+	# Hand-inked and lopsided: uneven rays, a share painted lime / cyan / crimson, halftone wedges.
+	material.set_shader_parameter("variation", 1.0)
+	material.set_shader_parameter("accent_share", SPEEDLINES_PAINT_SHARE)
+	material.set_shader_parameter("tone", SPEEDLINES_TONE)
+	material.set_shader_parameter("ray_count", SPEEDLINES_SECTORS)
 	speedlines_rect.material = material
 	speedlines_rect.visible = false
 	layer.add_child(speedlines_rect)

@@ -38,6 +38,12 @@ Semua 10 sasis `keeps_original_paint = true`, sehingga tidak ada tint livery tam
 - **Lampu depan/belakang:** semua elemen lampu di bodi dibuang (estetika aset, posisi lampu tiap mobil berbeda). Lampu rem = kilau lembut + pita neon crimson yang mengalir di belakang mobil (`RaceVfx.tail_trails`); lampu depan = `SpotLight3D` + kilau lembut, menyala terus di malam/hujan.
 - **Speedlines:** berpusat di posisi mobil di layar (area bersih di sekitar mobil), dipotong ke jendela bebas-HUD sehingga tidak melintasi panel HUD (konsep `temp/concepts/vfx_toon_anime_graffiti_concept.png`).
 - **Judul:** 4 arah konsep dihasilkan, nomor 1 dipilih dan dipasang.
+- **Speedlines abstrak & bernada (tone):** shader `manga_speedlines.gdshader` mode `variation`: tiap sektor sinar punya kehadiran, lebar, titik awal/akhir acak (diundi ulang 12×/detik seperti frame gambar tangan), kerapatan condong ke satu sisi (`lean`), 20% sinar dicat lime/cyan/crimson, dan sebagian membawa baji screentone halftone. Mode lama (panel radio) tidak berubah.
+- **Percikan kerb abstrak:** pecahan tinta bentuk runcing berukuran acak (×7.6), palet 4 warna, sebaran 55°, arah lemparan condong menjauhi sisi kerb yang berubah tiap letupan, ditambah bintang kilau (`KerbStars`).
+- **Asap ban grafiti:** sprite sheet 2×2 hasil Genex (`assets/vfx/…cmvkkjc7.png`): pusaran halftone bertepi lime/cyan, tiap puff mengambil satu frame acak.
+- **Api knalpot komik:** sprite sheet 2×2 hasil Genex (`assets/vfx/…cmvkkjfc.png`) sebagai `Burst` di tiap knalpot dan dua semburan di ujung wing (`wing_bursts`) hanya saat downshift, 0.12 s.
+- **Pita lampu rem melengkung:** pita neon berayun membentuk S seiring umur, seperti jejak cahaya di konsep.
+- **Biaya Genex:** 2 gambar sprite sheet; anggaran aset dinaikkan pengguna ke 130 kredit.
 
 ## 5. Keputusan (rulings)
 

@@ -64,6 +64,26 @@ func _run() -> void:
 	world.camera_director.update(FRAME)
 	await _shot("race-night-brake-lights")
 
+	# Burnout: graffiti tyre smoke, plus a downshift for the exhaust and wing-tip bursts.
+	for each in world.actors:
+		each.car.brake = 1.0
+		each.car.v = 60.0
+		each.car.gear = 5
+	for _i: int in range(14):
+		for each in world.actors:
+			each.car.s += 1.0
+			each.car.prev_s = each.car.s - 1.0
+			each.present(1.0, FRAME)
+		world.vfx.update(FRAME)
+		world.camera_director.update(FRAME)
+	for each in world.actors:
+		each.car.gear = 3
+	world.vfx.update(FRAME)
+	for _i: int in range(2):
+		world.vfx.update(FRAME)
+		world.camera_director.update(FRAME)
+	await _shot("race-graffiti-smoke-flames")
+
 	world.race.weather.time_of_day = WeatherScript.compute_time_of_day(WeatherScript.TimeOfDay.DAY, 0.0)
 	car.brake = 0.0
 	car.v = 80.0
