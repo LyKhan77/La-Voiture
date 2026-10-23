@@ -356,3 +356,158 @@ production/session-logs/.session-end.hash
 production/session-logs/session-log.md
 ---
 
+## Session End: 20261023_205621
+### Commits
+4b2eb72 chore: track race engineer portrait asset and update production session logs
+bff064c chore: track Godot .uid files for the new UI scripts and scratch tools
+c4586fc perf(ui): radio banner repaints only its equaliser bars, halftone is one tiled texture
+2d47997 feat(ui,vfx): Concept 01 Settings and Race Setup, preset/reduce-motion/sound hardening
+0393849 feat(vfx): hand-inked speedlines, abstract kerb sparks, graffiti smoke, comic flame bursts
+5d120e2 feat(ui): toon-anime x graffiti logo as the main menu title
+### Uncommitted Changes
+production/session-logs/compaction-log.txt
+---
+
+## Session End: 20261023_205913
+### Commits
+4b2eb72 chore: track race engineer portrait asset and update production session logs
+bff064c chore: track Godot .uid files for the new UI scripts and scratch tools
+c4586fc perf(ui): radio banner repaints only its equaliser bars, halftone is one tiled texture
+2d47997 feat(ui,vfx): Concept 01 Settings and Race Setup, preset/reduce-motion/sound hardening
+0393849 feat(vfx): hand-inked speedlines, abstract kerb sparks, graffiti smoke, comic flame bursts
+5d120e2 feat(ui): toon-anime x graffiti logo as the main menu title
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261023_210723
+### Commits
+4b2eb72 chore: track race engineer portrait asset and update production session logs
+bff064c chore: track Godot .uid files for the new UI scripts and scratch tools
+c4586fc perf(ui): radio banner repaints only its equaliser bars, halftone is one tiled texture
+2d47997 feat(ui,vfx): Concept 01 Settings and Race Setup, preset/reduce-motion/sound hardening
+0393849 feat(vfx): hand-inked speedlines, abstract kerb sparks, graffiti smoke, comic flame bursts
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261023_213322
+### Commits
+4b2eb72 chore: track race engineer portrait asset and update production session logs
+bff064c chore: track Godot .uid files for the new UI scripts and scratch tools
+c4586fc perf(ui): radio banner repaints only its equaliser bars, halftone is one tiled texture
+2d47997 feat(ui,vfx): Concept 01 Settings and Race Setup, preset/reduce-motion/sound hardening
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261023_213523
+### Commits
+4b2eb72 chore: track race engineer portrait asset and update production session logs
+bff064c chore: track Godot .uid files for the new UI scripts and scratch tools
+c4586fc perf(ui): radio banner repaints only its equaliser bars, halftone is one tiled texture
+2d47997 feat(ui,vfx): Concept 01 Settings and Race Setup, preset/reduce-motion/sound hardening
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+scratch/fit_cars.gd
+---
+
+## Session End: 20261023_214302
+### Commits
+4b2eb72 chore: track race engineer portrait asset and update production session logs
+bff064c chore: track Godot .uid files for the new UI scripts and scratch tools
+c4586fc perf(ui): radio banner repaints only its equaliser bars, halftone is one tiled texture
+2d47997 feat(ui,vfx): Concept 01 Settings and Race Setup, preset/reduce-motion/sound hardening
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+scratch/capture_wheel_review.gd
+scratch/fit_cars.gd
+scripts/car/gt_car_actor.gd
+scripts/ui/garage_roster.gd
+tests/test_audi_r8_chassis.gd
+tests/test_main_menu_flow.gd
+---
+
+## Session End: 20261023_221636
+### Commits
+4b2eb72 chore: track race engineer portrait asset and update production session logs
+bff064c chore: track Godot .uid files for the new UI scripts and scratch tools
+c4586fc perf(ui): radio banner repaints only its equaliser bars, halftone is one tiled texture
+2d47997 feat(ui,vfx): Concept 01 Settings and Race Setup, preset/reduce-motion/sound hardening
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+scratch/capture_wheel_review.gd
+scratch/fit_cars.gd
+scripts/car/gt_car_actor.gd
+scripts/ui/garage_roster.gd
+scripts/vfx/race_vfx.gd
+tests/test_audi_r8_chassis.gd
+tests/test_car_dynamics_vfx.gd
+tests/test_main_menu_flow.gd
+---
+
+## Session End: 20261023_224819
+### Commits
+4b2eb72 chore: track race engineer portrait asset and update production session logs
+bff064c chore: track Godot .uid files for the new UI scripts and scratch tools
+c4586fc perf(ui): radio banner repaints only its equaliser bars, halftone is one tiled texture
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+scratch/capture_wheel_review.gd
+scratch/fit_cars.gd
+scripts/car/gt_car_actor.gd
+scripts/ui/garage_roster.gd
+scripts/vfx/race_vfx.gd
+tests/test_audi_r8_chassis.gd
+tests/test_car_dynamics_vfx.gd
+tests/test_main_menu_flow.gd
+---
+
+## Session End: 20261023_225332
+### Commits
+4b2eb72 chore: track race engineer portrait asset and update production session logs
+bff064c chore: track Godot .uid files for the new UI scripts and scratch tools
+c4586fc perf(ui): radio banner repaints only its equaliser bars, halftone is one tiled texture
+### Uncommitted Changes
+ROADMAP.md
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+scratch/capture_wheel_review.gd
+scratch/fit_cars.gd
+scripts/car/gt_car_actor.gd
+scripts/ui/garage_roster.gd
+scripts/vfx/race_vfx.gd
+tests/test_audi_r8_chassis.gd
+tests/test_car_dynamics_vfx.gd
+tests/test_main_menu_flow.gd
+---
+
+## Session End: 20261023_231138
+### Commits
+7f9c22c docs: track the Langkah 1 spec, plan, handoff task and Mercedes reference images
+5d57e6e docs(fase-11): executive report, evidence screenshots and roadmap for Langkah 1
+4f64bf9 feat(car): Mercedes-AMG GT3 Evo for team 0 and a dedicated FIA safety car
+4b2eb72 chore: track race engineer portrait asset and update production session logs
+bff064c chore: track Godot .uid files for the new UI scripts and scratch tools
+c4586fc perf(ui): radio banner repaints only its equaliser bars, halftone is one tiled texture
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
