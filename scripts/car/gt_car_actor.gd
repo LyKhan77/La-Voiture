@@ -40,14 +40,12 @@ const BRAKE_GLOW_FALL: float = 1.2
 ## Time constant of each of the two cascaded low-passes that turn the sim's 20 Hz steps into body motion.
 const BODY_EASE_S: float = 0.07
 const LIVERY_TINT: float = 0.6
-const TAIL_COLOR := Color("#ff1a4b")
-const HEAD_COLOR := Color("#eaf2ff")
 const TAIL_BRAKE_ENERGY: float = 6.5
 const TAIL_NIGHT_ENERGY: float = 1.2
 const TAIL_ATTACK: float = 18.0 # energy per second: a brake light is a switch, not a fade
 const BRAKE_LIGHT_G: float = 0.5
 const NIGHT_LAMPS_ON: float = 0.5
-const LAMP_SIZE := Vector3(0.36, 0.04, 0.03)
+const LAMP_SPREAD: float = 0.24 # lamp anchors sit this share of the body width off the centre line
 
 var car: GtCar
 var track: GtTrack
@@ -57,8 +55,10 @@ var brake_glow: float = 0.0
 var steer_visual: float = 0.0
 ## Emission of the rear cluster: 6.5 on the brakes, 1.2 resting at night or in the gloom, else dark.
 var taillight_energy: float = 0.0
-## Headlamp emission the weather asks for (RaceVfx writes it); the head slabs and the resting tail glow follow it.
+## Headlamp emission the weather asks for (RaceVfx writes it); the resting tail glow follows it.
 var night_lights: float = 0.0
+## Chassis-local lamp points ("tail" / "head", left then right); refreshed by bind().
+var lamp_anchors: Dictionary = {"tail": [], "head": []}
 
 # Roll, pitch, yaw and steer as (first, second) stage of ease2().
 var _roll: Vector2 = Vector2.ZERO
@@ -69,10 +69,6 @@ var wheel_controllers: Array[WheelControllerScript] = []
 
 var _wheel_compound: int = -1
 var _livery_team: int = -1
-var _taillight_mat: StandardMaterial3D
-var _headlight_mat: StandardMaterial3D
-var _tail_lamps: Node3D
-var _head_lamps: Node3D
 
 @onready var chassis: ModularCarAssembler = $Chassis
 @onready var body: AnimatableBody3D = $Body
@@ -89,7 +85,7 @@ func bind(p_car: GtCar, p_track: GtTrack) -> void:
 		_livery_team = car.team_id
 		_apply_livery(car.team_id)
 	mount_wheels(car.compound)
-	_build_lamps()
+	_find_lamp_anchors()
 	present(1.0, 0.0)
 
 
@@ -183,68 +179,30 @@ func _tilt_chassis(dt: float) -> void:
 	chassis.transform = Transform3D(basis, chassis.position)
 
 
-## Two emissive slabs per end, fitted to this chassis' body bounds (the model faces chassis +Z, so the
-## rear is -Z). They ride on the chassis, so they roll and pitch with the body.
-func _build_lamps() -> void:
-	if chassis.get_node_or_null("Lamps") != null or chassis.base_body_mesh == null:
+## Where the lamps sit on this body, as chassis-local points: a rough guess from the body bounds, since every
+## car's real lamps differ. Nothing is drawn here; RaceVfx hangs soft glow and light trails off these points.
+func _find_lamp_anchors() -> void:
+	lamp_anchors = {"tail": [], "head": []}
+	if chassis.base_body_mesh == null:
 		return
 	var to_chassis: Transform3D = chassis.global_transform.affine_inverse() * chassis.base_body_mesh.global_transform
 	var bounds: AABB = to_chassis * chassis.base_body_mesh.get_aabb()
-	var lamps := Node3D.new()
-	lamps.name = "Lamps"
-	chassis.add_child(lamps)
-	_taillight_mat = _lamp_material(TAIL_COLOR)
-	_headlight_mat = _lamp_material(HEAD_COLOR)
-	_tail_lamps = _lamp_group(lamps, "Tail")
-	_head_lamps = _lamp_group(lamps, "Head")
-	var rear: float = bounds.position.z + 0.08
-	var front: float = bounds.end.z - 0.08
 	for side: float in [-1.0, 1.0]:
-		var x: float = side * bounds.size.x * 0.24
-		_add_lamp(_tail_lamps, "Taillight", _taillight_mat, Vector3(x, bounds.position.y + bounds.size.y * 0.42, rear))
-		_add_lamp(_head_lamps, "Headlight", _headlight_mat, Vector3(x, bounds.position.y + bounds.size.y * 0.30, front))
+		var x: float = side * bounds.size.x * LAMP_SPREAD
+		lamp_anchors["tail"].append(Vector3(x, bounds.position.y + bounds.size.y * 0.42, bounds.position.z + 0.05))
+		lamp_anchors["head"].append(Vector3(x, bounds.position.y + bounds.size.y * 0.30, bounds.end.z - 0.05))
 
 
-func _lamp_group(parent: Node3D, group_name: String) -> Node3D:
-	var group := Node3D.new()
-	group.name = group_name
-	group.visible = false
-	parent.add_child(group)
-	return group
+## World position of a lamp anchor; kind is "tail" or "head".
+func lamp_point(kind: String, index: int) -> Vector3:
+	return chassis.to_global(lamp_anchors[kind][index])
 
 
-func _add_lamp(parent: Node3D, lamp_name: String, material: StandardMaterial3D, at: Vector3) -> void:
-	var lamp := MeshInstance3D.new()
-	lamp.name = lamp_name
-	var slab := BoxMesh.new()
-	slab.size = LAMP_SIZE
-	lamp.mesh = slab
-	lamp.material_override = material
-	lamp.position = at
-	lamp.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	parent.add_child(lamp)
-
-
-func _lamp_material(color: Color) -> StandardMaterial3D:
-	var material := StandardMaterial3D.new()
-	material.albedo_color = color.darkened(0.2)
-	material.emission_enabled = true
-	material.emission = color
-	material.emission_energy_multiplier = 0.0
-	return material
-
-
-## Brake lights snap on above 0.5 G or any pedal; at night and in the gloom the cluster rests lit.
+## Brake energy snaps on above 0.5 G or any pedal; at night and in the gloom it rests at 1.2.
 func _update_lamps(dt: float) -> void:
-	if _taillight_mat == null:
-		return
 	var braking: bool = car.brake > 0.05 or car.longitudinal_g < -BRAKE_LIGHT_G
 	var resting: float = TAIL_NIGHT_ENERGY if night_lights > NIGHT_LAMPS_ON else 0.0
 	taillight_energy = move_toward(taillight_energy, TAIL_BRAKE_ENERGY if braking else resting, maxf(dt, 0.02) * TAIL_ATTACK)
-	_taillight_mat.emission_energy_multiplier = taillight_energy
-	_headlight_mat.emission_energy_multiplier = night_lights
-	_tail_lamps.visible = taillight_energy > 0.02 # an unlit slab would show as a dark bar on the paint
-	_head_lamps.visible = night_lights > 0.02
 
 
 func _animate_wheels(dt: float, spin_scale: float) -> void:

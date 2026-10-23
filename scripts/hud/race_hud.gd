@@ -41,6 +41,13 @@ const SPEEDLINES_FROM_KMH: float = 200.0
 const SPEEDLINES_FULL_KMH: float = 280.0
 const SPEEDLINES_ALPHA: float = 0.8
 const SPEEDLINES_MIN_VISIBLE: float = 0.02
+## The rays hug the car: clear around it up to the first radius, full by the second, gone by the third
+## (screen heights), and clipped to the HUD-free window so no panel is ever crossed.
+const SPEEDLINES_CLEAR_RADIUS: float = 0.16
+const SPEEDLINES_FULL_RADIUS: float = 0.34
+const SPEEDLINES_END_RADIUS: float = 0.62
+const SPEEDLINES_EDGE_FADE: float = 0.06
+const SPEEDLINES_CAR_LIFT_M: float = 0.7
 
 var world: Node3D
 var race: GtRace
@@ -141,6 +148,9 @@ func fit() -> void:
 	stage.scale = Vector2(factor, factor)
 	stage.position = (view - STAGE * factor) * 0.5
 	var dock := Rect2(stage.position + RADIO_DOCK.position * factor, RADIO_DOCK.size * factor)
+	if speedlines_rect != null:
+		var window := Rect2(dock.position / view, dock.size / view)
+		(speedlines_rect.material as ShaderMaterial).set_shader_parameter("safe_rect", Vector4(window.position.x, window.position.y, window.end.x, window.end.y))
 	for cut_in: CanvasLayer in [radio, engineer_radio]:
 		if cut_in != null:
 			cut_in.set_dock(dock, factor)
@@ -258,8 +268,10 @@ func _build_speedlines() -> void:
 	var material := ShaderMaterial.new()
 	material.shader = SpeedlinesShader
 	material.set_shader_parameter("ray_count", 72.0)
-	material.set_shader_parameter("inner", 0.35)
-	material.set_shader_parameter("outer", 0.95)
+	material.set_shader_parameter("inner", SPEEDLINES_CLEAR_RADIUS)
+	material.set_shader_parameter("outer", SPEEDLINES_FULL_RADIUS)
+	material.set_shader_parameter("ring_end", SPEEDLINES_END_RADIUS)
+	material.set_shader_parameter("safe_fade", SPEEDLINES_EDGE_FADE)
 	speedlines_rect.material = material
 	speedlines_rect.visible = false
 	layer.add_child(speedlines_rect)
@@ -281,8 +293,16 @@ func _update_speedlines() -> void:
 	_last_ers_mode = followed.ers_mode
 	speedlines_intensity = speedlines_for(followed.v, followed.ers_mode)
 	speedlines_rect.visible = speedlines_intensity > SPEEDLINES_MIN_VISIBLE
-	if speedlines_rect.visible:
-		(speedlines_rect.material as ShaderMaterial).set_shader_parameter("line_color", Color(0.04, 0.04, 0.06, SPEEDLINES_ALPHA * speedlines_intensity))
+	if not speedlines_rect.visible:
+		return
+	var material := speedlines_rect.material as ShaderMaterial
+	material.set_shader_parameter("line_color", Color(0.04, 0.04, 0.06, SPEEDLINES_ALPHA * speedlines_intensity))
+	# The rays radiate from where the car is on screen.
+	var actor: Node3D = world.actor_of(followed.id)
+	var camera: Camera3D = world.camera
+	var anchor: Vector3 = actor.global_position + Vector3.UP * SPEEDLINES_CAR_LIFT_M
+	if not camera.is_position_behind(anchor):
+		material.set_shader_parameter("center", camera.unproject_position(anchor) / get_viewport().get_visible_rect().size)
 
 
 # --- input ---------------------------------------------------------------------------------

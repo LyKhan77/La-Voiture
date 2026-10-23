@@ -33,6 +33,16 @@ const KERB_SPARK_AMOUNT: int = 18
 const FLAME_POP_S: float = 0.12
 const GRAFFITI_CRIMSON := Color("#ff1a4b")
 const GRAFFITI_ACID := Color("#d8ff00")
+## Lamp VFX: soft glows and a neon ribbon at each lamp anchor. Nothing is modelled on the car body.
+const TAIL_COLOR := Color("#ff1a4b")
+const TRAIL_POINTS: int = 22
+const TRAIL_WIDTH_M: float = 0.045
+const TRAIL_RANGE_M: float = 140.0
+const TRAIL_MIN_V: float = 8.0
+const TAIL_ENERGY_FULL: float = 6.5 # GtCarActor.TAIL_BRAKE_ENERGY
+const GLOW_SIZE_M: float = 0.7
+const GLOW_ON: float = 0.02
+const HEAD_GLOW_MIN_CAMERA_M: float = 10.0
 ## Floating graffiti tip over every car: a name tag that flashes up for a moment (a pass, a
 ## selection, a car coming close) and a status sticker (hazard, pit, DRS, brake) while it lasts.
 const TIP_HEIGHT_M: float = 2.6
@@ -64,6 +74,8 @@ var flames: Dictionary = {} # car id -> Array[MeshInstance3D]
 var tips: Dictionary = {} # car id -> Node3D holding the Code and Status sprites
 var head_lights: Dictionary = {} # car id -> Array[SpotLight3D]
 var kerb_sparks: Dictionary = {} # car id -> GPUParticles3D
+var tail_trails: Dictionary = {} # car id -> MeshInstance3D (ImmediateMesh ribbon, world space)
+var lamp_glows: Dictionary = {} # car id -> {"tail": Array[MeshInstance3D], "head": Array[MeshInstance3D]}
 var sparks: Array[GPUParticles3D] = []
 ## Headlamp emission the weather asks for this frame (0 by day, up to 4 at night or in a storm).
 var headlight_energy: float = 0.0
@@ -79,6 +91,9 @@ var _tip_alpha: Dictionary = {} # car id -> 0..1 fade of the name tag
 var _tip_memory: Dictionary = {} # car id -> what it looked like last frame
 var _tip_status_text: Dictionary = {} # car id -> status shown now
 var _flame_timers: Dictionary = {} # car id -> seconds the pop stays lit
+var _trail_history: Dictionary = {} # car id -> two Array[Vector3] of world points, newest first
+var _glow_mesh: QuadMesh
+var _tail_glow_mesh: QuadMesh
 var _last_gear: Dictionary = {} # car id -> gear
 var _clock: float = 0.0
 var _sky_material: ProceduralSkyMaterial
@@ -94,6 +109,7 @@ func setup(p_world: Node3D) -> void:
 	track = world.track
 	_sun = world.get_node("Sun")
 	_build_smoke_mesh()
+	_build_lamp_meshes()
 	_build_status_textures()
 	_build_weather()
 	_build_sparks()
@@ -192,6 +208,128 @@ func _lamp(color: Color, energy: float) -> StandardMaterial3D:
 	return material
 
 
+## Two soft round flares (additive, camera-facing): crimson for the tail, ice white for the head.
+func _build_lamp_meshes() -> void:
+	var ramp := Gradient.new()
+	ramp.set_color(0, Color.WHITE)
+	ramp.set_color(1, Color(1.0, 1.0, 1.0, 0.0))
+	var texture := GradientTexture2D.new()
+	texture.gradient = ramp
+	texture.fill = GradientTexture2D.FILL_RADIAL
+	texture.fill_from = Vector2(0.5, 0.5)
+	texture.fill_to = Vector2(0.5, 0.0)
+	texture.width = 64
+	texture.height = 64
+	_tail_glow_mesh = _flare_quad(texture, TAIL_COLOR)
+	_glow_mesh = _flare_quad(texture, HEAD_COLOR)
+
+
+func _flare_quad(texture: Texture2D, color: Color) -> QuadMesh:
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA # additive blending still reads the flare/vertex alpha
+	material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	material.albedo_texture = texture
+	material.albedo_color = color
+	material.no_depth_test = false
+	var quad := QuadMesh.new()
+	quad.size = Vector2(GLOW_SIZE_M, GLOW_SIZE_M)
+	quad.material = material
+	return quad
+
+
+## Lamps are effects, not parts: a soft flare per anchor and one neon ribbon streaming off the tail.
+func _build_lamp_vfx(actor: ActorScript) -> void:
+	var id: int = actor.car.id
+	var glows: Dictionary = {"tail": [] as Array[MeshInstance3D], "head": [] as Array[MeshInstance3D]}
+	for kind: String in ["tail", "head"]:
+		for anchor: Vector3 in actor.lamp_anchors[kind]:
+			var flare := MeshInstance3D.new()
+			flare.name = "%sGlow" % kind.capitalize()
+			flare.mesh = _tail_glow_mesh if kind == "tail" else _glow_mesh
+			flare.position = anchor
+			flare.visible = false
+			flare.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			actor.chassis.add_child(flare)
+			glows[kind].append(flare)
+	lamp_glows[id] = glows
+	var ribbon := MeshInstance3D.new()
+	ribbon.name = "TailTrail"
+	ribbon.top_level = true # world-space points: it must not follow the car
+	ribbon.mesh = ImmediateMesh.new()
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA # a crisp red neon line, not an additive wash to pink
+	material.vertex_color_use_as_albedo = true
+	material.vertex_color_is_srgb = true # the ribbon colour is an sRGB crimson; linear would wash it to pink
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	ribbon.material_override = material
+	ribbon.visible = false
+	ribbon.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	ribbon.extra_cull_margin = 60.0 # the rebuilt strip is far larger than its empty first AABB
+	actor.add_child(ribbon)
+	tail_trails[id] = ribbon
+	_trail_history[id] = [[] as Array[Vector3], [] as Array[Vector3]]
+
+
+func _update_lamp_vfx(actor: ActorScript) -> void:
+	var car: GtCar = actor.car
+	var id: int = car.id
+	var strength: float = clampf(actor.taillight_energy / TAIL_ENERGY_FULL, 0.0, 1.0)
+	var glows: Dictionary = lamp_glows[id]
+	for flare: MeshInstance3D in glows["tail"]:
+		flare.visible = strength > GLOW_ON
+		flare.scale = Vector3.ONE * lerpf(0.5, 1.4, strength)
+	var heads_on: bool = headlight_energy > 0.5 and world.camera.global_position.distance_to(actor.global_position) > HEAD_GLOW_MIN_CAMERA_M # not the flares of the car the camera rides on
+	for flare: MeshInstance3D in glows["head"]:
+		flare.visible = heads_on
+	var ribbon := tail_trails[id] as MeshInstance3D
+	var distance: float = world.camera.global_position.distance_to(actor.global_position)
+	var streaming: bool = strength > GLOW_ON and car.v > TRAIL_MIN_V and distance < TRAIL_RANGE_M
+	ribbon.visible = streaming
+	var history: Array = _trail_history[id]
+	if not streaming:
+		for line: Array in history:
+			line.clear()
+		return
+	var mesh := ribbon.mesh as ImmediateMesh
+	mesh.clear_surfaces()
+	for side: int in range(2):
+		var line: Array = history[side]
+		line.push_front(actor.lamp_point("tail", side))
+		if line.size() > TRAIL_POINTS:
+			line.pop_back()
+		if line.size() >= 2:
+			_stroke_ribbon(mesh, line, strength)
+
+
+## One camera-facing triangle strip along the points (newest first), tapering and fading with age.
+func _stroke_ribbon(mesh: ImmediateMesh, points: Array, strength: float) -> void:
+	var eye: Vector3 = world.camera.global_position
+	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
+	for index: int in range(points.size()):
+		var here: Vector3 = points[index]
+		var ahead: Vector3 = points[index - 1] if index > 0 else points[index + 1]
+		var behind: Vector3 = points[index + 1] if index + 1 < points.size() else points[index]
+		var along: Vector3 = (ahead - behind).normalized()
+		var across: Vector3 = along.cross(eye - here).normalized()
+		var age: float = float(index) / float(TRAIL_POINTS)
+		var width: float = TRAIL_WIDTH_M * (1.0 - age) * lerpf(0.6, 1.4, strength)
+		mesh.surface_set_color(Color(TAIL_COLOR, pow(1.0 - age, 1.5) * lerpf(0.35, 1.0, strength)))
+		mesh.surface_add_vertex(here + across * width)
+		mesh.surface_add_vertex(here - across * width)
+	mesh.surface_end()
+
+
+func tail_trail_length(car_id: int) -> float:
+	var line: Array = (_trail_history[car_id] as Array)[0]
+	var total: float = 0.0
+	for index: int in range(1, line.size()):
+		total += (line[index] as Vector3).distance_to(line[index - 1])
+	return total
+
+
 func _flame_cone(radius: float, height: float) -> CylinderMesh:
 	var cone := CylinderMesh.new()
 	cone.top_radius = 0.0
@@ -208,7 +346,9 @@ func _build_kerb_sparks() -> GPUParticles3D:
 	var material := StandardMaterial3D.new()
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA # additive blending still reads the flare/vertex alpha
 	material.vertex_color_use_as_albedo = true
+	material.vertex_color_is_srgb = true # the ribbon colour is an sRGB crimson; linear would wash it to pink
 	material.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
 	material.billboard_keep_scale = true
 	material.albedo_color = Color.WHITE
@@ -317,6 +457,7 @@ func _build_car_effects(actor: ActorScript) -> void:
 	var kerb := _build_kerb_sparks()
 	actor.add_child(kerb)
 	kerb_sparks[id] = kerb
+	_build_lamp_vfx(actor)
 	tips[id] = _build_tip(actor)
 	_last_gear[id] = actor.car.gear
 
@@ -367,6 +508,7 @@ func _update_car_effects(actor: ActorScript, delta: float, followed: bool) -> vo
 	var kerb := kerb_sparks[id] as GPUParticles3D
 	kerb.emitting = car.v > KERB_SPARK_MIN_V and absf(car.lateral) > SpatialCarAudio.KERB_LATERAL_M and car.pit == null
 	kerb.position.x = signf(car.lateral) * 0.92 # the wheel on the outside lip
+	_update_lamp_vfx(actor)
 
 	_update_tip(actor, followed, delta)
 

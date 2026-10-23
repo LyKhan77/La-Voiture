@@ -50,10 +50,17 @@ func _run() -> void:
 	var car: GtCar = world.race.get_car(world.followed_id)
 	var actor = world.actor_of(world.followed_id)
 	world.race.weather.time_of_day = WeatherScript.compute_time_of_day(WeatherScript.TimeOfDay.NIGHT, 0.0)
-	car.brake = 1.0
-	for _i: int in range(30):
+	for each in world.actors:
+		each.car.brake = 1.0
+		each.car.v = 40.0
+	for _i: int in range(40):
+		for each in world.actors:
+			each.car.s += 1.2
+			each.car.prev_s = each.car.s - 1.2
+			each.present(1.0, FRAME)
 		world.vfx.update(FRAME)
-		actor.present(1.0, FRAME)
+		world.camera_director.update(FRAME)
+	car.brake = 1.0
 	world.camera_director.update(FRAME)
 	await _shot("race-night-brake-lights")
 

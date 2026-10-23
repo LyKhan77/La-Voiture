@@ -40,8 +40,11 @@ func _run() -> void:
 	for _i: int in range(30):
 		world.step(FRAME)
 	_test_no_spheremesh_headlights()
+	_test_no_lamp_elements_on_cars()
+	_test_brake_light_trails()
 	_test_reactive_brake_lights()
 	_test_manga_speedlines_trigger()
+	_test_speedlines_stay_around_the_car()
 	_test_boost_fov_punch()
 	_test_kerb_strike_sparks()
 	_test_graffiti_backfire()
@@ -280,3 +283,67 @@ func _test_garage_showroom_toon_consistency() -> void:
 	check(widths.size() == 2 and is_equal_approx(widths[0], 0.007) and is_equal_approx(widths[1], 0.02),
 		"showroom: the graphics preset drives the showroom ink width (LOW %.3f, ULTRA %.3f)" % [widths[0], widths[1]])
 	garage.queue_free()
+
+
+# --- refinement: lamps are VFX, never geometry on the paint -------------------------------------
+
+func _test_no_lamp_elements_on_cars() -> void:
+	var stuck: int = 0
+	for actor: ActorScript in world.actors:
+		stuck += 1 if actor.chassis.get_node_or_null("Lamps") != null else 0
+		stuck += (1 if actor.chassis.find_child("Taillight", true, false) != null else 0) + (1 if actor.chassis.find_child("Headlight", true, false) != null else 0)
+	check(stuck == 0, "lamps: no lamp slabs or boxes are stuck on any car body (%d found)" % stuck)
+
+
+func _test_brake_light_trails() -> void:
+	var vfx: RaceVfx = world.vfx
+	var actor: ActorScript = world.actors[7]
+	var car: GtCar = actor.car
+	var id: int = car.id
+	var trails: Variant = vfx.get("tail_trails")
+	var trail: MeshInstance3D = (trails as Dictionary).get(id) as MeshInstance3D if trails is Dictionary else null
+	if trail == null:
+		check(false, "tail trails: every car owns a light-trail ribbon")
+		return
+	car.brake = 0.0
+	car.longitudinal_g = 0.0
+	for _i: int in range(40):
+		actor.present(1.0, FRAME)
+		vfx.update(FRAME)
+	var dark: bool = not trail.visible
+	car.brake = 1.0
+	for _i: int in range(40):
+		car.v = 40.0
+		car.s += 1.2
+		car.prev_s = car.s - 1.2
+		actor.present(1.0, FRAME)
+		vfx.update(FRAME)
+	var length: float = float(vfx.call("tail_trail_length", id))
+	check(dark and trail.visible and length > 4.0 and trail.mesh != null and trail.mesh.get_surface_count() > 0,
+		"tail trails: hidden when not braking by day, a red ribbon streams %.1f m behind the car on the brakes" % length)
+	car.brake = 0.0
+
+
+# --- refinement: speedlines hug the car and never reach the HUD ---------------------------------
+
+func _test_speedlines_stay_around_the_car() -> void:
+	var hud: RaceHud = world.hud
+	var car: GtCar = world.race.get_car(world.followed_id)
+	var actor: ActorScript = world.actor_of(world.followed_id)
+	car.v = 80.0
+	hud.update(FRAME)
+	var material := hud.speedlines_rect.material as ShaderMaterial
+	var center: Variant = material.get_shader_parameter("center")
+	var safe: Variant = material.get_shader_parameter("safe_rect")
+	if not (center is Vector2) or not (safe is Vector4):
+		check(false, "speedlines: the overlay is centred on the car and clipped to a HUD-free window")
+		car.v = 0.0
+		return
+	var view: Vector2 = root.get_visible_rect().size
+	var expected: Vector2 = world.camera.unproject_position(actor.global_position + Vector3.UP * 0.7) / view
+	var tower_edge: float = (hud.stage.position.x + RaceHud.RADIO_DOCK.position.x * hud.stage.scale.x) / view.x
+	var window: Vector4 = safe
+	check((center as Vector2).distance_to(expected) < 0.02 and window.x >= tower_edge - 0.001 and window.x > 0.15 and window.z < 0.9 and window.w < 0.85,
+		"speedlines: centred on the car (%s) and clipped to the HUD-free window (%s)" % [str(center), str(window)])
+	car.v = 0.0
+	hud.update(FRAME)
