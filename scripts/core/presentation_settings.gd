@@ -35,6 +35,8 @@ static var resolution: int = 0
 static var vsync: bool = true
 static var halftone: bool = true
 static var vfx_high: bool = true
+## Accessibility: no FOV punch and frozen speedline re-rolls. Persisted with the graphics choices.
+static var reduce_motion: bool = false
 ## Linear bus gain, 0..1; the layout's own balance is the default mix.
 static var volumes: Dictionary = {
 	&"Master": 1.0, &"SFX": 1.0, &"Radio": 1.0, &"Music": 0.63, &"UI": 0.79,
@@ -59,6 +61,7 @@ static func load_saved() -> void:
 	quality = clampi(int(cfg.get_value("graphics", "quality", quality)), 0, QUALITY_NAMES.size() - 1)
 	halftone = bool(cfg.get_value("graphics", "halftone", halftone))
 	vfx_high = bool(cfg.get_value("graphics", "vfx_high", vfx_high))
+	reduce_motion = bool(cfg.get_value("graphics", "reduce_motion", reduce_motion))
 	display_mode = clampi(int(cfg.get_value("display", "mode", display_mode)), 0, DISPLAY_MODE_NAMES.size() - 1)
 	resolution = clampi(int(cfg.get_value("display", "resolution", resolution)), 0, RESOLUTIONS.size() - 1)
 	vsync = bool(cfg.get_value("display", "vsync", vsync))
@@ -72,6 +75,7 @@ static func save() -> void:
 	cfg.set_value("graphics", "quality", quality)
 	cfg.set_value("graphics", "halftone", halftone)
 	cfg.set_value("graphics", "vfx_high", vfx_high)
+	cfg.set_value("graphics", "reduce_motion", reduce_motion)
 	cfg.set_value("display", "mode", display_mode)
 	cfg.set_value("display", "resolution", resolution)
 	cfg.set_value("display", "vsync", vsync)
@@ -87,6 +91,19 @@ static func set_quality(index: int) -> void:
 	quality = clampi(index, 0, QUALITY_NAMES.size() - 1)
 	halftone = quality >= Quality.MEDIUM
 	vfx_high = quality >= Quality.HIGH
+
+
+## The heavier race VFX each preset keeps: light trails and comic bursts from MEDIUM, headlight beams from HIGH.
+static func light_trails() -> bool:
+	return quality >= Quality.MEDIUM
+
+
+static func comic_bursts() -> bool:
+	return quality >= Quality.MEDIUM
+
+
+static func headlight_beams() -> bool:
+	return quality >= Quality.HIGH
 
 
 ## Pushes shadows, outline, halftone and particle density onto a live scene tree. Call it

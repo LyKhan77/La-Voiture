@@ -15,17 +15,27 @@ const MONO := preload("res://assets/fonts/JetBrainsMono.ttf")
 const SAMPLE_STEP_M: float = 2.0
 const MARGIN_PX: float = 34.0
 const ELEVATION_STRIP_H: float = 74.0
-const TURN_LABEL_SIZE: int = 15
+const TURN_LABEL_SIZE: int = 17
 const CORNER_TURN_RAD: float = 0.25
 const CORNER_STEP_RAD: float = 0.02
 const CORNER_MERGE_M: float = 26.0
+const TrackRibbonScript := preload("res://scripts/car/track_ribbon.gd")
+## Broadcast sector colours (the ink plate keeps lime for the DRS zones).
 const SECTOR_COLORS: Array[Color] = [
-	Color("#CCFF00"), Color("#00F0FF"), Color("#D946EF"),
+	Color("#00F0FF"), Color("#FFE600"), Color("#FF1A4B"),
 ]
+const CASING_PX: float = 28.0
+const ASPHALT_PX: float = 20.0
+const ASPHALT_COLOR := Color("#2A2C33")
+const BAND_PX: float = 6.0
+const BADGE_OFFSET_PX: float = 30.0
+const BADGE_SIZE := Vector2(34.0, 26.0)
 
 var length_m: float = 0.0
 ## Corner apexes in travel order: {"s": arc metres, "angle": signed radians}.
 var turns: Array[Dictionary] = []
+## The real DRS zones of the circuit: {"start_s", "end_s"} in arc metres.
+var drs_zones: Array[Dictionary] = []
 var min_elevation: float = 0.0
 var max_elevation: float = 0.0
 
@@ -52,11 +62,14 @@ func stats() -> Dictionary:
 
 
 func _load_track() -> void:
-	var path := CircuitScene.instantiate() as Path3D
-	if path == null:
+	var ribbon := CircuitScene.instantiate() as TrackRibbonScript
+	if ribbon == null:
 		return
-	var curve: Curve3D = path.curve.duplicate() as Curve3D
-	path.free()
+	add_child(ribbon) # the ribbon builds its sample table when it enters the tree
+	var curve: Curve3D = ribbon.curve.duplicate() as Curve3D
+	drs_zones = GtTrack.new(ribbon).drs_zones
+	remove_child(ribbon)
+	ribbon.free()
 	if curve == null:
 		return
 	curve.bake_interval = SAMPLE_STEP_M
@@ -176,7 +189,10 @@ func _draw_grid(rect: Rect2) -> void:
 
 
 func _draw_track(fitted: PackedVector2Array) -> void:
-	draw_polyline(_closed(fitted), T.INK_BORDER_BLACK, 13.0, true)
+	var closed := _closed(fitted)
+	draw_polyline(closed, T.INK_BORDER_BLACK, CASING_PX, true)
+	draw_polyline(closed, ASPHALT_COLOR, ASPHALT_PX, true)
+	draw_polyline(closed, Color(1.0, 1.0, 1.0, 0.22), 1.5, true)
 	var per_sector: float = length_m / float(SECTOR_COLORS.size())
 	var last: int = SECTOR_COLORS.size() - 1
 	for sector: int in range(SECTOR_COLORS.size()):
@@ -194,40 +210,70 @@ func _draw_track(fitted: PackedVector2Array) -> void:
 		if sector == last and not run.is_empty():
 			run.append(fitted[0])
 		if run.size() >= 2:
-			draw_polyline(run, SECTOR_COLORS[sector], 6.0, true)
+			draw_polyline(run, SECTOR_COLORS[sector], BAND_PX, true)
 		_draw_sector_tag(fitted, sector, per_sector)
-	draw_polyline(_closed(fitted), Color(1.0, 1.0, 1.0, 0.18), 1.5, true)
+	_draw_drs(fitted)
+
+
+## The DRS zones as a lime dotted stripe laid over the sector band.
+func _draw_drs(fitted: PackedVector2Array) -> void:
+	for zone: Dictionary in drs_zones:
+		var from_s: float = float(zone["start_s"])
+		var to_s: float = float(zone["end_s"])
+		if to_s < from_s:
+			to_s += length_m
+		var s: float = from_s
+		while s <= to_s:
+			var index: int = int(fposmod(s, length_m) / maxf(length_m, 1.0) * float(fitted.size())) % fitted.size()
+			draw_circle(fitted[index], 3.4, T.ACCENT_ACID_LIME)
+			s += 14.0
 
 
 func _draw_sector_tag(fitted: PackedVector2Array, sector: int, per_sector: float) -> void:
 	var s: float = per_sector * (float(sector) + 0.5)
 	var index: int = clampi(int(s / maxf(length_m, 1.0) * float(fitted.size())), 0, fitted.size() - 1)
-	var at: Vector2 = fitted[index] + Vector2(0.0, -20.0)
-	draw_string(MONO, at - Vector2(10.0, 0.0), "S%d" % (sector + 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, SECTOR_COLORS[sector])
+	var at: Vector2 = fitted[index] + Vector2(0.0, -26.0)
+	draw_string(MONO, at - Vector2(10.0, 0.0), "S%d" % (sector + 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 16, SECTOR_COLORS[sector])
 
 
 func _draw_start_line(fitted: PackedVector2Array) -> void:
 	var at: Vector2 = fitted[0]
 	var dir: Vector2 = (fitted[1] - fitted[fitted.size() - 1]).normalized()
 	var normal := Vector2(-dir.y, dir.x)
-	draw_line(at - normal * 12.0, at + normal * 12.0, T.TEXT_PRIMARY, 5.0)
-	draw_circle(at, 5.0, T.ACCENT_ANIME_CRIMSON)
+	var half: float = CASING_PX * 0.5
+	# A chequered gate across the road: two rows of four squares, ink and white.
+	for row: int in range(2):
+		for col: int in range(4):
+			var corner: Vector2 = at + dir * (float(row) - 1.0) * 5.0 + normal * (float(col) - 2.0) * (half / 2.0)
+			var quad := PackedVector2Array([corner, corner + dir * 5.0, corner + dir * 5.0 + normal * (half / 2.0), corner + normal * (half / 2.0)])
+			draw_colored_polygon(quad, T.TEXT_PRIMARY if (row + col) % 2 == 0 else T.INK_BORDER_BLACK)
+	draw_polyline(PackedVector2Array([at - normal * half - dir * 5.0, at + normal * half - dir * 5.0, at + normal * half + dir * 5.0, at - normal * half + dir * 5.0, at - normal * half - dir * 5.0]), T.INK_BORDER_BLACK, 2.0)
 
 
+## Numbered corners as skewed lime tags set just outside the bend, so the road stays readable.
 func _draw_turn_numbers(fitted: PackedVector2Array) -> void:
+	var centre := Vector2.ZERO
+	for point: Vector2 in fitted:
+		centre += point
+	centre /= float(fitted.size())
 	for index: int in range(turns.size()):
 		var corner: Dictionary = turns[index]
 		var s: float = float(corner["s"])
 		var at_index: int = clampi(int(s / maxf(length_m, 1.0) * float(fitted.size())), 0, fitted.size() - 1)
-		var at: Vector2 = fitted[at_index]
-		draw_circle(at, 11.0, T.INK_BORDER_BLACK)
-		draw_circle(at, 8.0, T.ACCENT_CYBER_YELLOW)
-		var label := str(index + 1)
+		var apex: Vector2 = fitted[at_index]
+		var away: Vector2 = (apex - centre).normalized()
+		var at: Vector2 = apex + away * BADGE_OFFSET_PX
+		var half := BADGE_SIZE * 0.5
+		var lean: float = half.y * 0.21 * 2.0
+		var tag := PackedVector2Array([
+			at + Vector2(-half.x + lean, -half.y), at + Vector2(half.x + lean, -half.y),
+			at + Vector2(half.x - lean, half.y), at + Vector2(-half.x - lean, half.y),
+		])
+		draw_colored_polygon(tag, T.ACCENT_ACID_LIME)
+		draw_polyline(PackedVector2Array([tag[0], tag[1], tag[2], tag[3], tag[0]]), T.INK_BORDER_BLACK, 3.0)
+		var label := "T%d" % (index + 1)
 		var width: float = DISPLAY.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, TURN_LABEL_SIZE).x
-		draw_string(
-			DISPLAY, at + Vector2(-width * 0.5, TURN_LABEL_SIZE * 0.36), label,
-			HORIZONTAL_ALIGNMENT_LEFT, -1, TURN_LABEL_SIZE, T.INK_BORDER_BLACK
-		)
+		draw_string(DISPLAY, at + Vector2(-width * 0.5, TURN_LABEL_SIZE * 0.36), label, HORIZONTAL_ALIGNMENT_LEFT, -1, TURN_LABEL_SIZE, T.INK_BORDER_BLACK)
 
 
 func _draw_elevation(strip: Rect2) -> void:

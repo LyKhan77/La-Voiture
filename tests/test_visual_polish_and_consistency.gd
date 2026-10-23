@@ -11,6 +11,8 @@ const ActorScript := preload("res://scripts/car/gt_car_actor.gd")
 const CameraDirectorScript := preload("res://scripts/world/broadcast_camera_director.gd")
 const GarageBuilder := preload("res://scripts/world/garage_environment_builder.gd")
 const PS := preload("res://scripts/core/presentation_settings.gd")
+const WeatherScript := preload("res://scripts/gt/gt_weather.gd")
+const ConfigScript := preload("res://scripts/core/race_config_data.gd")
 const T := preload("res://scripts/ui/ui_theme_tokens.gd")
 const FRAME: float = 1.0 / 60.0
 
@@ -52,11 +54,17 @@ func _run() -> void:
 	_test_graffiti_tyre_smoke()
 	_test_flame_bursts_and_wing_pops()
 	_test_speedlines_are_hand_inked()
+	_test_presets_scale_the_heavier_vfx()
+	_test_reduce_motion()
+	_test_vfx_one_shot_sounds()
 	world.race.dispose()
 	world.queue_free()
 	await process_frame
 	ActorScript._paint_cache.clear()
 	await _test_main_menu_concept_01_styling()
+	await _test_settings_reduce_motion_toggle()
+	await _test_settings_inspection_tag()
+	await _test_race_setup_hero_map()
 	_test_garage_showroom_toon_consistency()
 	print("%d assertions, %d failure(s)" % [assertions, failures])
 	print("FASE 8.5 VISUAL POLISH: %s" % ("PASS" if failures == 0 else "%d FAILURES" % failures))
@@ -412,3 +420,174 @@ func _test_speedlines_are_hand_inked() -> void:
 	var material := world.hud.speedlines_rect.material as ShaderMaterial
 	check(float(material.get_shader_parameter("variation")) > 0.5 and float(material.get_shader_parameter("accent_share")) > 0.1 and float(material.get_shader_parameter("tone")) > 0.3,
 		"speedlines: uneven hand-inked rays, a share painted lime / cyan / crimson, halftone wedges")
+
+
+# --- refinement: presets, reduce motion, one-shot sounds ---------------------------------------------
+
+func _night(on: bool) -> void:
+	var mode: int = WeatherScript.TimeOfDay.NIGHT if on else WeatherScript.TimeOfDay.DAY
+	world.race.weather.time_of_day = WeatherScript.compute_time_of_day(mode, 0.0)
+
+
+func _test_presets_scale_the_heavier_vfx() -> void:
+	var vfx: RaceVfx = world.vfx
+	var actor: ActorScript = world.actors[4]
+	var car: GtCar = actor.car
+	var id: int = car.id
+	var quality_before: int = PS.quality
+	_night(true)
+	car.brake = 1.0
+	car.v = 40.0
+	var seen: Dictionary = {}
+	for level: int in [PS.Quality.LOW, PS.Quality.MEDIUM, PS.Quality.HIGH]:
+		PS.set_quality(level)
+		for _i: int in range(30):
+			car.s += 1.2
+			car.prev_s = car.s - 1.2
+			actor.present(1.0, FRAME)
+			vfx.update(FRAME)
+		seen[level] = {"beams": (vfx.head_lights[id][0] as SpotLight3D).visible, "trail": (vfx.tail_trails[id] as MeshInstance3D).visible}
+	car.gear = 4
+	vfx.update(FRAME)
+	car.gear = 3
+	PS.set_quality(PS.Quality.LOW)
+	vfx.update(FRAME)
+	var low_burst: bool = (vfx.flames[id][0] as MeshInstance3D).get_node("Burst").visible or (vfx.wing_bursts[id][0] as MeshInstance3D).visible
+	PS.set_quality(quality_before)
+	_night(false)
+	car.brake = 0.0
+	check(not seen[PS.Quality.LOW]["beams"] and not seen[PS.Quality.LOW]["trail"] and not seen[PS.Quality.MEDIUM]["beams"] and seen[PS.Quality.MEDIUM]["trail"]
+		and seen[PS.Quality.HIGH]["beams"] and seen[PS.Quality.HIGH]["trail"] and not low_burst,
+		"presets: LOW drops beams, trails and comic bursts, MEDIUM adds the light trail, HIGH adds the headlight beams (%s)" % str(seen))
+
+
+func _test_reduce_motion() -> void:
+	var director: CameraDirectorScript = world.camera_director
+	var hud: RaceHud = world.hud
+	var car: GtCar = world.race.get_car(world.followed_id)
+	director.set_mode(CameraDirectorScript.Mode.CHASE)
+	director.update(1.0)
+	var base: float = world.camera.fov
+	PS.reduce_motion = true
+	director.punch_fov()
+	director.update(0.08)
+	var punched: float = world.camera.fov
+	car.v = 80.0
+	hud.update(FRAME)
+	var material := hud.speedlines_rect.material as ShaderMaterial
+	var reroll: float = float(material.get_shader_parameter("reroll_rate"))
+	car.v = 0.0
+	hud.update(FRAME)
+	PS.reduce_motion = false
+	director.update(1.0)
+	car.v = 80.0
+	hud.update(FRAME)
+	var reroll_normal: float = float(material.get_shader_parameter("reroll_rate"))
+	car.v = 0.0
+	hud.update(FRAME)
+	check(absf(punched - base) < 0.01 and reroll == 0.0 and reroll_normal > 0.0,
+		"reduce motion: no FOV punch (%.2f vs %.2f) and the speedlines hold still (reroll %.0f, normally %.0f)" % [punched, base, reroll, reroll_normal])
+
+
+func _test_vfx_one_shot_sounds() -> void:
+	var vfx: RaceVfx = world.vfx
+	var actor: ActorScript = world.actors[9]
+	var car: GtCar = actor.car
+	car.gear = 4
+	car.ers_mode = GtTypes.ErsMode.NEUTRAL
+	vfx.update(FRAME)
+	var before: int = int(vfx.get("one_shots_played"))
+	world.camera.global_position = actor.global_position + Vector3(0.0, 2.0, 8.0)
+	car.gear = 3 # downshift near the camera: backfire crackle
+	vfx.update(FRAME)
+	var crackle: int = int(vfx.get("one_shots_played"))
+	car.ers_mode = GtTypes.ErsMode.OVERTAKE # boost whoosh
+	vfx.update(FRAME)
+	var whoosh: int = int(vfx.get("one_shots_played"))
+	car.ers_mode = GtTypes.ErsMode.NEUTRAL
+	world.camera.global_position = actor.global_position + Vector3(0.0, 2.0, 400.0)
+	car.gear = 4
+	vfx.update(FRAME)
+	car.gear = 3 # the same downshift 400 m away stays silent
+	vfx.update(FRAME)
+	var far: int = int(vfx.get("one_shots_played"))
+	check(crackle == before + 1 and whoosh == crackle + 1 and far == whoosh,
+		"sounds: a near downshift crackles (%d -> %d), an ERS overtake whooshes (%d), a distant downshift is silent (%d)" % [before, crackle, whoosh, far])
+
+
+func _test_settings_reduce_motion_toggle() -> void:
+	var modal: Node = load("res://scenes/ui/settings_modal.tscn").instantiate()
+	root.add_child(modal)
+	await process_frame
+	modal.open()
+	var toggle: Variant = modal.get("reduce_motion_check")
+	if toggle == null:
+		check(false, "settings: a REDUCE MOTION toggle exists")
+		modal.queue_free()
+		return
+	(toggle as CheckButton).button_pressed = true
+	var on: bool = PS.reduce_motion
+	(toggle as CheckButton).button_pressed = false
+	check(on and not PS.reduce_motion, "settings: the REDUCE MOTION toggle drives PresentationSettings.reduce_motion")
+	modal.queue_free()
+	await process_frame
+
+
+# --- Concept 01 for Settings (A, inspection tag) and Race Setup (C, hero map) ---------------------------
+
+func _skew_of(control: Control, state: String) -> float:
+	var box := control.get_theme_stylebox(state) as StyleBoxFlat
+	return absf(box.skew.x) if box != null else 0.0
+
+
+func _test_settings_inspection_tag() -> void:
+	var modal: Node = load("res://scenes/ui/settings_modal.tscn").instantiate()
+	root.add_child(modal)
+	await process_frame
+	modal.open()
+	var panel := (modal.get("stage") as Control).get_node("Panel") as Control
+	var badge := panel.get_node_or_null("SysBadge") as Label
+	var option := modal.get("display_option") as OptionButton
+	var toggle := modal.get("halftone_check") as CheckButton
+	var master := (modal.get("sliders") as Dictionary)[&"Master"] as HSlider
+	check(absf(panel.rotation - deg_to_rad(-4.0)) < 0.005 and badge != null and badge.text == "SYS // CONFIG",
+		"settings A: the panel hangs as a -4 deg inspection tag with a crimson SYS // CONFIG badge")
+	var master_grabber := master.get_theme_stylebox("grabber_area") as StyleBoxFlat
+	check(_skew_of(option, "normal") > 0.1 and _skew_of(option, "hover") > 0.1 and toggle.has_theme_icon_override("checked") and toggle.has_theme_icon_override("unchecked")
+		and master_grabber != null and absf(master_grabber.skew.x) > 0.1 and master_grabber.bg_color.is_equal_approx(T.ACCENT_ACID_LIME),
+		"settings A: dropdowns are skewed plates, toggles are skewed switches, sliders are skewed ink bars with a lime fill")
+	modal.queue_free()
+	await process_frame
+
+
+func _test_race_setup_hero_map() -> void:
+	ConfigScript.reset()
+	var setup: Control = load("res://scenes/ui/race_setup_menu.tscn").instantiate()
+	root.add_child(setup)
+	await process_frame
+	var radar := setup.get("radar") as Control
+	var drs: Variant = radar.get("drs_zones")
+	check(radar.size.x >= 1000.0 and radar.size.y >= 520.0 and drs is Array and (drs as Array).size() >= 1 and int(radar.stats()["corners"]) >= 5,
+		"race setup C: the circuit map is the hero (%s px) with the real DRS zones (%s) and numbered corners" % [str(radar.size), str(drs.size()) if drs is Array else "none"])
+	var laps: Variant = setup.get("lap_select")
+	var weather: Variant = setup.get("weather_select")
+	var time: Variant = setup.get("time_select")
+	var config: RefCounted = ConfigScript.get_config()
+	var chips_ok: bool = laps != null and weather != null and time != null and laps.get_item_count() == 3 and weather.get_item_count() == 4 and time.get_item_count() == 3
+	if chips_ok:
+		setup.select_weather(3)
+		var via_api: bool = weather.selected == 3 and config.weather_preset == 3
+		weather.press(1) # a click on the second weather chip
+		laps.press(2)
+		time.press(2)
+		chips_ok = via_api and weather.selected == 1 and config.weather_preset == 1 and config.total_laps == 10 and config.time_of_day == 2
+	check(chips_ok, "race setup C: laps, weather and time are chips that write straight into the race config")
+	var apex := setup.find_child("CircuitCardAPEX", true, false) as Button
+	var suzuka := setup.find_child("ComingSoonSUZUKA", true, false) as Button
+	var macau := setup.find_child("ComingSoonMACAU", true, false) as Button
+	check(apex != null and suzuka != null and macau != null and suzuka.disabled and macau.disabled and not apex.disabled,
+		"race setup C: the circuit strip has Apex Ring selected and the two other venues marked coming soon")
+	var next := setup.get("continue_button") as Button
+	check(next != null and next.text.contains("CONTINUE") and _skew_of(next, "normal") > 0.1, "race setup C: the continue button is a skewed street plate")
+	setup.queue_free()
+	await process_frame

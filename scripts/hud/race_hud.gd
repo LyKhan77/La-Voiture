@@ -51,6 +51,7 @@ const SPEEDLINES_CAR_LIFT_M: float = 0.7
 const SPEEDLINES_PAINT_SHARE: float = 0.2
 const SPEEDLINES_TONE: float = 0.75
 const SPEEDLINES_SECTORS: float = 54.0
+const SPEEDLINES_REROLL_HZ: float = 12.0
 
 var world: Node3D
 var race: GtRace
@@ -304,6 +305,7 @@ func _update_speedlines() -> void:
 		return
 	var material := speedlines_rect.material as ShaderMaterial
 	material.set_shader_parameter("line_color", Color(0.04, 0.04, 0.06, SPEEDLINES_ALPHA * speedlines_intensity))
+	material.set_shader_parameter("reroll_rate", 0.0 if PresentationSettings.reduce_motion else SPEEDLINES_REROLL_HZ)
 	# The rays radiate from where the car is on screen.
 	var actor: Node3D = world.actor_of(followed.id)
 	var camera: Camera3D = world.camera

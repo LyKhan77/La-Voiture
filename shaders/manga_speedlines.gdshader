@@ -26,6 +26,8 @@ uniform float outer : hint_range(0.0, 1.5) = 0.85;
 uniform float variation : hint_range(0.0, 1.0) = 0.0;
 uniform vec2 lean = vec2(-0.5, 0.85);
 uniform float seed = 0.0;
+// How many times a second the ray set is re-drawn; 0 freezes it (reduce motion).
+uniform float reroll_rate : hint_range(0.0, 30.0) = 12.0;
 uniform float tone : hint_range(0.0, 1.0) = 0.0;
 uniform float tone_dots = 90.0;
 
@@ -38,7 +40,6 @@ uniform float safe_fade : hint_range(0.001, 0.2) = 0.001;
 uniform float ring_end = 10.0;
 
 const float TWO_PI = 6.28318530718;
-const float REROLLS_PER_SECOND = 12.0;
 
 float hash(float n) {
 	return fract(sin(n * 127.1 + seed * 17.3) * 43758.5453);
@@ -60,7 +61,7 @@ void fragment() {
 	} else {
 		float sector = floor((angle / TWO_PI + 0.5) * ray_count);
 		float across = fract((angle / TWO_PI + 0.5) * ray_count);
-		float frame = floor(TIME * REROLLS_PER_SECOND);
+		float frame = floor(TIME * reroll_rate);
 		float r_presence = hash(sector);
 		float r_width = hash(sector + 31.0);
 		float r_start = hash(sector + 67.0);

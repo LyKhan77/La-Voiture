@@ -45,6 +45,38 @@ Semua 10 sasis `keeps_original_paint = true`, sehingga tidak ada tint livery tam
 - **Pita lampu rem melengkung:** pita neon berayun membentuk S seiring umur, seperti jejak cahaya di konsep.
 - **Biaya Genex:** 2 gambar sprite sheet; anggaran aset dinaikkan pengguna ke 130 kredit.
 
+## 4c. Hardening sebelum serah
+
+- **Preset grafis mengatur VFX baru:** LOW menghilangkan sorot lampu depan, pita lampu rem, dan semburan komik; MEDIUM menambah pita lampu; HIGH/ULTRA menambah sorot lampu depan (`PresentationSettings.light_trails() / comic_bursts() / headlight_beams()`). Jumlah partikel tetap mengikuti `VFX_RATIO`.
+- **Reduce motion:** toggle baru di Settings (`PresentationSettings.reduce_motion`, disimpan ke `presentation.cfg`): tanpa FOV punch dan garis kecepatan berhenti diundi ulang (`reroll_rate = 0`).
+- **Suara VFX (Genex SFX):** gemeretak backfire saat downshift dan whoosh boost saat ERS overtake, lewat 4 suara 3D bersama di `RaceVfx`, hanya untuk mobil dalam 60 m dari kamera. (Dihasilkan sebagai MP3 lalu dikonversi ke WAV karena importer MP3 Godot 4.7.2 crash di mode headless; MP3 asli disimpan di `temp/`.)
+- **Garasi:** 10 stall memuat sasis balap dalam ~1.3 detik; tampilan dicek (`fase-8.5-garage-team0/2.png`).
+
+## 4d. Hasil pengukuran native (RTX 3050 Laptop, 1920×1080, hujan badai malam, 20 mobil, vsync off)
+
+| Preset | FPS rata-rata | frame time rata-rata | p99 | draw call maks |
+| :--- | :--- | :--- | :--- | :--- |
+| LOW | 53 | 19.0 ms | 43 ms | 2937 |
+| MEDIUM | 51 | 19.8 ms | 50 ms | 3310 |
+| HIGH | 48–54 | 18.5–20.8 ms | 31–51 ms | 3417 |
+| ULTRA | 53 | 18.8 ms | 49 ms | 3756 |
+
+- **Target 60 FPS (16.66 ms) belum tercapai di semua preset, termasuk LOW.** Frame **terikat CPU**: GPU hanya ~5.3 ms, render-CPU ~1.6 ms, tetapi tick fisika/simulasi ~8 ms dan `_process` ~11 ms per frame.
+- Biaya per panggilan VFX Fase 8.5: `vfx.update` 0.43–0.56 ms, `hud.update` 0.38 ms, `actors.present` 0.30 ms — total ≈ 1.2–1.4 ms, di bawah 8% frame. Matikan audio mesin tidak mengubah hasil, sehingga sumber utama bukan audio. Hot spot di sisi simulasi/skrip adalah temuan lama yang belum dioptimalkan dan perlu sesi profiling sendiri.
+- **Orphan node setelah world dibebaskan: 0** pada semua preset.
+- Smoke test: `scratch/smoke_fase85.gd` (balapan 3 lap, cuaca terberat, malam). Catatan: pengukuran dilakukan ~40 detik pertama balapan, bukan 3 lap penuh.
+
+## 4e. Temuan terbuka
+
+- Mobil putih (mis. Nissan GT-R) terlalu terang (specular blowout di kap) di bawah lampu garasi.
+- Dua badge tikungan di peta yang berdekatan (T6/T7) saling menimpa sedikit; tikungan di lintasan ini rapat.
+
+## 4f. Settings dan Race Setup dalam Concept 01 (pilihan pengguna: Settings A, Race Setup C)
+
+- **Gaya bersama:** `scripts/ui/street_style.gd` (pelat miring −12° dengan border tinta + bayangan keras, lencana crimson, saklar miring, ink-bar, thumb miring) dan `scripts/ui/chip_row.gd` (baris chip miring satu-pilihan dengan API setara `OptionButton`: `selected`, `select()`, `item_selected`, plus `press()`).
+- **Settings A (inspection tag):** panel digantung miring −4° dengan lencana `SYS // CONFIG`; dropdown = pelat miring, toggle = saklar miring, slider = ink-bar lime dengan thumb crimson, tombol CLOSE lime. Kontrol dan perilaku tidak berubah (semua tetap CheckButton/OptionButton/HSlider).
+- **Race Setup C (hero map):** peta sirkuit (`TrackMapView`) memenuhi sisi kiri 1112×614 px: casing tinta + aspal + pita sektor S1/S2/S3 (cyan/kuning/crimson), **zona DRS nyata** dari `GtTrack` sebagai titik lime, tikungan T1–T9 bernomor sebagai tag miring, gerbang start/finish bergaris catur, plus profil elevasi. Di bawahnya *circuit strip*: Apex Ring terpilih dan dua venue **COMING SOON** (Suzuka Touge Night, Macau Guia Circuit) berpita hazard. Laps/cuaca/waktu = chip miring yang menulis langsung ke `RaceConfigData`; angka lintasan, ringkasan, dan tombol CONTINUE lime ada di kolom kanan. Logo judul dipakai di kepala layar.
+
 ## 5. Keputusan (rulings)
 
 1. **Speedlines:** rumus rencana (220→290 km/h) hanya memberi 0.46 pada 252 km/h, padahal acceptance meminta > 0.5 di atas 240 km/h. Dipakai ramp 200→280 km/h (240 km/h = 0.5, 252 = 0.65).
@@ -66,5 +98,5 @@ Bukti visual: `screenshots/phases/fase-8.5-*.png` (menu, hover, balap malam, spe
 
 ## 8. Batas yang diketahui
 
-- Smoke test native 3 lap 20 mobil dan hitungan orphan node belum dijalankan di sesi ini; hanya headless + capture visual.
+- Smoke test native dijalankan sebagian (40 detik, bukan 3 lap penuh) — lihat bagian 4d; 60 FPS belum tercapai.
 - Review akhir dilakukan sendiri oleh penulis (tanpa subagent).

@@ -12,11 +12,13 @@ signal closed
 const UI := preload("res://scripts/ui/pit_wall_ui.gd")
 const T := preload("res://scripts/ui/ui_theme_tokens.gd")
 const PS := preload("res://scripts/core/presentation_settings.gd")
+const StreetStyle := preload("res://scripts/ui/street_style.gd")
 const HEADER := preload("res://assets/fonts/BarlowCondensed.ttf")
 const MONO := preload("res://assets/fonts/JetBrainsMono.ttf")
 const DISPLAY := preload("res://assets/fonts/Anton.ttf")
 
 const STAGE := Vector2(1920.0, 1080.0)
+const TILT_RAD: float = -0.0698 # the panel hangs like an inspection tag, -4 degrees
 const PANEL_RECT := Rect2(330.0, 140.0, 1260.0, 800.0)
 const LEFT_X: float = 44.0
 const RIGHT_X: float = 660.0
@@ -28,6 +30,7 @@ var resolution_option: OptionButton
 var vsync_check: CheckButton
 var quality_option: OptionButton
 var halftone_check: CheckButton
+var reduce_motion_check: CheckButton
 var vfx_check: CheckButton
 var outline_label: Label
 var sliders: Dictionary = {} # bus name -> HSlider
@@ -105,8 +108,14 @@ func _build_panel() -> void:
 	panel.position = PANEL_RECT.position
 	panel.size = PANEL_RECT.size
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	panel.pivot_offset = PANEL_RECT.size * 0.5
+	panel.rotation = TILT_RAD
 	stage.add_child(panel)
 	UI.surface(panel, T.ACCENT_ELECTRIC_CYAN)
+	var badge := StreetStyle.badge("SYS // CONFIG")
+	badge.name = "SysBadge"
+	badge.position = Vector2(-26.0, -30.0)
+	panel.add_child(badge)
 
 	var header := UI.header("SYSTEM SETTINGS // PRESENTATION & AUDIO", T.ACCENT_ELECTRIC_CYAN)
 	header.name = "Title"
@@ -114,10 +123,8 @@ func _build_panel() -> void:
 	header.size = Vector2(PANEL_RECT.size.x - 80.0, 40.0)
 	panel.add_child(header)
 
-	var left := _section(panel, "DISPLAY // RENDER", Vector2(LEFT_X, 100.0))
-	left.size = Vector2(COLUMN_W, 24.0)
-	var right := _section(panel, "AUDIO MIXER // FIVE BUSES", Vector2(RIGHT_X, 100.0))
-	right.size = Vector2(COLUMN_W, 24.0)
+	_section(panel, "DISPLAY // RENDER", Vector2(LEFT_X, 96.0), T.ACCENT_ACID_LIME)
+	_section(panel, "AUDIO MIXER // FIVE BUSES", Vector2(RIGHT_X, 96.0), T.ACCENT_ELECTRIC_CYAN)
 
 	display_option = _option(["WINDOWED", "BORDERLESS", "FULLSCREEN"], "DisplayModeOption")
 	_row(panel, "DISPLAY MODE", display_option, 140.0, LEFT_X)
@@ -131,8 +138,7 @@ func _build_panel() -> void:
 	vsync_check.toggled.connect(_on_vsync)
 	_row(panel, "V-SYNC", vsync_check, 268.0, LEFT_X)
 
-	var preset := _section(panel, "GRAPHICS PRESET", Vector2(LEFT_X, 344.0))
-	preset.size = Vector2(COLUMN_W, 24.0)
+	_section(panel, "GRAPHICS PRESET", Vector2(LEFT_X, 340.0), T.ACCENT_ACID_LIME)
 	quality_option = _option(PS.QUALITY_NAMES, "QualityOption")
 	_row(panel, "PRESET", quality_option, 384.0, LEFT_X)
 	quality_option.item_selected.connect(_on_quality)
@@ -145,9 +151,13 @@ func _build_panel() -> void:
 	vfx_check.toggled.connect(_on_vfx)
 	_row(panel, "VFX DENSITY", vfx_check, 512.0, LEFT_X)
 
+	reduce_motion_check = _check("REDUCE MOTION", "ReduceMotionCheck")
+	reduce_motion_check.toggled.connect(_on_reduce_motion)
+	_row(panel, "ACCESSIBILITY", reduce_motion_check, 576.0, LEFT_X)
+
 	outline_label = UI.label("", 16, T.ACCENT_ACID_LIME, MONO)
 	outline_label.name = "OutlineLabel"
-	outline_label.position = Vector2(LEFT_X, 588.0)
+	outline_label.position = Vector2(LEFT_X, 644.0)
 	outline_label.size = Vector2(COLUMN_W, 24.0)
 	panel.add_child(outline_label)
 
@@ -164,6 +174,11 @@ func _build_panel() -> void:
 
 	close_button = UI.button("CLOSE  [ESC]", T.ACCENT_ACID_LIME)
 	close_button.name = "CloseButton"
+	StreetStyle.skin(close_button, 4, Vector2(6.0, 6.0), 24)
+	var hot: StyleBox = close_button.get_theme_stylebox("pressed")
+	close_button.add_theme_stylebox_override("normal", hot) # the way out wears the lime face
+	close_button.add_theme_color_override("font_color", T.INK_BORDER_BLACK)
+	close_button.add_theme_color_override("font_hover_color", T.INK_BORDER_BLACK)
 	close_button.position = Vector2(960.0, 684.0)
 	close_button.size = Vector2(256.0, 56.0)
 	close_button.pressed.connect(close)
@@ -171,10 +186,9 @@ func _build_panel() -> void:
 	_chain_focus()
 
 
-func _section(parent: Control, text: String, at: Vector2) -> Label:
-	var node := UI.label(text, 18, T.ACCENT_ELECTRIC_CYAN, HEADER)
+func _section(parent: Control, text: String, at: Vector2, fill: Color) -> Label:
+	var node := StreetStyle.section(text, fill)
 	node.position = at
-	node.size = Vector2(COLUMN_W, 24.0)
 	parent.add_child(node)
 	return node
 
@@ -195,16 +209,7 @@ func _option(items: Array, node_name: String) -> OptionButton:
 	var option := OptionButton.new()
 	option.name = node_name
 	option.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	option.add_theme_font_override("font", HEADER)
-	option.add_theme_font_size_override("font_size", 20)
-	for state: String in ["normal", "hover", "pressed", "focus", "disabled"]:
-		var fill: Color = T.SURFACE_PANEL_ELEVATED
-		if state == "hover" or state == "focus":
-			fill = T.SURFACE_SNAP_INVERT
-		option.add_theme_stylebox_override(state, UI.style(fill))
-	option.add_theme_color_override("font_color", T.TEXT_PRIMARY)
-	for state: String in ["hover", "pressed", "focus"]:
-		option.add_theme_color_override("font_" + state + "_color", T.INK_BORDER_BLACK)
+	StreetStyle.skin(option, 3, Vector2(4.0, 4.0), 20)
 	for item: String in items:
 		option.add_item(item)
 	return option
@@ -221,6 +226,10 @@ func _check(text: String, node_name: String) -> CheckButton:
 	check.add_theme_color_override("font_hover_color", T.ACCENT_ACID_LIME)
 	check.add_theme_color_override("font_pressed_color", T.TEXT_PRIMARY)
 	check.add_theme_color_override("font_focus_color", T.TEXT_PRIMARY)
+	for state: String in ["checked", "checked_disabled"]:
+		check.add_theme_icon_override(state, StreetStyle.switch_icon(true))
+	for state: String in ["unchecked", "unchecked_disabled"]:
+		check.add_theme_icon_override(state, StreetStyle.switch_icon(false))
 	return check
 
 
@@ -247,6 +256,7 @@ func _add_audio_row(parent: Control, index: int) -> void:
 	slider.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	slider.position = Vector2(RIGHT_X, y + 32.0)
 	slider.size = Vector2(COLUMN_W, 30.0)
+	StreetStyle.skin_slider(slider)
 	slider.value_changed.connect(_on_volume.bind(bus))
 	parent.add_child(slider)
 	sliders[bus] = slider
@@ -257,7 +267,7 @@ func _add_audio_row(parent: Control, index: int) -> void:
 func _chain_focus() -> void:
 	var chain: Array[Control] = [
 		display_option, resolution_option, vsync_check, quality_option,
-		halftone_check, vfx_check, close_button,
+		halftone_check, vfx_check, reduce_motion_check, close_button,
 	]
 	for bus: StringName in PS.BUSES:
 		chain.append(sliders[bus])
@@ -277,6 +287,7 @@ func _sync() -> void:
 	quality_option.select(PS.quality)
 	halftone_check.set_pressed_no_signal(PS.halftone)
 	vfx_check.set_pressed_no_signal(PS.vfx_high)
+	reduce_motion_check.set_pressed_no_signal(PS.reduce_motion)
 	_refresh_labels()
 	for bus: StringName in PS.BUSES:
 		var slider: HSlider = sliders[bus]
@@ -290,6 +301,7 @@ func _refresh_labels() -> void:
 	outline_label.text = "TOON INK OUTLINE // %s" % ("FULL 0.02 m" if full else "PERFORMANCE 0.012 m")
 	halftone_check.text = "MANGA HALFTONE // " + ("ON" if PS.halftone else "OFF")
 	vfx_check.text = "ANIME VFX // " + ("HIGH" if PS.vfx_high else "LOW")
+	reduce_motion_check.text = "REDUCE MOTION // " + ("ON" if PS.reduce_motion else "OFF")
 	vsync_check.text = "V-SYNC // " + ("ON (60 FPS)" if PS.vsync else "OFF")
 
 
@@ -323,6 +335,12 @@ func _on_halftone(pressed: bool) -> void:
 	PS.halftone = pressed
 	_refresh_labels()
 	PS.apply_to_tree(get_tree().root)
+	PS.save()
+
+
+func _on_reduce_motion(pressed: bool) -> void:
+	PS.reduce_motion = pressed
+	_refresh_labels()
 	PS.save()
 
 

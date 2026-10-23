@@ -38,6 +38,13 @@ const GRAFFITI_ACID := Color("#d8ff00")
 const SmokeSheet := preload("res://assets/vfx/2x2-sprite-sheet-of-four-different-anime-cmvkkjc7.png")
 const FlameSheet := preload("res://assets/vfx/2x2-sprite-sheet-of-four-different-manga-cmvkkjfc.png")
 const SHEET_FRAMES: int = 2
+## One-shot sounds (Genex): the backfire crackle on a downshift, the boost whoosh when ERS overtake kicks in.
+const BackfireStream := preload("res://assets/audio/sfx/short-exhaust-backfire-crackle-three-sha-cmvkm1hx.wav")
+const BoostStream := preload("res://assets/audio/sfx/fast-electric-boost-whoosh-rising-sweep-cmvkm1o4.wav")
+const ONE_SHOT_RANGE_M: float = 60.0
+const ONE_SHOT_VOICES: int = 4
+const BACKFIRE_DB: float = -4.0
+const BOOST_DB: float = -6.0
 const BURST_SIZE_M: float = 0.7
 const WING_BURST_SIZE_M: float = 0.85
 const TRAIL_WAVE_M: float = 0.32
@@ -84,6 +91,8 @@ var flames: Dictionary = {} # car id -> Array[MeshInstance3D]
 var tips: Dictionary = {} # car id -> Node3D holding the Code and Status sprites
 var head_lights: Dictionary = {} # car id -> Array[SpotLight3D]
 var kerb_sparks: Dictionary = {} # car id -> GPUParticles3D
+## How many one-shot sounds the VFX layer has started (tests and the HUD can watch it).
+var one_shots_played: int = 0
 var wing_bursts: Dictionary = {} # car id -> Array[MeshInstance3D], comic flame bursts at the two wing tips
 var tail_trails: Dictionary = {} # car id -> MeshInstance3D (ImmediateMesh ribbon, world space)
 var lamp_glows: Dictionary = {} # car id -> {"tail": Array[MeshInstance3D], "head": Array[MeshInstance3D]}
@@ -104,6 +113,9 @@ var _tip_status_text: Dictionary = {} # car id -> status shown now
 var _flame_timers: Dictionary = {} # car id -> seconds the pop stays lit
 var _wing_timers: Dictionary = {} # car id -> seconds the wing-tip bursts stay lit
 var _trail_history: Dictionary = {} # car id -> two Array[Vector3] of world points, newest first
+var _sfx_voices: Array[AudioStreamPlayer3D] = []
+var _sfx_next: int = 0
+var _last_ers: Dictionary = {} # car id -> ErsMode last frame
 var _glow_mesh: QuadMesh
 var _tail_glow_mesh: QuadMesh
 var _last_gear: Dictionary = {} # car id -> gear
@@ -122,6 +134,7 @@ func setup(p_world: Node3D) -> void:
 	_sun = world.get_node("Sun")
 	_build_smoke_mesh()
 	_build_lamp_meshes()
+	_build_one_shot_voices()
 	_build_status_textures()
 	_build_weather()
 	_build_sparks()
@@ -214,6 +227,28 @@ func _lamp(color: Color, energy: float) -> StandardMaterial3D:
 	return material
 
 
+## A small pool of 3D voices for the short effects; the oldest one is reused when all are busy.
+func _build_one_shot_voices() -> void:
+	for index: int in range(ONE_SHOT_VOICES):
+		var voice := AudioStreamPlayer3D.new()
+		voice.name = "OneShot%d" % index
+		voice.bus = &"SFX"
+		voice.max_distance = ONE_SHOT_RANGE_M * 1.5
+		voice.unit_size = 8.0
+		add_child(voice)
+		_sfx_voices.append(voice)
+
+
+func _one_shot(stream: AudioStream, at: Vector3, volume_db: float) -> void:
+	var voice: AudioStreamPlayer3D = _sfx_voices[_sfx_next]
+	_sfx_next = (_sfx_next + 1) % _sfx_voices.size()
+	voice.stream = stream
+	voice.volume_db = volume_db
+	voice.global_position = at
+	voice.play()
+	one_shots_played += 1
+
+
 ## Two soft round flares (additive, camera-facing): crimson for the tail, ice white for the head.
 func _build_lamp_meshes() -> void:
 	var ramp := Gradient.new()
@@ -300,7 +335,7 @@ func _update_lamp_vfx(actor: ActorScript) -> void:
 		flare.visible = heads_on
 	var ribbon := tail_trails[id] as MeshInstance3D
 	var distance: float = world.camera.global_position.distance_to(actor.global_position)
-	var streaming: bool = strength > GLOW_ON and car.v > TRAIL_MIN_V and distance < TRAIL_RANGE_M
+	var streaming: bool = strength > GLOW_ON and car.v > TRAIL_MIN_V and distance < TRAIL_RANGE_M and PresentationSettings.light_trails()
 	ribbon.visible = streaming
 	var history: Array = _trail_history[id]
 	if not streaming:
@@ -568,6 +603,7 @@ func _build_car_effects(actor: ActorScript) -> void:
 	_build_lamp_vfx(actor)
 	tips[id] = _build_tip(actor)
 	_last_gear[id] = actor.car.gear
+	_last_ers[id] = actor.car.ers_mode
 
 
 func _update_car_effects(actor: ActorScript, delta: float, followed: bool) -> void:
@@ -603,22 +639,30 @@ func _update_car_effects(actor: ActorScript, delta: float, followed: bool) -> vo
 			flame.rotation_degrees = Vector3(90.0, 0.0, randf_range(-14.0, 14.0))
 			flame.scale = Vector3(randf_range(0.8, 1.25), randf_range(0.9, 1.5), randf_range(0.8, 1.25))
 			_pick_burst_frame(flame.get_node("Burst") as MeshInstance3D)
+	var bursts_on: bool = PresentationSettings.comic_bursts()
+	var near_camera: bool = world.camera.global_position.distance_to(actor.global_position) < ONE_SHOT_RANGE_M
 	var wing_timer: float = float(_wing_timers.get(id, 0.0)) - delta
 	if downshift:
 		wing_timer = FLAME_POP_S
+		if near_camera:
+			_one_shot(BackfireStream, actor.global_position + Vector3(0.0, 0.5, 2.3), BACKFIRE_DB)
 		for burst: MeshInstance3D in wing_bursts[id]:
 			_pick_burst_frame(burst)
 			burst.rotation_degrees.z = randf_range(-30.0, 30.0)
 	_wing_timers[id] = wing_timer
+	if car.ers_mode == GtTypes.ErsMode.OVERTAKE and int(_last_ers[id]) != GtTypes.ErsMode.OVERTAKE and near_camera:
+		_one_shot(BoostStream, actor.global_position, BOOST_DB)
+	_last_ers[id] = car.ers_mode
 	for burst: MeshInstance3D in wing_bursts[id]:
-		burst.visible = wing_timer > 0.0 and car.pit == null
+		burst.visible = wing_timer > 0.0 and car.pit == null and bursts_on
 	_flame_timers[id] = timer
 	for flame: MeshInstance3D in flames[id]:
 		flame.visible = timer > 0.0 and car.pit == null
+		(flame.get_node("Burst") as Node3D).visible = bursts_on
 
 	# Headlamps: on at night and in the gloom. The slabs glow on the actor; the cones light the asphalt.
 	actor.night_lights = headlight_energy
-	var beams_on: bool = headlight_energy > 0.5
+	var beams_on: bool = headlight_energy > 0.5 and PresentationSettings.headlight_beams()
 	for beam: SpotLight3D in head_lights[id]:
 		beam.visible = beams_on
 		beam.light_energy = headlight_energy * HEAD_BEAM_ENERGY_SHARE

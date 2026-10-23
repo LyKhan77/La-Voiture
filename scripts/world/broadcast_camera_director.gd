@@ -163,6 +163,8 @@ func _update_pit() -> void:
 
 ## Kicks the lens wider for a moment (ERS overtake); whichever camera mode runs keeps its own base FOV.
 func punch_fov() -> void:
+	if PresentationSettings.reduce_motion:
+		return
 	_punch_age_s = 0.0
 
 
