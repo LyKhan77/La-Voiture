@@ -47,7 +47,7 @@ const TAIL_NIGHT_ENERGY: float = 1.2
 const TAIL_ATTACK: float = 18.0 # energy per second: a brake light is a switch, not a fade
 const BRAKE_LIGHT_G: float = 0.5
 const NIGHT_LAMPS_ON: float = 0.5
-const LAMP_SIZE := Vector3(0.5, 0.075, 0.05)
+const LAMP_SIZE := Vector3(0.36, 0.04, 0.03)
 
 var car: GtCar
 var track: GtTrack
@@ -71,6 +71,8 @@ var _wheel_compound: int = -1
 var _livery_team: int = -1
 var _taillight_mat: StandardMaterial3D
 var _headlight_mat: StandardMaterial3D
+var _tail_lamps: Node3D
+var _head_lamps: Node3D
 
 @onready var chassis: ModularCarAssembler = $Chassis
 @onready var body: AnimatableBody3D = $Body
@@ -193,12 +195,22 @@ func _build_lamps() -> void:
 	chassis.add_child(lamps)
 	_taillight_mat = _lamp_material(TAIL_COLOR)
 	_headlight_mat = _lamp_material(HEAD_COLOR)
+	_tail_lamps = _lamp_group(lamps, "Tail")
+	_head_lamps = _lamp_group(lamps, "Head")
 	var rear: float = bounds.position.z + 0.08
 	var front: float = bounds.end.z - 0.08
 	for side: float in [-1.0, 1.0]:
-		var x: float = side * bounds.size.x * 0.27
-		_add_lamp(lamps, "Taillight", _taillight_mat, Vector3(x, bounds.position.y + bounds.size.y * 0.55, rear))
-		_add_lamp(lamps, "Headlight", _headlight_mat, Vector3(x, bounds.position.y + bounds.size.y * 0.36, front))
+		var x: float = side * bounds.size.x * 0.24
+		_add_lamp(_tail_lamps, "Taillight", _taillight_mat, Vector3(x, bounds.position.y + bounds.size.y * 0.42, rear))
+		_add_lamp(_head_lamps, "Headlight", _headlight_mat, Vector3(x, bounds.position.y + bounds.size.y * 0.30, front))
+
+
+func _lamp_group(parent: Node3D, group_name: String) -> Node3D:
+	var group := Node3D.new()
+	group.name = group_name
+	group.visible = false
+	parent.add_child(group)
+	return group
 
 
 func _add_lamp(parent: Node3D, lamp_name: String, material: StandardMaterial3D, at: Vector3) -> void:
@@ -215,7 +227,7 @@ func _add_lamp(parent: Node3D, lamp_name: String, material: StandardMaterial3D, 
 
 func _lamp_material(color: Color) -> StandardMaterial3D:
 	var material := StandardMaterial3D.new()
-	material.albedo_color = color.darkened(0.55)
+	material.albedo_color = color.darkened(0.2)
 	material.emission_enabled = true
 	material.emission = color
 	material.emission_energy_multiplier = 0.0
@@ -231,6 +243,8 @@ func _update_lamps(dt: float) -> void:
 	taillight_energy = move_toward(taillight_energy, TAIL_BRAKE_ENERGY if braking else resting, maxf(dt, 0.02) * TAIL_ATTACK)
 	_taillight_mat.emission_energy_multiplier = taillight_energy
 	_headlight_mat.emission_energy_multiplier = night_lights
+	_tail_lamps.visible = taillight_energy > 0.02 # an unlit slab would show as a dark bar on the paint
+	_head_lamps.visible = night_lights > 0.02
 
 
 func _animate_wheels(dt: float, spin_scale: float) -> void:

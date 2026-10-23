@@ -58,6 +58,7 @@
   - [x] `Task 8.2`: Generasi aset karakter Tim 0 (Apex Racing: Kaze Ryu & Sora Ren) & Tim 1 (Neon Drift: Makoto Ito & Axel Vale) via Meshy AI
   - [x] `Task 8.3`: Generasi sisa 16 karakter pembalap (Tim 2 s/d Tim 9) dengan alur baru 2-Step Reference Workflow (4-View Turnaround Full Body -> 2D Comms Radio Portrait)
   - [x] `Task 8.4`: Dynamic radio comms (potret driver per mobil, manga soundwave, trigger overtake/ERS/tyre cliff/kontak + cooldown 15 s, suara wanita Freja Berg) & standee 2D podium P1-P3 — lihat `executor-report/reports/FASE-8.4-DYNAMIC-RADIO-AND-PODIUM-REPORT.md` (3D character rig ditunda)
+  - [x] `Task 8.5`: Visual polish — lampu mesh nyata + lampu rem reaktif (tanpa SphereMesh), manga speedlines + boost warp FOV, kerb sparks, backfire graffiti 2-tone, main menu Concept 01 (Street Tag & Speed Stencil), showroom memakai sasis balap (cel paint + ink hull) — lihat `executor-report/reports/FASE-8.5-VISUAL-POLISH-AND-UI-REDESIGN-REPORT.md`
 - [x] **Fase 9: Main Menu, Pre-Race Configuration, 3D Pitstop Garage & Manga Transition Flow**
   - [x] `Task 9.1`: Perumusan Dokumen Spesifikasi Desain (`docs/superpowers/specs/2026-10-22-main-menu-and-garage-flow-design.md`) & Rencana Implementasi (`docs/superpowers/plans/2026-10-22-main-menu-and-garage-flow-plan.md`)
   - [x] `Task 9.2`: Model Data `RaceConfigData` & Modal Pengaturan Grafis/Audio (`scenes/ui/settings_modal.tscn`); pilihan display, preset, outline, halftone, VFX, dan lima bus diterapkan langsung serta disimpan ke `user://presentation.cfg`.
