@@ -1,0 +1,107 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/car/safety_car_chassis.gd" id="1_sc"]
+[ext_resource type="PackedScene" path="res://assets/cars/porsche_911/porsche_911_body.glb" id="2_body"]
+[ext_resource type="Material" path="res://materials/safety_car_toon_body.tres" id="3_silver"]
+[ext_resource type="Material" path="res://materials/toon_carbon_aero.tres" id="4_carbon"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_bar"]
+size = Vector3(0.96, 0.07, 0.24)
+
+[sub_resource type="BoxMesh" id="BoxMesh_led"]
+size = Vector3(0.14, 0.05, 0.2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_green"]
+size = Vector3(0.1, 0.05, 0.2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_grille"]
+size = Vector3(0.1, 0.03, 0.03)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_amber"]
+albedo_color = Color(1, 0.45, 0, 1)
+emission_enabled = true
+emission = Color(1, 0.45, 0, 1)
+emission_energy_multiplier = 3.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_green"]
+albedo_color = Color(0, 1, 0.15, 1)
+emission_enabled = true
+emission = Color(0, 1, 0.15, 1)
+emission_energy_multiplier = 2.5
+
+[node name="SafetyCarChassis" type="Node3D" node_paths=PackedStringArray("base_body_mesh")]
+script = ExtResource("1_sc")
+car_name = "FIA Safety Car"
+team_name = "FIA"
+base_body_mesh = NodePath("BodyShell/PorscheBody/tripo_node_caa06e4e-d9f7-4654-9f18-f144def4be58")
+keeps_original_paint = true
+
+[node name="BodyShell" type="Node3D" parent="."]
+
+[node name="PorscheBody" parent="BodyShell" instance=ExtResource("2_body")]
+
+[node name="tripo_node_caa06e4e-d9f7-4654-9f18-f144def4be58" parent="BodyShell/PorscheBody" index="0"]
+surface_material_override/0 = ExtResource("3_silver")
+surface_material_override/1 = ExtResource("4_carbon")
+
+[node name="Sockets" type="Node3D" parent="."]
+
+[node name="Socket_Wheel_FL" type="Marker3D" parent="Sockets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.86, 0.33, 1.19)
+
+[node name="Socket_Wheel_FR" type="Marker3D" parent="Sockets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.86, 0.33, 1.19)
+
+[node name="Socket_Wheel_RL" type="Marker3D" parent="Sockets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.86, 0.33, -1.26)
+
+[node name="Socket_Wheel_RR" type="Marker3D" parent="Sockets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.86, 0.33, -1.26)
+
+[node name="Socket_Cockpit" type="Marker3D" parent="Sockets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0.1)
+
+[node name="RooftopLightbar" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.345, -0.35)
+mesh = SubResource("BoxMesh_bar")
+surface_material_override/0 = ExtResource("4_carbon")
+
+[node name="AmberLed0" type="MeshInstance3D" parent="RooftopLightbar"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3, 0.02, 0)
+mesh = SubResource("BoxMesh_led")
+surface_material_override/0 = SubResource("StandardMaterial3D_amber")
+
+[node name="AmberLed1" type="MeshInstance3D" parent="RooftopLightbar"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.1, 0.02, 0)
+mesh = SubResource("BoxMesh_led")
+surface_material_override/0 = SubResource("StandardMaterial3D_amber")
+
+[node name="AmberLed2" type="MeshInstance3D" parent="RooftopLightbar"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1, 0.02, 0)
+mesh = SubResource("BoxMesh_led")
+surface_material_override/0 = SubResource("StandardMaterial3D_amber")
+
+[node name="AmberLed3" type="MeshInstance3D" parent="RooftopLightbar"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, 0.02, 0)
+mesh = SubResource("BoxMesh_led")
+surface_material_override/0 = SubResource("StandardMaterial3D_amber")
+
+[node name="GreenLed0" type="MeshInstance3D" parent="RooftopLightbar"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.42, 0.02, 0)
+mesh = SubResource("BoxMesh_green")
+surface_material_override/0 = SubResource("StandardMaterial3D_green")
+
+[node name="GreenLed1" type="MeshInstance3D" parent="RooftopLightbar"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.42, 0.02, 0)
+mesh = SubResource("BoxMesh_green")
+surface_material_override/0 = SubResource("StandardMaterial3D_green")
+
+[node name="GrilleStrobeL" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3, 0.42, 2.195)
+mesh = SubResource("BoxMesh_grille")
+surface_material_override/0 = SubResource("StandardMaterial3D_amber")
+
+[node name="GrilleStrobeR" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, 0.42, 2.195)
+mesh = SubResource("BoxMesh_grille")
+surface_material_override/0 = SubResource("StandardMaterial3D_amber")

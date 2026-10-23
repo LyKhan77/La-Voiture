@@ -99,7 +99,7 @@ func _test_actor_picks_chassis_by_team() -> void:
 	world.set_physics_process(false)
 	await process_frame
 	var expected: Dictionary = {
-		0: "res://scenes/car/base_chassis.tscn", # Apex Racing keeps the Porsche base
+		0: "res://scenes/car/mercedes_amg_chassis.tscn", # Apex Racing
 		1: "res://scenes/car/audi_r8_chassis.tscn", # Neon Drift
 		2: "res://scenes/car/nissan_gtr_chassis.tscn", # Kurogane GT
 		3: "res://scenes/car/bmw_m4_chassis.tscn", # Vanta Motors
@@ -122,7 +122,7 @@ func _test_actor_picks_chassis_by_team() -> void:
 		var body_paint := actor.chassis.base_body_mesh.get_surface_override_material(0) as ShaderMaterial
 		var untinted: bool = (body_paint.get_shader_parameter("base_color") as Color).is_equal_approx(Color.WHITE)
 		paint_by_chassis = paint_by_chassis and untinted and actor.chassis.keeps_original_paint
-	check(all_match, "every actor rides its team's chassis (Audi + the eight new bodies + the Porsche base)")
+	check(all_match, "every actor rides its team's own chassis (Mercedes-AMG, Audi and the eight new bodies)")
 	var even_grid: bool = per_team.size() == 10
 	for count: int in per_team.values():
 		even_grid = even_grid and count == 2

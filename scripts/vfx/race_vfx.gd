@@ -123,7 +123,6 @@ var _clock: float = 0.0
 var _sky_material: ProceduralSkyMaterial
 var _environment: Environment
 var _sun: DirectionalLight3D
-var _bar_materials: Array[StandardMaterial3D] = []
 var _smoke_mesh: QuadMesh
 
 
@@ -867,28 +866,30 @@ func _update_crew_sparks() -> void:
 
 func _build_safety_car() -> void:
 	_safety_car_state = GtCar.new()
-	_safety_car_state.team_id = 7 # the pale team colour reads as a marshal car
+	_safety_car_state.team_id = ActorScript.SAFETY_CAR_TEAM_ID
 	_safety_car_state.compound = GtTypes.Compound.MEDIUM
 	safety_car_actor = ActorScene.instantiate() as ActorScript
 	world.add_child(safety_car_actor)
 	safety_car_actor.bind(_safety_car_state, track)
 	safety_car_actor.visible = false
-	var bar := MeshInstance3D.new()
-	bar.name = "LightBar"
-	var box := BoxMesh.new()
-	box.size = Vector3(0.9, 0.12, 0.25)
-	bar.mesh = box
-	var amber := _lamp(Color("#ffaa00"), 5.0)
-	bar.material_override = amber
-	bar.position = Vector3(0.0, 1.45, 0.2)
-	safety_car_actor.add_child(bar)
-	_bar_materials.append(amber)
+
+
+## DEPLOYED: amber strobe. IN_THIS_LAP: the strobe goes out and the green lights hold. HIDDEN: nothing to show.
+func _strobe_mode_for(phase: int) -> SafetyCarChassis.StrobeMode:
+	match phase:
+		GtTypes.SafetyCarPhase.DEPLOYED:
+			return SafetyCarChassis.StrobeMode.AMBER
+		GtTypes.SafetyCarPhase.IN_THIS_LAP:
+			return SafetyCarChassis.StrobeMode.GREEN
+	return SafetyCarChassis.StrobeMode.OFF
 
 
 func _update_safety_car() -> void:
 	var state: Dictionary = race.safety_car
 	var active: bool = bool(state["active"])
 	safety_car_actor.visible = active
+	var official := safety_car_actor.chassis as SafetyCarChassis
+	official.set_strobe_mode(_strobe_mode_for(int(state["phase"])) if active else SafetyCarChassis.StrobeMode.OFF)
 	if not active:
 		return
 	var sc: GtCar = _safety_car_state
@@ -898,5 +899,3 @@ func _update_safety_car() -> void:
 	sc.lateral = float(state["lateral"])
 	sc.v = float(state["v"])
 	safety_car_actor.present(1.0, 0.016)
-	var bar := safety_car_actor.get_node("LightBar") as MeshInstance3D
-	bar.visible = bool(state["lights_on"]) and sin(_clock * 12.0) > -0.3

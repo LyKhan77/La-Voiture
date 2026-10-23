@@ -7,7 +7,7 @@ extends SceneTree
 
 const OUT := "res://temp/wheel_review/"
 const WHEEL := preload("res://scenes/car/parts/porsche_wheel_soft.tscn")
-const CARS := ["nissan_gtr", "aston_vantage", "bmw_m4", "lambo_huracan", "honda_nsx", "chevy_corvette", "lexus_rcf", "mclaren_720s"]
+const CARS := ["nissan_gtr", "aston_vantage", "bmw_m4", "lambo_huracan", "honda_nsx", "chevy_corvette", "lexus_rcf", "mclaren_720s", "mercedes_amg"]
 
 
 func _initialize() -> void:

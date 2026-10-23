@@ -6,12 +6,12 @@ extends RefCounted
 ## the final team names, so they are mapped per team here instead of derived from GtData.
 
 const CAR_SLUGS: Array[String] = [
-	"porsche_911", "audi_r8", "nissan_gtr", "bmw_m4", "aston_vantage",
+	"mercedes_amg", "audi_r8", "nissan_gtr", "bmw_m4", "aston_vantage",
 	"chevy_corvette", "honda_nsx", "lexus_rcf", "mclaren_720s", "lambo_huracan",
 ]
 
 const CAR_NAMES: Array[String] = [
-	"Porsche 911 GT3 R (992)", "Audi R8 LMS GT3 Evo II", "Nissan GT-R NISMO GT3",
+	"Mercedes-AMG GT3 Evo", "Audi R8 LMS GT3 Evo II", "Nissan GT-R NISMO GT3",
 	"BMW M4 GT3", "Aston Martin Vantage AMR GT3", "Chevrolet Corvette Z06 GT3.R",
 	"Honda NSX GT3 Evo22", "Lexus RC F GT3", "McLaren 720S GT3 Evo",
 	"Lamborghini Huracan GT3 EVO2",

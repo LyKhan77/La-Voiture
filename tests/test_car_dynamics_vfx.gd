@@ -372,7 +372,64 @@ func _test_safety_car() -> void:
 	var shown: bool = vfx.safety_car_actor.visible
 	var ahead: bool = float(race.safety_car["s"]) > leader.s
 	var placed: bool = vfx.safety_car_actor.global_position.distance_to(world.track.point_at(float(race.safety_car["s"]), float(race.safety_car["lateral"])).origin) < 0.5
+	var official := vfx.safety_car_actor.chassis as SafetyCarChassis
+	check(official != null and official.scene_file_path == "res://scenes/car/safety_car_chassis.tscn",
+		"safety car: it rides the dedicated FIA safety car chassis, not a borrowed team car")
+	if official == null:
+		return
+	_test_safety_car_livery(official)
+	_test_safety_car_deployed(official, race)
+	_test_safety_car_in_this_lap(official, race, vfx)
 	race.set_flag(Types.Flag.GREEN, 1, "GREEN", 1.0)
 	vfx.update(FRAME)
 	check(hidden and shown and ahead and placed and not vfx.safety_car_actor.visible,
-		"safety car: a Porsche with a light bar appears ahead of the leader while the flag is out and leaves with it")
+		"safety car: it appears ahead of the leader while the flag is out and leaves with it")
+	check(official.strobe_mode == SafetyCarChassis.StrobeMode.OFF, "safety car: the lightbar goes dark when the car leaves the track")
+
+
+func _lit(leds: Array[MeshInstance3D]) -> Array[bool]:
+	var states: Array[bool] = []
+	for led: MeshInstance3D in leds:
+		states.append(led.visible)
+	return states
+
+
+func _test_safety_car_livery(official: SafetyCarChassis) -> void:
+	var paint := official.base_body_mesh.get_surface_override_material(0) as ShaderMaterial
+	var tint: Color = paint.get_shader_parameter("base_color") if paint != null else Color.BLACK
+	var lettered: int = 0
+	for label: Node in official.find_children("*", "Label3D", true, false):
+		lettered += int((label as Label3D).text == "SAFETY CAR")
+	check(paint != null and tint.s < 0.15 and tint.v > 0.6, "safety car: the body paint is metallic silver (%s)" % tint)
+	check(lettered == 3, "safety car: SAFETY CAR is lettered on both doors and the bonnet (%d labels)" % lettered)
+	check(official.find_child("ChevronStripL", true, false) != null and official.find_child("ChevronStripR", true, false) != null,
+		"safety car: hazard chevron strips run down both sides")
+
+
+func _test_safety_car_deployed(official: SafetyCarChassis, race: GtRace) -> void:
+	var first: Array[bool] = _lit(official.amber_leds)
+	official.advance(0.5 / SafetyCarChassis.STROBE_HZ)
+	var second: Array[bool] = _lit(official.amber_leds)
+	var toggles: int = 0
+	var previous: bool = official.amber_leds[0].visible
+	for _i: int in range(480):
+		official.advance(1.0 / 480.0)
+		toggles += int(official.amber_leds[0].visible != previous)
+		previous = official.amber_leds[0].visible
+	check(int(race.safety_car["phase"]) == Types.SafetyCarPhase.DEPLOYED and official.strobe_mode == SafetyCarChassis.StrobeMode.AMBER,
+		"safety car: while DEPLOYED the lightbar runs the amber strobe")
+	check(first.count(true) == 2 and second == first.map(func(on: bool) -> bool: return not on),
+		"safety car: the four amber LEDs flash in two alternating pairs (%s then %s)" % [first, second])
+	check(absf(float(toggles) * 0.5 - SafetyCarChassis.STROBE_HZ) <= 1.0, "safety car: the amber strobe flashes at 12 Hz (%d toggles in one second)" % toggles)
+	check(_lit(official.green_leds).count(true) == 0, "safety car: the green lights stay dark while DEPLOYED")
+
+
+func _test_safety_car_in_this_lap(official: SafetyCarChassis, race: GtRace, vfx: RaceVfx) -> void:
+	race.race_control["sc_laps_remaining"] = 0
+	race.step()
+	vfx.update(FRAME)
+	official.advance(0.3)
+	check(int(race.safety_car["phase"]) == Types.SafetyCarPhase.IN_THIS_LAP and official.strobe_mode == SafetyCarChassis.StrobeMode.GREEN,
+		"safety car: IN_THIS_LAP switches the lightbar to green")
+	check(_lit(official.amber_leds).count(true) == 0 and _lit(official.green_leds).count(false) == 0 and official.green_leds.size() == 2,
+		"safety car: IN_THIS_LAP kills the amber strobe and holds both green lights solid")

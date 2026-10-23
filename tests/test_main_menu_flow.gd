@@ -144,12 +144,13 @@ func _test_menu_scenes(config_script: Script) -> void:
 	root.push_input(right)
 	await process_frame
 	check(garage.config.selected_team_id == 1, "Team-switch arrows work even while Launch owns keyboard focus")
-	var expected_slugs: Array[String] = ["porsche_911", "audi_r8", "nissan_gtr", "bmw_m4", "aston_vantage", "chevy_corvette", "honda_nsx", "lexus_rcf", "mclaren_720s", "lambo_huracan"]
+	var expected_slugs: Array[String] = ["mercedes_amg", "audi_r8", "nissan_gtr", "bmw_m4", "aston_vantage", "chevy_corvette", "honda_nsx", "lexus_rcf", "mclaren_720s", "lambo_huracan"]
 	for index: int in range(10):
 		var model: Node3D = garage.environment.cars[index]
 		var slug: String = expected_slugs[index]
-		check(model.scene_file_path == ("res://scenes/car/base_chassis.tscn" if index == 0 else "res://scenes/car/%s_chassis.tscn" % slug) and is_equal_approx(garage.environment.stalls[index].position.x, float(index) * 14.0), "Stall %02d rides its race chassis at its dolly stop" % index)
+		check(model.scene_file_path == "res://scenes/car/%s_chassis.tscn" % slug and is_equal_approx(garage.environment.stalls[index].position.x, float(index) * 14.0), "Stall %02d rides its race chassis at its dolly stop" % index)
 	var roster: Script = load("res://scripts/ui/garage_roster.gd")
+	check(GarageRoster.CAR_NAMES[0].begins_with("Mercedes-AMG") and ResourceLoader.exists(roster.car_path(0)) and roster.car_path(0).ends_with("mercedes_amg/mercedes_amg_full.glb"), "Team 0 garage card names the Mercedes-AMG and points at its full GLB")
 	for slot: int in range(20):
 		var texture: Texture2D = load(roster.portrait_path(slot))
 		check(texture != null and texture.get_width() == 1024 and texture.get_height() == 1024, "Driver %02d has the original sharp radio portrait" % (slot + 1))

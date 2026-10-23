@@ -22,7 +22,11 @@ const WHEEL_SCENES: Array[PackedScene] = [
 ]
 ## Chassis scene per team_id; any team not listed rides the Porsche base chassis the actor scene carries.
 const BASE_CHASSIS: PackedScene = preload("res://scenes/car/base_chassis.tscn")
+## Not a grid team: the team_id the FIA safety car's actor carries, so it never clashes with the ten below.
+const SAFETY_CAR_TEAM_ID: int = -1
 const CHASSIS_BY_TEAM: Dictionary = {
+	SAFETY_CAR_TEAM_ID: preload("res://scenes/car/safety_car_chassis.tscn"),
+	0: preload("res://scenes/car/mercedes_amg_chassis.tscn"), # Apex Racing
 	1: preload("res://scenes/car/audi_r8_chassis.tscn"), # Neon Drift
 	2: preload("res://scenes/car/nissan_gtr_chassis.tscn"), # Kurogane GT
 	3: preload("res://scenes/car/bmw_m4_chassis.tscn"), # Vanta Motors

@@ -10,7 +10,7 @@ const WheelFit := preload("res://tests/wheel_fit_checks.gd")
 const CARS = {
 	"porsche_911": "base_chassis", "audi_r8": "audi_r8_chassis", "nissan_gtr": "nissan_gtr_chassis", "aston_vantage": "aston_vantage_chassis",
 	"bmw_m4": "bmw_m4_chassis", "lambo_huracan": "lambo_huracan_chassis", "honda_nsx": "honda_nsx_chassis", "chevy_corvette": "chevy_corvette_chassis",
-	"lexus_rcf": "lexus_rcf_chassis", "mclaren_720s": "mclaren_720s_chassis",
+	"lexus_rcf": "lexus_rcf_chassis", "mclaren_720s": "mclaren_720s_chassis", "mercedes_amg": "mercedes_amg_chassis",
 }
 # Hand-made by older pipelines (refine_body.py, refine_audi_r8.py): measured and printed, never counted as a failure.
 const REFERENCE = ["porsche_911", "audi_r8"]
