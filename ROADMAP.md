@@ -53,11 +53,11 @@
   - [x] `Task 7.1B`: Pembersihan bodi & spakbor di Blender (`refine_car.py`), pembuatan scene sasis `audi_r8_chassis.tscn`, shader `toon_car_paint.gdshader`, dan integrasi multi-chassis ke `GtCarActor` (SELESAI - Laporan Eksekutif FASE 7)
   - [x] `Task 7.2`: Batch Generasi Fondasi 3D Mentah 8 Mobil GT3 via Meshy AI Multi-Image (`assets/cars/<car>/raw/`) + 4 PBR Maps
   - [ ] `Task 7.3`: Batch Body Refining (Blender `refine_car.py`), Sasis Modular (`.tscn`), dan Integrasi `CHASSIS_BY_TEAM` untuk 8 Mobil GT3 (Handoff Executor `TASK-MULTI-CAR-REFINING-AND-ASSEMBLY.md`)
-- [ ] **Fase 8: Driver Character Roster & Comms Visuals (2D/3D)**
+- [x] **Fase 8: Driver Character Roster & Comms Visuals (2D/3D)**
   - [x] `Task 8.1`: Perumusan karakterisasi lengkap 20 pembalap + 10 Team Principal (`DRIVER-CHARACTERIZATION-ROSTER.md` & `CHARACTER-IMAGE-PROMPTS.md`)
   - [x] `Task 8.2`: Generasi aset karakter Tim 0 (Apex Racing: Kaze Ryu & Sora Ren) & Tim 1 (Neon Drift: Makoto Ito & Axel Vale) via Meshy AI
   - [x] `Task 8.3`: Generasi sisa 16 karakter pembalap (Tim 2 s/d Tim 9) dengan alur baru 2-Step Reference Workflow (4-View Turnaround Full Body -> 2D Comms Radio Portrait)
-  - [ ] `Task 8.4`: Integrasi 2D Radio Portrait ke `RaceHud.RADIO_DOCK` dan persiapan 3D Character Rig untuk `podium_screen.tscn` / HQ Factory
+  - [x] `Task 8.4`: Dynamic radio comms (potret driver per mobil, manga soundwave, trigger overtake/ERS/tyre cliff/kontak + cooldown 15 s, suara wanita Freja Berg) & standee 2D podium P1-P3 — lihat `executor-report/reports/FASE-8.4-DYNAMIC-RADIO-AND-PODIUM-REPORT.md` (3D character rig ditunda)
 - [x] **Fase 9: Main Menu, Pre-Race Configuration, 3D Pitstop Garage & Manga Transition Flow**
   - [x] `Task 9.1`: Perumusan Dokumen Spesifikasi Desain (`docs/superpowers/specs/2026-10-22-main-menu-and-garage-flow-design.md`) & Rencana Implementasi (`docs/superpowers/plans/2026-10-22-main-menu-and-garage-flow-plan.md`)
   - [x] `Task 9.2`: Model Data `RaceConfigData` & Modal Pengaturan Grafis/Audio (`scenes/ui/settings_modal.tscn`); pilihan display, preset, outline, halftone, VFX, dan lima bus diterapkan langsung serta disimpan ke `user://presentation.cfg`.

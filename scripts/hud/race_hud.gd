@@ -319,9 +319,14 @@ func _on_radio(message: Dictionary) -> void:
 	deck.set_radio("%s: %s" % [String(message["code"]), String(message["text"])])
 	var car: GtCar = race.get_car(int(message["car_id"]))
 	var urgent: bool = bool(message["urgent"])
-	if urgent or (car != null and car.team_id == race.player_team_id):
+	if urgent or bool(message.get("rival", false)) or (car != null and car.team_id == race.player_team_id):
 		var cut_in: CanvasLayer = engineer_radio if String(message["speaker"]) == "engineer" else radio
-		var clip: Dictionary = RadioVoice.find(String(message["speaker"]), String(message["text"]))
+		if String(message["speaker"]) == "driver":
+			var portrait_path: String = GarageRoster.portrait_path(int(message["car_id"]))
+			cut_in.set_portrait(load(portrait_path) as Texture2D if ResourceLoader.exists(portrait_path) else PORTRAIT)
+		else:
+			cut_in.set_portrait(ENGINEER_PORTRAIT)
+		var clip: Dictionary = RadioVoice.find(String(message["speaker"]), String(message["text"]), int(message["car_id"]))
 		var hold: float = 0.0
 		if not clip.is_empty():
 			hold = radio_audio.queue_voice(cut_in, clip)

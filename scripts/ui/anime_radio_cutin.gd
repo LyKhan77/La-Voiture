@@ -36,6 +36,16 @@ const MIRROR_EDGE_PAD := 30.0
 ## Docked placement: margin to the free area edge, and how far the banner drops while fading in.
 const DOCK_MARGIN := 28.0
 const DOCK_DROP := 36.0
+## Manga soundwave equalizer: bar count and size, harmonics (Hz) and how fast the bars chase
+## their target while talking and fall back to the baseline when idle.
+const WAVE_BARS := 14
+const WAVE_BAR_W := 7.0
+const WAVE_GAP := 3.0
+const WAVE_MAX_H := 22.0
+const WAVE_STRIP := 28.0
+const WAVE_HARMONICS: Array[float] = [8.0, 14.0, 22.0]
+const WAVE_ATTACK := 30.0
+const WAVE_DECAY := 8.0
 
 @onready var banner: Control = $Banner
 @onready var speech: Label = $Banner/Speech
@@ -62,6 +72,12 @@ var _docked := false
 var _dock_rect := Rect2()
 var _dock_scale := 1.0
 
+## True while a transmission is on screen: the soundwave bars pulse.
+var soundwave_active: bool = false
+var _soundwave_time: float = 0.0
+var _wave_bars := PackedFloat32Array() # 0..1 height per bar
+var _wave_x := 0.0 # left edge of the bars inside the banner
+
 
 func _ready() -> void:
 	var authored_width := banner.offset_right - banner.offset_left
@@ -84,6 +100,7 @@ func _ready() -> void:
 	_portrait.offset_bottom = -4.0
 	_accent = T.ACCENT_ACID_LIME if role == Role.DRIVER else T.ACCENT_ELECTRIC_CYAN
 	_radio_font = _make_radio_font()
+	_wave_bars.resize(WAVE_BARS)
 	_apply_fonts()
 	_ignore_mouse(banner)
 	_backdrop.draw.connect(_draw_backdrop)
@@ -97,6 +114,38 @@ func _ready() -> void:
 		var queued: Array = _pending
 		_pending = []
 		_play(int(queued[0]), str(queued[1]), bool(queued[2]), float(queued[3]))
+
+
+func _process(delta: float) -> void:
+	if not soundwave_active and soundwave_energy() < 0.0005:
+		return
+	if soundwave_active:
+		_soundwave_time += delta
+	for index: int in range(WAVE_BARS):
+		var target: float = _wave_target(index) if soundwave_active else 0.0
+		var rate: float = WAVE_ATTACK if target > _wave_bars[index] else WAVE_DECAY
+		_wave_bars[index] = lerpf(_wave_bars[index], target, 1.0 - exp(-rate * delta))
+	_backdrop.queue_redraw()
+
+
+## Mean bar height, 0 (flat) to 1.
+func soundwave_energy() -> float:
+	if _wave_bars.is_empty():
+		return 0.0
+	var total := 0.0
+	for height: float in _wave_bars:
+		total += height
+	return total / float(_wave_bars.size())
+
+
+## Three sine harmonics per bar, each bar on its own phase: A = base + amplitude * |sin|.
+func _wave_target(index: int) -> float:
+	var phase := float(index) * 1.7
+	var mix := 0.0
+	for harmonic: int in range(WAVE_HARMONICS.size()):
+		var weight: float = [0.5, 0.3, 0.2][harmonic]
+		mix += weight * absf(sin(TAU * WAVE_HARMONICS[harmonic] * _soundwave_time + phase * float(harmonic + 1)))
+	return clampf(0.18 + 0.82 * mix * 1.25, 0.0, 1.0)
 
 
 ## Docks the banner to the top of `free_rect` (window pixels), the driver at its left end and
@@ -139,6 +188,7 @@ func _play(car_id: int, message: String, urgent: bool, hold: float) -> void:
 	_update_accent()
 	_refresh_layout()
 	_show_banner()
+	soundwave_active = true
 	transmission_shown.emit(car_id, message)
 
 
@@ -201,6 +251,7 @@ func _hidden_x() -> float:
 func _hide_banner() -> void:
 	banner.visible = false
 	_present = false
+	soundwave_active = false
 	transmission_finished.emit()
 
 
@@ -257,7 +308,8 @@ func _refresh_layout() -> void:
 	speech.size = Vector2(text_w, _radio_font.get_height(SPEECH_SIZE))
 	var measured := _radio_font.get_multiline_string_size(
 		_message, HORIZONTAL_ALIGNMENT_LEFT, text_w, SPEECH_SIZE)
-	var needed := SPEECH_Y + maxf(measured.y + 6.0, _radio_font.get_height(SPEECH_SIZE)) + 14.0
+	_wave_x = text_x
+	var needed := SPEECH_Y + maxf(measured.y + 6.0, _radio_font.get_height(SPEECH_SIZE)) + 14.0 + WAVE_STRIP
 	var viewport_h := get_viewport().get_visible_rect().size.y
 	var limit := maxf(viewport_h - TICKER_OFFSET - 24.0, BANNER_MIN_HEIGHT)
 	_banner_h = clampf(needed, BANNER_MIN_HEIGHT, limit)
@@ -297,6 +349,26 @@ func _draw_backdrop() -> void:
 	_backdrop.draw_rect(Rect2(3.0, 3.0, w - 6.0, h - 6.0), _accent)
 	_draw_halftone(w, h)
 	_draw_speed_lines(w, h)
+	_draw_manga_soundwave(w, h)
+
+
+## Equalizer bars on a strip along the bottom edge, under the speech: ink outline, paper fill,
+## an ink cap on each peak, and a 2 px ink baseline that the bars fall back to when idle.
+func _draw_manga_soundwave(_w: float, h: float) -> void:
+	_backdrop.draw_set_transform_matrix(Transform2D.IDENTITY)
+	var base_y := h - 14.0
+	var step := WAVE_BAR_W + WAVE_GAP
+	var span := step * float(WAVE_BARS) - WAVE_GAP
+	_backdrop.draw_rect(Rect2(_wave_x, base_y - 2.0, span, 2.0), T.INK_BORDER_BLACK)
+	for index: int in range(WAVE_BARS):
+		var height: float = 2.0 + _wave_bars[index] * (WAVE_MAX_H - 2.0)
+		if height <= 2.5:
+			continue
+		var x := _wave_x + float(index) * step
+		var top := base_y - height
+		_backdrop.draw_rect(Rect2(x, top, WAVE_BAR_W, height), T.INK_BORDER_BLACK)
+		_backdrop.draw_rect(Rect2(x + 2.0, top + 3.0, WAVE_BAR_W - 4.0, maxf(height - 3.0, 0.0)), Color("#F4F5F7"))
+		_backdrop.draw_rect(Rect2(x - 1.0, top - 2.0, WAVE_BAR_W + 2.0, 3.0), T.INK_BORDER_BLACK)
 
 
 func _draw_halftone(w: float, h: float) -> void:

@@ -7,6 +7,9 @@
 export const VOICES = {
 	engineer: { voice: "bm_lewis", speed: 1.05 },
 	driver: { voice: "am_eric", speed: 1.05 },
+	// Freja Berg (Nordic Phantom, field slot 7) hears her own voice: every driver line is also
+	// rendered as <id>_f and marked voice: "female" (see RadioVoice.FEMALE_DRIVER_SLOTS).
+	driver_female: { voice: "af_bella", speed: 1.05 },
 };
 
 const COMPOUNDS = ["SOFT", "MEDIUM", "HARD", "INTERMEDIATE", "WET"];
@@ -15,6 +18,7 @@ const lines = [];
 
 function add(id, speaker, pattern, spoken) {
 	lines.push({ id, speaker, pattern, spoken });
+	if (speaker === "driver") lines.push({ id: `${id}_f`, speaker, pattern, spoken, voice: "female" });
 }
 const word = (compound) => compound.toLowerCase();
 
@@ -76,6 +80,13 @@ for (const n of [1, 2, 3]) {
 add("eng_sc_wall", "engineer", "^Safety Car deployed! #\\d+ \\(\\w+\\) heavily in the wall\\. Cheap pit stop window open!$", "Safety car deployed! A car is heavily in the wall. Cheap pit stop window open!");
 
 // --- driver --------------------------------------------------------------------------------
+// High-drama wheel-to-wheel calls (FASE 8.4): GtDriving.announce_pass / announce_ers_boost, the tyre
+// cliff in _wear_and_fuel and GtContacts.announce_rub.
+add("drv_pass_made", "driver", "^Pass made on \\w+! Clean move down the inside!$", "Pass made! Clean move down the inside!");
+add("drv_lost_spot", "driver", "^Lost the spot to \\w+! Defending now!$", "Lost the spot, defending now!");
+add("drv_ers_boost", "driver", "^Deploying ERS boost! Maximum attack!$", "Deploying E R S boost! Maximum attack!");
+add("drv_tyres_cooked", "driver", "^Tyres are cooked! Rear is sliding everywhere!$", "Tyres are cooked! Rear is sliding everywhere!");
+add("drv_touched_telemetry", "driver", "^We touched with \\w+! Check the telemetry!$", "We touched! Check the telemetry!");
 add("drv_touched", "driver", "^We touched with \\w+! Front wing damage!$", "We touched! Front wing damage!");
 add("drv_spun_contact", "driver", "^I spun after contact with \\w+! Tyres cooked!$", "I spun after contact! Tyres are cooked!");
 add("drv_heavy_crash", "driver", "^Heavy crash! I'm out of the race, suspension sheared off!$", "Heavy crash! I'm out of the race, suspension sheared off!");

@@ -473,15 +473,17 @@ func _defend_and_race(car: GtCar, lead: Dictionary, behind: Dictionary, curv_now
 			car.pass_timer = 0.0
 			car.overtake_phase = GtTypes.Overtake.NONE
 			ahead.overtake_phase = GtTypes.Overtake.YIELDING
+			announce_pass(car, ahead)
 	elif gap < GtTypes.FOLLOW_GAP and ahead.v < _target:
 		var advantage: float = _target - ahead.v
 		if race.rng.next() < minf(0.68, advantage / 7.5) * dt:
 			car.pass_timer = 4.8
 			car.overtake_phase = GtTypes.Overtake.ATTACKING
 			if car.ers_battery > 25.0 and race.rng.next() < 0.35:
+				if car.ers_mode != GtTypes.ErsMode.OVERTAKE:
+					announce_ers_boost(car)
 				car.ers_mode = GtTypes.ErsMode.OVERTAKE
-			if car.team_id == race.player_team_id and race.time - race.last_radio_time > 25.0 and race.rng.next() < 0.3:
-				race.push_radio(car, "engineer", "Passing %s! Excellent drive." % ahead.code)
+			car.praise_pending = car.team_id == race.player_team_id and race.time - race.last_radio_time > 25.0 and race.rng.next() < 0.3
 		else:
 			# Pace behind the car only when in its corridor, not when side by side.
 			var same_corridor: bool = absf(ahead.lateral - car.lateral) < 2.05
@@ -491,6 +493,25 @@ func _defend_and_race(car: GtCar, lead: Dictionary, behind: Dictionary, curv_now
 				car.overtake_phase = GtTypes.Overtake.NONE
 	elif car.defend_timer <= 0.0:
 		car.overtake_phase = GtTypes.Overtake.NONE
+
+
+## Calls after a completed pass: the engineer praises the player's car (rarely), then the driver
+## who took the place and the one who lost it speak. A rival driver is heard when the other car
+## of the pair is the player's.
+func announce_pass(car: GtCar, passed: GtCar) -> void:
+	var involves_player: bool = car.team_id == race.player_team_id or passed.team_id == race.player_team_id
+	if car.praise_pending:
+		car.praise_pending = false
+		race.push_radio(car, "engineer", "Passing %s! Excellent drive." % passed.code)
+	if race.can_push_driver_radio(car.id):
+		race.push_radio(car, "driver", "Pass made on %s! Clean move down the inside!" % passed.code, false, involves_player)
+	if race.can_push_driver_radio(passed.id):
+		race.push_radio(passed, "driver", "Lost the spot to %s! Defending now!" % car.code, false, involves_player)
+
+
+func announce_ers_boost(car: GtCar) -> void:
+	if race.can_push_driver_radio(car.id):
+		race.push_radio(car, "driver", "Deploying ERS boost! Maximum attack!")
 
 
 ## Racing room: never steer into the car alongside; the car with its nose behind lifts.
@@ -561,6 +582,9 @@ func _wear_and_fuel(car: GtCar, ds: float, wear_rate_mult: float, fuel_burn_mult
 	if car.tyre_temp > 112.0:
 		wear_inc *= 1.4
 	car.wear = minf(1.0, car.wear + wear_inc)
+	if car.wear > 0.75 and not car.tyre_cliff_called and race.can_push_driver_radio(car.id):
+		car.tyre_cliff_called = true
+		race.push_radio(car, "driver", "Tyres are cooked! Rear is sliding everywhere!")
 	car.fuel = maxf(0.0, car.fuel - car.fuel_use * laps_driven * fuel_burn_mult)
 	car.fuel_burn_rate = snappedf(car.fuel_use * fuel_burn_mult, 0.01)
 	if car.fuel <= 0.0:
@@ -897,6 +921,7 @@ func _service_car(car: GtCar, pit: GtPit, dt: float) -> void:
 	if pit.timer >= pit.duration:
 		car.compound = pit.compound
 		car.wear = 0.0
+		car.tyre_cliff_called = false
 		car.tyre_age_laps = 0
 		car.tyre_temp = 85.0
 		car.is_punctured = false

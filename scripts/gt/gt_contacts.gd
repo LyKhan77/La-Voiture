@@ -145,6 +145,17 @@ func _note_contact(car_a: GtCar, car_b: GtCar, ds: float, d_lat: float, abs_ds: 
 		_collision_incident(car_a, car_b, mid_s, contact_lat)
 	else:
 		_emit_collision(GtTypes.CollisionKind.RUB, car_a.code, car_b.code, mid_s, contact_lat)
+		announce_rub(car_a, car_b)
+
+
+## A light rub reaches the player team's driver as an urgent call; one call per car every
+## GtRace.DRIVER_RADIO_COOLDOWN_S so a pack battle does not flood the banner.
+func announce_rub(car_a: GtCar, car_b: GtCar) -> void:
+	for pair: Array in [[car_a, car_b], [car_b, car_a]]:
+		var car: GtCar = pair[0]
+		if car.team_id == race.player_team_id and race.can_push_driver_radio(car.id):
+			race.push_radio(car, "driver", "We touched with %s! Check the telemetry!" % (pair[1] as GtCar).code, true)
+			race.driver_radio_cooldown[car.id] = GtRace.DRIVER_RADIO_COOLDOWN_S
 
 
 func _emit_collision(kind: int, code_a: String, code_b: String, s: float, lateral: float) -> void:

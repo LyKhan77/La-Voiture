@@ -32,8 +32,19 @@ const STEP_RECTS: Array[Rect2] = [
 	Rect2(890.0, 720.0, 360.0, 160.0),
 ]
 const STEP_TINT: Array[Color] = [GOLD, SILVER, BRONZE]
-const CARD_H: float = 140.0
+## Character standee above each step: neo-brutalist card with the driver's 2D portrait.
+const CARD_H: float = 240.0
 const CARD_GAP: float = 12.0
+const STANDEE_SIZE := Vector2(360.0, CARD_H)
+const PORTRAIT_FRAME: float = 140.0
+const TIER_NAMES: Array[String] = ["WINNER", "RUNNER-UP", "PODIUM"]
+## Staggered entrance by finishing place (P1 first): when each standee starts, how long it
+## takes to fade in, and how far below its resting spot it slides up from. P3 leads, P1 closes.
+const ENTER_DELAY_S: Array[float] = [0.4, 0.2, 0.0]
+const ENTER_DURATION_S: Array[float] = [0.4, 0.35, 0.35]
+const ENTER_RISE_PX: Array[float] = [80.0, 60.0, 60.0]
+## The trophy pops and the confetti storm starts once the winner is in.
+const TROPHY_AT_S: float = 0.5
 
 var race: GtRace
 var order: Array[GtCar] = []
@@ -42,11 +53,16 @@ var winners: Array[GtCar] = []
 var fastest_car: GtCar
 var driver_points: Dictionary = {} # car id -> points scored this race
 var team_points: Dictionary = {} # team id -> points scored this race
-## Per finishing place (P1 first): the cards' name, time labels and the step panels.
+## Per finishing place (P1 first): the standees' name, time, tier ribbon and portrait nodes
+## and the step panels.
 var name_labels: Array[Label] = []
 var time_labels: Array[Label] = []
 var steps: Array[Control] = []
-var cards: Array[Control] = []
+var standees: Array[Control] = []
+var portraits: Array[TextureRect] = []
+var ribbons: Array[Label] = []
+var ribbon_fills: Array[ColorRect] = []
+var trophy: Control
 var points_labels: Array[Label] = [] # one row per points place, P1 first
 var constructor_labels: Array[Label] = []
 var stamp: Control
@@ -135,7 +151,7 @@ func _process(delta: float) -> void:
 	step(delta)
 
 
-## One frame: the steps rise, the cards drop in, the confetti falls.
+## One frame: the steps rise, the standees slide in, the confetti falls.
 func step(delta: float) -> void:
 	if not _built:
 		return
@@ -158,7 +174,10 @@ func _build() -> void:
 	name_labels.clear()
 	time_labels.clear()
 	steps.clear()
-	cards.clear()
+	standees.clear()
+	portraits.clear()
+	ribbons.clear()
+	ribbon_fills.clear()
 	points_labels.clear()
 	constructor_labels.clear()
 	# The backdrop covers the whole window, the stage is the letterboxed 16:9 frame inside it.
@@ -237,39 +256,114 @@ func _build_step(place: int, car: GtCar) -> void:
 	numeral.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	numeral.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	steps.append(step_panel)
-	# Driver card above the step.
-	var card: Control = _panel(Vector2(rect.position.x, rect.position.y - CARD_H - CARD_GAP), Vector2(rect.size.x, CARD_H), tint)
-	card.name = "Card%d" % (place + 1)
+	var standee: Control = _build_standee(place, car)
+	standee.position = Vector2(rect.position.x, rect.position.y - CARD_H - CARD_GAP)
+
+
+## The driver's standee: tier ribbon, portrait in an ink frame, number, code and team, finishing
+## time and name, on a hard 6 px shadow over the team colour with manga hatching.
+func _build_standee(place: int, car: GtCar) -> Control:
+	var tint: Color = Liveries.color_for(car.team_id)
+	var standee := Control.new()
+	standee.name = "Standee%d" % (place + 1)
+	standee.size = STANDEE_SIZE
+	standee.custom_minimum_size = STANDEE_SIZE
+	standee.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stage.add_child(standee)
+	var shadow := ColorRect.new()
+	shadow.color = T.INK_BORDER_BLACK
+	shadow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	standee.add_child(shadow)
+	shadow.position = Vector2(6.0, 6.0)
+	shadow.size = STANDEE_SIZE
+	var body := Panel.new()
+	var box := StyleBoxFlat.new()
+	box.bg_color = tint.darkened(0.45)
+	box.set_border_width_all(4)
+	box.border_color = T.INK_BORDER_BLACK
+	body.add_theme_stylebox_override("panel", box)
+	body.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	standee.add_child(body)
+	body.size = STANDEE_SIZE
+	var hatch := Hatch.new()
+	standee.add_child(hatch)
+	hatch.position = Vector2(4.0, 4.0)
+	hatch.size = STANDEE_SIZE - Vector2(8.0, 8.0)
+	# Championship tier ribbon: gold, silver or bronze.
+	var ribbon_fill := ColorRect.new()
+	ribbon_fill.color = STEP_TINT[place]
+	ribbon_fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	standee.add_child(ribbon_fill)
+	ribbon_fill.position = Vector2(4.0, 4.0)
+	ribbon_fill.size = Vector2(STANDEE_SIZE.x - 8.0, 34.0)
+	var rule := ColorRect.new()
+	rule.color = T.INK_BORDER_BLACK
+	rule.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	standee.add_child(rule)
+	rule.position = Vector2(4.0, 38.0)
+	rule.size = Vector2(STANDEE_SIZE.x - 8.0, 3.0)
+	var ribbon: Label = _text(standee, "P%d %s // %d PTS" % [place + 1, TIER_NAMES[place], points_for(place + 1)], Vector2(4.0, 2.0), 24, T.INK_BORDER_BLACK, UI.DISPLAY)
+	ribbon.size = Vector2(STANDEE_SIZE.x - 8.0, 34.0)
+	ribbon.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	ribbon.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	# Portrait: 140 px square inside a 2 px ink frame.
+	var frame := ColorRect.new()
+	frame.color = T.INK_BORDER_BLACK
+	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	standee.add_child(frame)
+	frame.position = Vector2(14.0, 46.0)
+	frame.size = Vector2(PORTRAIT_FRAME + 4.0, PORTRAIT_FRAME + 4.0)
+	var portrait := TextureRect.new()
+	portrait.texture = load(GarageRoster.portrait_path(car.id)) as Texture2D
+	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	standee.add_child(portrait)
+	portrait.position = Vector2(16.0, 48.0)
+	portrait.size = Vector2(PORTRAIT_FRAME, PORTRAIT_FRAME)
+	# Car number badge, broadcast code and team, finishing time.
+	var badge_frame := ColorRect.new()
+	badge_frame.color = T.INK_BORDER_BLACK
+	badge_frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	standee.add_child(badge_frame)
+	badge_frame.position = Vector2(172.0, 46.0)
+	badge_frame.size = Vector2(88.0, 62.0)
 	var badge := ColorRect.new()
 	badge.color = tint
 	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	card.add_child(badge)
-	badge.position = Vector2(14.0, 14.0)
-	badge.size = Vector2(76.0, 76.0)
-	var number: Label = _text(badge, "%02d" % car.number, Vector2(0.0, 0.0), 54, T.INK_BORDER_BLACK, UI.DISPLAY)
+	standee.add_child(badge)
+	badge.position = Vector2(175.0, 49.0)
+	badge.size = Vector2(82.0, 56.0)
+	var number: Label = _text(badge, "%02d" % car.number, Vector2.ZERO, 44, T.INK_BORDER_BLACK, UI.DISPLAY)
 	number.size = badge.size
 	number.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	number.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	var driver: Label = _text(card, car.driver_name.to_upper(), Vector2(104.0, 10.0), 34, T.TEXT_PRIMARY, UI.DISPLAY)
-	driver.size = Vector2(rect.size.x - 116.0, 44.0)
-	driver.clip_text = true
-	_text(card, "%s  //  %s" % [car.code, car.team_name.to_upper()], Vector2(104.0, 58.0), 17, tint, UI.HEADER)
-	_text(card, "P%d" % (place + 1), Vector2(104.0, 82.0), 15, T.TEXT_MUTED)
-	var time_label: Label = _text(card, format_time(car.finished_at), Vector2(14.0, 102.0), 24, T.ACCENT_ACID_LIME)
-	time_label.size = Vector2(rect.size.x - 28.0, 30.0)
+	var team: Label = _text(standee, "%s // %s" % [car.code, car.team_name.to_upper()], Vector2(172.0, 116.0), 16, T.TEXT_PRIMARY, UI.HEADER)
+	team.size = Vector2(176.0, 22.0)
+	team.clip_text = true
+	var time_label: Label = _text(standee, format_time(car.finished_at), Vector2(172.0, 148.0), 20, T.ACCENT_ACID_LIME)
+	time_label.size = Vector2(176.0, 28.0)
 	time_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	var driver: Label = _text(standee, car.driver_name.to_upper(), Vector2(14.0, 192.0), 28, T.TEXT_PRIMARY, UI.DISPLAY)
+	driver.size = Vector2(STANDEE_SIZE.x - 28.0, 34.0)
+	driver.clip_text = true
 	name_labels.append(driver)
 	time_labels.append(time_label)
-	cards.append(card)
+	standees.append(standee)
+	portraits.append(portrait)
+	ribbons.append(ribbon)
+	ribbon_fills.append(ribbon_fill)
+	return standee
 
 
 func _build_trophy() -> void:
-	var trophy := Trophy.new()
+	trophy = Trophy.new()
 	trophy.name = "Trophy"
 	stage.add_child(trophy)
 	var centre: float = STEP_RECTS[0].position.x + STEP_RECTS[0].size.x * 0.5
 	trophy.size = Vector2(180.0, 190.0)
 	trophy.position = Vector2(centre - 90.0, STEP_RECTS[0].position.y - CARD_H - CARD_GAP - 200.0)
+	trophy.pivot_offset = trophy.size * 0.5
 
 
 func _build_points_table() -> void:
@@ -339,7 +433,7 @@ func _team_name(team_id: int) -> String:
 func _build_stamp() -> void:
 	if fastest_car == null:
 		return
-	stamp = _panel(Vector2(140.0, 150.0), Vector2(520.0, 108.0), T.ACCENT_PURPLE_SECTOR)
+	stamp = _panel(Vector2(50.0, 150.0), Vector2(520.0, 108.0), T.ACCENT_PURPLE_SECTOR)
 	stamp.name = "FastestLapStamp"
 	var fill := ColorRect.new()
 	fill.color = T.ACCENT_PURPLE_SECTOR
@@ -388,8 +482,20 @@ func _on_exit() -> void:
 	exit_requested.emit()
 
 
-## Steps rise from the floor, then the cards drop onto them and the stamp slaps down.
+## Jumps the reveal to `seconds` after it started (0 .. REVEAL_S).
+func set_elapsed(seconds: float) -> void:
+	_reveal = clampf(seconds / REVEAL_S, 0.0, 1.0)
+	_apply_reveal()
+
+
+func confetti_visible() -> bool:
+	return _confetti != null and _confetti.visible
+
+
+## Steps rise from the floor, the standees slide up P3, P2, P1, then the trophy pops, the
+## confetti starts and the stamp slaps down.
 func _apply_reveal() -> void:
+	var elapsed: float = _reveal * REVEAL_S
 	for place: int in range(steps.size()):
 		var rect: Rect2 = STEP_RECTS[place]
 		var rise: float = ease(clampf(_reveal / 0.6, 0.0, 1.0), -2.0)
@@ -397,14 +503,34 @@ func _apply_reveal() -> void:
 		steps[place].position.y = rect.position.y + rect.size.y - height
 		steps[place].size.y = maxf(height, 1.0)
 		steps[place].clip_contents = true
-		var drop: float = ease(clampf((_reveal - 0.45) / 0.4, 0.0, 1.0), -2.0)
-		cards[place].modulate.a = drop
-		cards[place].position.y = rect.position.y - CARD_H - CARD_GAP - 40.0 * (1.0 - drop)
+		var enter: float = clampf((elapsed - ENTER_DELAY_S[place]) / ENTER_DURATION_S[place], 0.0, 1.0)
+		standees[place].modulate.a = enter
+		standees[place].position.y = rect.position.y - CARD_H - CARD_GAP + ENTER_RISE_PX[place] * (1.0 - ease(enter, -2.0))
+	var pop: float = clampf((elapsed - TROPHY_AT_S) / 0.3, 0.0, 1.0)
+	if trophy != null:
+		trophy.modulate.a = pop
+		trophy.scale = Vector2.ONE * (0.5 + 0.5 * ease(pop, -2.0))
+	if _confetti != null:
+		_confetti.visible = elapsed >= TROPHY_AT_S
 	if stamp != null:
 		stamp.modulate.a = clampf((_reveal - 0.8) / 0.2, 0.0, 1.0)
 
 
 # --- drawn pieces --------------------------------------------------------------------------------
+
+## Diagonal manga hatching over a standee's team colour.
+class Hatch extends Control:
+	func _init() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		clip_contents = true
+
+	func _draw() -> void:
+		var ink := Color(0.02, 0.02, 0.02, 0.22)
+		var x: float = -size.y
+		while x < size.x:
+			draw_line(Vector2(x, size.y), Vector2(x + size.y, 0.0), ink, 2.0)
+			x += 14.0
+
 
 ## Falling paper in the palette; seeded so a capture is repeatable.
 class Confetti extends Control:

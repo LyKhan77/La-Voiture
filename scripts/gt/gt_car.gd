@@ -79,6 +79,10 @@ var damage: float = 0.0
 var spin_timer: float = 0.0
 var spin_angle: float = 0.0
 var incident_cooldown: float = 0.0
+## The driver has already complained about this set of tyres being past the wear cliff.
+var tyre_cliff_called: bool = false
+## Decided when the attack began (same random draw as always): the engineer praises the pass once it is made.
+var praise_pending: bool = false
 var impact_jolt: float = 0.0
 var impact_side: float = 1.0
 var collision_hold_timer: float = 0.0

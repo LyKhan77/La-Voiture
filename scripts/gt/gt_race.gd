@@ -47,6 +47,9 @@ var last_incident_time: float = -999.0
 ## Race time at which the winner took the flag; every other car finishes at its next line crossing.
 var flag_time: float = -1.0
 var last_radio_time: float = -999.0
+## Seconds before a car may make another routine call to the pit wall, by car id. Urgent calls ignore it.
+const DRIVER_RADIO_COOLDOWN_S: float = 15.0
+var driver_radio_cooldown: Dictionary = {}
 
 var _radio_counter: int = 0
 var _suggestion_cooldowns: Dictionary = {} # "car-type" -> time
@@ -196,6 +199,7 @@ func standings_entries() -> Array[Dictionary]:
 ## One fixed tick of GtTypes.TICK_DT.
 func step(dt: float = GtTypes.TICK_DT) -> void:
 	tick_count += 1
+	_tick_driver_radio_cooldowns(dt)
 	_step_weather(dt)
 	_update_race_control(dt)
 	var racing: Array[GtCar] = []
@@ -358,14 +362,31 @@ func is_under_caution(car: GtCar) -> bool:
 
 # --- radio and tactics -------------------------------------------------------
 
-func push_radio(car: GtCar, speaker: String, text: String, force: bool = false) -> void:
-	if not force and car.team_id != player_team_id:
+## True when the car has not made a routine driver call in the last DRIVER_RADIO_COOLDOWN_S.
+func can_push_driver_radio(car_id: int) -> bool:
+	return float(driver_radio_cooldown.get(car_id, 0.0)) <= 0.0
+
+
+func _tick_driver_radio_cooldowns(dt: float) -> void:
+	for car_id: int in driver_radio_cooldown.keys():
+		var left: float = float(driver_radio_cooldown[car_id]) - dt
+		if left <= 0.0:
+			driver_radio_cooldown.erase(car_id)
+		else:
+			driver_radio_cooldown[car_id] = left
+
+
+## `rival` lets a car outside the player's team speak because the call is about one of the player's cars.
+func push_radio(car: GtCar, speaker: String, text: String, force: bool = false, rival: bool = false) -> void:
+	if not force and not rival and car.team_id != player_team_id:
 		return
+	if speaker == "driver" and not force:
+		driver_radio_cooldown[car.id] = DRIVER_RADIO_COOLDOWN_S
 	last_radio_time = time
 	_radio_counter += 1
 	var message: Dictionary = {
 		"id": _radio_counter, "car_id": car.id, "code": car.code, "driver_name": car.driver_name,
-		"team_color": car.color, "speaker": speaker, "text": text, "time": time, "urgent": force,
+		"team_color": car.color, "speaker": speaker, "text": text, "time": time, "urgent": force, "rival": rival,
 	}
 	radio_history.append(message)
 	if radio_history.size() > 60:

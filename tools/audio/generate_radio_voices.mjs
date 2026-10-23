@@ -1,5 +1,5 @@
 // Renders the team radio voice clips (FASE 6) with Kokoro-82M, a local Apache-2.0 TTS model:
-// bm_lewis for the engineer, am_eric for the driver (see tools/audio/radio_lines.mjs).
+// bm_lewis for the engineer, am_eric for the driver and af_bella for Freja Berg (see tools/audio/radio_lines.mjs).
 // Clips go to assets/audio/radio/voice/<id>.wav (mono 24 kHz, trimmed, loudness-normalised; the
 // in-game Radio bus adds the band-pass and the grit) and the lookup table to manifest.json.
 //
@@ -44,7 +44,7 @@ let made = 0;
 for (const line of LINES) {
 	const file = path.join(outDir, `${line.id}.wav`);
 	if ((only && !only.has(line.id)) || (!only && !force && fs.existsSync(file))) continue;
-	const { voice, speed } = VOICES[line.speaker];
+	const { voice, speed } = VOICES[line.voice === "female" ? "driver_female" : line.speaker];
 	const raw = path.join(tmp, `${line.id}.wav`);
 	const audio = await tts.generate(line.spoken, { voice, speed });
 	await audio.save(raw);
@@ -60,6 +60,7 @@ const manifest = LINES.map((line) => ({
 	pattern: line.pattern,
 	file: `res://assets/audio/radio/voice/${line.id}.wav`,
 	spoken: line.spoken,
+	...(line.voice ? { voice: line.voice } : {}),
 }));
 fs.writeFileSync(path.join(outDir, "manifest.json"), JSON.stringify(manifest, null, "\t") + "\n");
 console.log(`${made} clip(s) rendered, ${manifest.length} in manifest.json`);

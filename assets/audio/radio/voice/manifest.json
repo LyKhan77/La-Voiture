@@ -357,11 +357,94 @@
 		"spoken": "Safety car deployed! A car is heavily in the wall. Cheap pit stop window open!"
 	},
 	{
+		"id": "drv_pass_made",
+		"speaker": "driver",
+		"pattern": "^Pass made on \\w+! Clean move down the inside!$",
+		"file": "res://assets/audio/radio/voice/drv_pass_made.wav",
+		"spoken": "Pass made! Clean move down the inside!"
+	},
+	{
+		"id": "drv_pass_made_f",
+		"speaker": "driver",
+		"pattern": "^Pass made on \\w+! Clean move down the inside!$",
+		"file": "res://assets/audio/radio/voice/drv_pass_made_f.wav",
+		"spoken": "Pass made! Clean move down the inside!",
+		"voice": "female"
+	},
+	{
+		"id": "drv_lost_spot",
+		"speaker": "driver",
+		"pattern": "^Lost the spot to \\w+! Defending now!$",
+		"file": "res://assets/audio/radio/voice/drv_lost_spot.wav",
+		"spoken": "Lost the spot, defending now!"
+	},
+	{
+		"id": "drv_lost_spot_f",
+		"speaker": "driver",
+		"pattern": "^Lost the spot to \\w+! Defending now!$",
+		"file": "res://assets/audio/radio/voice/drv_lost_spot_f.wav",
+		"spoken": "Lost the spot, defending now!",
+		"voice": "female"
+	},
+	{
+		"id": "drv_ers_boost",
+		"speaker": "driver",
+		"pattern": "^Deploying ERS boost! Maximum attack!$",
+		"file": "res://assets/audio/radio/voice/drv_ers_boost.wav",
+		"spoken": "Deploying E R S boost! Maximum attack!"
+	},
+	{
+		"id": "drv_ers_boost_f",
+		"speaker": "driver",
+		"pattern": "^Deploying ERS boost! Maximum attack!$",
+		"file": "res://assets/audio/radio/voice/drv_ers_boost_f.wav",
+		"spoken": "Deploying E R S boost! Maximum attack!",
+		"voice": "female"
+	},
+	{
+		"id": "drv_tyres_cooked",
+		"speaker": "driver",
+		"pattern": "^Tyres are cooked! Rear is sliding everywhere!$",
+		"file": "res://assets/audio/radio/voice/drv_tyres_cooked.wav",
+		"spoken": "Tyres are cooked! Rear is sliding everywhere!"
+	},
+	{
+		"id": "drv_tyres_cooked_f",
+		"speaker": "driver",
+		"pattern": "^Tyres are cooked! Rear is sliding everywhere!$",
+		"file": "res://assets/audio/radio/voice/drv_tyres_cooked_f.wav",
+		"spoken": "Tyres are cooked! Rear is sliding everywhere!",
+		"voice": "female"
+	},
+	{
+		"id": "drv_touched_telemetry",
+		"speaker": "driver",
+		"pattern": "^We touched with \\w+! Check the telemetry!$",
+		"file": "res://assets/audio/radio/voice/drv_touched_telemetry.wav",
+		"spoken": "We touched! Check the telemetry!"
+	},
+	{
+		"id": "drv_touched_telemetry_f",
+		"speaker": "driver",
+		"pattern": "^We touched with \\w+! Check the telemetry!$",
+		"file": "res://assets/audio/radio/voice/drv_touched_telemetry_f.wav",
+		"spoken": "We touched! Check the telemetry!",
+		"voice": "female"
+	},
+	{
 		"id": "drv_touched",
 		"speaker": "driver",
 		"pattern": "^We touched with \\w+! Front wing damage!$",
 		"file": "res://assets/audio/radio/voice/drv_touched.wav",
 		"spoken": "We touched! Front wing damage!"
+	},
+	{
+		"id": "drv_touched_f",
+		"speaker": "driver",
+		"pattern": "^We touched with \\w+! Front wing damage!$",
+		"file": "res://assets/audio/radio/voice/drv_touched_f.wav",
+		"spoken": "We touched! Front wing damage!",
+		"voice": "female"
 	},
 	{
 		"id": "drv_spun_contact",
@@ -371,11 +454,27 @@
 		"spoken": "I spun after contact! Tyres are cooked!"
 	},
 	{
+		"id": "drv_spun_contact_f",
+		"speaker": "driver",
+		"pattern": "^I spun after contact with \\w+! Tyres cooked!$",
+		"file": "res://assets/audio/radio/voice/drv_spun_contact_f.wav",
+		"spoken": "I spun after contact! Tyres are cooked!",
+		"voice": "female"
+	},
+	{
 		"id": "drv_heavy_crash",
 		"speaker": "driver",
 		"pattern": "^Heavy crash! I'm out of the race, suspension sheared off!$",
 		"file": "res://assets/audio/radio/voice/drv_heavy_crash.wav",
 		"spoken": "Heavy crash! I'm out of the race, suspension sheared off!"
+	},
+	{
+		"id": "drv_heavy_crash_f",
+		"speaker": "driver",
+		"pattern": "^Heavy crash! I'm out of the race, suspension sheared off!$",
+		"file": "res://assets/audio/radio/voice/drv_heavy_crash_f.wav",
+		"spoken": "Heavy crash! I'm out of the race, suspension sheared off!",
+		"voice": "female"
 	},
 	{
 		"id": "drv_lost_rear_5",
@@ -385,11 +484,27 @@
 		"spoken": "I lost the rear at turn 5! Spun out, tyres flat-spotted!"
 	},
 	{
+		"id": "drv_lost_rear_5_f",
+		"speaker": "driver",
+		"pattern": "^I lost the rear at Turn 5! Spun out, tyres flat-spotted!$",
+		"file": "res://assets/audio/radio/voice/drv_lost_rear_5_f.wav",
+		"spoken": "I lost the rear at turn 5! Spun out, tyres flat-spotted!",
+		"voice": "female"
+	},
+	{
 		"id": "drv_lost_rear_9",
 		"speaker": "driver",
 		"pattern": "^I lost the rear at Turn 9! Spun out, tyres flat-spotted!$",
 		"file": "res://assets/audio/radio/voice/drv_lost_rear_9.wav",
 		"spoken": "I lost the rear at turn 9! Spun out, tyres flat-spotted!"
+	},
+	{
+		"id": "drv_lost_rear_9_f",
+		"speaker": "driver",
+		"pattern": "^I lost the rear at Turn 9! Spun out, tyres flat-spotted!$",
+		"file": "res://assets/audio/radio/voice/drv_lost_rear_9_f.wav",
+		"spoken": "I lost the rear at turn 9! Spun out, tyres flat-spotted!",
+		"voice": "female"
 	},
 	{
 		"id": "drv_lost_rear_13",
@@ -399,11 +514,27 @@
 		"spoken": "I lost the rear at turn 13! Spun out, tyres flat-spotted!"
 	},
 	{
+		"id": "drv_lost_rear_13_f",
+		"speaker": "driver",
+		"pattern": "^I lost the rear at Turn 13! Spun out, tyres flat-spotted!$",
+		"file": "res://assets/audio/radio/voice/drv_lost_rear_13_f.wav",
+		"spoken": "I lost the rear at turn 13! Spun out, tyres flat-spotted!",
+		"voice": "female"
+	},
+	{
 		"id": "drv_barrier",
 		"speaker": "driver",
 		"pattern": "^Hit the barrier! Front wing is broken, handling like a boat!$",
 		"file": "res://assets/audio/radio/voice/drv_barrier.wav",
 		"spoken": "Hit the barrier! Front wing is broken, handling like a boat!"
+	},
+	{
+		"id": "drv_barrier_f",
+		"speaker": "driver",
+		"pattern": "^Hit the barrier! Front wing is broken, handling like a boat!$",
+		"file": "res://assets/audio/radio/voice/drv_barrier_f.wav",
+		"spoken": "Hit the barrier! Front wing is broken, handling like a boat!",
+		"voice": "female"
 	},
 	{
 		"id": "drv_massive_crash",
@@ -413,11 +544,27 @@
 		"spoken": "Massive crash! I'm into the wall, car is destroyed!"
 	},
 	{
+		"id": "drv_massive_crash_f",
+		"speaker": "driver",
+		"pattern": "^Massive crash! I'm into the wall, car is destroyed!$",
+		"file": "res://assets/audio/radio/voice/drv_massive_crash_f.wav",
+		"spoken": "Massive crash! I'm into the wall, car is destroyed!",
+		"voice": "female"
+	},
+	{
 		"id": "drv_oversteer",
 		"speaker": "driver",
 		"pattern": "^Had a snap of oversteer! Lost some time\\.$",
 		"file": "res://assets/audio/radio/voice/drv_oversteer.wav",
 		"spoken": "Had a snap of oversteer! Lost some time."
+	},
+	{
+		"id": "drv_oversteer_f",
+		"speaker": "driver",
+		"pattern": "^Had a snap of oversteer! Lost some time\\.$",
+		"file": "res://assets/audio/radio/voice/drv_oversteer_f.wav",
+		"spoken": "Had a snap of oversteer! Lost some time.",
+		"voice": "female"
 	},
 	{
 		"id": "drv_engine_died",
@@ -427,11 +574,27 @@
 		"spoken": "Engine died! No fuel, no fuel! I'm stopping on the grass!"
 	},
 	{
+		"id": "drv_engine_died_f",
+		"speaker": "driver",
+		"pattern": "^Engine died! No fuel, no fuel! I'm stopping on the grass!$",
+		"file": "res://assets/audio/radio/voice/drv_engine_died_f.wav",
+		"spoken": "Engine died! No fuel, no fuel! I'm stopping on the grass!",
+		"voice": "female"
+	},
+	{
 		"id": "drv_puncture",
 		"speaker": "driver",
 		"pattern": "^Puncture! The tyre has delaminated!$",
 		"file": "res://assets/audio/radio/voice/drv_puncture.wav",
 		"spoken": "Puncture! The tyre has delaminated!"
+	},
+	{
+		"id": "drv_puncture_f",
+		"speaker": "driver",
+		"pattern": "^Puncture! The tyre has delaminated!$",
+		"file": "res://assets/audio/radio/voice/drv_puncture_f.wav",
+		"spoken": "Puncture! The tyre has delaminated!",
+		"voice": "female"
 	},
 	{
 		"id": "drv_blowout",
@@ -441,10 +604,26 @@
 		"spoken": "I'm spinning! Tyre blew out on the high speed section!"
 	},
 	{
+		"id": "drv_blowout_f",
+		"speaker": "driver",
+		"pattern": "^I'm spinning! Tyre blew out on the high speed section!$",
+		"file": "res://assets/audio/radio/voice/drv_blowout_f.wav",
+		"spoken": "I'm spinning! Tyre blew out on the high speed section!",
+		"voice": "female"
+	},
+	{
 		"id": "drv_suspension",
 		"speaker": "driver",
 		"pattern": "^Suspension has snapped from the flat tyre! I can't steer, retiring the car!$",
 		"file": "res://assets/audio/radio/voice/drv_suspension.wav",
 		"spoken": "Suspension has snapped from the flat tyre! I can't steer, retiring the car!"
+	},
+	{
+		"id": "drv_suspension_f",
+		"speaker": "driver",
+		"pattern": "^Suspension has snapped from the flat tyre! I can't steer, retiring the car!$",
+		"file": "res://assets/audio/radio/voice/drv_suspension_f.wav",
+		"spoken": "Suspension has snapped from the flat tyre! I can't steer, retiring the car!",
+		"voice": "female"
 	}
 ]
