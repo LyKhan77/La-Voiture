@@ -23,7 +23,7 @@
 
 ## 3. Main menu Concept 01
 
-Judul "LA VOITURE" Anton 156 pt, `rotation = -0.21`, outline 14 px, bayangan hitam (+6,+6) dan tepi acid (−3,−1); `SprayHalo` (inti lime 140 px / halo crimson 280 px) di belakangnya; subtag `/// GT3 // RACING SYNDICATE // TOON MOTORSPORT`.
+Judul = logo toon-anime x grafiti (`assets/ui/title/game-title-logo-la-voiture-with-a-clear-cmvkjm70.png`, PNG transparan hasil `npx genex image --transparent --quality high`, konsep nomor 1 yang dipilih): huruf blok miring berisi halftone lime, outline tinta, bayangan crimson, dan asap grafiti cyan/lime; dipasang sebagai `BrandTitle` (`TextureRect`) di atas subtag `/// GT3 // RACING SYNDICATE // TOON MOTORSPORT`. Judul teks Anton + `SprayHalo` lama dihapus.
 Tombol: `StyleBoxFlat.skew` −0.21, border 4 px, bayangan solid 6 px, awalan `/// `. Hover/fokus: geser (+6, −2) seketika, latar → acid lime, teks → hitam, bayangan → crimson (8 px); kembali dalam 0.12 s. Modal credits/quit miring −4° dengan lencana crimson `SYS // …`.
 
 Bukti: `screenshots/phases/fase-8.5-main-menu.png`, `fase-8.5-main-menu-hover.png`.
@@ -32,6 +32,12 @@ Bukti: `screenshots/phases/fase-8.5-main-menu.png`, `fase-8.5-main-menu-hover.pn
 
 `GarageEnvironmentBuilder._instantiate_car()` kini memuat sasis balap (`GtCarActor.CHASSIS_BY_TEAM` / `BASE_CHASSIS`) dengan roda medium, bukan `*_full.glb`. Material bodi = material balapan (toon_car_paint untuk 9 mobil, anime_cel_shaded untuk Porsche) lengkap dengan `next_pass` inverted-hull. `PresentationSettings.apply_to_tree()` sudah menelusuri `next_pass`; test membuktikan lebar tinta LOW 0.007 m → ULTRA 0.020 m di showroom. Tidak ada perubahan di `presentation_settings.gd`.
 Semua 10 sasis `keeps_original_paint = true`, sehingga tidak ada tint livery tambahan.
+
+## 4b. Refinement setelah review pengguna
+
+- **Lampu depan/belakang:** semua elemen lampu di bodi dibuang (estetika aset, posisi lampu tiap mobil berbeda). Lampu rem = kilau lembut + pita neon crimson yang mengalir di belakang mobil (`RaceVfx.tail_trails`); lampu depan = `SpotLight3D` + kilau lembut, menyala terus di malam/hujan.
+- **Speedlines:** berpusat di posisi mobil di layar (area bersih di sekitar mobil), dipotong ke jendela bebas-HUD sehingga tidak melintasi panel HUD (konsep `temp/concepts/vfx_toon_anime_graffiti_concept.png`).
+- **Judul:** 4 arah konsep dihasilkan, nomor 1 dipilih dan dipasang.
 
 ## 5. Keputusan (rulings)
 
@@ -54,7 +60,5 @@ Bukti visual: `screenshots/phases/fase-8.5-*.png` (menu, hover, balap malam, spe
 
 ## 8. Batas yang diketahui
 
-- Tekstur sebagian sasis sudah melukis lampu sendiri; strip LED emisif berada tepat di bawahnya, bukan menggantikan lukisan itu.
-- Speedlines di `CanvasLayer` 5 sesuai spesifikasi, sehingga garisnya melintasi panel HUD.
 - Smoke test native 3 lap 20 mobil dan hitungan orphan node belum dijalankan di sesi ini; hanya headless + capture visual.
 - Review akhir dilakukan sendiri oleh penulis (tanpa subagent).

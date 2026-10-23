@@ -12,7 +12,6 @@ const PS := preload("res://scripts/core/presentation_settings.gd")
 const ConfigData := preload("res://scripts/core/race_config_data.gd")
 const GarageBuilder := preload("res://scripts/world/garage_environment_builder.gd")
 const GarageOrbit := preload("res://scripts/ui/garage_car_orbit.gd")
-const SprayHaloScript := preload("res://scripts/ui/spray_halo.gd")
 const SettingsScene := preload("res://scenes/ui/settings_modal.tscn")
 const HEADER := preload("res://assets/fonts/BarlowCondensed.ttf")
 const MONO := preload("res://assets/fonts/JetBrainsMono.ttf")
@@ -24,7 +23,9 @@ const STAGE := Vector2(1920.0, 1080.0)
 ## Concept 01 "Street Tag & Speed Stencil": everything leans -12 degrees (0.21 rad), modals -4.
 const SLANT_RAD: float = -0.21
 const MODAL_TILT_RAD: float = -0.0698 # -4 degrees
-const TITLE_POSITION := Vector2(112.0, 130.0)
+const TITLE_LOGO := preload("res://assets/ui/title/game-title-logo-la-voiture-with-a-clear-cmvkjm70.png")
+const TITLE_POSITION := Vector2(40.0, -22.0)
+const TITLE_SIZE := Vector2(700.0, 391.0)
 const SUBTAG := "/// GT3 // RACING SYNDICATE // TOON MOTORSPORT"
 const BUTTON_PREFIX := "/// "
 const BUTTON_SIZE := Vector2(620.0, 74.0)
@@ -169,29 +170,26 @@ func _build_stage() -> void:
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	stage.add_child(shade)
 
-	var halo := SprayHaloScript.new()
-	halo.name = "SprayHalo"
-	halo.position = TITLE_POSITION + Vector2(330.0, 90.0)
-	stage.add_child(halo)
-
-	# Black offset shadow and an acid edge sit behind the inked title as copies of it.
-	for layer: Array in [["BrandTitleShadow", Vector2(6.0, 6.0), Color.BLACK], ["BrandTitleEdge", Vector2(-3.0, -1.0), T.ACCENT_ACID_LIME]]:
-		var echo := _title_label(String(layer[0]), layer[2])
-		echo.position = TITLE_POSITION + (layer[1] as Vector2)
-		stage.add_child(echo)
-	var brand := _title_label("BrandTitle", T.TEXT_PRIMARY)
+	# The title is the toon-anime x graffiti logo art itself: slanted ink-and-halftone letters in smoke.
+	var brand := TextureRect.new()
+	brand.name = "BrandTitle"
+	brand.texture = TITLE_LOGO
+	brand.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	brand.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	brand.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	brand.position = TITLE_POSITION
+	brand.size = TITLE_SIZE
 	stage.add_child(brand)
 
 	var subtag := UI.label(SUBTAG, 24, T.ACCENT_ELECTRIC_CYAN, HEADER)
 	subtag.name = "Subtag"
-	subtag.position = Vector2(130.0, 346.0)
+	subtag.position = Vector2(150.0, 372.0)
 	subtag.rotation = SLANT_RAD
 	subtag.add_theme_constant_override("outline_size", 6)
 	subtag.add_theme_color_override("font_outline_color", T.INK_BORDER_BLACK)
 	stage.add_child(subtag)
 	var build := UI.label("EXHIBITION BUILD 1.0  //  PIT LANE, 22:40", 14, T.TEXT_MUTED, MONO)
-	build.position = Vector2(118.0, 380.0)
+	build.position = Vector2(118.0, 408.0)
 	stage.add_child(build)
 
 	_build_buttons()
@@ -216,15 +214,6 @@ func _build_buttons() -> void:
 	quit_button.name = "QuitButton"
 	quit_button.pressed.connect(_on_quit_pressed)
 	_focus_ring()
-
-
-func _title_label(node_name: String, color: Color) -> Label:
-	var label := UI.label("LA VOITURE", 156, color, DISPLAY)
-	label.name = node_name
-	label.rotation = SLANT_RAD
-	label.add_theme_constant_override("outline_size", 14)
-	label.add_theme_color_override("font_outline_color", T.INK_BORDER_BLACK if node_name == "BrandTitle" else color)
-	return label
 
 
 ## One parallelogram plate: dark fill, 4 px ink border, solid 6 px shadow. Hover and focus snap it

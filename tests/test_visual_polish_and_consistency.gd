@@ -206,9 +206,10 @@ func _test_main_menu_concept_01_styling() -> void:
 	root.add_child(menu)
 	await process_frame
 	var stage := menu.get("stage") as Control
-	var title := stage.get_node_or_null("BrandTitle") as Label
-	check(title != null and absf(title.rotation - (-0.21)) < 0.005, "menu: the LA VOITURE title leans -12 deg (rotation -0.21)")
-	check(stage.get_node_or_null("SprayHalo") != null, "menu: a spray paint halo sits behind the title")
+	var logo := stage.get_node_or_null("BrandTitle") as TextureRect
+	var logo_ok: bool = logo != null and logo.texture != null and logo.texture.resource_path.begins_with("res://assets/ui/title/") and logo.expand_mode != TextureRect.EXPAND_KEEP_SIZE
+	check(logo_ok and stage.get_node_or_null("SprayHalo") == null and stage.get_node_or_null("BrandTitleShadow") == null,
+		"menu: the title is the toon-anime x graffiti logo art (no plain text label, halo or echo copies)")
 	var tag_ok: bool = false
 	for node: Node in stage.get_children():
 		var label := node as Label
