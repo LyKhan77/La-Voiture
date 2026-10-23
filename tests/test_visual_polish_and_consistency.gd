@@ -246,7 +246,8 @@ func _find_toon_body(node: Node) -> ShaderMaterial:
 		if mesh_instance.mesh != null:
 			for surface: int in range(mesh_instance.mesh.get_surface_count()):
 				var material := (mesh_instance.get_surface_override_material(surface) if mesh_instance.get_surface_override_material(surface) != null else mesh_instance.mesh.surface_get_material(surface)) as ShaderMaterial
-				if material != null and material.shader != null and material.shader.resource_path.ends_with("toon_car_paint.gdshader"):
+				# The Porsche base chassis races in anime_cel_shaded; the nine others in toon_car_paint.
+				if material != null and material.shader != null and (material.shader.resource_path.ends_with("toon_car_paint.gdshader") or material.shader.resource_path.ends_with("anime_cel_shaded.gdshader")):
 					return material
 	for child: Node in node.get_children():
 		var found: ShaderMaterial = _find_toon_body(child)
@@ -266,7 +267,7 @@ func _test_garage_showroom_toon_consistency() -> void:
 		all_toon = all_toon and paint != null
 		var hull := paint.next_pass as ShaderMaterial if paint != null else null
 		all_inked = all_inked and hull != null and hull.shader.resource_path.ends_with("inverted_hull_outline.gdshader")
-	check(all_toon and all_inked, "showroom: stall cars wear toon_car_paint with an inverted-hull ink pass, like the race chassis")
+	check(all_toon and all_inked, "showroom: stall cars wear the race cel paint with an inverted-hull ink pass")
 	var quality_before: int = PS.quality
 	var widths: Array[float] = []
 	for level: int in [PS.Quality.LOW, PS.Quality.ULTRA]:

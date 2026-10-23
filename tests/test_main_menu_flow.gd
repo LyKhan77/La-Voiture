@@ -148,7 +148,7 @@ func _test_menu_scenes(config_script: Script) -> void:
 	for index: int in range(10):
 		var model: Node3D = garage.environment.cars[index]
 		var slug: String = expected_slugs[index]
-		check(model.scene_file_path == "res://assets/cars/%s/%s_full.glb" % [slug, slug] and is_equal_approx(garage.environment.stalls[index].position.x, float(index) * 14.0), "Stall %02d uses the canonical full model at its dolly stop" % index)
+		check(model.scene_file_path == ("res://scenes/car/base_chassis.tscn" if index == 0 else "res://scenes/car/%s_chassis.tscn" % slug) and is_equal_approx(garage.environment.stalls[index].position.x, float(index) * 14.0), "Stall %02d rides its race chassis at its dolly stop" % index)
 	var roster: Script = load("res://scripts/ui/garage_roster.gd")
 	for slot: int in range(20):
 		var texture: Texture2D = load(roster.portrait_path(slot))

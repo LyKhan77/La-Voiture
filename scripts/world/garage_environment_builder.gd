@@ -3,9 +3,9 @@ extends Node3D
 
 ## Procedural 10-stall pit garage for the team-select screen. Each stall is spaced
 ## STALL_SPACING metres apart along +X, opens to +Z (the pit lane) and carries the team's
-## real `*_full.glb` car, a glossy epoxy floor, hazard chevrons, floor typography, steel
+## race chassis (toon paint + ink hull, medium wheels), a glossy epoxy floor, hazard chevrons, floor typography, steel
 ## partitions with team-coloured LED strips, a tyre rack, a toolbox and a hanging
-## telemetry monitor. The car instances are the imported GLB roots themselves: bounds are
+## telemetry monitor. The car instances are the chassis scenes themselves: bounds are
 ## read from the meshes, never from the shared asset, and each root is normalised onto the
 ## floor inside its stall.
 
@@ -72,6 +72,7 @@ func build(team_count: int = 10) -> void:
 		_build_stall(stall, team)
 		var car: Node3D = _instantiate_car(team)
 		stall.add_child(car)
+		_dress_car(car)
 		cars.append(car)
 	_build_partitions()
 	_build_ceiling_lights()
@@ -343,22 +344,21 @@ func _build_reflection_probe() -> void:
 	add_child(probe)
 
 
+## The team's race chassis (the scene GtCarActor rides on the grid): its body already wears
+## toon_car_paint with the inverted-hull ink pass, so the showroom and the race share one look.
+## Wheels need the chassis' sockets, so the car is finished by _dress_car() once it is in the tree.
 func _instantiate_car(team: int) -> Node3D:
-	var path: String = Roster.car_path(team)
-	var packed: PackedScene = load(path) as PackedScene
-	if packed == null:
-		push_error("Garage car missing: %s" % path)
-		var placeholder := Node3D.new()
-		placeholder.name = "Car%02d" % (team + 1)
-		return placeholder
-	var instance: Node = packed.instantiate()
-	var car: Node3D = instance as Node3D
-	if car == null:
-		car = Node3D.new()
-		car.add_child(instance)
+	var packed: PackedScene = GtCarActor.CHASSIS_BY_TEAM.get(team, GtCarActor.BASE_CHASSIS)
+	var car := packed.instantiate() as Node3D
 	car.name = "Car%02d" % (team + 1)
-	_fit_car(car)
 	return car
+
+
+## Fits the medium-compound wheels the race starts on, then normalises the car onto the stall floor.
+func _dress_car(car: Node3D) -> void:
+	var chassis := car as ModularCarAssembler
+	chassis.perform_pitstop_tire_change(GtCarActor.WHEEL_SCENES[GtTypes.Compound.MEDIUM], ModularCarAssembler.TireCompound.MEDIUM)
+	_fit_car(car)
 
 
 ## Bounds are measured from the imported meshes, then the instance root is rotated and

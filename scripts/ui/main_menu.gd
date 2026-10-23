@@ -12,6 +12,7 @@ const PS := preload("res://scripts/core/presentation_settings.gd")
 const ConfigData := preload("res://scripts/core/race_config_data.gd")
 const GarageBuilder := preload("res://scripts/world/garage_environment_builder.gd")
 const GarageOrbit := preload("res://scripts/ui/garage_car_orbit.gd")
+const SprayHaloScript := preload("res://scripts/ui/spray_halo.gd")
 const SettingsScene := preload("res://scenes/ui/settings_modal.tscn")
 const HEADER := preload("res://assets/fonts/BarlowCondensed.ttf")
 const MONO := preload("res://assets/fonts/JetBrainsMono.ttf")
@@ -19,6 +20,20 @@ const DISPLAY := preload("res://assets/fonts/Anton.ttf")
 
 const SETUP_SCENE := "res://scenes/ui/race_setup_menu.tscn"
 const STAGE := Vector2(1920.0, 1080.0)
+
+## Concept 01 "Street Tag & Speed Stencil": everything leans -12 degrees (0.21 rad), modals -4.
+const SLANT_RAD: float = -0.21
+const MODAL_TILT_RAD: float = -0.0698 # -4 degrees
+const TITLE_POSITION := Vector2(112.0, 130.0)
+const SUBTAG := "/// GT3 // RACING SYNDICATE // TOON MOTORSPORT"
+const BUTTON_PREFIX := "/// "
+const BUTTON_SIZE := Vector2(620.0, 74.0)
+const BUTTON_FILL := Color("#141722")
+const BUTTON_BORDER_PX: int = 4
+const BUTTON_SHADOW := Vector2(6.0, 6.0)
+const BUTTON_HOVER_SHADOW := Vector2(8.0, 8.0)
+const BUTTON_HOVER_SHIFT := Vector2(6.0, -2.0)
+const BUTTON_SETTLE_S: float = 0.12
 
 const CREDITS: Array[String] = [
 	"LA VOITURE // NEO-BRUTALIST GT3 STRATEGY SIMULATOR",
@@ -154,30 +169,29 @@ func _build_stage() -> void:
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	stage.add_child(shade)
 
-	var brand := UI.label("LA VOITURE", 150, T.TEXT_PRIMARY, DISPLAY)
-	brand.name = "BrandTitle"
-	brand.position = Vector2(112.0, 96.0)
-	brand.rotation = -0.02
-	brand.add_theme_constant_override("outline_size", 12)
-	brand.add_theme_color_override("font_outline_color", T.INK_BORDER_BLACK)
+	var halo := SprayHaloScript.new()
+	halo.name = "SprayHalo"
+	halo.position = TITLE_POSITION + Vector2(330.0, 90.0)
+	stage.add_child(halo)
+
+	# Black offset shadow and an acid edge sit behind the inked title as copies of it.
+	for layer: Array in [["BrandTitleShadow", Vector2(6.0, 6.0), Color.BLACK], ["BrandTitleEdge", Vector2(-3.0, -1.0), T.ACCENT_ACID_LIME]]:
+		var echo := _title_label(String(layer[0]), layer[2])
+		echo.position = TITLE_POSITION + (layer[1] as Vector2)
+		stage.add_child(echo)
+	var brand := _title_label("BrandTitle", T.TEXT_PRIMARY)
+	brand.position = TITLE_POSITION
 	stage.add_child(brand)
 
-	var slash := ColorRect.new()
-	slash.color = T.ACCENT_ACID_LIME
-	slash.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	slash.position = Vector2(116.0, 262.0)
-	slash.size = Vector2(620.0, 10.0)
-	slash.rotation = -0.02
-	stage.add_child(slash)
-
-	var tagline := UI.label(
-		"GT3 STRATEGY SIM  //  NEO-BRUTALIST MANGA PADDOCK",
-		20, T.ACCENT_ELECTRIC_CYAN, MONO
-	)
-	tagline.position = Vector2(118.0, 288.0)
-	stage.add_child(tagline)
+	var subtag := UI.label(SUBTAG, 24, T.ACCENT_ELECTRIC_CYAN, HEADER)
+	subtag.name = "Subtag"
+	subtag.position = Vector2(130.0, 346.0)
+	subtag.rotation = SLANT_RAD
+	subtag.add_theme_constant_override("outline_size", 6)
+	subtag.add_theme_color_override("font_outline_color", T.INK_BORDER_BLACK)
+	stage.add_child(subtag)
 	var build := UI.label("EXHIBITION BUILD 1.0  //  PIT LANE, 22:40", 14, T.TEXT_MUTED, MONO)
-	build.position = Vector2(118.0, 318.0)
+	build.position = Vector2(118.0, 380.0)
 	stage.add_child(build)
 
 	_build_buttons()
@@ -204,24 +218,77 @@ func _build_buttons() -> void:
 	_focus_ring()
 
 
+func _title_label(node_name: String, color: Color) -> Label:
+	var label := UI.label("LA VOITURE", 156, color, DISPLAY)
+	label.name = node_name
+	label.rotation = SLANT_RAD
+	label.add_theme_constant_override("outline_size", 14)
+	label.add_theme_color_override("font_outline_color", T.INK_BORDER_BLACK if node_name == "BrandTitle" else color)
+	return label
+
+
+## One parallelogram plate: dark fill, 4 px ink border, solid 6 px shadow. Hover and focus snap it
+## forward onto an acid-lime face with a crimson shadow, black type.
+func _plate(fill: Color, shadow: Color, shadow_offset: Vector2) -> StyleBoxFlat:
+	var box := StyleBoxFlat.new()
+	box.bg_color = fill
+	box.set_border_width_all(BUTTON_BORDER_PX)
+	box.border_color = T.INK_BORDER_BLACK
+	box.skew = Vector2(SLANT_RAD, 0.0)
+	box.shadow_color = shadow
+	box.shadow_size = 1 # a blur of 1 px reads as a hard offset shadow
+	box.shadow_offset = shadow_offset
+	box.content_margin_left = 44.0
+	box.content_margin_right = 24.0
+	return box
+
+
 func _menu_button(text: String, accent: Color, y: float) -> Button:
-	var button := UI.button(text, accent)
+	var button := UI.button(BUTTON_PREFIX + text, accent)
 	button.position = Vector2(118.0, y)
-	button.size = Vector2(600.0, 76.0)
+	button.size = BUTTON_SIZE
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	button.add_theme_font_size_override("font_size", 30)
+	button.add_theme_font_size_override("font_size", 32)
 	button.add_theme_constant_override("outline_size", 0)
-	button.pivot_offset = Vector2(0.0, 38.0)
-	button.rotation = -0.012
+	var rest := _plate(BUTTON_FILL, Color.BLACK, BUTTON_SHADOW)
+	button.add_theme_stylebox_override("normal", rest)
+	button.add_theme_stylebox_override("disabled", rest)
+	for state: String in ["hover", "pressed", "focus"]:
+		button.add_theme_stylebox_override(state, _plate(T.ACCENT_ACID_LIME, T.ACCENT_ANIME_CRIMSON, BUTTON_HOVER_SHADOW))
 	button.add_theme_color_override("font_color", T.TEXT_PRIMARY)
+	button.set_meta(&"home", button.position)
+	button.mouse_entered.connect(_lift_button.bind(button, true))
+	button.mouse_exited.connect(func() -> void:
+		if not button.has_focus():
+			_lift_button(button, false)
+	)
+	button.focus_entered.connect(_lift_button.bind(button, true))
+	button.focus_exited.connect(func() -> void:
+		if not button.is_hovered():
+			_lift_button(button, false)
+	)
 	stage.add_child(button)
-	var bar := ColorRect.new()
-	bar.color = accent
-	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	bar.position = Vector2(0.0, 0.0)
-	bar.size = Vector2(16.0, 76.0)
-	button.add_child(bar)
+	# The accent rides along as a lean tab in front of the type.
+	var tab := Polygon2D.new()
+	tab.name = "AccentTab"
+	tab.color = accent
+	tab.polygon = PackedVector2Array([Vector2(14.0, 14.0), Vector2(24.0, 14.0), Vector2(14.0, BUTTON_SIZE.y - 14.0), Vector2(4.0, BUTTON_SIZE.y - 14.0)])
+	button.add_child(tab)
 	return button
+
+
+## Snaps to the lifted pose at once; the way back settles over a tenth of a second.
+func _lift_button(button: Button, lifted: bool) -> void:
+	var tween: Tween = button.get_meta(&"lift_tween") if button.has_meta(&"lift_tween") else null
+	if tween != null:
+		tween.kill()
+	var home: Vector2 = button.get_meta(&"home")
+	if lifted:
+		button.position = home + BUTTON_HOVER_SHIFT
+		return
+	tween = button.create_tween()
+	tween.tween_property(button, "position", home, BUTTON_SETTLE_S).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	button.set_meta(&"lift_tween", tween)
 
 
 func _build_career_button(y: float) -> void:
@@ -313,7 +380,7 @@ func _on_credits_pressed() -> void:
 	AudioManager.click(self)
 	_open_dialog("CREDITS // PADDOCK", CREDITS, [
 		{"text": "CLOSE  [ESC]", "accent": T.ACCENT_ACID_LIME, "action": _close_dialog},
-	], credits_button)
+	], credits_button, "SYS // CREDITS")
 
 
 func _on_quit_pressed() -> void:
@@ -326,7 +393,7 @@ func _on_quit_pressed() -> void:
 	], [
 		{"text": "CANCEL  [ESC]", "accent": T.ACCENT_ELECTRIC_CYAN, "action": _close_dialog},
 		{"text": "QUIT NOW", "accent": T.ACCENT_ANIME_CRIMSON, "action": _quit_now},
-	], quit_button)
+	], quit_button, "SYS // EXIT")
 
 
 func _quit_now() -> void:
@@ -350,7 +417,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 # --- dialogs -------------------------------------------------------------------------------------
 
-func _open_dialog(title: String, lines: Array[String], actions: Array, opener: Button) -> void:
+func _open_dialog(title: String, lines: Array[String], actions: Array, opener: Button, badge_text: String = "SYS // CONFIG") -> void:
 	if _dialog != null:
 		return
 	_dialog_opener = opener
@@ -378,12 +445,24 @@ func _open_dialog(title: String, lines: Array[String], actions: Array, opener: B
 	panel.position = Vector2(470.0, 258.0)
 	panel.size = Vector2(980.0, 564.0)
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	panel.pivot_offset = panel.size * 0.5
+	panel.rotation = MODAL_TILT_RAD # an inspection tag hung slightly off true
 	_dialog.add_child(panel)
 	UI.surface(panel, T.ACCENT_ACID_LIME)
 	var header: Control = UI.header(title, T.ACCENT_ACID_LIME)
 	header.position = Vector2(30.0, 26.0)
 	header.size = Vector2(920.0, 40.0)
 	panel.add_child(header)
+	var badge := UI.label(badge_text, 18, T.TEXT_PRIMARY, HEADER)
+	badge.name = "SysBadge"
+	badge.position = Vector2(-18.0, -22.0)
+	var badge_plate := _plate(T.ACCENT_ANIME_CRIMSON, Color.BLACK, Vector2(4.0, 4.0))
+	badge_plate.content_margin_left = 16.0
+	badge_plate.content_margin_right = 16.0
+	badge.add_theme_stylebox_override("normal", badge_plate)
+	badge.add_theme_constant_override("outline_size", 0)
+	badge.rotation = SLANT_RAD * 0.25
+	panel.add_child(badge)
 	var body := UI.label("\n".join(lines), 18, T.TEXT_PRIMARY, MONO)
 	body.position = Vector2(34.0, 96.0)
 	body.size = Vector2(912.0, 340.0)
