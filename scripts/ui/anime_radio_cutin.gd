@@ -44,6 +44,10 @@ const DIM_ALPHA := 0.6
 const DIM_TINT := 0.75
 const DIM_SCALE := 0.95
 const SLAP_SEC := 0.45
+const SLAP_SCALE := 1.55
+const SLAP_START_DEG := 9.0
+## The engineer card sits this far down the dock (0..1), below the driver card.
+const ENGINEER_DOCK_Y := 0.42
 const FADE_OUT_SEC := 1.8
 ## Torn paper outline, percent of the card size.
 const PAPER_POINTS: Array[Vector2] = [
@@ -310,29 +314,68 @@ func _show_banner() -> void:
 	_tween.tween_callback(_hide_banner)
 
 
-## Docked: fade down from DOCK_DROP above the resting spot, hold, then fade back up.
+## Docked: the card slaps in (scale x1.55 and a 9 degree turn settle to the rest pose in SLAP_SEC), holds, then
+## fades out over FADE_OUT_SEC. A card that is already up just takes the new text. Reduce motion shows and hides
+## the card at its rest pose without moving.
 func _fade_in_docked(was_present: bool) -> void:
-	var shown: Vector2 = _dock_shown()
-	var hidden: Vector2 = shown - Vector2(0.0, DOCK_DROP * _dock_scale)
-	banner.position = shown if was_present else hidden
-	banner.modulate.a = _rest_alpha() if was_present else 0.0
 	_tween = create_tween()
-	if not was_present:
-		_tween.tween_property(banner, "position:y", shown.y, SLIDE_IN_SEC).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
-		_tween.parallel().tween_property(banner, "modulate:a", _rest_alpha(), SLIDE_IN_SEC)
+	if was_present or PresentationSettings.reduce_motion:
+		_rest_pose()
+	else:
+		var tilt: float = REST_TILT_DEG[role]
+		var start_tilt: float = -SLAP_START_DEG if role == Role.DRIVER else SLAP_START_DEG
+		_apply_slap(0.0, start_tilt)
+		banner.modulate.a = 0.0
+		_tween.set_parallel(true)
+		_tween.tween_method(_apply_slap.bind(start_tilt), 0.0, 1.0, SLAP_SEC).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		_tween.tween_property(banner, "modulate:a", _rest_alpha(), SLAP_SEC * 0.55)
+		_tween.set_parallel(false)
 	_tween.tween_interval(_hold)
-	_tween.tween_property(banner, "position:y", hidden.y, SLIDE_OUT_SEC).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_IN)
-	_tween.parallel().tween_property(banner, "modulate:a", 0.0, SLIDE_OUT_SEC)
+	if not PresentationSettings.reduce_motion:
+		_tween.tween_property(banner, "modulate:a", 0.0, FADE_OUT_SEC)
 	_tween.tween_callback(_hide_banner)
 
 
-## Top-left of the docked banner in window pixels: driver at the left end of the free area,
-## engineer at the right end (leaving room for the mirrored lean).
+## The slap pose at progress `t` (1 = rest): scale and turn around the card's centre, which stays where the rest
+## pose puts it, so the card lands exactly on its dock position.
+func _apply_slap(t: float, start_tilt: float) -> void:
+	var rest_scale: float = _dock_scale * (DIM_SCALE if dimmed else 1.0)
+	var tilt: float = REST_TILT_DEG[role]
+	var half := Vector2(_banner_w, _banner_h) * 0.5
+	var rest_centre: Vector2 = _dock_shown() + half.rotated(deg_to_rad(tilt)) * rest_scale
+	var scale_now: float = lerpf(rest_scale * SLAP_SCALE, rest_scale, t)
+	var turn: float = lerpf(start_tilt, tilt, t)
+	banner.scale = Vector2.ONE * scale_now
+	banner.rotation_degrees = turn
+	banner.position = rest_centre - (half * scale_now).rotated(deg_to_rad(turn))
+
+
+func _rest_pose() -> void:
+	banner.position = _dock_shown()
+	banner.rotation_degrees = REST_TILT_DEG[role]
+	_apply_scale()
+	banner.modulate.a = _rest_alpha()
+
+
+func is_present() -> bool:
+	return _present
+
+
+## Test hook: jumps the entrance animation to the rest pose and keeps the card up.
+func _settle() -> void:
+	if _tween != null and _tween.is_valid():
+		_tween.kill()
+	_rest_pose()
+
+
+## Top-left of the docked banner in window pixels: the driver at the top-left of the free area, the engineer at
+## its right end a little below the middle (leaving room for the sticker that sticks out).
 func _dock_shown() -> Vector2:
 	var y: float = _dock_rect.position.y + DOCK_MARGIN * _dock_scale
 	var x: float = _dock_rect.position.x + DOCK_MARGIN * _dock_scale
 	if role == Role.ENGINEER:
 		x = _dock_rect.end.x - (DOCK_MARGIN + MIRROR_EDGE_PAD) * _dock_scale - _banner_w * _dock_scale
+		y = _dock_rect.position.y + _dock_rect.size.y * ENGINEER_DOCK_Y
 	return Vector2(x, y)
 
 
@@ -423,7 +466,6 @@ func _refresh_layout() -> void:
 	_portrait_frame.size = Vector2(PORTRAIT_SIZE, PORTRAIT_SIZE)
 	_portrait_frame.pivot_offset = _portrait_frame.size * 0.5
 	_portrait_frame.rotation_degrees = -STICKER_TILT_DEG if role == Role.DRIVER else STICKER_TILT_DEG
-	banner.pivot_offset = Vector2(_banner_w, _banner_h) * 0.5
 	if not _present:
 		if _docked:
 			banner.position = _dock_shown() - Vector2(0.0, DOCK_DROP * _dock_scale)

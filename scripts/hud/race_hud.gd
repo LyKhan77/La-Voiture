@@ -69,6 +69,8 @@ var radar: Control
 var weather_widget: WeatherRadarWidget
 var weather_deck: WeatherDeck
 var weather_layer: CanvasLayer
+## Driver portraits by car id, loaded once at bind.
+var _portraits: Dictionary = {}
 var drawer: TelemetryDrawer
 ## Team accent of the HUD skin (logo, marquee, deck header, drawer): the player team's livery colour.
 var style: GarageStyleScript
@@ -161,6 +163,9 @@ func bind(p_world: Node3D) -> void:
 	add_child(radio_audio)
 	radio = _make_cut_in("AnimeRadioCutIn", CutInScript.Role.DRIVER, "DRIVER", PORTRAIT)
 	engineer_radio = _make_cut_in("EngineerRadioCutIn", CutInScript.Role.ENGINEER, "ENGINEER", ENGINEER_PORTRAIT)
+	_paint_engineer_card()
+	for car: GtCar in race.cars:
+		_portraits[car.id] = _load_portrait(car.id)
 	race.radio_message.connect(_on_radio)
 	race.flag_changed.connect(_on_flag_changed)
 	race.suggestion_changed.connect(_on_suggestion)
@@ -179,6 +184,7 @@ func _make_cut_in(node_name: String, role: int, title: String, portrait: Texture
 	cut_in.set_portrait(portrait)
 	cut_in.transmission_shown.connect(radio_audio.on_transmission_shown.bind(cut_in))
 	cut_in.transmission_finished.connect(radio_audio.on_transmission_finished.bind(cut_in))
+	cut_in.transmission_finished.connect(_on_cut_in_finished.bind(cut_in))
 	return cut_in
 
 
@@ -473,6 +479,30 @@ func _on_style_changed() -> void:
 	for label: Label in marquee_texts:
 		label.add_theme_color_override("font_color", style.on_accent)
 	deck.set_accent(style.accent, style.on_accent)
+	_paint_engineer_card()
+
+
+## The engineer's card is in the colour that complements the team's.
+func _paint_engineer_card() -> void:
+	if engineer_radio != null:
+		engineer_radio.set_base_color(style.engineer)
+
+
+## Portraits of all drivers are loaded once at bind, so no file is read while the radio is talking.
+func _load_portrait(car_id: int) -> Texture2D:
+	var path: String = GarageRoster.portrait_path(car_id)
+	return load(path) as Texture2D if ResourceLoader.exists(path) else PORTRAIT
+
+
+func _portrait_for(car_id: int) -> Texture2D:
+	return _portraits.get(car_id, PORTRAIT)
+
+
+## One card speaks, the other (if it is up) dims; when a card is done the other recovers.
+func _on_cut_in_finished(cut_in: CanvasLayer) -> void:
+	var other: CanvasLayer = engineer_radio if cut_in == radio else radio
+	if other != null:
+		other.set_dimmed(false)
 
 
 func _on_accept() -> void:
@@ -494,9 +524,13 @@ func _on_radio(message: Dictionary) -> void:
 	var urgent: bool = bool(message["urgent"])
 	if urgent or bool(message.get("rival", false)) or (car != null and car.team_id == race.player_team_id):
 		var cut_in: CanvasLayer = engineer_radio if String(message["speaker"]) == "engineer" else radio
+		var other: CanvasLayer = radio if cut_in == engineer_radio else engineer_radio
+		if other.is_present():
+			other.set_dimmed(true)
+		cut_in.set_dimmed(false)
 		if String(message["speaker"]) == "driver":
-			var portrait_path: String = GarageRoster.portrait_path(int(message["car_id"]))
-			cut_in.set_portrait(load(portrait_path) as Texture2D if ResourceLoader.exists(portrait_path) else PORTRAIT)
+			cut_in.set_base_color(message["team_color"])
+			cut_in.set_portrait(_portrait_for(int(message["car_id"])))
 		else:
 			cut_in.set_portrait(ENGINEER_PORTRAIT)
 		var clip: Dictionary = RadioVoice.find(String(message["speaker"]), String(message["text"]), int(message["car_id"]))

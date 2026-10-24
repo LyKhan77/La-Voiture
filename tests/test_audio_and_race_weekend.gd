@@ -406,10 +406,10 @@ func _test_engineer_overlay(hud: RaceHud) -> void:
 	var texts: bool = hud.engineer_radio._speaker.text.contains("ENGINEER") and hud.radio._speaker.text.contains("DRIVER")
 	var portraits: bool = hud.engineer_radio._portrait.texture != null and hud.radio._portrait.texture != null and hud.engineer_radio._portrait.texture != hud.radio._portrait.texture
 	hud.engineer_radio.play_radio(1, "Fuel is fine, keep pushing.", false)
-	var cyan: bool = hud.engineer_radio._accent == RaceHud.T.ACCENT_ELECTRIC_CYAN
+	var cyan: bool = hud.engineer_radio._accent == hud.style.engineer # the engineer card is in the colour that complements the team's
 	hud.radio.play_radio(1, "Copy that.", false)
-	var lime: bool = hud.radio._accent == RaceHud.T.ACCENT_ACID_LIME
-	check(texts and portraits and cyan and lime, "#28 the engineer overlay has its own portrait, ENGINEER title and cyan accent; the driver keeps the lime one")
+	var lime: bool = hud.radio._accent == hud.radio.base_color # the driver card is in the speaking team's colour
+	check(texts and portraits and cyan and lime, "#28 the engineer overlay has its own portrait, ENGINEER title and the complementary colour; the driver card keeps the team colour")
 	var both_live: bool = hud.radio_audio.transmitting
 	hud.radio._hide_banner()
 	var still_ducked: bool = hud.radio_audio.transmitting

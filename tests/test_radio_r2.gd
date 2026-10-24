@@ -7,6 +7,10 @@ extends SceneTree
 
 const CutInScene := preload("res://scenes/pit_wall/anime_radio_cutin.tscn")
 const T := preload("res://scripts/ui/ui_theme_tokens.gd")
+const WorldScene := preload("res://scenes/race_weekend_world.tscn")
+const DirectorScript := preload("res://scripts/world/race_weekend_director.gd")
+const ActorScript := preload("res://scripts/car/gt_car_actor.gd")
+const FRAME: float = 1.0 / 60.0
 
 var failures: int = 0
 var assertions: int = 0
@@ -26,6 +30,7 @@ func check(ok: bool, description: String) -> void:
 
 func _run() -> void:
 	await _test_card()
+	await _test_two_way_hud()
 	print("%d assertions, %d failure(s)" % [assertions, failures])
 	print("FASE 11 LANGKAH 3E RADIO R2: %s" % ("PASS" if failures == 0 else "%d FAILURES" % failures))
 	quit(0 if failures == 0 else 1)
@@ -80,3 +85,102 @@ func _test_card() -> void:
 	check(tall > cut_in.BANNER_MIN_HEIGHT and tall <= viewport_h and is_equal_approx(cut_in._banner_h, cut_in.BANNER_MIN_HEIGHT),
 		"radio r2: long calls make the card taller, short ones keep 470x190 (%.0f)" % tall)
 	cut_in.queue_free()
+
+
+# --- two cards, one conversation ---------------------------------------------------------------------------------------
+
+func _dock_pixels(hud: RaceHud) -> Rect2:
+	var factor: float = hud.stage.scale.x
+	return Rect2(hud.stage.position + hud.RADIO_DOCK.position * factor, hud.RADIO_DOCK.size * factor)
+
+
+func _banner_rect(cut_in: CanvasLayer) -> Rect2:
+	return Rect2(cut_in.banner.position, Vector2(cut_in._banner_w, cut_in._banner_h) * cut_in._dock_scale)
+
+
+func _test_two_way_hud() -> void:
+	var world: Node3D = WorldScene.instantiate()
+	root.add_child(world)
+	world.set_physics_process(false)
+	var hud: RaceHud = world.hud
+	var race: GtRace = world.race
+	race.incidents_enabled = false
+	world.director._enter(DirectorScript.State.GREEN_RACING)
+	for _i: int in range(40):
+		world.step(FRAME)
+	var car: GtCar = null
+	for candidate: GtCar in race.cars:
+		if candidate.team_id == race.player_team_id:
+			car = candidate
+			break
+	race.driver_radio_cooldown.clear()
+	hud.radio._hide_banner()
+	hud.engineer_radio._hide_banner()
+	hud.radio.set_dimmed(false)
+	hud.engineer_radio.set_dimmed(false)
+
+	race.push_radio(car, "driver", "Had a snap of oversteer! Lost some time.")
+	var driver: CanvasLayer = hud.radio
+	var engineer: CanvasLayer = hud.engineer_radio
+	var slap: bool = is_equal_approx(driver.banner.rotation_degrees, -9.0) and driver.banner.scale.x > driver._dock_scale * 1.4
+	driver._settle()
+	check(driver.banner.visible and not driver.dimmed and driver._accent == car.color and slap
+			and is_equal_approx(driver.banner.rotation_degrees, -2.0) and driver.banner.scale.is_equal_approx(Vector2.ONE * driver._dock_scale),
+		"hud radio: the driver card slaps in in the team colour and settles at its tilt")
+
+	race.push_radio(car, "engineer", "Copy, stay on it.", true)
+	engineer._settle()
+	check(engineer.banner.visible and not engineer.dimmed and driver.dimmed and engineer._accent == T.ACCENT_ANIME_CRIMSON
+			and is_equal_approx(engineer.banner.rotation_degrees, 1.6) and is_equal_approx(driver.banner.modulate.a, 0.6),
+		"hud radio: the speaker is lit and the other card dims")
+	race.push_radio(car, "engineer", "Copy, calm down.", false, true)
+	check(engineer._accent == hud.style.engineer, "hud radio: a routine engineer call is in the complementary colour")
+
+	var dock: Rect2 = _dock_pixels(hud)
+	driver.banner.visible = true
+	var driver_rect: Rect2 = _banner_rect(driver)
+	var engineer_rect: Rect2 = _banner_rect(engineer)
+	check(dock.grow(1.0).encloses(driver_rect) and dock.grow(1.0).encloses(engineer_rect) and not driver_rect.intersects(engineer_rect)
+			and driver_rect.position.x < engineer_rect.position.x and engineer_rect.position.y > driver_rect.position.y,
+		"hud radio: the cards sit at the two ends of the dock without overlapping")
+
+	driver._hide_banner()
+	var undimmed: bool = not engineer.dimmed
+	engineer._hide_banner()
+	check(undimmed and not hud.radio_audio.transmitting, "hud radio: the dim ends with the other card and the radio is released")
+
+	check(hud._portraits.size() == race.cars.size() and driver._portrait_texture == hud._portraits[car.id] and hud._portrait_for(9999) == hud.PORTRAIT,
+		"hud radio: portraits are preloaded and a missing one falls back")
+
+	PresentationSettings.reduce_motion = true
+	driver.play_radio(car.id, "Box now.", false)
+	var still: bool = driver.banner.scale.is_equal_approx(Vector2.ONE * driver._dock_scale) and is_equal_approx(driver.banner.rotation_degrees, -2.0) and is_equal_approx(driver.banner.modulate.a, 1.0)
+	driver._hide_banner()
+	PresentationSettings.reduce_motion = false
+	check(still, "hud radio: reduce motion skips the slap and the fade")
+
+	var shown: Array[String] = []
+	var record: Callable = func(_car_id: int, text: String) -> void: shown.append(text)
+	driver.transmission_shown.connect(record)
+	engineer.transmission_shown.connect(record)
+	race._pending_replies.clear() # the replies queued by the earlier calls of this test
+	race.driver_radio_cooldown.clear()
+	race.push_radio(car, "driver", "Had a snap of oversteer! Lost some time.")
+	race.step_ticks(ceili(2.6 / GtTypes.TICK_DT))
+	var snaps: int = 0
+	var copies: int = 0
+	for text: String in shown:
+		snaps += 1 if text.begins_with("Had a snap") else 0
+		copies += 1 if text.begins_with("Copy ") else 0
+	driver.play_radio(car.id, "First call.", false)
+	driver.play_radio(car.id, "Second call.", false)
+	driver._hide_banner()
+	engineer._hide_banner()
+	driver.transmission_shown.disconnect(record)
+	engineer.transmission_shown.disconnect(record)
+	check(snaps == 1 and copies == 1 and not hud.radio_audio.transmitting, "hud radio: a driver call and its reply each show once and the radio is not left keyed")
+
+	race.dispose()
+	world.queue_free()
+	await process_frame
+	ActorScript._paint_cache.clear()
