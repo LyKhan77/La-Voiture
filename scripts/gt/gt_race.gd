@@ -412,6 +412,18 @@ func request_pit(car_id: int, compound: int) -> void:
 		push_radio(car, "engineer", "Box this lap, confirm %s tyres." % GtTypes.COMPOUND_NAME[compound], true)
 
 
+## Withdraws a box call before the car commits to the pit lane (`pit` is set 120 m out). No penalty: the
+## pit approach pace only holds while `pit_request` is set. A repeat BOX suggestion waits 30 s.
+func cancel_pit(car_id: int) -> bool:
+	var car: GtCar = get_car(car_id)
+	if car == null or car.pit != null or car.pit_request < 0 or car.finished_at >= 0.0:
+		return false
+	car.pit_request = -1
+	_suggestion_cooldowns["%d-%d" % [car.id, GtTypes.TacticType.PIT]] = time + 30.0
+	push_radio(car, "engineer", "Stay out, stay out! Box call cancelled.", true)
+	return true
+
+
 func set_pace_mode(car_id: int, mode: int) -> void:
 	var car: GtCar = get_car(car_id)
 	if car != null:

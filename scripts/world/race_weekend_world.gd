@@ -165,6 +165,11 @@ func request_pit(car_id: int, compound: int = -1) -> bool:
 	return true
 
 
+## Withdraws a box call that has not reached the pit lane yet.
+func cancel_pit(car_id: int) -> bool:
+	return race.cancel_pit(car_id)
+
+
 func _physics_process(delta: float) -> void:
 	step(delta)
 

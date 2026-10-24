@@ -8,6 +8,7 @@ extends SceneTree
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
 const DirectorScript := preload("res://scripts/world/race_weekend_director.gd")
 const ActorScript := preload("res://scripts/car/gt_car_actor.gd")
+const PitLaneScript := preload("res://scripts/world/pit_lane_complex.gd")
 const FRAME: float = 1.0 / 60.0
 
 var failures: int = 0
@@ -46,6 +47,7 @@ func _run() -> void:
 	race.step_ticks(200)
 	hud.refresh_all()
 	_test_desk_modes_and_suggestion_window()
+	_test_cancel_pit()
 	race.dispose()
 	world.queue_free()
 	await process_frame
@@ -123,3 +125,50 @@ func _test_desk_modes_and_suggestion_window() -> void:
 			box_calls += 1
 	check(car.pit_request == GtTypes.Compound.HARD and race.latest_suggestion.is_empty() and box_calls == 1,
 		"suggestion: accepting at 9.9 s calls the stop once, the window end does not call it again (box calls: %d)" % box_calls)
+
+
+# --- cancelling a box call --------------------------------------------------------------------------------
+
+func _test_cancel_pit() -> void:
+	if not world.has_method("cancel_pit"):
+		check(false, "pit: the world exposes cancel_pit(car_id)")
+		return
+	var car: GtCar = _reset(GtTypes.TacticMode.MANUAL)
+	car.pit = null
+	var called: bool = world.request_pit(car.id, GtTypes.Compound.WET) and car.pit_request == GtTypes.Compound.WET
+	var cancelled_at: float = race.time
+	var cancelled: bool = world.cancel_pit(car.id)
+	var radio: Dictionary = race.latest_radio
+	check(called and cancelled and car.pit_request == -1 and String(radio["text"]) == "Stay out, stay out! Box call cancelled." and String(radio["speaker"]) == "engineer",
+		"pit: cancelling a box call clears the request and the engineer confirms it")
+	var cooldown: float = float(race._suggestion_cooldowns["%d-%d" % [car.id, GtTypes.TacticType.PIT]])
+	check(cooldown >= cancelled_at + 30.0 - 0.001,
+		"pit: cancelling blocks an instant repeat BOX suggestion (cooldown until +%.0f s)" % (cooldown - cancelled_at))
+
+	car.s = PitLaneScript.ENTRY_S - 290.0
+	car.prev_s = car.s
+	car.v = 45.0
+	car.lap = maxi(car.lap, 1)
+	world.request_pit(car.id, GtTypes.Compound.WET)
+	race.step_ticks(20)
+	var held: bool = car.v <= 38.5
+	world.cancel_pit(car.id)
+	var peak: float = 0.0
+	for _step: int in range(8):
+		race.step_ticks(10)
+		peak = maxf(peak, car.v)
+	check(held and peak > 45.0 and car.pit == null and car.pit_request == -1,
+		"pit: after cancelling, the car leaves the 38 m/s pit approach pace (peak %.1f m/s) and drives past the pit entry with no penalty" % peak)
+
+	var radio_count: int = race.radio_history.size()
+	check(not world.cancel_pit(car.id) and race.radio_history.size() == radio_count,
+		"pit: cancelling with no call is a no-op")
+
+	car.pit_request = GtTypes.Compound.WET
+	var committed := GtPit.new()
+	committed.phase = GtTypes.PitPhase.ENTRY
+	car.pit = committed
+	check(not world.cancel_pit(car.id) and car.pit == committed and car.pit_request == GtTypes.Compound.WET,
+		"pit: a car already committed to the pit lane cannot cancel")
+	car.pit = null
+	car.pit_request = -1
