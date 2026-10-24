@@ -9,8 +9,9 @@ extends CanvasLayer
 ## control marquee. Team radio cuts in through the anime banner. It reads the GT sim and
 ## the world and writes only through the sim's own tactic calls.
 ##
-## Keys: M fold the deck, T telemetry, Tab tower columns, H hide the HUD, E ERS overtake,
-## [ and ] pace down / up, N next car of the player team.
+## Keys: B request the box, Esc dismiss the card / cancel the box, Enter accept the card, M fold the
+## deck, T telemetry, Tab tower columns, H hide the HUD, E ERS overtake, [ and ] pace down / up,
+## N next car of the player team.
 
 const UI = preload("res://scripts/ui/pit_wall_ui.gd")
 const T = preload("res://scripts/ui/ui_theme_tokens.gd")
@@ -35,6 +36,10 @@ const WEATHER_REFRESH_FRAMES: int = 30
 const TICKER_SPEED: float = 45.0
 const TICKER_VIEW_W: float = 1664.0
 const SpeedlinesShader := preload("res://shaders/manga_speedlines.gdshader")
+## The suggestion card burns down over GtRace.SUGGESTION_WINDOW_S and goes critical (flashing) under 3 s.
+const CARD_CRITICAL_S: float = 3.0
+const CARD_BLINK_FRAMES: int = 6
+const BURN_ORANGE := Color("#FF6D00")
 const SPEEDLINES_LAYER: int = 5
 ## Rays appear at 200 km/h and are full at 280: 240 km/h already reads at 0.5.
 const SPEEDLINES_FROM_KMH: float = 200.0
@@ -78,6 +83,10 @@ var card_title: Label
 var card_text: Label
 var accept_button: Button
 var dismiss_button: Button
+## Burn bar along the top of the card, the seconds left, and whether the last 3 s are running.
+var burn_fill: ColorRect
+var card_timer: Label
+var card_critical: bool = false
 var tower_mode: int = 0
 var last_radio: Dictionary = {}
 
@@ -223,8 +232,22 @@ func _build_tower_and_radar() -> void:
 func _build_card() -> void:
 	card = _panel(Vector2(656.0, 690.0), Vector2(608.0, 136.0), T.ACCENT_CYBER_YELLOW)
 	card.name = "SuggestionCard"
-	card_title = _text(card, "", Vector2(16.0, 10.0), 24, T.ACCENT_CYBER_YELLOW, UI.HEADER)
-	card_text = _text(card, "", Vector2(16.0, 42.0), 14, T.TEXT_PRIMARY, UI.RADIO)
+	var burn_track := ColorRect.new()
+	burn_track.color = T.SURFACE_PANEL_DARK
+	burn_track.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_child(burn_track)
+	burn_track.position = Vector2(4.0, 4.0)
+	burn_track.size = Vector2(card.size.x - 8.0, 10.0)
+	burn_fill = ColorRect.new()
+	burn_fill.color = T.ACCENT_CYBER_YELLOW
+	burn_fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	burn_track.add_child(burn_fill)
+	burn_fill.size = burn_track.size
+	card_title = _text(card, "", Vector2(16.0, 16.0), 24, T.ACCENT_CYBER_YELLOW, UI.HEADER)
+	card_timer = _text(card, "10.0s", Vector2(card.size.x - 100.0, 16.0), 22, T.ACCENT_CYBER_YELLOW, UI.HEADER)
+	card_timer.size = Vector2(84.0, 28.0)
+	card_timer.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	card_text = _text(card, "", Vector2(16.0, 46.0), 14, T.TEXT_PRIMARY, UI.RADIO)
 	card_text.size = Vector2(576.0, 44.0)
 	card_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	accept_button = UI.button("ACCEPT")
@@ -257,7 +280,7 @@ func _build_marquee() -> void:
 	bar.add_child(clip)
 	clip.position = Vector2(226.0, 0.0)
 	clip.size = Vector2(TICKER_VIEW_W, 48.0)
-	ticker = _text(clip, "LIVE TIMING ONLINE   //   GREEN FLAG   //   %d LAPS   //   [M] DECK  [T] TELEMETRY  [TAB] TOWER  [N] NEXT CAR  [E] ERS  [ ] PACE  [H] HIDE" % race.laps, Vector2(0.0, 12.0), 20, T.INK_BORDER_BLACK, UI.RADIO)
+	ticker = _text(clip, "LIVE TIMING ONLINE   //   GREEN FLAG   //   %d LAPS   //   [B] REQUEST BOX  [ESC] CANCEL BOX  [M] DECK  [T] TELEMETRY  [TAB] TOWER  [N] NEXT CAR  [E] ERS  [ ] PACE  [H] HIDE" % race.laps, Vector2(0.0, 12.0), 20, T.INK_BORDER_BLACK, UI.RADIO)
 
 
 func _build_speedlines() -> void:
@@ -330,6 +353,19 @@ func handle_key(keycode: Key) -> bool:
 	if not stage.visible:
 		return false
 	match keycode:
+		KEY_B:
+			deck.press_box()
+		KEY_ENTER, KEY_KP_ENTER:
+			if not card.visible:
+				return false
+			_on_accept()
+		KEY_ESCAPE:
+			if card.visible:
+				_on_dismiss()
+			elif _deck_box_called():
+				deck.cancel_box()
+			else:
+				return false
 		KEY_M:
 			deck.toggle_collapsed()
 		KEY_T:
@@ -348,6 +384,12 @@ func handle_key(keycode: Key) -> bool:
 		_:
 			return false
 	return true
+
+
+## True while the deck car has a box call out that has not reached the pit lane.
+func _deck_box_called() -> bool:
+	var car: GtCar = race.get_car(deck.deck_car_id)
+	return car != null and car.pit_request >= 0 and car.pit == null
 
 
 ## Shows or hides the whole HUD, the radio banner (a layer of its own) included.
@@ -424,9 +466,11 @@ func _on_flag_changed(flag: int, message: String) -> void:
 func _on_suggestion(suggestion: Dictionary) -> void:
 	card.visible = not suggestion.is_empty()
 	if suggestion.is_empty():
+		card_critical = false
 		return
 	card_title.text = String(suggestion["title"])
 	card_text.text = String(suggestion["description"])
+	_update_burn()
 
 
 func _set_ticker(text: String) -> void:
@@ -442,6 +486,7 @@ func update(delta: float) -> void:
 		return
 	_frame += 1
 	_update_speedlines()
+	_update_burn()
 	if _frame % TOWER_REFRESH_FRAMES == 0:
 		_update_tower()
 	if _frame % PANEL_REFRESH_FRAMES == 0:
@@ -459,6 +504,36 @@ func refresh_all() -> void:
 	_update_tower()
 	_update_panels()
 	_update_weather()
+	_update_burn()
+
+
+## Flame stage of the burn bar: yellow, then orange from two thirds, crimson in the last third.
+static func burn_color(fraction: float) -> Color:
+	if fraction >= 0.66:
+		return T.ACCENT_CYBER_YELLOW
+	if fraction >= 0.33:
+		return BURN_ORANGE
+	return T.ACCENT_ANIME_CRIMSON
+
+
+static func burn_text(remaining: float) -> String:
+	return "%04.1fs" % maxf(remaining, 0.0)
+
+
+## The suggestion card burns down with the sim's own window (race seconds), so AUTO and the bar agree.
+func _update_burn() -> void:
+	if not card.visible:
+		card_critical = false
+		return
+	var remaining: float = race.suggestion_remaining()
+	var fraction: float = clampf(remaining / GtRace.SUGGESTION_WINDOW_S, 0.0, 1.0)
+	card_critical = remaining < CARD_CRITICAL_S
+	var flash: bool = card_critical and not PresentationSettings.reduce_motion and (_frame / CARD_BLINK_FRAMES) % 2 == 0
+	burn_fill.size.x = (card.size.x - 8.0) * fraction
+	burn_fill.color = burn_color(fraction)
+	burn_fill.modulate.a = 0.55 if flash else 1.0
+	card_timer.text = burn_text(remaining)
+	card_timer.add_theme_color_override("font_color", (T.TEXT_PRIMARY if flash else T.ACCENT_ANIME_CRIMSON) if card_critical else T.ACCENT_CYBER_YELLOW)
 
 
 func _update_tower() -> void:

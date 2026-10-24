@@ -9,6 +9,7 @@ const WorldScene := preload("res://scenes/race_weekend_world.tscn")
 const DirectorScript := preload("res://scripts/world/race_weekend_director.gd")
 const ActorScript := preload("res://scripts/car/gt_car_actor.gd")
 const PitLaneScript := preload("res://scripts/world/pit_lane_complex.gd")
+const T := preload("res://scripts/ui/ui_theme_tokens.gd")
 const FRAME: float = 1.0 / 60.0
 
 var failures: int = 0
@@ -49,6 +50,7 @@ func _run() -> void:
 	_test_desk_modes_and_suggestion_window()
 	_test_cancel_pit()
 	_test_deck_box_and_desk()
+	_test_burn_bar_and_keys()
 	race.dispose()
 	world.queue_free()
 	await process_frame
@@ -62,6 +64,7 @@ func _run() -> void:
 ## tyres keep the advisor from raising an ERS or pace card that would replace the one under test).
 func _reset(mode: int) -> GtCar:
 	race.latest_suggestion = {}
+	race.suggestion_changed.emit({})
 	race._suggestion_cooldowns.clear()
 	race.set_tactic_mode(mode)
 	for car: GtCar in mine:
@@ -230,3 +233,58 @@ func _test_deck_box_and_desk() -> void:
 	deck.refresh()
 	check(auto_ok and race.tactic_mode == GtTypes.TacticMode.MANUAL and (status as Label).text == "MODE: MANUAL // 100% PLAYER DIRECTIVE",
 		"deck: the desk status tag follows MANUAL and AUTO")
+
+
+# --- burn bar and keys ---------------------------------------------------------------------------------------------
+
+func _test_burn_bar_and_keys() -> void:
+	check(RaceHud.burn_text(10.0) == "10.0s" and RaceHud.burn_text(3.24) == "03.2s" and RaceHud.burn_text(-1.0) == "00.0s" and RaceHud.burn_color(1.0) == T.ACCENT_CYBER_YELLOW and RaceHud.burn_color(0.5) == Color("#FF6D00") and RaceHud.burn_color(0.1) == T.ACCENT_ANIME_CRIMSON,
+		"burn bar: label format and flame colour stages")
+	var deck: TacticalDeck = hud.deck
+	var car: GtCar = _reset(GtTypes.TacticMode.MANUAL)
+	deck.deck_car_id = car.id
+	_suggest_box(car)
+	var full: float = hud.card.size.x - 8.0
+	check(hud.card.visible and is_equal_approx(hud.burn_fill.size.x, full) and hud.card_timer.text == "10.0s" and not hud.card_critical,
+		"burn bar: a new card starts with a full bar and 10.0s")
+	race.time += 5.0
+	hud.refresh_all()
+	check(absf(hud.burn_fill.size.x / full - 0.5) < 0.01 and hud.card_timer.text == "05.0s" and not hud.card_critical,
+		"burn bar: the fill and the label follow the 10 s window")
+	race.time += 3.0
+	hud.refresh_all()
+	check(hud.card_critical and hud.card_timer.text == "02.0s",
+		"burn bar: under 3 s the card enters its critical state")
+	race.suggest_tactic(car, GtTypes.TacticType.PACE, GtTypes.PaceMode.CONSERVE, "PACE: CONSERVE", "Save the tyres.")
+	check(hud.card_timer.text == "10.0s" and not hud.card_critical and is_equal_approx(hud.burn_fill.size.x, full),
+		"burn bar: a replacement card restarts at 10.0s")
+
+	car = _reset(GtTypes.TacticMode.MANUAL)
+	deck.deck_car_id = car.id
+	var idle_enter: bool = hud.handle_key(KEY_ENTER)
+	_suggest_box(car)
+	var enter_consumed: bool = hud.handle_key(KEY_ENTER)
+	check(not idle_enter and enter_consumed and not hud.card.visible and car.pit_request == GtTypes.Compound.HARD,
+		"keys: ENTER accepts the open card, and is left alone when there is no card")
+
+	car = _reset(GtTypes.TacticMode.MANUAL)
+	deck.deck_car_id = car.id
+	_suggest_box(car)
+	race.request_pit(car.id, GtTypes.Compound.HARD)
+	var esc_card: bool = hud.handle_key(KEY_ESCAPE)
+	var card_closed: bool = not hud.card.visible and car.pit_request >= 0
+	var esc_box: bool = hud.handle_key(KEY_ESCAPE)
+	var box_cancelled: bool = car.pit_request == -1
+	var esc_idle: bool = hud.handle_key(KEY_ESCAPE)
+	check(esc_card and card_closed and esc_box and box_cancelled and not esc_idle,
+		"keys: ESC dismisses the card first, then cancels the box call, then is not consumed")
+
+	car = _reset(GtTypes.TacticMode.MANUAL)
+	deck.deck_car_id = car.id
+	deck.pit_compound = -1
+	var b_first: bool = hud.handle_key(KEY_B)
+	var chosen: int = car.pit_request
+	var b_again: bool = hud.handle_key(KEY_B)
+	check(b_first and chosen >= 0 and b_again and car.pit_request == chosen,
+		"keys: B requests the box once; pressing it again keeps the same call")
+	car.pit_request = -1
