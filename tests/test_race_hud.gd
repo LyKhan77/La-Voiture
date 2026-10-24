@@ -188,8 +188,8 @@ func _test_deck_writes_to_sim() -> void:
 	deck.tyre_row.buttons[1 + GtTypes.Compound.WET].pressed.emit()
 	var accepted: bool = deck.press_box()
 	deck.refresh()
-	check(accepted and car.pit_request == GtTypes.Compound.WET and deck.box_button.disabled and deck.box_button.text.contains("BOX CALLED") and deck.box_button.text.contains("WET"),
-		"deck: choosing W and BOX THIS LAP calls the car in for wets and locks the button")
+	check(accepted and car.pit_request == GtTypes.Compound.WET and not deck.box_button.disabled and deck.box_button.text.contains("CANCEL BOX") and deck.box_button.text.contains("WET"),
+		"deck: choosing W and REQUEST BOX calls the car in for wets and the button turns into CANCEL BOX")
 	car.pit_request = -1
 	deck.pit_compound = -1
 	deck.tyre_row.set_active(0)
@@ -308,7 +308,7 @@ func _test_suggestion_card() -> void:
 	var shown: bool = hud.card.visible and hud.card_title.text.contains("BOX FOR HARD") and hud.card_text.text.contains("wear")
 	hud.accept_button.pressed.emit()
 	check(shown and not hud.card.visible and car.pit_request == GtTypes.Compound.HARD,
-		"suggestion: the hybrid desk shows a card, ACCEPT executes the box call and hides it")
+		"suggestion: the desk shows a card, ACCEPT executes the box call and hides it")
 	car.pit_request = -1
 	race.suggest_tactic(car, GtTypes.TacticType.PACE, GtTypes.PaceMode.CONSERVE, "PACE: CONSERVE", "Save the tyres.")
 	var again: bool = hud.card.visible

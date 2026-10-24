@@ -19,7 +19,9 @@ const ROW_1: float = 36.0
 const ROW_2: float = 70.0
 const ROW_H: float = 28.0
 const LABEL_W: float = 44.0
-const TACTIC_NAME: Array[String] = ["MANUAL", "AUTO", "HYBRID"]
+const TACTIC_NAME: Array[String] = ["MANUAL", "AUTO"]
+const BOX_STYLE_STATES: Array[String] = ["normal", "hover", "pressed"]
+const DESK_STATUS: Array[String] = ["MODE: MANUAL // 100% PLAYER DIRECTIVE", "MODE: AUTO // AI ENGINEER ASSISTED"]
 const TYRE_LABELS: Array[String] = ["AUTO", "S", "M", "H", "I", "W"]
 
 var race: GtRace
@@ -37,10 +39,14 @@ var box_button: Button
 var collapse_button: Button
 var info_label: Label
 var radio_label: Label
+var desk_status: Label
 
 var _world: Node3D
 var _body: Control
 var _tab_text: Array[String] = ["", ""]
+## The BOX button's own styles, kept so the crimson CANCEL look can be undone.
+var _box_styles: Dictionary = {}
+var _box_cancel_look: bool = false
 var _ers_before: int = GtTypes.ErsMode.NEUTRAL
 
 
@@ -137,19 +143,23 @@ func _build_pit() -> void:
 	tyre_row = ModeRow.new(TYRE_LABELS, tints, 14)
 	tyre_row.selected.connect(_on_tyre)
 	_place(tyre_row, Vector2(938.0 + 50.0, ROW_1), Vector2(362.0, ROW_H))
-	box_button = UI.button("BOX THIS LAP")
+	box_button = UI.button("REQUEST BOX [B]")
 	box_button.add_theme_font_size_override("font_size", 24)
 	box_button.focus_mode = Control.FOCUS_NONE
-	box_button.pressed.connect(press_box)
+	box_button.pressed.connect(on_box_pressed)
+	for state: String in BOX_STYLE_STATES:
+		_box_styles[state] = box_button.get_theme_stylebox(state)
 	_place(box_button, Vector2(938.0, ROW_2), Vector2(412.0, 54.0))
 	tyre_row.set_active(0)
 
 
 func _build_tactics() -> void:
 	_caption("DESK", Vector2(1366.0, ROW_1 + 6.0))
-	tactic_row = ModeRow.new(TACTIC_NAME, [T.TEXT_SECONDARY, T.ACCENT_CYBER_YELLOW, T.ACCENT_ACID_LIME], 13)
+	tactic_row = ModeRow.new(TACTIC_NAME, [T.ACCENT_ACID_LIME, T.ACCENT_CYBER_YELLOW], 13)
 	tactic_row.selected.connect(_on_tactic)
 	_place(tactic_row, Vector2(1366.0 + 44.0, ROW_1), Vector2(214.0, ROW_H))
+	desk_status = UI.label(DESK_STATUS[0], 11, T.TEXT_SECONDARY)
+	_place(desk_status, Vector2(1366.0, ROW_2 + 32.0), Vector2(258.0, 18.0))
 	collapse_button = UI.button("FOLD DECK [M]")
 	collapse_button.add_theme_font_size_override("font_size", 14)
 	collapse_button.focus_mode = Control.FOCUS_NONE
@@ -210,6 +220,21 @@ func press_box() -> bool:
 	return _world.request_pit(deck_car_id, pit_compound)
 
 
+## Withdraws the deck car's box call while it has not reached the pit lane (no penalty).
+func cancel_box() -> bool:
+	AudioManager.click(self)
+	return _world.cancel_pit(deck_car_id)
+
+
+## The BOX button is one control with two states: REQUEST BOX, and CANCEL BOX once a call is out.
+func on_box_pressed() -> void:
+	var car: GtCar = race.get_car(deck_car_id)
+	if car != null and car.pit_request >= 0 and car.pit == null:
+		cancel_box()
+	else:
+		press_box()
+
+
 func step_pace(direction: int) -> void:
 	var car: GtCar = race.get_car(deck_car_id)
 	if car != null:
@@ -265,19 +290,34 @@ func refresh() -> void:
 	ers_row.set_active(car.ers_mode)
 	tactic_row.set_active(race.tactic_mode)
 	tyre_row.set_active(pit_compound + 1)
-	var locked: bool = car.pit != null or car.pit_request >= 0 or car.finished_at >= 0.0 or car.is_dnf
+	desk_status.text = DESK_STATUS[clampi(race.tactic_mode, 0, DESK_STATUS.size() - 1)]
+	var locked: bool = car.pit != null or car.finished_at >= 0.0 or car.is_dnf
 	box_button.disabled = locked
+	var cancelling: bool = not locked and car.pit_request >= 0
 	if car.is_dnf:
 		box_button.text = "RETIRED"
 	elif car.finished_at >= 0.0:
 		box_button.text = "CHEQUERED"
 	elif car.pit != null:
 		box_button.text = "IN THE PIT LANE"
-	elif car.pit_request >= 0:
-		box_button.text = "BOX CALLED  //  %s" % GtTypes.COMPOUND_NAME[car.pit_request]
+	elif cancelling:
+		box_button.text = "CANCEL BOX [ESC]  //  %s" % GtTypes.COMPOUND_NAME[car.pit_request]
 	else:
-		box_button.text = "BOX THIS LAP"
+		box_button.text = "REQUEST BOX [B]"
+	_style_box_button(cancelling)
 	info_label.text = "%s %s   STOPS %d   AGE %d L" % [car.code, GtTypes.COMPOUND_NAME[car.compound], car.stops, car.tyre_age_laps]
+
+
+## Crimson while the button cancels a call, its own look otherwise.
+func _style_box_button(cancelling: bool) -> void:
+	if cancelling == _box_cancel_look:
+		return
+	_box_cancel_look = cancelling
+	for state: String in BOX_STYLE_STATES:
+		box_button.add_theme_stylebox_override(state, UI.style(T.ACCENT_ANIME_CRIMSON) if cancelling else _box_styles[state])
+	var hover_ink: Color = T.TEXT_PRIMARY if cancelling else T.INK_BORDER_BLACK
+	box_button.add_theme_color_override("font_hover_color", hover_ink)
+	box_button.add_theme_color_override("font_pressed_color", hover_ink)
 
 
 func _style_tab(index: int, car: GtCar) -> void:

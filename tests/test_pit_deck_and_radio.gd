@@ -48,6 +48,7 @@ func _run() -> void:
 	hud.refresh_all()
 	_test_desk_modes_and_suggestion_window()
 	_test_cancel_pit()
+	_test_deck_box_and_desk()
 	race.dispose()
 	world.queue_free()
 	await process_frame
@@ -172,3 +173,60 @@ func _test_cancel_pit() -> void:
 		"pit: a car already committed to the pit lane cannot cancel")
 	car.pit = null
 	car.pit_request = -1
+
+
+# --- deck: two-state BOX button and the MANUAL / AUTO desk --------------------------------------------------------
+
+func _test_deck_box_and_desk() -> void:
+	var deck: TacticalDeck = hud.deck
+	var car: GtCar = _reset(GtTypes.TacticMode.MANUAL)
+	car.pit = null
+	car.is_dnf = false
+	deck.deck_car_id = car.id
+	deck.pit_compound = -1
+	deck.tyre_row.set_active(0)
+	deck.refresh()
+	check(deck.tactic_row.buttons.size() == 2 and deck.tactic_row.buttons[0].text == "MANUAL" and deck.tactic_row.buttons[1].text == "AUTO",
+		"deck: the desk row has MANUAL and AUTO only")
+	check(deck.box_button.text == "REQUEST BOX [B]" and not deck.box_button.disabled,
+		"deck: with no call the button reads REQUEST BOX [B] and is enabled")
+
+	deck.tyre_row.buttons[1 + GtTypes.Compound.WET].pressed.emit()
+	deck.box_button.pressed.emit()
+	deck.refresh()
+	check(car.pit_request == GtTypes.Compound.WET and deck.box_button.text == "CANCEL BOX [ESC]  //  WET" and not deck.box_button.disabled,
+		"deck: after a box call the button becomes CANCEL BOX [ESC] // WET and stays enabled")
+	deck.box_button.pressed.emit()
+	deck.refresh()
+	check(car.pit_request == -1 and deck.box_button.text == "REQUEST BOX [B]",
+		"deck: clicking CANCEL BOX withdraws the call and the button reads REQUEST BOX again")
+
+	var committed := GtPit.new()
+	committed.phase = GtTypes.PitPhase.ENTRY
+	car.pit = committed
+	deck.refresh()
+	var in_pit: bool = deck.box_button.text == "IN THE PIT LANE" and deck.box_button.disabled
+	car.pit = null
+	car.is_dnf = true
+	deck.refresh()
+	var retired: bool = deck.box_button.text == "RETIRED" and deck.box_button.disabled
+	car.is_dnf = false
+	car.finished_at = 100.0
+	deck.refresh()
+	var chequered: bool = deck.box_button.text == "CHEQUERED" and deck.box_button.disabled
+	car.finished_at = -1.0
+	deck.refresh()
+	check(in_pit and retired and chequered and not deck.box_button.disabled,
+		"deck: the button locks as IN THE PIT LANE, RETIRED or CHEQUERED and unlocks again afterwards")
+
+	var status: Variant = deck.get("desk_status")
+	if status == null:
+		check(false, "deck: the desk status label exists")
+		return
+	deck.tactic_row.buttons[GtTypes.TacticMode.AUTO].pressed.emit()
+	deck.refresh()
+	var auto_ok: bool = race.tactic_mode == GtTypes.TacticMode.AUTO and (status as Label).text == "MODE: AUTO // AI ENGINEER ASSISTED"
+	deck.tactic_row.buttons[GtTypes.TacticMode.MANUAL].pressed.emit()
+	deck.refresh()
+	check(auto_ok and race.tactic_mode == GtTypes.TacticMode.MANUAL and (status as Label).text == "MODE: MANUAL // 100% PLAYER DIRECTIVE",
+		"deck: the desk status tag follows MANUAL and AUTO")
