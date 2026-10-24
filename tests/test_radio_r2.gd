@@ -177,8 +177,8 @@ func _test_two_way_hud() -> void:
 	var driver_rect: Rect2 = _banner_rect(driver)
 	var engineer_rect: Rect2 = _banner_rect(engineer)
 	check(dock.grow(1.0).encloses(driver_rect) and dock.grow(1.0).encloses(engineer_rect) and not driver_rect.intersects(engineer_rect)
-			and driver_rect.position.x < engineer_rect.position.x and engineer_rect.position.y > driver_rect.position.y,
-		"hud radio: the cards sit at the two ends of the dock without overlapping")
+			and driver_rect.position.x < engineer_rect.position.x and is_equal_approx(engineer_rect.position.y, driver_rect.position.y),
+		"hud radio: the cards sit side by side at the top of the dock, clear of the track, without overlapping")
 
 	driver._hide_banner()
 	var undimmed: bool = not engineer.dimmed

@@ -65,6 +65,7 @@ func _run() -> void:
 			car = candidate
 			break
 	car.wear = 0.62
+	_clear() # the sim may have an urgent card up already
 
 	race.push_radio(car, "driver", "Had a snap of oversteer! Lost some time.")
 	hud.radio._settle()

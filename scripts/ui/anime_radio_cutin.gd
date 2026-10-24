@@ -46,8 +46,6 @@ const DIM_SCALE := 0.95
 const SLAP_SEC := 0.45
 const SLAP_SCALE := 1.55
 const SLAP_START_DEG := 9.0
-## The engineer card sits this far down the dock (0..1), below the driver card.
-const ENGINEER_DOCK_Y := 0.42
 const FADE_OUT_SEC := 1.8
 ## Torn paper outline, percent of the card size.
 const PAPER_POINTS: Array[Vector2] = [
@@ -375,14 +373,13 @@ func _settle() -> void:
 	_rest_pose()
 
 
-## Top-left of the docked banner in window pixels: the driver at the top-left of the free area, the engineer at
-## its right end a little below the middle (leaving room for the sticker that sticks out).
+## Top-left of the docked banner in window pixels: the driver at the top-left of the free area, the engineer on the
+## same row at its right end (leaving room for the sticker that sticks out); both stay clear of the track below.
 func _dock_shown() -> Vector2:
 	var y: float = _dock_rect.position.y + DOCK_MARGIN * _dock_scale
 	var x: float = _dock_rect.position.x + DOCK_MARGIN * _dock_scale
 	if role == Role.ENGINEER:
 		x = _dock_rect.end.x - (DOCK_MARGIN + MIRROR_EDGE_PAD) * _dock_scale - _banner_w * _dock_scale
-		y = _dock_rect.position.y + _dock_rect.size.y * ENGINEER_DOCK_Y
 	return Vector2(x, y)
 
 
