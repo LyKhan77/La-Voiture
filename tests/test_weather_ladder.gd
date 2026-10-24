@@ -46,6 +46,7 @@ func _run() -> void:
 	race.step_ticks(200)
 	hud.refresh_all()
 	_test_outlook()
+	_test_chip()
 	race.dispose()
 	world.queue_free()
 	await process_frame
@@ -124,3 +125,49 @@ func _test_outlook() -> void:
 	check(GtWeatherOutlook.state_of(0.9, 85.0) == 2 and GtWeatherOutlook.state_of(0.2, 10.0) == 1 and GtWeatherOutlook.state_of(0.0, 30.0) == 3
 			and GtWeatherOutlook.state_of(0.0, 2.0) == 0 and RaceHud.weather_state(0.9, 85.0) == 2 and GtWeatherOutlook.state_name(2) == "HEAVY RAIN",
 		"outlook: weather states keep the HUD's meanings")
+
+
+# --- ribbon chip -----------------------------------------------------------------------------------------------------
+
+func _test_chip() -> void:
+	var chip := WeatherRadarWidget.new()
+	root.add_child(chip)
+	var rows: Array[Dictionary] = GtWeatherOutlook.ahead(_case_a(), 3, 7)
+	chip.update_outlook(rows, GtWeatherOutlook.summary(rows), 24.0, 31.0)
+	var cols: Array[Dictionary] = chip.columns
+	check(cols.size() == 8 and cols[0]["tag"] == "NOW" and cols[3]["tag"] == "BOX" and bool(cols[4]["crossover"]) and not bool(cols[3]["crossover"])
+			and int(cols[4]["tyre"]) == GtTypes.Compound.INTERMEDIATE and int(cols[5]["tyre"]) == GtTypes.Compound.WET
+			and chip.forecast_label.text.contains("DRIZZLE L+4"),
+		"chip: the ladder marks NOW, the box lap and the crossover column (%s)" % chip.forecast_label.text)
+	var animated: bool = chip.is_processing()
+
+	var quiet: Array = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+	var quiet_water: Array = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+	var calm_rows: Array[Dictionary] = GtWeatherOutlook.ahead(_weather(0.0, 3.0, _forecast(quiet, quiet_water)), 3, 7)
+	chip.update_outlook(calm_rows, GtWeatherOutlook.summary(calm_rows), 24.0, 31.0)
+	var tags: String = ""
+	for column: Dictionary in chip.columns:
+		tags += String(column["tag"])
+	check(tags == "NOW" and chip.forecast_label.text.contains("STABLE"), "chip: a dry forecast shows no box tag")
+
+	var short_rows: Array[Dictionary] = GtWeatherOutlook.ahead(_case_a(), 3, 7, 5)
+	chip.update_outlook(short_rows, GtWeatherOutlook.summary(short_rows), 24.0, 31.0)
+	check(bool(chip.columns[3]["dim"]) and chip.columns[3]["tag"] == "" and not bool(chip.columns[2]["dim"]) and not bool(chip.columns[3]["crossover"]),
+		"chip: columns after the flag are dimmed and untagged")
+
+	var clicks: Array[int] = []
+	chip.clicked.connect(func() -> void: clicks.append(1))
+	var press := InputEventMouseButton.new()
+	press.button_index = MOUSE_BUTTON_LEFT
+	press.pressed = true
+	chip._gui_input(press)
+	check(clicks.size() == 1 and WeatherRadarWidget.format_forecast(0, [0, 0, 1, 1, 2]) == "L+3: DRIZZLE | L+5: HEAVY RAIN",
+		"chip: a click emits clicked and the old forecast text format stays")
+
+	PresentationSettings.reduce_motion = true
+	chip.update_outlook(rows, GtWeatherOutlook.summary(rows), 24.0, 31.0)
+	var still: bool = not chip.is_processing()
+	PresentationSettings.reduce_motion = false
+	chip.update_outlook(rows, GtWeatherOutlook.summary(rows), 24.0, 31.0)
+	check(animated and still and chip.is_processing(), "chip: rain and pulses animate, and reduce motion stops them")
+	chip.queue_free()
