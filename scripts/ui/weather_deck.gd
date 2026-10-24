@@ -43,7 +43,7 @@ func _init() -> void:
 	chart = WeatherChart.new()
 	add_child(chart)
 	chart.position = Vector2(8.0, 34.0)
-	var hint := UI.label("white line = water on track | blue bars = rain | cone = how unsure the forecast is", 9, T.TEXT_MUTED)
+	var hint := UI.label("white = water | blue = rain | cone = how unsure", 9, T.TEXT_MUTED)
 	add_child(hint)
 	hint.position = Vector2(12.0, 246.0)
 	var map_title := UI.label("TRACK STATE", 11, T.TEXT_SECONDARY, UI.HEADER)
@@ -56,23 +56,23 @@ func _init() -> void:
 	for key: String in ["AIR", "TRACK", "HUMIDITY", "WIND"]:
 		var label := UI.label(key, 10, T.TEXT_PRIMARY)
 		add_child(label)
-		label.position = Vector2(382.0 + float(column % 2) * 86.0, 158.0 + float(column / 2) * 14.0)
+		label.position = Vector2(382.0 + float(column % 2) * 86.0, 148.0 + float(column / 2) * 13.0)
 		info_labels[key] = label
 		column += 1
-	next_label = UI.label("", 11, T.TEXT_PRIMARY, UI.HEADER)
+	next_label = UI.label("", 10, T.TEXT_PRIMARY, UI.HEADER)
 	next_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	next_label.custom_minimum_size.x = 168.0
 	add_child(next_label)
-	next_label.position = Vector2(382.0, 190.0)
-	next_label.size = Vector2(168.0, 34.0)
+	next_label.position = Vector2(382.0, 178.0)
+	next_label.size = Vector2(168.0, 44.0)
 	action_button = UI.button("")
 	action_button.add_theme_font_size_override("font_size", 12)
 	action_button.focus_mode = Control.FOCUS_NONE
 	action_button.visible = false
 	action_button.pressed.connect(_on_action)
 	add_child(action_button)
-	action_button.position = Vector2(380.0, 226.0)
-	action_button.size = Vector2(172.0, 28.0)
+	action_button.position = Vector2(380.0, 228.0)
+	action_button.size = Vector2(172.0, 26.0)
 	set_process(false)
 
 
@@ -114,7 +114,7 @@ func update_outlook(rows: Array[Dictionary], summary: Dictionary, snapshot: Dict
 	info_labels["TRACK"].text = "TRACK %d°C" % roundi(float(snapshot["track"]))
 	info_labels["HUMIDITY"].text = "HUMIDITY %d%%" % roundi(float(snapshot["humidity"]))
 	var heading: int = posmod(roundi(float(snapshot["wind_dir"]) / TAU * 8.0), 8)
-	info_labels["WIND"].text = "WIND %d km/h %s" % [roundi(float(snapshot["wind_kmh"])), COMPASS[heading]]
+	info_labels["WIND"].text = "WIND %dkm/h %s" % [roundi(float(snapshot["wind_kmh"])), COMPASS[heading]]
 	var water: float = float(snapshot["water"])
 	var sectors: Array[float] = []
 	for offset: float in SECTOR_OFFSET:
@@ -137,8 +137,8 @@ func _update_next(rows: Array[Dictionary], summary: Dictionary) -> void:
 	else:
 		var laps: int = int(next["k"])
 		var crossover: String = "none in %dL" % GtWeatherOutlook.CHART_LAPS if change.is_empty() \
-				else "> %s at L+%d" % [GtTypes.COMPOUND_NAME[int(change["tyre"])], int(change["k"])]
-		next_label.text = "%s IN ~%d LAP%s\nconfidence %d%% | crossover %s" % [
+				else "> %s L+%d" % [GtTypes.COMPOUND_NAME[int(change["tyre"])], int(change["k"])]
+		next_label.text = "%s IN ~%d LAP%s\nconfidence %d%%\ncrossover %s" % [
 			GtWeatherOutlook.state_name(int(next["state"])), laps, "S" if laps > 1 else "", confidence, crossover]
 	action_button.visible = box_k > 0
 	if box_k > 0:
@@ -191,7 +191,7 @@ class WeatherChart extends Control:
 		for line: Array in [[GtForecast.WET_WATER_PCT, "WET > 45%", Color("#2979FF")], [GtForecast.INTER_WATER_PCT, "INTER > 18%", Color("#00E676")]]:
 			var y: float = _y(float(line[0]))
 			draw_line(Vector2(PLOT.position.x, y), Vector2(PLOT.end.x, y), line[2], 1.0)
-			draw_string(font, Vector2(PLOT.end.x - 2.0, y - 3.0), String(line[1]), HORIZONTAL_ALIGNMENT_RIGHT, 120.0, 8, line[2])
+			draw_string(font, Vector2(PLOT.end.x - 122.0, y - 3.0), String(line[1]), HORIZONTAL_ALIGNMENT_RIGHT, 120.0, 8, line[2])
 		if rows.size() < 2:
 			return
 		var step: float = PLOT.size.x / float(rows.size() - 1)

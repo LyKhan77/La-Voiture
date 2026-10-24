@@ -285,6 +285,8 @@ func _test_hud() -> void:
 	check(GtWeatherOutlook.leader_lap(race, world.track.length) == lead and opened and closed_by_key and reopened and esc and hidden_closes,
 		"hud: the chip and W open the weather deck, ESC closes it first, hiding the HUD closes it")
 
+	check(hud.weather_deck.get_parent() == hud.weather_layer and hud.weather_layer.layer > hud.radio.layer and hud.weather_layer.layer > hud.engineer_radio.layer,
+		"hud: the weather deck draws above the radio banners")
 	hud.weather_widget.clicked.emit()
 	var offered: String = hud.weather_deck.action_button.text
 	hud.weather_deck.action_button.pressed.emit()

@@ -43,6 +43,7 @@ const CARD_CRITICAL_S: float = 3.0
 const CARD_BLINK_FRAMES: int = 6
 const BURN_ORANGE := Color("#FF6D00")
 const SPEEDLINES_LAYER: int = 5
+const WEATHER_LAYER: int = 31
 ## Rays appear at 200 km/h and are full at 280: 240 km/h already reads at 0.5.
 const SPEEDLINES_FROM_KMH: float = 200.0
 const SPEEDLINES_FULL_KMH: float = 280.0
@@ -67,6 +68,7 @@ var tower: Control
 var radar: Control
 var weather_widget: WeatherRadarWidget
 var weather_deck: WeatherDeck
+var weather_layer: CanvasLayer
 var drawer: TelemetryDrawer
 ## Team accent of the HUD skin (logo, marquee, deck header, drawer): the player team's livery colour.
 var style: GarageStyleScript
@@ -135,7 +137,12 @@ func bind(p_world: Node3D) -> void:
 	drawer.position = Vector2(1598.0, 372.0)
 	weather_deck = WeatherDeck.new()
 	weather_deck.name = "WeatherDeck"
-	stage.add_child(weather_deck)
+	# A layer of its own above the radio banners (layer 30), which would cover it inside the stage.
+	weather_layer = CanvasLayer.new()
+	weather_layer.name = "WeatherLayer"
+	weather_layer.layer = WEATHER_LAYER
+	add_child(weather_layer)
+	weather_layer.add_child(weather_deck)
 	weather_deck.position = Vector2(1006.0, 76.0)
 	weather_deck.set_ribbon(world.ribbon, world.ribbon.length_m)
 	weather_deck.tyres_chosen.connect(_on_weather_tyres)
@@ -180,6 +187,8 @@ func fit() -> void:
 	var factor: float = minf(view.x / STAGE.x, view.y / STAGE.y)
 	stage.scale = Vector2(factor, factor)
 	stage.position = (view - STAGE * factor) * 0.5
+	if weather_layer != null:
+		weather_layer.transform = Transform2D(0.0, Vector2(factor, factor), 0.0, stage.position)
 	var dock := Rect2(stage.position + RADIO_DOCK.position * factor, RADIO_DOCK.size * factor)
 	if speedlines_rect != null:
 		var window := Rect2(dock.position / view, dock.size / view)
