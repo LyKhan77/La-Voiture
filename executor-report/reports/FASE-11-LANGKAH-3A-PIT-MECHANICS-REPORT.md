@@ -26,13 +26,13 @@ Posisi dan ukuran seluruh kotak HUD tidak berubah.
 | `scripts/world/race_weekend_world.gd` | `cancel_pit()` |
 | `scripts/hud/tactical_deck.gd` | desk dua opsi, `desk_status`, `on_box_pressed()`, `cancel_box()`, gaya CANCEL |
 | `scripts/hud/race_hud.gd` | bar api, `card_timer`, `card_critical`, `burn_color()`, `burn_text()`, keybind B/ESC/ENTER, teks marquee |
-| `tests/test_pit_deck_and_radio.gd` | suite baru, 25 assertion (radio dua arah menyusul di 3e) |
+| `tests/test_pit_deck_and_radio.gd` | suite baru, 26 assertion (radio dua arah menyusul di 3e) |
 | `tests/test_gt_sim.gd`, `tests/test_race_hud.gd` | skenario HYBRID ditulis ulang untuk MANUAL/AUTO dan tombol CANCEL BOX |
 | `PRD/00`, `PRD/02`, `PRD/07`, `ROADMAP.md` | sebutan HYBRID dihapus, status 3a |
 
 ## 3. Verifikasi
 
-- **28 suite headless (27 lama + `test_pit_deck_and_radio`): semua exit 0**, tanpa `[FAIL]` dan tanpa `SCRIPT ERROR` di seluruh log. `test_race_world` dan `test_simulation_verification` menutup dengan baris `ALL PASS` / `ALL CORE MODEL ASSERTIONS VERIFIED` (bukan baris `PASS` berformat sama).
+- **28 suite headless (27 lama + `test_pit_deck_and_radio`): semua exit 0, diulang setelah fix review**, tanpa `[FAIL]` dan tanpa `SCRIPT ERROR` di seluruh log. `test_race_world` dan `test_simulation_verification` menutup dengan baris `ALL PASS` / `ALL CORE MODEL ASSERTIONS VERIFIED` (bukan baris `PASS` berformat sama).
 - `test_gt_sim.gd` (termasuk `_test_determinism`: seed sama, balapan sama) tetap hijau.
 - Setiap test baru dilihat gagal lebih dulu: Task 1 (parse error karena `SUGGESTION_WINDOW_S` belum ada), Task 2 (`cancel_pit` tidak ada), Task 3 (6 asersi gagal), Task 4 (parse error `burn_text`).
 - Bukti visual native 1920×1080 (`scratch/capture_langkah3a.gd`), di `executor-report/screenshots/phases/`:
@@ -40,7 +40,13 @@ Posisi dan ukuran seluruh kotak HUD tidak berubah.
 
 **Tidak dilakukan:** smoke test penuh 3 lap 20 mobil sampai podium dan pengukuran frame time 60 FPS tidak dijalankan di langkah ini (hanya sesi tangkapan layar di dunia balapan). Perubahan 3a tidak menambah beban per frame selain satu `ColorRect` dan satu `Label` yang diperbarui saat kartu tampil; pengukuran FPS menyusul bersama 3b–3e.
 
-## 4. Keputusan dan ruling
+## 4. Review akhir (reviewer segar, model Fable, seluruh cabang)
+
+Tidak ada Critical. **I1 diperbaiki:** di AUTO, kartu BOX yang masih terbuka membuat mobil di-box ulang setelah pemain membatalkan box; `cancel_pit` kini menutup kartu PIT terbuka milik mobil itu (`test_cancel_closes_the_box_card`: RED 1 gagal → GREEN, suite 28/28 exit 0 setelah fix). **I2 jadi ruling:** kartu pengganti menimpa kartu BOX yang tertunda (satu slot, sesuai desain; kartu muncul lagi setelah cooldown 25 s, risiko AUTO dua mobil menunda pit hingga ~20 s).
+
+Minor ditunda: M1 `cancel_pit` bisa memperpendek cooldown yang lebih panjang; M2 ACCEPT manual bisa menimpa panggilan yang sudah dibuat; M3 jalur expiry tidak memeriksa DNF; M4 jendela bisa selisih satu tick; M5 pembagian integer di `race_hud.gd` mungkin memicu warning; M6 akses `["deadline"]` langsung; M7 advisor kini bersuara di MANUAL.
+
+## 5. Keputusan dan ruling
 
 1. **Cabang fitur, bukan git worktree** (proyek Godot dengan cache `.godot` dan aset LFS membuat worktree berat).
 2. **Perilaku MANUAL/AUTO berubah dari sim lama** (sebelumnya MANUAL diam, AUTO langsung memanggil pit tanpa kartu, HYBRID = kartu): lihat spec §6. Dikonfirmasi pengguna.
@@ -50,7 +56,7 @@ Posisi dan ukuran seluruh kotak HUD tidak berubah.
 6. `test_race_hud.gd:180` (HYBRID → MANUAL) dipindah ke Task 1 agar suite tetap bisa di-parse.
 7. Test memakai pola proyek (`tests/test_*.gd` headless), bukan gdUnit4 seperti di `.claude/rules/test-standards.md`.
 
-## 5. Catatan untuk langkah berikutnya
+## 6. Catatan untuk langkah berikutnya
 
 - `scratch/capture_langkah3a.gd` bisa dipakai ulang sebagai kerangka tangkapan 3b–3e.
 - Saran baru dari advisor dapat menggantikan kartu terbuka di tengah jendela dan memulai ulang bar dari 10.0 s (disengaja, dicakup test).

@@ -49,6 +49,7 @@ func _run() -> void:
 	hud.refresh_all()
 	_test_desk_modes_and_suggestion_window()
 	_test_cancel_pit()
+	_test_cancel_closes_the_box_card()
 	_test_deck_box_and_desk()
 	_test_burn_bar_and_keys()
 	race.dispose()
@@ -288,3 +289,20 @@ func _test_burn_bar_and_keys() -> void:
 	check(b_first and chosen >= 0 and b_again and car.pit_request == chosen,
 		"keys: B requests the box once; pressing it again keeps the same call")
 	car.pit_request = -1
+
+
+# --- final review fix: an explicit cancel beats a still-open BOX card -----------------------------------------------
+
+func _test_cancel_closes_the_box_card() -> void:
+	var car: GtCar = _reset(GtTypes.TacticMode.AUTO)
+	car.pit = null
+	_suggest_box(car)
+	race.time += 2.0
+	world.request_pit(car.id, GtTypes.Compound.WET)
+	race.time += 2.0
+	var cancelled: bool = world.cancel_pit(car.id)
+	var card_closed: bool = race.latest_suggestion.is_empty()
+	race.time += GtRace.SUGGESTION_WINDOW_S
+	race.step()
+	check(cancelled and card_closed and car.pit_request == -1,
+		"pit: in AUTO an explicit cancel closes the open BOX card, so the window end cannot re-box the car")

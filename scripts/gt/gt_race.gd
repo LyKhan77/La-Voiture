@@ -421,6 +421,9 @@ func cancel_pit(car_id: int) -> bool:
 	car.pit_request = -1
 	_suggestion_cooldowns["%d-%d" % [car.id, GtTypes.TacticType.PIT]] = time + 30.0
 	push_radio(car, "engineer", "Stay out, stay out! Box call cancelled.", true)
+	# An explicit cancel beats a BOX card still open for this car, or AUTO would re-box it at the window end.
+	if not latest_suggestion.is_empty() and int(latest_suggestion["car_id"]) == car.id and int(latest_suggestion["type"]) == GtTypes.TacticType.PIT:
+		dismiss_suggestion()
 	return true
 
 
