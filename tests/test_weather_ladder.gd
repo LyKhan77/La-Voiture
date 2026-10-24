@@ -47,6 +47,7 @@ func _run() -> void:
 	hud.refresh_all()
 	_test_outlook()
 	_test_chip()
+	_test_deck()
 	race.dispose()
 	world.queue_free()
 	await process_frame
@@ -171,3 +172,70 @@ func _test_chip() -> void:
 	chip.update_outlook(rows, GtWeatherOutlook.summary(rows), 24.0, 31.0)
 	check(animated and still and chip.is_processing(), "chip: rain and pulses animate, and reduce motion stops them")
 	chip.queue_free()
+
+
+# --- weather deck ----------------------------------------------------------------------------------------------------
+
+func _snapshot() -> Dictionary:
+	return {"air": 24.0, "track": 31.0, "humidity": 52.0, "wind_kmh": 18.0, "wind_dir": 0.0, "water": 3.0, "drying_line": 0.0}
+
+
+func _test_deck() -> void:
+	var deck := WeatherDeck.new()
+	root.add_child(deck)
+	var opened: bool = false
+	deck.set_open(true)
+	opened = deck.visible and deck.is_open
+	deck.toggle()
+	check(opened and not deck.is_open and not deck.visible, "deck: the weather deck opens and toggles shut")
+
+	var picks: Array[Vector2i] = []
+	deck.tyres_chosen.connect(func(compound: int, box_k: int) -> void: picks.append(Vector2i(compound, box_k)))
+	deck.set_open(true)
+	var rows: Array[Dictionary] = GtWeatherOutlook.ahead(_case_a(), 3, 10)
+	deck.update_outlook(rows, GtWeatherOutlook.summary(rows), _snapshot())
+	var button_text: String = deck.action_button.text
+	var offered: bool = deck.action_button.visible
+	deck.action_button.pressed.emit()
+	check(deck.next_label.text.contains("DRIZZLE IN ~4 LAPS") and deck.next_label.text.contains("confidence 66%") and deck.next_label.text.contains("INTERMEDIATE")
+			and offered and button_text == "SET TYRES  L+3 > INTERMEDIATE" and picks == [Vector2i(GtTypes.Compound.INTERMEDIATE, 3)],
+		"deck: the weather deck names the next change and offers the tyre for the box lap (%s)" % deck.next_label.text.replace("\n", " / "))
+	var animated: bool = deck.is_processing()
+
+	var quiet: Array = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+	var quiet_water: Array = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+	var calm_rows: Array[Dictionary] = GtWeatherOutlook.ahead(_weather(0.0, 3.0, _forecast(quiet, quiet_water)), 3, 10)
+	deck.update_outlook(calm_rows, GtWeatherOutlook.summary(calm_rows), _snapshot())
+	var calm_text: String = deck.next_label.text
+	var calm_offered: bool = deck.action_button.visible
+	var short_rows: Array[Dictionary] = GtWeatherOutlook.ahead(_case_a(), 3, 10, 6)
+	deck.update_outlook(short_rows, GtWeatherOutlook.summary(short_rows), _snapshot())
+	check(calm_text.contains("NO CHANGE IN 10 LAPS") and calm_text.contains("confidence 95%") and not calm_offered and not deck.action_button.visible
+			and deck.next_label.text.contains("BEFORE THE FLAG"),
+		"deck: a dry forecast, or a change after the flag, offers no tyre action")
+
+	var snap: Dictionary = _snapshot()
+	snap["wind_kmh"] = 18.0
+	deck.update_outlook(rows, GtWeatherOutlook.summary(rows), snap)
+	check(String(deck.info_labels["AIR"].text).contains("24") and String(deck.info_labels["TRACK"].text).contains("31")
+			and String(deck.info_labels["WIND"].text).contains("18") and String(deck.info_labels["HUMIDITY"].text).contains("52"),
+		"deck: the weather numbers show air, track, humidity and wind")
+
+	var points := PackedVector2Array()
+	for index: int in range(60):
+		points.append(Vector2(85.0 + cos(float(index) / 60.0 * TAU) * 70.0, 52.0 + sin(float(index) / 60.0 * TAU) * 40.0))
+	deck.map.set_points(points)
+	var wet: Array[float] = [3.0, 13.0, 0.0]
+	deck.map.set_wetness(wet, 0.0)
+	var colors: Array[Color] = deck.map.sector_colors()
+	check(colors.size() == 3 and colors[0] != colors[1], "deck: the track map tints each sector by its water")
+
+	PresentationSettings.reduce_motion = true
+	deck.update_outlook(rows, GtWeatherOutlook.summary(rows), _snapshot())
+	var still: bool = not deck.is_processing()
+	PresentationSettings.reduce_motion = false
+	deck.update_outlook(rows, GtWeatherOutlook.summary(rows), _snapshot())
+	var live: bool = deck.is_processing()
+	deck.set_open(false)
+	check(animated and still and live and not deck.is_processing(), "deck: the bracket blinks only while open, and reduce motion or closing stops it")
+	deck.queue_free()
