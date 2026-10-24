@@ -40,11 +40,13 @@ func _init() -> void:
 	head.add_child(title_label)
 	plain_label = UI.label("", 12, T.TEXT_SECONDARY, UI.RADIO)
 	plain_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	plain_label.custom_minimum_size.x = WIDTH - PAD * 2.0
 	_body.add_child(plain_label)
 	numbers_label = UI.label("", 11, T.TEXT_PRIMARY)
 	_body.add_child(numbers_label)
 	verdict_label = UI.label("", 12, T.TEXT_PRIMARY, UI.HEADER)
 	verdict_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	verdict_label.custom_minimum_size.x = WIDTH - PAD * 2.0
 	_body.add_child(verdict_label)
 
 
