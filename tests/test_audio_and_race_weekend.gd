@@ -325,6 +325,9 @@ func _test_voice_coverage() -> void:
 			ticks += 1
 		for message: Dictionary in messages:
 			sent += 1
+			# Engineer replies quote the car's live numbers and the flood call is new in 3e: text only, no recorded clip.
+			if int(message.get("reply_to", -1)) >= 0 or String(message["text"]).begins_with("Track is flooding"):
+				continue
 			var clip: Dictionary = RadioVoice.find(String(message["speaker"]), String(message["text"]))
 			if clip.is_empty():
 				unvoiced["%s: %s" % [message["speaker"], message["text"]]] = true

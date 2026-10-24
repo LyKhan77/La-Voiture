@@ -52,8 +52,12 @@ var last_radio_time: float = -999.0
 ## Seconds before a car may make another routine call to the pit wall, by car id. Urgent calls ignore it.
 const DRIVER_RADIO_COOLDOWN_S: float = 15.0
 var driver_radio_cooldown: Dictionary = {}
+## The engineer answers a driver call of the player team this many seconds of sim time later.
+const RADIO_REPLY_DELAY_S: float = 2.5
 
 var _radio_counter: int = 0
+var _pending_replies: Array[Dictionary] = [] # {"due", "car_id", "reply_to", "driver_text"}
+var _flood_called: Dictionary = {} # car id -> true while a flood episode has been called
 var _suggestion_cooldowns: Dictionary = {} # "car-type" -> time
 var contacts: GtContacts
 
@@ -202,6 +206,7 @@ func standings_entries() -> Array[Dictionary]:
 func step(dt: float = GtTypes.TICK_DT) -> void:
 	tick_count += 1
 	_tick_driver_radio_cooldowns(dt)
+	_flush_replies()
 	_step_weather(dt)
 	_update_race_control(dt)
 	var racing: Array[GtCar] = []
@@ -218,6 +223,7 @@ func step(dt: float = GtTypes.TICK_DT) -> void:
 	contacts.resolve(active, dt)
 	_check_advisor_tactics()
 	_expire_suggestion()
+	_check_flood_radio()
 	time += dt
 	var order: Array[GtCar] = standings()
 	for index: int in range(order.size()):
@@ -379,7 +385,7 @@ func _tick_driver_radio_cooldowns(dt: float) -> void:
 
 
 ## `rival` lets a car outside the player's team speak because the call is about one of the player's cars.
-func push_radio(car: GtCar, speaker: String, text: String, force: bool = false, rival: bool = false) -> void:
+func push_radio(car: GtCar, speaker: String, text: String, force: bool = false, rival: bool = false, reply_to: int = -1) -> void:
 	if not force and not rival and car.team_id != player_team_id:
 		return
 	if speaker == "driver" and not force:
@@ -388,13 +394,47 @@ func push_radio(car: GtCar, speaker: String, text: String, force: bool = false, 
 	_radio_counter += 1
 	var message: Dictionary = {
 		"id": _radio_counter, "car_id": car.id, "code": car.code, "driver_name": car.driver_name,
-		"team_color": car.color, "speaker": speaker, "text": text, "time": time, "urgent": force, "rival": rival,
+		"team_color": car.color, "speaker": speaker, "text": text, "time": time, "urgent": force, "rival": rival, "reply_to": reply_to,
 	}
 	radio_history.append(message)
 	if radio_history.size() > 60:
 		radio_history.pop_front()
 	latest_radio = message
+	if speaker == "driver" and not rival and car.team_id == player_team_id and GtRadioReplies.reply_for(text, car, weather.track_water_pct) != "":
+		_pending_replies.append({"due": time + RADIO_REPLY_DELAY_S, "car_id": car.id, "reply_to": _radio_counter, "driver_text": text})
 	radio_message.emit(message)
+
+
+## Sends the engineer answers that fell due; the text is made now, from the car as it is now.
+func _flush_replies() -> void:
+	var waiting: Array[Dictionary] = []
+	for reply: Dictionary in _pending_replies:
+		if time < float(reply["due"]):
+			waiting.append(reply)
+			continue
+		var car: GtCar = get_car(int(reply["car_id"]))
+		if car != null:
+			var text: String = GtRadioReplies.reply_for(String(reply["driver_text"]), car, weather.track_water_pct)
+			if text != "":
+				push_radio(car, "engineer", text, false, false, int(reply["reply_to"]))
+	_pending_replies = waiting
+
+
+## A car of the player team on slicks calls the flooded track once per episode (water over the wet line, until it drops below the inter line).
+func _check_flood_radio() -> void:
+	var water: float = weather.track_water_pct
+	if water < GtForecast.INTER_WATER_PCT:
+		_flood_called.clear()
+		return
+	if water <= GtForecast.WET_WATER_PCT:
+		return
+	for car: GtCar in cars:
+		if car.team_id != player_team_id or car.is_dnf or car.finished_at >= 0.0 or not GtTypes.is_slick(car.compound):
+			continue
+		if _flood_called.has(car.id) or not can_push_driver_radio(car.id):
+			continue
+		_flood_called[car.id] = true
+		push_radio(car, "driver", "Track is flooding, aquaplaning heavily!")
 
 
 func set_tactic_mode(mode: int) -> void:

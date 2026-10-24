@@ -52,6 +52,7 @@ func _run() -> void:
 	_test_cancel_closes_the_box_card()
 	_test_deck_box_and_desk()
 	_test_burn_bar_and_keys()
+	_test_two_way_radio()
 	race.dispose()
 	world.queue_free()
 	await process_frame
@@ -307,3 +308,125 @@ func _test_cancel_closes_the_box_card() -> void:
 	race.step()
 	check(cancelled and card_closed and car.pit_request == -1,
 		"pit: in AUTO an explicit cancel closes the open BOX card, so the window end cannot re-box the car")
+
+
+# --- Langkah 3e: the engineer answers the driver ----------------------------------------------------------
+
+func _ticks_for(seconds: float) -> int:
+	return ceili(seconds / GtTypes.TICK_DT)
+
+
+## Replies to one driver message, in the order they were pushed.
+func _replies_to(log: Array[Dictionary], ids: Array[int]) -> Array[Dictionary]:
+	var found: Array[Dictionary] = []
+	for message: Dictionary in log:
+		if ids.has(int(message.get("reply_to", -1))) and String(message["speaker"]) == "engineer":
+			found.append(message)
+	return found
+
+
+func _test_two_way_radio() -> void:
+	var log: Array[Dictionary] = []
+	var collect: Callable = func(message: Dictionary) -> void: log.append(message)
+	race.radio_message.connect(collect)
+	var car: GtCar = _reset(GtTypes.TacticMode.MANUAL)
+	car.compound = GtTypes.Compound.MEDIUM
+	car.wear = 0.62
+	race.driver_radio_cooldown.clear()
+	race._pending_replies.clear()
+	race._flood_called.clear()
+	race.weather.track_water_pct = 0.0
+
+	race.push_radio(car, "driver", "Had a snap of oversteer! Lost some time.")
+	var snap_id: int = int(race.latest_radio["id"])
+	race.step_ticks(_ticks_for(2.4))
+	var early: int = _replies_to(log, [snap_id]).size()
+	race.step_ticks(_ticks_for(0.3))
+	var replies: Array[Dictionary] = _replies_to(log, [snap_id])
+	var reply_text: String = String(replies[0]["text"]) if replies.size() == 1 else ""
+	var snap_time: float = 0.0
+	for message: Dictionary in log:
+		if int(message["id"]) == snap_id:
+			snap_time = float(message["time"])
+	check(early == 0 and replies.size() == 1 and reply_text.begins_with("Copy ") and reply_text.contains("%") and not bool(replies[0]["urgent"])
+			and absf(float(replies[0]["time"]) - snap_time - GtRace.RADIO_REPLY_DELAY_S) <= GtTypes.TICK_DT * 1.01,
+		"radio: a driver call gets one engineer reply exactly 2.5 s of sim time later (%s)" % reply_text)
+
+	var rival: GtCar = null
+	for candidate: GtCar in race.cars:
+		if candidate.team_id != race.player_team_id:
+			rival = candidate
+			break
+	race.push_radio(rival, "driver", "Had a snap of oversteer! Lost some time.", false, true)
+	var rival_id: int = int(race.latest_radio["id"])
+	race.step_ticks(_ticks_for(3.0))
+	check(_replies_to(log, [rival_id]).is_empty(), "radio: a rival driver call gets no engineer reply")
+
+	race.driver_radio_cooldown.clear()
+	race.push_radio(car, "driver", "Had a snap of oversteer! Lost some time.")
+	var first_id: int = int(race.latest_radio["id"])
+	race.step_ticks(_ticks_for(1.0))
+	race.push_radio(car, "driver", "Tyres are cooked! Rear is sliding everywhere!", true)
+	var second_id: int = int(race.latest_radio["id"])
+	race.step_ticks(_ticks_for(3.0))
+	var pair: Array[Dictionary] = _replies_to(log, [first_id, second_id])
+	check(pair.size() == 2 and int(pair[0]["reply_to"]) == first_id and int(pair[1]["reply_to"]) == second_id
+			and absf(float(pair[1]["time"]) - float(pair[0]["time"]) - 1.0) < 0.1,
+		"radio: two driver calls in a row keep both replies in order")
+
+	race.push_radio(car, "driver", "Had a snap of oversteer! Lost some time.", true)
+	var retired_id: int = int(race.latest_radio["id"])
+	car.is_dnf = true
+	race.step_ticks(_ticks_for(2.6))
+	car.is_dnf = false
+	var late: Array[Dictionary] = _replies_to(log, [retired_id])
+	var late_text: String = String(late[0]["text"]) if late.size() == 1 else ""
+	check(late.size() == 1 and late_text != "" and not late_text.contains("%s") and not late_text.contains("%d") and not late_text.contains("%%"),
+		"radio: a reply for a car that retired meanwhile is still valid (%s)" % late_text)
+
+	race.driver_radio_cooldown.clear()
+	race.weather.track_water_pct = 60.0
+	var before: int = log.size()
+	race.step_ticks(1)
+	var floods: Array[Dictionary] = []
+	for message: Dictionary in log.slice(before):
+		if int(message["car_id"]) == car.id and String(message["text"]).begins_with("Track is flooding"):
+			floods.append(message)
+	race.weather.track_water_pct = 60.0
+	race.step_ticks(100)
+	var again: int = 0
+	for message: Dictionary in log.slice(before):
+		if int(message["car_id"]) == car.id and String(message["text"]).begins_with("Track is flooding"):
+			again += 1
+	race.weather.track_water_pct = 60.0
+	race.step_ticks(_ticks_for(2.6))
+	var flood_replies: Array[Dictionary] = _replies_to(log, [int(floods[0]["id"])]) if floods.size() == 1 else []
+	var flood_text: String = String(flood_replies[0]["text"]) if flood_replies.size() == 1 else ""
+	race.weather.track_water_pct = 5.0
+	race.step_ticks(2)
+	race.driver_radio_cooldown.clear()
+	race.weather.track_water_pct = 60.0
+	var mark: int = log.size()
+	race.step_ticks(1)
+	var second_flood: int = 0
+	for message: Dictionary in log.slice(mark):
+		if int(message["car_id"]) == car.id and String(message["text"]).begins_with("Track is flooding"):
+			second_flood += 1
+	check(floods.size() == 1 and again == 1 and flood_text.contains("WETS") and flood_text.contains("water at ") and second_flood == 1,
+		"radio: flooding is called once per episode and answered (%s)" % flood_text)
+
+	car.compound = GtTypes.Compound.WET
+	race._flood_called.clear()
+	race.driver_radio_cooldown.clear()
+	race.weather.track_water_pct = 60.0
+	var wet_mark: int = log.size()
+	race.step_ticks(1)
+	var wet_calls: int = 0
+	for message: Dictionary in log.slice(wet_mark):
+		if int(message["car_id"]) == car.id and String(message["text"]).begins_with("Track is flooding"):
+			wet_calls += 1
+	check(wet_calls == 0, "radio: a car already on wets does not call the flood")
+
+	race.radio_message.disconnect(collect)
+	car.compound = GtTypes.Compound.MEDIUM
+	race.weather.track_water_pct = 0.0
