@@ -415,6 +415,24 @@ func _test_two_way_radio() -> void:
 	check(floods.size() == 1 and again == 1 and flood_text.contains("WETS") and flood_text.contains("water at ") and second_flood == 1,
 		"radio: flooding is called once per episode and answered (%s)" % flood_text)
 
+	# Review: two cars of the team on slicks make one flood call, not two in the same tick.
+	race._flood_called.clear()
+	race._pending_replies.clear()
+	race.driver_radio_cooldown.clear()
+	for teammate: GtCar in mine:
+		teammate.compound = GtTypes.Compound.MEDIUM
+		teammate.is_dnf = false
+	race.weather.track_water_pct = 60.0
+	var pair_mark: int = log.size()
+	race.step_ticks(1)
+	race.weather.track_water_pct = 60.0
+	race.step_ticks(50)
+	var pair_calls: int = 0
+	for message: Dictionary in log.slice(pair_mark):
+		if String(message["text"]).begins_with("Track is flooding"):
+			pair_calls += 1
+	check(pair_calls == 1, "radio: two cars on slicks make one flood call per episode (%d)" % pair_calls)
+
 	car.compound = GtTypes.Compound.WET
 	race._flood_called.clear()
 	race.driver_radio_cooldown.clear()
@@ -426,6 +444,11 @@ func _test_two_way_radio() -> void:
 		if int(message["car_id"]) == car.id and String(message["text"]).begins_with("Track is flooding"):
 			wet_calls += 1
 	check(wet_calls == 0, "radio: a car already on wets does not call the flood")
+
+	var sample: GtCar = mine[0]
+	check(GtRadioReplies.reply_for("Tyres are cooked! Rear is sliding everywhere!", sample, 5.0).begins_with("Copy ") and GtRadioReplies.reply_for("Puncture! The tyre has delaminated!", sample, 5.0).begins_with("Copy ")
+			and GtRadioReplies.reply_for("Passing someone! Excellent drive.", sample, 5.0) == "",
+		"radio: every answered call has a reply and an unrelated call has none")
 
 	race.radio_message.disconnect(collect)
 	car.compound = GtTypes.Compound.MEDIUM

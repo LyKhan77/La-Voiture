@@ -92,6 +92,7 @@ var dimmed: bool = false
 ## The headline: capitalised, keywords as ink blocks. `speech` keeps the plain text.
 var rich: RichTextLabel
 var _message := ""
+var _urgent := false
 var _banner_h := BANNER_MIN_HEIGHT
 var _banner_w := BANNER_WIDTH
 var _present := false
@@ -276,6 +277,7 @@ func set_portrait(texture: Texture2D) -> void:
 
 func _play(car_id: int, message: String, urgent: bool, hold: float) -> void:
 	_message = message
+	_urgent = urgent
 	_hold = hold if hold > 0.0 else HOLD_SEC
 	_accent = T.ACCENT_ANIME_CRIMSON if urgent else base_color
 	_speaker.text = "CAR #%02d // %s" % [car_id + 1, role_title]
@@ -359,6 +361,11 @@ func _rest_pose() -> void:
 
 func is_present() -> bool:
 	return _present
+
+
+## True while an urgent call is on screen: a routine one should not replace it.
+func is_urgent() -> bool:
+	return _present and _urgent
 
 
 ## Test hook: jumps the entrance animation to the rest pose and keeps the card up.

@@ -428,13 +428,20 @@ func _check_flood_radio() -> void:
 		return
 	if water <= GtForecast.WET_WATER_PCT:
 		return
+	# One call per episode for the whole team: the first eligible car speaks, its team mates are marked as told,
+	# so two calls (and two replies) never land in the same tick on the two radio cards.
+	var speaker: GtCar = null
 	for car: GtCar in cars:
 		if car.team_id != player_team_id or car.is_dnf or car.finished_at >= 0.0 or not GtTypes.is_slick(car.compound):
 			continue
-		if _flood_called.has(car.id) or not can_push_driver_radio(car.id):
+		if _flood_called.has(car.id):
 			continue
-		_flood_called[car.id] = true
-		push_radio(car, "driver", "Track is flooding, aquaplaning heavily!")
+		if speaker == null and can_push_driver_radio(car.id):
+			speaker = car
+		if speaker != null:
+			_flood_called[car.id] = true
+	if speaker != null:
+		push_radio(speaker, "driver", "Track is flooding, aquaplaning heavily!")
 
 
 func set_tactic_mode(mode: int) -> void:

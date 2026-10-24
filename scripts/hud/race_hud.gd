@@ -522,8 +522,10 @@ func _on_radio(message: Dictionary) -> void:
 	deck.set_radio("%s: %s" % [String(message["code"]), String(message["text"])])
 	var car: GtCar = race.get_car(int(message["car_id"]))
 	var urgent: bool = bool(message["urgent"])
-	if urgent or bool(message.get("rival", false)) or (car != null and car.team_id == race.player_team_id):
-		var cut_in: CanvasLayer = engineer_radio if String(message["speaker"]) == "engineer" else radio
+	var cut_in: CanvasLayer = engineer_radio if String(message["speaker"]) == "engineer" else radio
+	# A routine call waits (ticker only) while an urgent card of the same speaker is still up.
+	var blocked: bool = not urgent and cut_in.is_urgent()
+	if (urgent or bool(message.get("rival", false)) or (car != null and car.team_id == race.player_team_id)) and not blocked:
 		var other: CanvasLayer = radio if cut_in == engineer_radio else engineer_radio
 		if other.is_present():
 			other.set_dimmed(true)

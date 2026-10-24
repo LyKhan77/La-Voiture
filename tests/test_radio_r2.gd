@@ -133,8 +133,44 @@ func _test_two_way_hud() -> void:
 	check(engineer.banner.visible and not engineer.dimmed and driver.dimmed and engineer._accent == T.ACCENT_ANIME_CRIMSON
 			and is_equal_approx(engineer.banner.rotation_degrees, 1.6) and is_equal_approx(driver.banner.modulate.a, 0.6),
 		"hud radio: the speaker is lit and the other card dims")
+	engineer._hide_banner() # the urgent card above would hold a routine call back
 	race.push_radio(car, "engineer", "Copy, calm down.", false, true)
 	check(engineer._accent == hud.style.engineer, "hud radio: a routine engineer call is in the complementary colour")
+
+	# Review: a routine reply must not overwrite an urgent card that is still up.
+	engineer._hide_banner()
+	engineer.set_dimmed(false)
+	race.push_radio(car, "engineer", "Box this lap, confirm WET tyres!", true)
+	engineer._settle()
+	race.push_radio(car, "engineer", "Copy, routine reply.")
+	var urgent_kept: bool = engineer.speech.text.begins_with("Box this lap") and engineer._accent == T.ACCENT_ANIME_CRIMSON
+	engineer._hide_banner()
+	race.push_radio(car, "engineer", "Copy, routine reply.")
+	check(urgent_kept and engineer.speech.text.begins_with("Copy, routine"), "hud radio: a routine reply waits for an urgent card instead of replacing it")
+
+	# Review: the slap lands exactly on the dock position and turns around the card's centre.
+	var half := Vector2(engineer._banner_w, engineer._banner_h) * 0.5
+	engineer._apply_slap(1.0, 9.0)
+	var landed: bool = engineer.banner.position.is_equal_approx(engineer._dock_shown()) and is_equal_approx(engineer.banner.rotation_degrees, 1.6)
+	var rest_centre: Vector2 = engineer.banner.position + (half * engineer.banner.scale.x).rotated(deg_to_rad(engineer.banner.rotation_degrees))
+	engineer._apply_slap(0.0, 9.0)
+	var start_centre: Vector2 = engineer.banner.position + (half * engineer.banner.scale.x).rotated(deg_to_rad(engineer.banner.rotation_degrees))
+	check(landed and start_centre.is_equal_approx(rest_centre) and engineer.banner.scale.x > engineer.banner.scale.x * 0.0, "hud radio: the slap lands on the dock position and keeps the card's centre")
+	engineer._settle()
+
+	# Review: two cards with a long call each stay in the dock and apart.
+	var long_call: String = "Suspension has snapped from the flat tyre! I can't continue, the car is destroyed, please send help now."
+	driver.play_radio(car.id, long_call, false)
+	engineer.play_radio(car.id, long_call, false)
+	driver._settle()
+	engineer._settle()
+	var tall_driver: Rect2 = _banner_rect(driver)
+	var tall_engineer: Rect2 = _banner_rect(engineer)
+	var the_dock: Rect2 = _dock_pixels(hud)
+	check(the_dock.grow(1.0).encloses(tall_driver) and the_dock.grow(1.0).encloses(tall_engineer) and not tall_driver.intersects(tall_engineer),
+		"hud radio: two long calls stay inside the dock and apart")
+	driver._hide_banner()
+	engineer._hide_banner()
 
 	var dock: Rect2 = _dock_pixels(hud)
 	driver.banner.visible = true
