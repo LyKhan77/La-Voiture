@@ -697,14 +697,9 @@ func _update_weather() -> void:
 func weather_status() -> Dictionary:
 	var weather: GtWeather = race.weather
 	var forecast: Array[int] = []
-	var lap: int = maxi(1, floori(1.0 + maxf(0.0, race.standings()[0].s) / world.track.length))
-	var last: Dictionary = weather.forecast[weather.forecast.size() - 1]
-	for ahead: int in range(1, 6):
-		var point: Dictionary = last
-		for candidate: Dictionary in weather.forecast:
-			if int(candidate["lap"]) == lap + ahead:
-				point = candidate
-		forecast.append(weather_state(float(point["rain_intensity"]), float(point["water_pct"])))
+	var rows: Array[Dictionary] = GtWeatherOutlook.ahead(weather, leader_lap(), 5)
+	for index: int in range(1, rows.size()):
+		forecast.append(int(rows[index]["state"]))
 	return {
 		"state": weather_state(weather.rain_intensity, weather.track_water_pct),
 		"wetness_pct": clampf(weather.track_water_pct / 100.0, 0.0, 1.0),
@@ -715,8 +710,9 @@ func weather_status() -> Dictionary:
 
 ## 0 dry, 1 drizzle, 2 heavy rain, 3 drying (wet track, no rain).
 static func weather_state(rain: float, water_pct: float) -> int:
-	if rain > 0.55:
-		return 2
-	if rain > 0.08:
-		return 1
-	return 3 if water_pct > 8.0 else 0
+	return GtWeatherOutlook.state_of(rain, water_pct)
+
+
+## The lap the leader is on, which the weather forecast is indexed by.
+func leader_lap() -> int:
+	return maxi(1, floori(1.0 + maxf(0.0, race.standings()[0].s) / world.track.length))
