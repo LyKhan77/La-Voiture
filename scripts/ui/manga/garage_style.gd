@@ -7,13 +7,18 @@ signal changed
 const T := preload("res://scripts/ui/ui_theme_tokens.gd")
 const CRIMSON := Color("#FF1E56")
 const CYAN := Color("#00F0FF")
+const PINK := Color("#FF007F")
 ## Hue distance (0..0.5) under which a team colour counts as "near crimson" and swaps its shadow.
 const NEAR_CRIMSON_HUE: float = 0.11
 const MIN_SATURATION_FOR_HUE: float = 0.3
 const DARK_TYPE_LUMINANCE: float = 0.35
+## The engineer card colour must sit at least this far (0..0.5 of the hue wheel, 55 degrees) from the accent.
+const ENGINEER_MIN_HUE_GAP: float = 55.0 / 360.0
 var accent: Color = T.ACCENT_ACID_LIME
 var shadow: Color = CRIMSON
 var on_accent: Color = T.INK_BORDER_BLACK
+## The pit wall engineer's colour: complementary to the accent (see engineer_for).
+var engineer: Color = CYAN
 var _faces: Array = [] # [StyleBoxFlat, lighten]
 var _shadows: Array[StyleBoxFlat] = []
 var _borders: Array[StyleBoxFlat] = []
@@ -29,8 +34,20 @@ func blend_accent(color: Color, goal: Color) -> void:
 	var lin: Color = goal.srgb_to_linear()
 	var luminance: float = 0.2126 * lin.r + 0.7152 * lin.g + 0.0722 * lin.b
 	on_accent = T.INK_BORDER_BLACK if luminance > DARK_TYPE_LUMINANCE else Color.WHITE
+	engineer = engineer_for(goal)
 	_apply()
 	changed.emit()
+## First of cyan, pink, lime, yellow whose hue is at least ENGINEER_MIN_HUE_GAP from `accent`; a grey accent gets cyan.
+static func engineer_for(accent: Color) -> Color:
+	if accent.s < MIN_SATURATION_FOR_HUE:
+		return CYAN
+	for candidate: Color in [CYAN, PINK, T.ACCENT_ACID_LIME, T.ACCENT_CYBER_YELLOW]:
+		var gap: float = absf(accent.h - candidate.h)
+		if minf(gap, 1.0 - gap) > ENGINEER_MIN_HUE_GAP:
+			return candidate
+	return CYAN
+
+
 ## `box.bg_color` follows the accent (optionally lightened for hover faces).
 func face(box: StyleBoxFlat, lighten: float = 0.0) -> StyleBoxFlat:
 	_faces.append([box, lighten])
