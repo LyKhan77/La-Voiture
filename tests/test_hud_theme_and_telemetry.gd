@@ -20,6 +20,18 @@ var race: GtRace
 var mine: Array[GtCar] = []
 
 
+## A bare canvas that paints the drawer for real, so draw-time errors surface in the log.
+class PaintProbe extends Control:
+	var state: TelemetryState
+	var reduce: bool = false
+	var draws: int = 0
+
+	func _draw() -> void:
+		draws += 1
+		TelemetryPainter.paint(self, state, Color("#FF1E56"), Color.WHITE, reduce)
+
+
+
 func _initialize() -> void:
 	call_deferred("_run")
 
@@ -52,6 +64,8 @@ func _run() -> void:
 	_test_telemetry_state()
 	_test_caption_typing()
 	await _test_drawer_theme_and_draw()
+	_test_clipping_and_reduce_motion()
+	await _test_paint_rich_states()
 	race.dispose()
 	world.queue_free()
 	await process_frame
@@ -317,3 +331,70 @@ func _test_caption_typing() -> void:
 	check(start == 0.0 and half and full and retyped and is_equal_approx(state.shift_time, state.clock),
 		"telemetry state: the caption types at 42 characters per second and restarts when the story changes, an upshift stamps shift_time")
 	_calm(car)
+
+
+# --- final review fixes: clipping, reduce motion, real painting ----------------------------------------------------
+
+func _test_clipping_and_reduce_motion() -> void:
+	var box := PackedVector2Array([Vector2(0.0, 0.0), Vector2(100.0, 0.0), Vector2(100.0, 100.0), Vector2(0.0, 100.0)])
+	var crossing: Array[PackedVector2Array] = TelemetryPainter.inside_pieces(Vector2(50.0, 50.0), Vector2(200.0, 50.0), box)
+	var kept: bool = crossing.size() == 1
+	for piece: PackedVector2Array in crossing:
+		for point: Vector2 in piece:
+			kept = kept and point.x >= -0.01 and point.x <= 100.01 and point.y >= -0.01 and point.y <= 100.01
+	var outside: Array[PackedVector2Array] = TelemetryPainter.inside_pieces(Vector2(150.0, 150.0), Vector2(250.0, 150.0), box)
+	check(kept and outside.is_empty(),
+		"painter: a panel line keeps only the part inside its polygon (the Geometry2D difference would keep the rest)")
+	var steady: bool = TelemetryPainter.limiter_flash(true, 0.0, true) and TelemetryPainter.limiter_flash(true, 0.1, true)
+	var flicker: bool = TelemetryPainter.limiter_flash(true, 0.0, false) != TelemetryPainter.limiter_flash(true, 0.1, false)
+	var state := TelemetryState.new()
+	state.clock = 5.0
+	state.shift_time = 4.9
+	check(steady and flicker and not TelemetryPainter.limiter_flash(false, 0.0, true),
+		"painter: the limiter flashes, and under reduce motion it holds one steady purple")
+	check(TelemetryPainter.kick_for(state, false) > 0.5 and TelemetryPainter.kick_for(state, true) == 0.0
+			and TelemetryPainter.beat_scale(1.0, true) == 1.0 and is_equal_approx(TelemetryPainter.beat_scale(1.0, false), 1.35)
+			and TelemetryPainter.pop_scale(0.05, true) == 1.0 and TelemetryPainter.pop_scale(0.05, false) > 1.2 and TelemetryPainter.pop_scale(1.0, true) == 1.0,
+		"painter: gear kick, heart pulse and onomatopoeia scale are all still under reduce motion")
+
+
+func _test_paint_rich_states() -> void:
+	var car: GtCar = mine[0]
+	_calm(car)
+	car.is_punctured = true
+	car.punctured_wheel = GtTypes.Wheel.FL
+	car.wheel_blister_pct = PackedFloat64Array([40.0, 40.0, 0.0, 0.0])
+	car.wheel_temp = PackedFloat64Array([140.0, 130.0, 118.0, 99.0])
+	car.damage = 50.0
+	car.brake = 0.9
+	car.rpm = 8800.0
+	car.drs_active = true
+	car.ers_mode = GtTypes.ErsMode.HARVEST
+	car.driver_stress = 100.0
+	var state := TelemetryState.new()
+	state.update(car, race.laps)
+	var probe := PaintProbe.new()
+	probe.state = state
+	probe.size = Vector2(312.0, 496.0)
+	root.add_child(probe)
+	var painted: int = 0
+	for reduce: bool in [false, true]:
+		probe.reduce = reduce
+		for kind: String in TelemetryState.POP_TEXT:
+			state.pops = [{"text": String(TelemetryState.POP_TEXT[kind]), "kind": kind, "born": state.clock}]
+			state.shift_time = state.clock
+			state.advance(0.05)
+			probe.queue_redraw()
+			await process_frame
+			painted += 1
+		for mode: int in [GtTypes.ErsMode.NEUTRAL, GtTypes.ErsMode.DEPLOY, GtTypes.ErsMode.OVERTAKE]:
+			car.ers_mode = mode
+			state.update(car, race.laps)
+			probe.queue_redraw()
+			await process_frame
+			painted += 1
+	probe.queue_free()
+	_calm(car)
+	car.damage = 0.0
+	check(probe.draws >= painted,
+		"painter: blown tyre, blisters, damage, limiter, kick, every onomatopoeia and every ERS mode paint with and without reduce motion (%d draws)" % probe.draws)

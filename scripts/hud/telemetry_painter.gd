@@ -48,11 +48,11 @@ static func paint(canvas: CanvasItem, state: TelemetryState, accent: Color, on_a
 	canvas.draw_string(UI.DISPLAY, Vector2(22.0, 27.0), "TELEMETRY", HORIZONTAL_ALIGNMENT_LEFT, -1.0, 20, on_accent)
 	canvas.draw_string(UI.MONO, Vector2(102.0, 24.0), state.header_text, HORIZONTAL_ALIGNMENT_RIGHT, 200.0, 11, accent)
 	_speed_panel(canvas, state, accent, clock, reduce_motion)
-	_gear_panel(canvas, state, clock)
+	_gear_panel(canvas, state, clock, reduce_motion)
 	_hero_panel(canvas, state, accent, clock, reduce_motion)
 	_pedal_panel(canvas, state, accent)
-	_driver_panel(canvas, state, accent, clock)
-	_caption_panel(canvas, state, accent, clock)
+	_driver_panel(canvas, state, accent, clock, reduce_motion)
+	_caption_panel(canvas, state, accent, clock, reduce_motion)
 	_pops(canvas, state, clock, reduce_motion)
 
 
@@ -76,9 +76,15 @@ static func _slanted(canvas: CanvasItem, rect: Rect2, skew: float, color: Color)
 		Vector2(rect.end.x, rect.end.y), Vector2(rect.position.x, rect.end.y)]), color)
 
 
-## A line clipped to the panel polygon (Geometry2D), so shimmer never leaves its panel.
+## The part of a line that lies inside the polygon (an intersection: clip_polyline_with_polygon would be a
+## difference and return the part outside).
+static func inside_pieces(from: Vector2, to: Vector2, polygon: PackedVector2Array) -> Array[PackedVector2Array]:
+	return Geometry2D.intersect_polyline_with_polygon(PackedVector2Array([from, to]), polygon)
+
+
+## A line kept inside its panel polygon, so shimmer never leaves the panel.
 static func _clipped_line(canvas: CanvasItem, from: Vector2, to: Vector2, polygon: PackedVector2Array, color: Color, width: float) -> void:
-	for piece: PackedVector2Array in Geometry2D.clip_polyline_with_polygon(PackedVector2Array([from, to]), polygon):
+	for piece: PackedVector2Array in inside_pieces(from, to, polygon):
 		canvas.draw_polyline(piece, color, width)
 
 
@@ -110,22 +116,22 @@ static func _speed_panel(canvas: CanvasItem, state: TelemetryState, accent: Colo
 				canvas.draw_circle(Vector2(14.0 + float(gx) * 8.0, 112.0 - float(gy) * 8.0), radius, Color(accent, 0.3))
 	_text_centered(canvas, UI.DISPLAY, str(roundi(state.speed_kmh)), Vector2(96.0, 72.0), 52, Color.WHITE, 6)
 	_text_centered(canvas, MARKER, "KM/H", Vector2(96.0, 105.0), 16, accent)
-	_drs_chip(canvas, state.drs, clock)
+	_drs_chip(canvas, state.drs, clock, reduce_motion)
 
 
-static func _drs_chip(canvas: CanvasItem, drs: int, clock: float) -> void:
+static func _drs_chip(canvas: CanvasItem, drs: int, clock: float, reduce_motion: bool) -> void:
 	var chip := Rect2(16.0, 44.0, 48.0, 16.0)
 	if drs == 0:
 		canvas.draw_rect(chip, WELL)
 		_text_centered(canvas, UI.HEADER, "DRS", chip.get_center(), 12, MUTED)
 	elif drs == 1:
-		var pulse: float = 0.5 + 0.5 * sin(clock * 8.0)
+		var pulse: float = 0.5 if reduce_motion else 0.5 + 0.5 * sin(clock * 8.0)
 		canvas.draw_rect(chip, Color(YELLOW, 0.12 + 0.18 * pulse))
 		canvas.draw_rect(chip, YELLOW, false, 1.5)
 		_text_centered(canvas, UI.HEADER, "DRS", chip.get_center(), 12, YELLOW)
 	else:
 		canvas.draw_rect(chip, CYAN)
-		var shift: float = fposmod(clock * 60.0, 14.0)
+		var shift: float = 0.0 if reduce_motion else fposmod(clock * 60.0, 14.0)
 		for index: int in range(4):
 			var x: float = chip.position.x + float(index) * 14.0 + shift - 14.0
 			if x >= chip.position.x and x + 8.0 <= chip.end.x:
@@ -133,15 +139,34 @@ static func _drs_chip(canvas: CanvasItem, drs: int, clock: float) -> void:
 		_text_centered(canvas, UI.HEADER, "DRS", chip.get_center(), 12, INK)
 
 
-static func _kick(state: TelemetryState) -> float:
+## The gear numeral kicks for KICK_S after an upshift (never under reduce motion).
+static func kick_for(state: TelemetryState, reduce_motion: bool) -> float:
+	if reduce_motion:
+		return 0.0
 	return clampf(1.0 - (state.clock - state.shift_time) / KICK_S, 0.0, 1.0)
 
 
-static func _gear_panel(canvas: CanvasItem, state: TelemetryState, clock: float) -> void:
-	var flash: bool = state.limiter and int(clock * 11.0) % 2 == 0
+## The limiter panel flickers about 5 Hz; under reduce motion it holds one steady purple.
+static func limiter_flash(limiter: bool, clock: float, reduce_motion: bool) -> bool:
+	return limiter and (reduce_motion or int(clock * 11.0) % 2 == 0)
+
+
+static func beat_scale(beat: float, reduce_motion: bool) -> float:
+	return 1.0 if reduce_motion else 1.0 + 0.35 * beat
+
+
+## Onomatopoeia punch in from 1.9x, then breathe; under reduce motion they just sit at 1x.
+static func pop_scale(age: float, reduce_motion: bool) -> float:
+	if reduce_motion:
+		return 1.0
+	return 1.9 - (age / 0.14) * 0.9 if age < 0.14 else 1.0 + 0.04 * sin(age * 30.0)
+
+
+static func _gear_panel(canvas: CanvasItem, state: TelemetryState, clock: float, reduce_motion: bool) -> void:
+	var flash: bool = limiter_flash(state.limiter, clock, reduce_motion)
 	var polygon := PackedVector2Array([Vector2(214.0, 38.0), Vector2(304.0, 38.0), Vector2(304.0, 118.0), Vector2(202.0, 118.0)])
 	_panel(canvas, polygon, Color("#2A0F33") if flash else PANEL, PURPLE if flash else YELLOW)
-	var kick: float = _kick(state)
+	var kick: float = kick_for(state, reduce_motion)
 	var scale: float = 1.0 + 0.35 * kick
 	canvas.draw_set_transform(Vector2(256.0, 76.0), 0.0, Vector2(scale, scale))
 	if kick > 0.05:
@@ -218,7 +243,7 @@ static func _car(canvas: CanvasItem, state: TelemetryState, accent: Color, clock
 	_ers_spine(canvas, state.ers_mode, clock, reduce_motion)
 	_tank(canvas, state.fuel, clock, reduce_motion)
 	if state.damage > 0.05:
-		var mark: Color = CRIMSON if int(clock * 3.0) % 2 == 0 else Color("#FF7A1A")
+		var mark: Color = CRIMSON if (reduce_motion or int(clock * 3.0) % 2 == 0) else Color("#FF7A1A")
 		canvas.draw_line(Vector2(24.0, 54.0), Vector2(32.0, 62.0), mark, 2.0)
 		canvas.draw_line(Vector2(32.0, 54.0), Vector2(24.0, 62.0), mark, 2.0)
 	for index: int in range(4):
@@ -343,7 +368,7 @@ static func _mood_bar(canvas: CanvasItem, rect: Rect2, stress: float, confidence
 	canvas.draw_rect(Rect2(rect.position.x + half - 1.0, rect.position.y, 2.0, rect.size.y), Color.WHITE)
 
 
-static func _driver_panel(canvas: CanvasItem, state: TelemetryState, accent: Color, clock: float) -> void:
+static func _driver_panel(canvas: CanvasItem, state: TelemetryState, accent: Color, clock: float, reduce_motion: bool) -> void:
 	_panel(canvas, _rect_poly(Rect2(8.0, 422.0, 296.0, 34.0)), PANEL, accent)
 	_mood_bar(canvas, Rect2(14.0, 428.0, 150.0, 10.0), state.stress, state.confidence)
 	var ecg := Rect2(14.0, 440.0, 150.0, 14.0)
@@ -358,7 +383,7 @@ static func _driver_panel(canvas: CanvasItem, state: TelemetryState, accent: Col
 	if trace.size() > 1:
 		canvas.draw_polyline(trace, LIME.lerp(CRIMSON, state.stress), 2.0)
 	var beat: float = maxf(TelemetryDrawer.heartbeat(fposmod(clock * rate, 1.0)), 0.0)
-	var scale: float = 1.0 + 0.35 * beat
+	var scale: float = beat_scale(beat, reduce_motion)
 	canvas.draw_set_transform(Vector2(180.0, 440.0), 0.0, Vector2(scale, scale))
 	var heart: Color = LIME.lerp(CRIMSON, state.stress)
 	canvas.draw_circle(Vector2(-3.0, -2.0), 3.4, heart)
@@ -370,11 +395,11 @@ static func _driver_panel(canvas: CanvasItem, state: TelemetryState, accent: Col
 	canvas.draw_string(UI.MONO, Vector2(196.0, 448.0), "CONF %d%%" % roundi(state.confidence * 100.0), HORIZONTAL_ALIGNMENT_RIGHT, 100.0, 10, LIME)
 
 
-static func _caption_panel(canvas: CanvasItem, state: TelemetryState, accent: Color, clock: float) -> void:
+static func _caption_panel(canvas: CanvasItem, state: TelemetryState, accent: Color, clock: float, reduce_motion: bool) -> void:
 	_panel(canvas, _rect_poly(Rect2(8.0, 460.0, 296.0, 30.0)), PANEL, accent)
 	var shown: String = state.caption.substr(0, floori(state.caption_chars))
 	canvas.draw_string(UI.HEADER, Vector2(16.0, 480.0), shown, HORIZONTAL_ALIGNMENT_LEFT, 272.0, 15, accent)
-	if int(clock * 3.0) % 2 == 0:
+	if reduce_motion or int(clock * 3.0) % 2 == 0:
 		var width: float = UI.HEADER.get_string_size(shown, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 15).x
 		canvas.draw_rect(Rect2(minf(16.0 + width + 2.0, 292.0), 469.0, 5.0, 12.0), accent)
 
@@ -383,7 +408,7 @@ static func _pops(canvas: CanvasItem, state: TelemetryState, clock: float, reduc
 	for pop: Dictionary in state.pops:
 		var spot: Array = POP_SPOTS[String(pop["kind"])]
 		var age: float = clock - float(pop["born"])
-		var scale: float = 1.9 - (age / 0.14) * 0.9 if age < 0.14 else 1.0 + 0.04 * sin(age * 30.0)
+		var scale: float = pop_scale(age, reduce_motion)
 		var alpha: float = (1.6 - age) / 0.4 if age > 1.2 else 1.0
 		var shake: float = 0.0 if reduce_motion or age >= 0.5 else sin(age * 50.0) * 1.5
 		canvas.draw_set_transform(spot[0] + Vector2(shake, 0.0), float(spot[1]), Vector2(scale, scale))

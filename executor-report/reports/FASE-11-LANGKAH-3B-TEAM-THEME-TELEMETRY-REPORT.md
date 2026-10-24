@@ -43,10 +43,16 @@ Kotak drawer tetap `(1598, 372)` `312×496`. Yang dihapus dari drawer lama sesua
 4. Aturan kontras teks memakai aturan `GarageStyle` yang sudah ada (luminans 0,35), bukan 0,3 dari mockup.
 5. Angka kecepatan memakai Anton (mockup memakai Dela Gothic One yang tidak ada di `assets/fonts`; tanpa aset font baru). Hati digambar dari poligon dan lingkaran (glyph ♥ pada font belum diverifikasi). Ketik caption, `shift_time`, dan level tangki (`fuel`) ditambahkan ke `TelemetryState` (rencana tidak menyebutnya; semuanya diuji).
 6. Dua ban melewati 125 °C pada sampel yang sama kini menghasilkan satu onomatope (sebelumnya dua, dan menyingkirkan onomatope lain).
-7. **Kode mati:** `scripts/hud/telemetry_widgets.gd` dan `scripts/hud/step_bar.gd` bukan buatan sesi ini; hanya `TelemetryWidgets.tyre_tint` dan `PulseTrace.beat` yang masih dipanggil. File dibiarkan; keputusan menghapus ada pada pengguna.
+7. **Kode mati sebagian:** `scripts/hud/step_bar.gd` tidak lagi dirujuk siapa pun, dan `scripts/hud/telemetry_widgets.gd` hanya masih dipakai lewat `TelemetryWidgets.tyre_tint` (state, drawer) dan `PulseTrace.beat` (`TelemetryDrawer.heartbeat`); sisanya (RpmStrip, PedalTrace, GBall, TyreMatrix, ErsMeter, MoodBar) mati. Keduanya bukan buatan sesi ini sehingga tidak dihapus. Saran: pindahkan dua fungsi statis itu ke file baru, lalu hapus kedua file bila pengguna setuju. `TelemetryPainter` memanggil balik `TelemetryDrawer.heartbeat` (kopling melingkar kecil).
 8. Bagian skin yang belum mengikuti aksen (menyusul di 3c–3e sesuai spec): tower, baris rate, tombol dan segmen deck, kartu saran, kartu radio, ribbon cuaca.
 
-## 5. Untuk langkah berikutnya
+## 5. Review akhir (reviewer segar, model Fable)
+
+Tidak ada Critical. **Diperbaiki (test dulu, hijau sesudahnya):** (1) garis speed lines tergambar di luar panel karena `Geometry2D.clip_polyline_with_polygon` adalah *difference*; kini `inside_pieces()` memakai `intersect_polyline_with_polygon` (terbukti di tangkapan layar), (2) `reduce_motion` kini juga menahan kedipan limiter (ungu tetap), kick gear, denyut jantung, kedip damage, kursor caption, kedip chip DRS, dan skala onomatope, (3) test baru benar-benar menggambar ban meletus, blister, damage, limiter, kick, kelima onomatope, dan keempat mode ERS dengan dan tanpa `reduce_motion` (pengintai `PaintProbe`).
+
+**Minor ditunda:** drawer yang disembunyikan lalu ditampilkan lagi membawa jejak, pop, dan memori tepi yang basi (usulan: `state.car_id = -1` saat tersembunyi); `shift_time` tidak di-reset saat mobil berganti; gambar sebelum sampel pertama membaca array kosong (`brake`, `heat_tint`); biaya gambar (~600 `draw_circle` pada stress tinggi, ~66 klip) belum diukur; label `LIVE 60Hz` padahal sampel sekitar 20 Hz (refresh panel tiap 3 frame, jendela pedal ~4,8 detik); `set_team_accent` belum punya pemanggil produksi (hanya test).
+
+## 6. Untuk langkah berikutnya
 
 - `TelemetryState` dan `TelemetryPainter` adalah titik masuk bila deck N2 (3c) perlu data yang sama (kecepatan, ERS, ban).
 - `GarageStyle.engineer` siap dipakai kartu radio R2 (3e).
