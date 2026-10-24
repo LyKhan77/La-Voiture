@@ -541,3 +541,760 @@ scripts/ui/garage_team_select.gd
 tests/test_race_weekend_and_physics.gd
 ---
 
+## Session End: 20261024_154605
+### Commits
+6c8faad feat(fase-11): complete Langkah 2 - team garage street-manga redesign & realistic tyre physics
+---
+
+## Session End: 20261024_161117
+### Commits
+6c8faad feat(fase-11): complete Langkah 2 - team garage street-manga redesign & realistic tyre physics
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/session-log.md
+---
+
+## Session End: 20261024_181431
+### Commits
+8f5fb73 feat(hud): 10 s burn bar on the suggestion card and B / ESC / ENTER keys
+2cd5e2e feat(deck): MANUAL/AUTO desk and a two-state REQUEST/CANCEL BOX button
+71ac7c3 feat(pit): cancel_pit with no penalty and a repeat-suggestion cooldown
+6c305c9 feat(gt): drop HYBRID desk mode, 10 s suggestion window in the sim
+6c8faad feat(fase-11): complete Langkah 2 - team garage street-manga redesign & realistic tyre physics
+### Uncommitted Changes
+PRD/00-MASTER-OVERVIEW.md
+PRD/02-UI-UX-TOPOLOGY.md
+PRD/07-DATA-TESTING-PERFORMANCE.md
+production/session-logs/.session-end.hash
+production/session-logs/session-log.md
+---
+
+## Session End: 20261024_184558
+### Commits
+b5aa649 docs(fase-11): Langkah 3a report, screenshots, PRD without HYBRID
+8f5fb73 feat(hud): 10 s burn bar on the suggestion card and B / ESC / ENTER keys
+2cd5e2e feat(deck): MANUAL/AUTO desk and a two-state REQUEST/CANCEL BOX button
+71ac7c3 feat(pit): cancel_pit with no penalty and a repeat-suggestion cooldown
+6c305c9 feat(gt): drop HYBRID desk mode, 10 s suggestion window in the sim
+6c8faad feat(fase-11): complete Langkah 2 - team garage street-manga redesign & realistic tyre physics
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/session-log.md
+---
+
+## Session End: 20261024_184858
+### Commits
+b5aa649 docs(fase-11): Langkah 3a report, screenshots, PRD without HYBRID
+8f5fb73 feat(hud): 10 s burn bar on the suggestion card and B / ESC / ENTER keys
+2cd5e2e feat(deck): MANUAL/AUTO desk and a two-state REQUEST/CANCEL BOX button
+71ac7c3 feat(pit): cancel_pit with no penalty and a repeat-suggestion cooldown
+6c305c9 feat(gt): drop HYBRID desk mode, 10 s suggestion window in the sim
+6c8faad feat(fase-11): complete Langkah 2 - team garage street-manga redesign & realistic tyre physics
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/session-log.md
+scripts/gt/gt_race.gd
+tests/test_pit_deck_and_radio.gd
+---
+
+## Session End: 20261024_193601
+### Commits
+b4f1b19 fix(pit): an explicit cancel closes the open BOX card
+b5aa649 docs(fase-11): Langkah 3a report, screenshots, PRD without HYBRID
+8f5fb73 feat(hud): 10 s burn bar on the suggestion card and B / ESC / ENTER keys
+2cd5e2e feat(deck): MANUAL/AUTO desk and a two-state REQUEST/CANCEL BOX button
+71ac7c3 feat(pit): cancel_pit with no penalty and a repeat-suggestion cooldown
+6c305c9 feat(gt): drop HYBRID desk mode, 10 s suggestion window in the sim
+6c8faad feat(fase-11): complete Langkah 2 - team garage street-manga redesign & realistic tyre physics
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/session-log.md
+---
+
+## Session End: 20261024_200037
+### Commits
+44064d9 feat(telemetry): concept F drawer drawn in one _draw with the team accent
+12bb9cd feat(telemetry): TelemetryState with traces, onomatopoeia and caption
+17e3eb9 feat(theme): team accent skins the logo, marquee and deck header
+d01fffa feat(theme): engineer colour derived from the team accent
+b4f1b19 fix(pit): an explicit cancel closes the open BOX card
+b5aa649 docs(fase-11): Langkah 3a report, screenshots, PRD without HYBRID
+8f5fb73 feat(hud): 10 s burn bar on the suggestion card and B / ESC / ENTER keys
+2cd5e2e feat(deck): MANUAL/AUTO desk and a two-state REQUEST/CANCEL BOX button
+71ac7c3 feat(pit): cancel_pit with no penalty and a repeat-suggestion cooldown
+6c305c9 feat(gt): drop HYBRID desk mode, 10 s suggestion window in the sim
+6c8faad feat(fase-11): complete Langkah 2 - team garage street-manga redesign & realistic tyre physics
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/session-log.md
+---
+
+## Session End: 20261024_202202
+### Commits
+0776dcb docs(fase-11): Langkah 3b report and screenshots
+44064d9 feat(telemetry): concept F drawer drawn in one _draw with the team accent
+12bb9cd feat(telemetry): TelemetryState with traces, onomatopoeia and caption
+17e3eb9 feat(theme): team accent skins the logo, marquee and deck header
+d01fffa feat(theme): engineer colour derived from the team accent
+b4f1b19 fix(pit): an explicit cancel closes the open BOX card
+b5aa649 docs(fase-11): Langkah 3a report, screenshots, PRD without HYBRID
+8f5fb73 feat(hud): 10 s burn bar on the suggestion card and B / ESC / ENTER keys
+2cd5e2e feat(deck): MANUAL/AUTO desk and a two-state REQUEST/CANCEL BOX button
+71ac7c3 feat(pit): cancel_pit with no penalty and a repeat-suggestion cooldown
+6c305c9 feat(gt): drop HYBRID desk mode, 10 s suggestion window in the sim
+6c8faad feat(fase-11): complete Langkah 2 - team garage street-manga redesign & realistic tyre physics
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/session-log.md
+---
+
+## Session End: 20261024_203124
+### Commits
+fc3daac fix(telemetry): keep speed lines inside their panels and honour reduce motion
+0776dcb docs(fase-11): Langkah 3b report and screenshots
+44064d9 feat(telemetry): concept F drawer drawn in one _draw with the team accent
+12bb9cd feat(telemetry): TelemetryState with traces, onomatopoeia and caption
+17e3eb9 feat(theme): team accent skins the logo, marquee and deck header
+d01fffa feat(theme): engineer colour derived from the team accent
+b4f1b19 fix(pit): an explicit cancel closes the open BOX card
+b5aa649 docs(fase-11): Langkah 3a report, screenshots, PRD without HYBRID
+8f5fb73 feat(hud): 10 s burn bar on the suggestion card and B / ESC / ENTER keys
+2cd5e2e feat(deck): MANUAL/AUTO desk and a two-state REQUEST/CANCEL BOX button
+71ac7c3 feat(pit): cancel_pit with no penalty and a repeat-suggestion cooldown
+6c305c9 feat(gt): drop HYBRID desk mode, 10 s suggestion window in the sim
+6c8faad feat(fase-11): complete Langkah 2 - team garage street-manga redesign & realistic tyre physics
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/session-log.md
+---
+
+## Session End: 20261024_205921
+### Commits
+fc3daac fix(telemetry): keep speed lines inside their panels and honour reduce motion
+0776dcb docs(fase-11): Langkah 3b report and screenshots
+44064d9 feat(telemetry): concept F drawer drawn in one _draw with the team accent
+12bb9cd feat(telemetry): TelemetryState with traces, onomatopoeia and caption
+17e3eb9 feat(theme): team accent skins the logo, marquee and deck header
+d01fffa feat(theme): engineer colour derived from the team accent
+b4f1b19 fix(pit): an explicit cancel closes the open BOX card
+b5aa649 docs(fase-11): Langkah 3a report, screenshots, PRD without HYBRID
+8f5fb73 feat(hud): 10 s burn bar on the suggestion card and B / ESC / ENTER keys
+2cd5e2e feat(deck): MANUAL/AUTO desk and a two-state REQUEST/CANCEL BOX button
+71ac7c3 feat(pit): cancel_pit with no penalty and a repeat-suggestion cooldown
+6c305c9 feat(gt): drop HYBRID desk mode, 10 s suggestion window in the sim
+6c8faad feat(fase-11): complete Langkah 2 - team garage street-manga redesign & realistic tyre physics
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/session-log.md
+scripts/gt/gt_driving.gd
+scripts/gt/gt_types.gd
+---
+
+## Session End: 20261024_212142
+### Commits
+5078463 feat(deck): N2 faders console with verdicts, gauges, wheel and coach tooltips
+2ae0b44 feat(deck): fader ladder, zoned gauge, chip grid, tyre wheel, tooltip and pitched click
+16450b4 feat(forecast): shared sim multiplier tables and GtForecast verdicts
+fc3daac fix(telemetry): keep speed lines inside their panels and honour reduce motion
+0776dcb docs(fase-11): Langkah 3b report and screenshots
+44064d9 feat(telemetry): concept F drawer drawn in one _draw with the team accent
+12bb9cd feat(telemetry): TelemetryState with traces, onomatopoeia and caption
+17e3eb9 feat(theme): team accent skins the logo, marquee and deck header
+d01fffa feat(theme): engineer colour derived from the team accent
+b4f1b19 fix(pit): an explicit cancel closes the open BOX card
+b5aa649 docs(fase-11): Langkah 3a report, screenshots, PRD without HYBRID
+8f5fb73 feat(hud): 10 s burn bar on the suggestion card and B / ESC / ENTER keys
+2cd5e2e feat(deck): MANUAL/AUTO desk and a two-state REQUEST/CANCEL BOX button
+71ac7c3 feat(pit): cancel_pit with no penalty and a repeat-suggestion cooldown
+6c305c9 feat(gt): drop HYBRID desk mode, 10 s suggestion window in the sim
+6c8faad feat(fase-11): complete Langkah 2 - team garage street-manga redesign & realistic tyre physics
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261024_214251
+### Commits
+3bf370d docs(fase-11): Langkah 3c report and screenshots
+5078463 feat(deck): N2 faders console with verdicts, gauges, wheel and coach tooltips
+2ae0b44 feat(deck): fader ladder, zoned gauge, chip grid, tyre wheel, tooltip and pitched click
+16450b4 feat(forecast): shared sim multiplier tables and GtForecast verdicts
+fc3daac fix(telemetry): keep speed lines inside their panels and honour reduce motion
+0776dcb docs(fase-11): Langkah 3b report and screenshots
+44064d9 feat(telemetry): concept F drawer drawn in one _draw with the team accent
+12bb9cd feat(telemetry): TelemetryState with traces, onomatopoeia and caption
+17e3eb9 feat(theme): team accent skins the logo, marquee and deck header
+d01fffa feat(theme): engineer colour derived from the team accent
+b4f1b19 fix(pit): an explicit cancel closes the open BOX card
+b5aa649 docs(fase-11): Langkah 3a report, screenshots, PRD without HYBRID
+8f5fb73 feat(hud): 10 s burn bar on the suggestion card and B / ESC / ENTER keys
+2cd5e2e feat(deck): MANUAL/AUTO desk and a two-state REQUEST/CANCEL BOX button
+71ac7c3 feat(pit): cancel_pit with no penalty and a repeat-suggestion cooldown
+6c305c9 feat(gt): drop HYBRID desk mode, 10 s suggestion window in the sim
+6c8faad feat(fase-11): complete Langkah 2 - team garage street-manga redesign & realistic tyre physics
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261024_214946
+### Commits
+3bf370d docs(fase-11): Langkah 3c report and screenshots
+5078463 feat(deck): N2 faders console with verdicts, gauges, wheel and coach tooltips
+2ae0b44 feat(deck): fader ladder, zoned gauge, chip grid, tyre wheel, tooltip and pitched click
+16450b4 feat(forecast): shared sim multiplier tables and GtForecast verdicts
+fc3daac fix(telemetry): keep speed lines inside their panels and honour reduce motion
+0776dcb docs(fase-11): Langkah 3b report and screenshots
+44064d9 feat(telemetry): concept F drawer drawn in one _draw with the team accent
+12bb9cd feat(telemetry): TelemetryState with traces, onomatopoeia and caption
+17e3eb9 feat(theme): team accent skins the logo, marquee and deck header
+d01fffa feat(theme): engineer colour derived from the team accent
+b4f1b19 fix(pit): an explicit cancel closes the open BOX card
+b5aa649 docs(fase-11): Langkah 3a report, screenshots, PRD without HYBRID
+8f5fb73 feat(hud): 10 s burn bar on the suggestion card and B / ESC / ENTER keys
+2cd5e2e feat(deck): MANUAL/AUTO desk and a two-state REQUEST/CANCEL BOX button
+71ac7c3 feat(pit): cancel_pit with no penalty and a repeat-suggestion cooldown
+6c305c9 feat(gt): drop HYBRID desk mode, 10 s suggestion window in the sim
+6c8faad feat(fase-11): complete Langkah 2 - team garage street-manga redesign & realistic tyre physics
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+scripts/gt/gt_forecast.gd
+scripts/hud/tactical_deck.gd
+scripts/world/race_weekend_world.gd
+tests/test_deck_n2.gd
+---
+
+## Session End: 20261024_220906
+### Commits
+8f4d04f fix(deck): refresh tooltip on click, clearer verdict texts, shared AUTO tyre rule, per-car tyre pick
+3bf370d docs(fase-11): Langkah 3c report and screenshots
+5078463 feat(deck): N2 faders console with verdicts, gauges, wheel and coach tooltips
+2ae0b44 feat(deck): fader ladder, zoned gauge, chip grid, tyre wheel, tooltip and pitched click
+16450b4 feat(forecast): shared sim multiplier tables and GtForecast verdicts
+fc3daac fix(telemetry): keep speed lines inside their panels and honour reduce motion
+0776dcb docs(fase-11): Langkah 3b report and screenshots
+44064d9 feat(telemetry): concept F drawer drawn in one _draw with the team accent
+12bb9cd feat(telemetry): TelemetryState with traces, onomatopoeia and caption
+17e3eb9 feat(theme): team accent skins the logo, marquee and deck header
+d01fffa feat(theme): engineer colour derived from the team accent
+b4f1b19 fix(pit): an explicit cancel closes the open BOX card
+b5aa649 docs(fase-11): Langkah 3a report, screenshots, PRD without HYBRID
+8f5fb73 feat(hud): 10 s burn bar on the suggestion card and B / ESC / ENTER keys
+2cd5e2e feat(deck): MANUAL/AUTO desk and a two-state REQUEST/CANCEL BOX button
+71ac7c3 feat(pit): cancel_pit with no penalty and a repeat-suggestion cooldown
+6c305c9 feat(gt): drop HYBRID desk mode, 10 s suggestion window in the sim
+6c8faad feat(fase-11): complete Langkah 2 - team garage street-manga redesign & realistic tyre physics
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261024_222219
+### Commits
+11fb542 docs(fase-11): Langkah 3d plan (weather ladder and weather deck)
+c0a6433 docs(fase-11): Langkah 3 redesign spec v2, design references and plans 3a-3c
+8f4d04f fix(deck): refresh tooltip on click, clearer verdict texts, shared AUTO tyre rule, per-car tyre pick
+3bf370d docs(fase-11): Langkah 3c report and screenshots
+5078463 feat(deck): N2 faders console with verdicts, gauges, wheel and coach tooltips
+2ae0b44 feat(deck): fader ladder, zoned gauge, chip grid, tyre wheel, tooltip and pitched click
+16450b4 feat(forecast): shared sim multiplier tables and GtForecast verdicts
+fc3daac fix(telemetry): keep speed lines inside their panels and honour reduce motion
+0776dcb docs(fase-11): Langkah 3b report and screenshots
+44064d9 feat(telemetry): concept F drawer drawn in one _draw with the team accent
+12bb9cd feat(telemetry): TelemetryState with traces, onomatopoeia and caption
+17e3eb9 feat(theme): team accent skins the logo, marquee and deck header
+d01fffa feat(theme): engineer colour derived from the team accent
+b4f1b19 fix(pit): an explicit cancel closes the open BOX card
+b5aa649 docs(fase-11): Langkah 3a report, screenshots, PRD without HYBRID
+8f5fb73 feat(hud): 10 s burn bar on the suggestion card and B / ESC / ENTER keys
+2cd5e2e feat(deck): MANUAL/AUTO desk and a two-state REQUEST/CANCEL BOX button
+71ac7c3 feat(pit): cancel_pit with no penalty and a repeat-suggestion cooldown
+6c305c9 feat(gt): drop HYBRID desk mode, 10 s suggestion window in the sim
+6c8faad feat(fase-11): complete Langkah 2 - team garage street-manga redesign & realistic tyre physics
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261024_223213
+### Commits
+d37028a feat(hud): weather deck wiring and a shared outlook for the box window card
+446ee45 feat(weather): weather deck with chart, cone, track map and tyre action
+c16ae92 feat(weather): ribbon chip with the 8 lap ladder
+6e01649 feat(weather): GtWeatherOutlook rows, tyre change and box lap from the forecast
+11fb542 docs(fase-11): Langkah 3d plan (weather ladder and weather deck)
+c0a6433 docs(fase-11): Langkah 3 redesign spec v2, design references and plans 3a-3c
+8f4d04f fix(deck): refresh tooltip on click, clearer verdict texts, shared AUTO tyre rule, per-car tyre pick
+3bf370d docs(fase-11): Langkah 3c report and screenshots
+5078463 feat(deck): N2 faders console with verdicts, gauges, wheel and coach tooltips
+2ae0b44 feat(deck): fader ladder, zoned gauge, chip grid, tyre wheel, tooltip and pitched click
+16450b4 feat(forecast): shared sim multiplier tables and GtForecast verdicts
+fc3daac fix(telemetry): keep speed lines inside their panels and honour reduce motion
+0776dcb docs(fase-11): Langkah 3b report and screenshots
+44064d9 feat(telemetry): concept F drawer drawn in one _draw with the team accent
+12bb9cd feat(telemetry): TelemetryState with traces, onomatopoeia and caption
+17e3eb9 feat(theme): team accent skins the logo, marquee and deck header
+d01fffa feat(theme): engineer colour derived from the team accent
+b4f1b19 fix(pit): an explicit cancel closes the open BOX card
+b5aa649 docs(fase-11): Langkah 3a report, screenshots, PRD without HYBRID
+8f5fb73 feat(hud): 10 s burn bar on the suggestion card and B / ESC / ENTER keys
+2cd5e2e feat(deck): MANUAL/AUTO desk and a two-state REQUEST/CANCEL BOX button
+71ac7c3 feat(pit): cancel_pit with no penalty and a repeat-suggestion cooldown
+6c305c9 feat(gt): drop HYBRID desk mode, 10 s suggestion window in the sim
+6c8faad feat(fase-11): complete Langkah 2 - team garage street-manga redesign & realistic tyre physics
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261024_225432
+### Commits
+08f584f docs(fase-11): Langkah 3d weather deck layer fix, report and screenshots
+d37028a feat(hud): weather deck wiring and a shared outlook for the box window card
+446ee45 feat(weather): weather deck with chart, cone, track map and tyre action
+c16ae92 feat(weather): ribbon chip with the 8 lap ladder
+6e01649 feat(weather): GtWeatherOutlook rows, tyre change and box lap from the forecast
+11fb542 docs(fase-11): Langkah 3d plan (weather ladder and weather deck)
+c0a6433 docs(fase-11): Langkah 3 redesign spec v2, design references and plans 3a-3c
+8f4d04f fix(deck): refresh tooltip on click, clearer verdict texts, shared AUTO tyre rule, per-car tyre pick
+3bf370d docs(fase-11): Langkah 3c report and screenshots
+5078463 feat(deck): N2 faders console with verdicts, gauges, wheel and coach tooltips
+2ae0b44 feat(deck): fader ladder, zoned gauge, chip grid, tyre wheel, tooltip and pitched click
+16450b4 feat(forecast): shared sim multiplier tables and GtForecast verdicts
+fc3daac fix(telemetry): keep speed lines inside their panels and honour reduce motion
+0776dcb docs(fase-11): Langkah 3b report and screenshots
+44064d9 feat(telemetry): concept F drawer drawn in one _draw with the team accent
+12bb9cd feat(telemetry): TelemetryState with traces, onomatopoeia and caption
+17e3eb9 feat(theme): team accent skins the logo, marquee and deck header
+d01fffa feat(theme): engineer colour derived from the team accent
+b4f1b19 fix(pit): an explicit cancel closes the open BOX card
+b5aa649 docs(fase-11): Langkah 3a report, screenshots, PRD without HYBRID
+8f5fb73 feat(hud): 10 s burn bar on the suggestion card and B / ESC / ENTER keys
+2cd5e2e feat(deck): MANUAL/AUTO desk and a two-state REQUEST/CANCEL BOX button
+71ac7c3 feat(pit): cancel_pit with no penalty and a repeat-suggestion cooldown
+6c305c9 feat(gt): drop HYBRID desk mode, 10 s suggestion window in the sim
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261024_225857
+### Commits
+08f584f docs(fase-11): Langkah 3d weather deck layer fix, report and screenshots
+d37028a feat(hud): weather deck wiring and a shared outlook for the box window card
+446ee45 feat(weather): weather deck with chart, cone, track map and tyre action
+c16ae92 feat(weather): ribbon chip with the 8 lap ladder
+6e01649 feat(weather): GtWeatherOutlook rows, tyre change and box lap from the forecast
+11fb542 docs(fase-11): Langkah 3d plan (weather ladder and weather deck)
+c0a6433 docs(fase-11): Langkah 3 redesign spec v2, design references and plans 3a-3c
+8f4d04f fix(deck): refresh tooltip on click, clearer verdict texts, shared AUTO tyre rule, per-car tyre pick
+3bf370d docs(fase-11): Langkah 3c report and screenshots
+5078463 feat(deck): N2 faders console with verdicts, gauges, wheel and coach tooltips
+2ae0b44 feat(deck): fader ladder, zoned gauge, chip grid, tyre wheel, tooltip and pitched click
+16450b4 feat(forecast): shared sim multiplier tables and GtForecast verdicts
+fc3daac fix(telemetry): keep speed lines inside their panels and honour reduce motion
+0776dcb docs(fase-11): Langkah 3b report and screenshots
+44064d9 feat(telemetry): concept F drawer drawn in one _draw with the team accent
+12bb9cd feat(telemetry): TelemetryState with traces, onomatopoeia and caption
+17e3eb9 feat(theme): team accent skins the logo, marquee and deck header
+d01fffa feat(theme): engineer colour derived from the team accent
+b4f1b19 fix(pit): an explicit cancel closes the open BOX card
+b5aa649 docs(fase-11): Langkah 3a report, screenshots, PRD without HYBRID
+8f5fb73 feat(hud): 10 s burn bar on the suggestion card and B / ESC / ENTER keys
+2cd5e2e feat(deck): MANUAL/AUTO desk and a two-state REQUEST/CANCEL BOX button
+71ac7c3 feat(pit): cancel_pit with no penalty and a repeat-suggestion cooldown
+6c305c9 feat(gt): drop HYBRID desk mode, 10 s suggestion window in the sim
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+scripts/gt/gt_weather_outlook.gd
+scripts/hud/tactical_deck.gd
+tests/test_weather_ladder.gd
+---
+
+## Session End: 20261024_232803
+### Commits
+fc314aa docs(fase-11): Langkah 3e plan (radio R2 two-way)
+e317337 fix(weather): no tyre change for a box call on the chequered lap, window card looks 10 laps ahead
+08f584f docs(fase-11): Langkah 3d weather deck layer fix, report and screenshots
+d37028a feat(hud): weather deck wiring and a shared outlook for the box window card
+446ee45 feat(weather): weather deck with chart, cone, track map and tyre action
+c16ae92 feat(weather): ribbon chip with the 8 lap ladder
+6e01649 feat(weather): GtWeatherOutlook rows, tyre change and box lap from the forecast
+11fb542 docs(fase-11): Langkah 3d plan (weather ladder and weather deck)
+c0a6433 docs(fase-11): Langkah 3 redesign spec v2, design references and plans 3a-3c
+8f4d04f fix(deck): refresh tooltip on click, clearer verdict texts, shared AUTO tyre rule, per-car tyre pick
+3bf370d docs(fase-11): Langkah 3c report and screenshots
+5078463 feat(deck): N2 faders console with verdicts, gauges, wheel and coach tooltips
+2ae0b44 feat(deck): fader ladder, zoned gauge, chip grid, tyre wheel, tooltip and pitched click
+16450b4 feat(forecast): shared sim multiplier tables and GtForecast verdicts
+fc3daac fix(telemetry): keep speed lines inside their panels and honour reduce motion
+0776dcb docs(fase-11): Langkah 3b report and screenshots
+44064d9 feat(telemetry): concept F drawer drawn in one _draw with the team accent
+12bb9cd feat(telemetry): TelemetryState with traces, onomatopoeia and caption
+17e3eb9 feat(theme): team accent skins the logo, marquee and deck header
+d01fffa feat(theme): engineer colour derived from the team accent
+b4f1b19 fix(pit): an explicit cancel closes the open BOX card
+b5aa649 docs(fase-11): Langkah 3a report, screenshots, PRD without HYBRID
+8f5fb73 feat(hud): 10 s burn bar on the suggestion card and B / ESC / ENTER keys
+2cd5e2e feat(deck): MANUAL/AUTO desk and a two-state REQUEST/CANCEL BOX button
+71ac7c3 feat(pit): cancel_pit with no penalty and a repeat-suggestion cooldown
+6c305c9 feat(gt): drop HYBRID desk mode, 10 s suggestion window in the sim
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261025_002135
+### Commits
+fc314aa docs(fase-11): Langkah 3e plan (radio R2 two-way)
+e317337 fix(weather): no tyre change for a box call on the chequered lap, window card looks 10 laps ahead
+08f584f docs(fase-11): Langkah 3d weather deck layer fix, report and screenshots
+d37028a feat(hud): weather deck wiring and a shared outlook for the box window card
+446ee45 feat(weather): weather deck with chart, cone, track map and tyre action
+c16ae92 feat(weather): ribbon chip with the 8 lap ladder
+6e01649 feat(weather): GtWeatherOutlook rows, tyre change and box lap from the forecast
+11fb542 docs(fase-11): Langkah 3d plan (weather ladder and weather deck)
+c0a6433 docs(fase-11): Langkah 3 redesign spec v2, design references and plans 3a-3c
+8f4d04f fix(deck): refresh tooltip on click, clearer verdict texts, shared AUTO tyre rule, per-car tyre pick
+3bf370d docs(fase-11): Langkah 3c report and screenshots
+5078463 feat(deck): N2 faders console with verdicts, gauges, wheel and coach tooltips
+2ae0b44 feat(deck): fader ladder, zoned gauge, chip grid, tyre wheel, tooltip and pitched click
+16450b4 feat(forecast): shared sim multiplier tables and GtForecast verdicts
+fc3daac fix(telemetry): keep speed lines inside their panels and honour reduce motion
+0776dcb docs(fase-11): Langkah 3b report and screenshots
+44064d9 feat(telemetry): concept F drawer drawn in one _draw with the team accent
+12bb9cd feat(telemetry): TelemetryState with traces, onomatopoeia and caption
+17e3eb9 feat(theme): team accent skins the logo, marquee and deck header
+d01fffa feat(theme): engineer colour derived from the team accent
+b4f1b19 fix(pit): an explicit cancel closes the open BOX card
+b5aa649 docs(fase-11): Langkah 3a report, screenshots, PRD without HYBRID
+8f5fb73 feat(hud): 10 s burn bar on the suggestion card and B / ESC / ENTER keys
+2cd5e2e feat(deck): MANUAL/AUTO desk and a two-state REQUEST/CANCEL BOX button
+71ac7c3 feat(pit): cancel_pit with no penalty and a repeat-suggestion cooldown
+6c305c9 feat(gt): drop HYBRID desk mode, 10 s suggestion window in the sim
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+scripts/gt/gt_race.gd
+tests/test_pit_deck_and_radio.gd
+---
+
+## Session End: 20261025_005834
+### Commits
+6f456ab feat(radio): two-way R2 cards with slap entry, talk and dim
+bdcdbbe feat(radio): wheatpaste R2 card with highlighted headline
+af9a840 feat(radio): engineer replies 2.5 s after a driver call and a flood call
+fc314aa docs(fase-11): Langkah 3e plan (radio R2 two-way)
+e317337 fix(weather): no tyre change for a box call on the chequered lap, window card looks 10 laps ahead
+08f584f docs(fase-11): Langkah 3d weather deck layer fix, report and screenshots
+d37028a feat(hud): weather deck wiring and a shared outlook for the box window card
+446ee45 feat(weather): weather deck with chart, cone, track map and tyre action
+c16ae92 feat(weather): ribbon chip with the 8 lap ladder
+6e01649 feat(weather): GtWeatherOutlook rows, tyre change and box lap from the forecast
+11fb542 docs(fase-11): Langkah 3d plan (weather ladder and weather deck)
+c0a6433 docs(fase-11): Langkah 3 redesign spec v2, design references and plans 3a-3c
+8f4d04f fix(deck): refresh tooltip on click, clearer verdict texts, shared AUTO tyre rule, per-car tyre pick
+3bf370d docs(fase-11): Langkah 3c report and screenshots
+5078463 feat(deck): N2 faders console with verdicts, gauges, wheel and coach tooltips
+2ae0b44 feat(deck): fader ladder, zoned gauge, chip grid, tyre wheel, tooltip and pitched click
+16450b4 feat(forecast): shared sim multiplier tables and GtForecast verdicts
+fc3daac fix(telemetry): keep speed lines inside their panels and honour reduce motion
+0776dcb docs(fase-11): Langkah 3b report and screenshots
+44064d9 feat(telemetry): concept F drawer drawn in one _draw with the team accent
+12bb9cd feat(telemetry): TelemetryState with traces, onomatopoeia and caption
+17e3eb9 feat(theme): team accent skins the logo, marquee and deck header
+d01fffa feat(theme): engineer colour derived from the team accent
+b4f1b19 fix(pit): an explicit cancel closes the open BOX card
+b5aa649 docs(fase-11): Langkah 3a report, screenshots, PRD without HYBRID
+8f5fb73 feat(hud): 10 s burn bar on the suggestion card and B / ESC / ENTER keys
+2cd5e2e feat(deck): MANUAL/AUTO desk and a two-state REQUEST/CANCEL BOX button
+71ac7c3 feat(pit): cancel_pit with no penalty and a repeat-suggestion cooldown
+6c305c9 feat(gt): drop HYBRID desk mode, 10 s suggestion window in the sim
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261025_012019
+### Commits
+1a3ba29 docs(fase-11): Langkah 3e report and screenshots
+6f456ab feat(radio): two-way R2 cards with slap entry, talk and dim
+bdcdbbe feat(radio): wheatpaste R2 card with highlighted headline
+af9a840 feat(radio): engineer replies 2.5 s after a driver call and a flood call
+fc314aa docs(fase-11): Langkah 3e plan (radio R2 two-way)
+e317337 fix(weather): no tyre change for a box call on the chequered lap, window card looks 10 laps ahead
+08f584f docs(fase-11): Langkah 3d weather deck layer fix, report and screenshots
+d37028a feat(hud): weather deck wiring and a shared outlook for the box window card
+446ee45 feat(weather): weather deck with chart, cone, track map and tyre action
+c16ae92 feat(weather): ribbon chip with the 8 lap ladder
+6e01649 feat(weather): GtWeatherOutlook rows, tyre change and box lap from the forecast
+11fb542 docs(fase-11): Langkah 3d plan (weather ladder and weather deck)
+c0a6433 docs(fase-11): Langkah 3 redesign spec v2, design references and plans 3a-3c
+8f4d04f fix(deck): refresh tooltip on click, clearer verdict texts, shared AUTO tyre rule, per-car tyre pick
+3bf370d docs(fase-11): Langkah 3c report and screenshots
+5078463 feat(deck): N2 faders console with verdicts, gauges, wheel and coach tooltips
+2ae0b44 feat(deck): fader ladder, zoned gauge, chip grid, tyre wheel, tooltip and pitched click
+16450b4 feat(forecast): shared sim multiplier tables and GtForecast verdicts
+fc3daac fix(telemetry): keep speed lines inside their panels and honour reduce motion
+0776dcb docs(fase-11): Langkah 3b report and screenshots
+44064d9 feat(telemetry): concept F drawer drawn in one _draw with the team accent
+12bb9cd feat(telemetry): TelemetryState with traces, onomatopoeia and caption
+17e3eb9 feat(theme): team accent skins the logo, marquee and deck header
+d01fffa feat(theme): engineer colour derived from the team accent
+b4f1b19 fix(pit): an explicit cancel closes the open BOX card
+b5aa649 docs(fase-11): Langkah 3a report, screenshots, PRD without HYBRID
+8f5fb73 feat(hud): 10 s burn bar on the suggestion card and B / ESC / ENTER keys
+2cd5e2e feat(deck): MANUAL/AUTO desk and a two-state REQUEST/CANCEL BOX button
+71ac7c3 feat(pit): cancel_pit with no penalty and a repeat-suggestion cooldown
+6c305c9 feat(gt): drop HYBRID desk mode, 10 s suggestion window in the sim
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261025_012556
+### Commits
+1a3ba29 docs(fase-11): Langkah 3e report and screenshots
+6f456ab feat(radio): two-way R2 cards with slap entry, talk and dim
+bdcdbbe feat(radio): wheatpaste R2 card with highlighted headline
+af9a840 feat(radio): engineer replies 2.5 s after a driver call and a flood call
+fc314aa docs(fase-11): Langkah 3e plan (radio R2 two-way)
+e317337 fix(weather): no tyre change for a box call on the chequered lap, window card looks 10 laps ahead
+08f584f docs(fase-11): Langkah 3d weather deck layer fix, report and screenshots
+d37028a feat(hud): weather deck wiring and a shared outlook for the box window card
+446ee45 feat(weather): weather deck with chart, cone, track map and tyre action
+c16ae92 feat(weather): ribbon chip with the 8 lap ladder
+6e01649 feat(weather): GtWeatherOutlook rows, tyre change and box lap from the forecast
+11fb542 docs(fase-11): Langkah 3d plan (weather ladder and weather deck)
+c0a6433 docs(fase-11): Langkah 3 redesign spec v2, design references and plans 3a-3c
+8f4d04f fix(deck): refresh tooltip on click, clearer verdict texts, shared AUTO tyre rule, per-car tyre pick
+3bf370d docs(fase-11): Langkah 3c report and screenshots
+5078463 feat(deck): N2 faders console with verdicts, gauges, wheel and coach tooltips
+2ae0b44 feat(deck): fader ladder, zoned gauge, chip grid, tyre wheel, tooltip and pitched click
+16450b4 feat(forecast): shared sim multiplier tables and GtForecast verdicts
+fc3daac fix(telemetry): keep speed lines inside their panels and honour reduce motion
+0776dcb docs(fase-11): Langkah 3b report and screenshots
+44064d9 feat(telemetry): concept F drawer drawn in one _draw with the team accent
+12bb9cd feat(telemetry): TelemetryState with traces, onomatopoeia and caption
+17e3eb9 feat(theme): team accent skins the logo, marquee and deck header
+d01fffa feat(theme): engineer colour derived from the team accent
+b4f1b19 fix(pit): an explicit cancel closes the open BOX card
+b5aa649 docs(fase-11): Langkah 3a report, screenshots, PRD without HYBRID
+8f5fb73 feat(hud): 10 s burn bar on the suggestion card and B / ESC / ENTER keys
+2cd5e2e feat(deck): MANUAL/AUTO desk and a two-state REQUEST/CANCEL BOX button
+71ac7c3 feat(pit): cancel_pit with no penalty and a repeat-suggestion cooldown
+6c305c9 feat(gt): drop HYBRID desk mode, 10 s suggestion window in the sim
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+scripts/gt/gt_race.gd
+scripts/hud/race_hud.gd
+scripts/ui/anime_radio_cutin.gd
+tests/test_pit_deck_and_radio.gd
+tests/test_radio_r2.gd
+---
+
+## Session End: 20261025_012750
+### Commits
+f674eb0 fix(radio): one flood call per episode, routine calls wait for an urgent card
+1a3ba29 docs(fase-11): Langkah 3e report and screenshots
+6f456ab feat(radio): two-way R2 cards with slap entry, talk and dim
+bdcdbbe feat(radio): wheatpaste R2 card with highlighted headline
+af9a840 feat(radio): engineer replies 2.5 s after a driver call and a flood call
+fc314aa docs(fase-11): Langkah 3e plan (radio R2 two-way)
+e317337 fix(weather): no tyre change for a box call on the chequered lap, window card looks 10 laps ahead
+08f584f docs(fase-11): Langkah 3d weather deck layer fix, report and screenshots
+d37028a feat(hud): weather deck wiring and a shared outlook for the box window card
+446ee45 feat(weather): weather deck with chart, cone, track map and tyre action
+c16ae92 feat(weather): ribbon chip with the 8 lap ladder
+6e01649 feat(weather): GtWeatherOutlook rows, tyre change and box lap from the forecast
+11fb542 docs(fase-11): Langkah 3d plan (weather ladder and weather deck)
+c0a6433 docs(fase-11): Langkah 3 redesign spec v2, design references and plans 3a-3c
+8f4d04f fix(deck): refresh tooltip on click, clearer verdict texts, shared AUTO tyre rule, per-car tyre pick
+3bf370d docs(fase-11): Langkah 3c report and screenshots
+5078463 feat(deck): N2 faders console with verdicts, gauges, wheel and coach tooltips
+2ae0b44 feat(deck): fader ladder, zoned gauge, chip grid, tyre wheel, tooltip and pitched click
+16450b4 feat(forecast): shared sim multiplier tables and GtForecast verdicts
+fc3daac fix(telemetry): keep speed lines inside their panels and honour reduce motion
+0776dcb docs(fase-11): Langkah 3b report and screenshots
+44064d9 feat(telemetry): concept F drawer drawn in one _draw with the team accent
+12bb9cd feat(telemetry): TelemetryState with traces, onomatopoeia and caption
+17e3eb9 feat(theme): team accent skins the logo, marquee and deck header
+d01fffa feat(theme): engineer colour derived from the team accent
+b4f1b19 fix(pit): an explicit cancel closes the open BOX card
+b5aa649 docs(fase-11): Langkah 3a report, screenshots, PRD without HYBRID
+8f5fb73 feat(hud): 10 s burn bar on the suggestion card and B / ESC / ENTER keys
+2cd5e2e feat(deck): MANUAL/AUTO desk and a two-state REQUEST/CANCEL BOX button
+71ac7c3 feat(pit): cancel_pit with no penalty and a repeat-suggestion cooldown
+6c305c9 feat(gt): drop HYBRID desk mode, 10 s suggestion window in the sim
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261025_015047
+### Commits
+b15290a test(radio): hide the driver card before the rival banner check
+f674eb0 fix(radio): one flood call per episode, routine calls wait for an urgent card
+1a3ba29 docs(fase-11): Langkah 3e report and screenshots
+6f456ab feat(radio): two-way R2 cards with slap entry, talk and dim
+bdcdbbe feat(radio): wheatpaste R2 card with highlighted headline
+af9a840 feat(radio): engineer replies 2.5 s after a driver call and a flood call
+fc314aa docs(fase-11): Langkah 3e plan (radio R2 two-way)
+e317337 fix(weather): no tyre change for a box call on the chequered lap, window card looks 10 laps ahead
+08f584f docs(fase-11): Langkah 3d weather deck layer fix, report and screenshots
+d37028a feat(hud): weather deck wiring and a shared outlook for the box window card
+446ee45 feat(weather): weather deck with chart, cone, track map and tyre action
+c16ae92 feat(weather): ribbon chip with the 8 lap ladder
+6e01649 feat(weather): GtWeatherOutlook rows, tyre change and box lap from the forecast
+11fb542 docs(fase-11): Langkah 3d plan (weather ladder and weather deck)
+c0a6433 docs(fase-11): Langkah 3 redesign spec v2, design references and plans 3a-3c
+8f4d04f fix(deck): refresh tooltip on click, clearer verdict texts, shared AUTO tyre rule, per-car tyre pick
+3bf370d docs(fase-11): Langkah 3c report and screenshots
+5078463 feat(deck): N2 faders console with verdicts, gauges, wheel and coach tooltips
+2ae0b44 feat(deck): fader ladder, zoned gauge, chip grid, tyre wheel, tooltip and pitched click
+16450b4 feat(forecast): shared sim multiplier tables and GtForecast verdicts
+fc3daac fix(telemetry): keep speed lines inside their panels and honour reduce motion
+0776dcb docs(fase-11): Langkah 3b report and screenshots
+44064d9 feat(telemetry): concept F drawer drawn in one _draw with the team accent
+12bb9cd feat(telemetry): TelemetryState with traces, onomatopoeia and caption
+17e3eb9 feat(theme): team accent skins the logo, marquee and deck header
+d01fffa feat(theme): engineer colour derived from the team accent
+b4f1b19 fix(pit): an explicit cancel closes the open BOX card
+b5aa649 docs(fase-11): Langkah 3a report, screenshots, PRD without HYBRID
+8f5fb73 feat(hud): 10 s burn bar on the suggestion card and B / ESC / ENTER keys
+2cd5e2e feat(deck): MANUAL/AUTO desk and a two-state REQUEST/CANCEL BOX button
+71ac7c3 feat(pit): cancel_pit with no penalty and a repeat-suggestion cooldown
+6c305c9 feat(gt): drop HYBRID desk mode, 10 s suggestion window in the sim
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261025_022433
+### Commits
+b15290a test(radio): hide the driver card before the rival banner check
+f674eb0 fix(radio): one flood call per episode, routine calls wait for an urgent card
+1a3ba29 docs(fase-11): Langkah 3e report and screenshots
+6f456ab feat(radio): two-way R2 cards with slap entry, talk and dim
+bdcdbbe feat(radio): wheatpaste R2 card with highlighted headline
+af9a840 feat(radio): engineer replies 2.5 s after a driver call and a flood call
+fc314aa docs(fase-11): Langkah 3e plan (radio R2 two-way)
+e317337 fix(weather): no tyre change for a box call on the chequered lap, window card looks 10 laps ahead
+08f584f docs(fase-11): Langkah 3d weather deck layer fix, report and screenshots
+d37028a feat(hud): weather deck wiring and a shared outlook for the box window card
+446ee45 feat(weather): weather deck with chart, cone, track map and tyre action
+c16ae92 feat(weather): ribbon chip with the 8 lap ladder
+6e01649 feat(weather): GtWeatherOutlook rows, tyre change and box lap from the forecast
+11fb542 docs(fase-11): Langkah 3d plan (weather ladder and weather deck)
+c0a6433 docs(fase-11): Langkah 3 redesign spec v2, design references and plans 3a-3c
+8f4d04f fix(deck): refresh tooltip on click, clearer verdict texts, shared AUTO tyre rule, per-car tyre pick
+3bf370d docs(fase-11): Langkah 3c report and screenshots
+5078463 feat(deck): N2 faders console with verdicts, gauges, wheel and coach tooltips
+2ae0b44 feat(deck): fader ladder, zoned gauge, chip grid, tyre wheel, tooltip and pitched click
+16450b4 feat(forecast): shared sim multiplier tables and GtForecast verdicts
+fc3daac fix(telemetry): keep speed lines inside their panels and honour reduce motion
+0776dcb docs(fase-11): Langkah 3b report and screenshots
+44064d9 feat(telemetry): concept F drawer drawn in one _draw with the team accent
+12bb9cd feat(telemetry): TelemetryState with traces, onomatopoeia and caption
+17e3eb9 feat(theme): team accent skins the logo, marquee and deck header
+d01fffa feat(theme): engineer colour derived from the team accent
+b4f1b19 fix(pit): an explicit cancel closes the open BOX card
+b5aa649 docs(fase-11): Langkah 3a report, screenshots, PRD without HYBRID
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261025_023404
+### Commits
+1246686 fix(radio): engineer card on the same row as the driver card, clear of the track
+b15290a test(radio): hide the driver card before the rival banner check
+f674eb0 fix(radio): one flood call per episode, routine calls wait for an urgent card
+1a3ba29 docs(fase-11): Langkah 3e report and screenshots
+6f456ab feat(radio): two-way R2 cards with slap entry, talk and dim
+bdcdbbe feat(radio): wheatpaste R2 card with highlighted headline
+af9a840 feat(radio): engineer replies 2.5 s after a driver call and a flood call
+fc314aa docs(fase-11): Langkah 3e plan (radio R2 two-way)
+e317337 fix(weather): no tyre change for a box call on the chequered lap, window card looks 10 laps ahead
+08f584f docs(fase-11): Langkah 3d weather deck layer fix, report and screenshots
+d37028a feat(hud): weather deck wiring and a shared outlook for the box window card
+446ee45 feat(weather): weather deck with chart, cone, track map and tyre action
+c16ae92 feat(weather): ribbon chip with the 8 lap ladder
+6e01649 feat(weather): GtWeatherOutlook rows, tyre change and box lap from the forecast
+11fb542 docs(fase-11): Langkah 3d plan (weather ladder and weather deck)
+c0a6433 docs(fase-11): Langkah 3 redesign spec v2, design references and plans 3a-3c
+8f4d04f fix(deck): refresh tooltip on click, clearer verdict texts, shared AUTO tyre rule, per-car tyre pick
+3bf370d docs(fase-11): Langkah 3c report and screenshots
+5078463 feat(deck): N2 faders console with verdicts, gauges, wheel and coach tooltips
+2ae0b44 feat(deck): fader ladder, zoned gauge, chip grid, tyre wheel, tooltip and pitched click
+16450b4 feat(forecast): shared sim multiplier tables and GtForecast verdicts
+fc3daac fix(telemetry): keep speed lines inside their panels and honour reduce motion
+0776dcb docs(fase-11): Langkah 3b report and screenshots
+44064d9 feat(telemetry): concept F drawer drawn in one _draw with the team accent
+12bb9cd feat(telemetry): TelemetryState with traces, onomatopoeia and caption
+17e3eb9 feat(theme): team accent skins the logo, marquee and deck header
+d01fffa feat(theme): engineer colour derived from the team accent
+b4f1b19 fix(pit): an explicit cancel closes the open BOX card
+b5aa649 docs(fase-11): Langkah 3a report, screenshots, PRD without HYBRID
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261025_024537
+### Commits
+b5fc850 docs(fase-11): full summary report of Langkah 3 (3a-3e), plan changes, rulings and merge order
+1246686 fix(radio): engineer card on the same row as the driver card, clear of the track
+b15290a test(radio): hide the driver card before the rival banner check
+f674eb0 fix(radio): one flood call per episode, routine calls wait for an urgent card
+1a3ba29 docs(fase-11): Langkah 3e report and screenshots
+6f456ab feat(radio): two-way R2 cards with slap entry, talk and dim
+bdcdbbe feat(radio): wheatpaste R2 card with highlighted headline
+af9a840 feat(radio): engineer replies 2.5 s after a driver call and a flood call
+fc314aa docs(fase-11): Langkah 3e plan (radio R2 two-way)
+e317337 fix(weather): no tyre change for a box call on the chequered lap, window card looks 10 laps ahead
+08f584f docs(fase-11): Langkah 3d weather deck layer fix, report and screenshots
+d37028a feat(hud): weather deck wiring and a shared outlook for the box window card
+446ee45 feat(weather): weather deck with chart, cone, track map and tyre action
+c16ae92 feat(weather): ribbon chip with the 8 lap ladder
+6e01649 feat(weather): GtWeatherOutlook rows, tyre change and box lap from the forecast
+11fb542 docs(fase-11): Langkah 3d plan (weather ladder and weather deck)
+c0a6433 docs(fase-11): Langkah 3 redesign spec v2, design references and plans 3a-3c
+8f4d04f fix(deck): refresh tooltip on click, clearer verdict texts, shared AUTO tyre rule, per-car tyre pick
+3bf370d docs(fase-11): Langkah 3c report and screenshots
+5078463 feat(deck): N2 faders console with verdicts, gauges, wheel and coach tooltips
+2ae0b44 feat(deck): fader ladder, zoned gauge, chip grid, tyre wheel, tooltip and pitched click
+16450b4 feat(forecast): shared sim multiplier tables and GtForecast verdicts
+fc3daac fix(telemetry): keep speed lines inside their panels and honour reduce motion
+0776dcb docs(fase-11): Langkah 3b report and screenshots
+44064d9 feat(telemetry): concept F drawer drawn in one _draw with the team accent
+12bb9cd feat(telemetry): TelemetryState with traces, onomatopoeia and caption
+17e3eb9 feat(theme): team accent skins the logo, marquee and deck header
+d01fffa feat(theme): engineer colour derived from the team accent
+b4f1b19 fix(pit): an explicit cancel closes the open BOX card
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
