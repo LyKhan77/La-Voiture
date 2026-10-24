@@ -77,6 +77,13 @@ static func click(node: Node) -> void:
 		hub.play_ui_click()
 
 
+## Click with a pitch per action, so each deck control answers in its own voice.
+static func click_pitched(node: Node, pitch: float) -> void:
+	var hub: AudioManager = of(node)
+	if hub != null:
+		hub.play_ui_click_pitched(pitch)
+
+
 ## --headless has no output device; playback there only leaves stream references behind at quit.
 static func has_output() -> bool:
 	return DisplayServer.get_name() != "headless"
@@ -126,6 +133,10 @@ func _make_player(bus: StringName) -> AudioStreamPlayer:
 
 func play_ui_click() -> void:
 	_play_ui(CLICK, 1.0)
+
+
+func play_ui_click_pitched(pitch: float) -> void:
+	_play_ui(CLICK, pitch)
 
 
 ## Emergency alarm: BOX call, critical tyres, urgent radio.

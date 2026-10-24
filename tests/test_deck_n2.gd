@@ -45,6 +45,7 @@ func _run() -> void:
 	race.step_ticks(200)
 	hud.refresh_all()
 	_test_forecast()
+	await _test_widgets()
 	race.dispose()
 	world.queue_free()
 	await process_frame
@@ -136,3 +137,102 @@ func _test_forecast() -> void:
 	var inter_flood: Dictionary = GtForecast.tyre_verdict(4, 60.0, 0.9, [])
 	check(int(inter_flood["severity"]) == 1 and String(inter_flood["text"]).contains("over 45%:") and not String(inter_flood["text"]).contains("%%"),
 		"forecast: texts print a single percent sign (%s)" % inter_flood["text"])
+
+
+# --- widgets ----------------------------------------------------------------------------------------------------------
+
+func _total_clicks() -> int:
+	var total: int = 0
+	for count: Variant in AudioManager.of(root).play_counts.values():
+		total += int(count)
+	return total
+
+
+func _test_widgets() -> void:
+	var labels: Array[String] = ["CONSERVE", "LIGHT", "STANDARD", "AGGRESSIVE", "ATTACK"]
+	var tints: Array[Color] = [Color.CYAN, Color.CYAN, Color.GREEN, Color.YELLOW, Color.RED]
+	var ladder := FaderLadder.new(labels, tints)
+	root.add_child(ladder)
+	var picks: Array[int] = []
+	ladder.selected.connect(func(index: int) -> void: picks.append(index))
+	ladder.set_active(2)
+	ladder.buttons[3].pressed.emit()
+	ladder.set_marks([0, 0, 0, 1, 2])
+	var shown: Array[int] = ladder.marks()
+	check(ladder.buttons.size() == 5 and ladder.get_child(0) == ladder.buttons[4] and ladder.get_child(4) == ladder.buttons[0]
+			and picks == [3] and ladder.active == 3 and shown == [0, 0, 0, 1, 2] and ladder.is_mark_visible(4) and not ladder.is_mark_visible(2),
+		"widgets: the fader ladder keeps the option order (strongest on top), selects, and marks risky options")
+	ladder.queue_free()
+
+	var gauge := ZonedGauge.new()
+	root.add_child(gauge)
+	gauge.set_state(0.72, 0.25)
+	var lit: int = gauge.lit_blocks()
+	var hidden_ghost: bool = not gauge.ghost_visible()
+	gauge.ghost = 0.24
+	check(lit == 9 and hidden_ghost and gauge.ghost_visible() and is_equal_approx(gauge.tick, 0.25),
+		"widgets: the gauge lights blocks by value and shows the finish ghost only when set")
+	gauge.queue_free()
+
+	var compound_labels: Array[String] = ["A", "S", "M", "H", "I", "W"]
+	var compound_words: Array[String] = ["AUTO", "SOFT", "MED", "HARD", "INTER", "WET"]
+	var compound_colors: Array[Color] = [Color.WHITE, Color.RED, Color.YELLOW, Color.GRAY, Color.GREEN, Color.BLUE]
+	var chips := ChipGrid.new(compound_labels, compound_words, compound_colors)
+	root.add_child(chips)
+	var chosen: Array[int] = []
+	chips.selected.connect(func(index: int) -> void: chosen.append(index))
+	chips.set_active(4)
+	chips.buttons[5].pressed.emit()
+	check(chips.buttons.size() == 6 and chips.buttons[1].text == "S\nSOFT" and chosen == [5] and chips.active == 5,
+		"widgets: the tyre chip grid selects a compound")
+	chips.queue_free()
+
+	var wheel := TyreWheel.new()
+	root.add_child(wheel)
+	var calm_spin: float = TyreWheel.spin_velocity(100.0, 0.0)
+	var kicked_spin: float = TyreWheel.spin_velocity(100.0, 900.0)
+	wheel.set_compound(3, true)
+	var kicked: bool = wheel.compound == 3 and wheel.impulse >= 900.0
+	var before: float = wheel.angle
+	wheel._process(0.5)
+	check(calm_spin == 160.0 and kicked_spin == 1060.0 and kicked and wheel.impulse < 900.0 * exp(-1.6) + 0.1 and wheel.angle != before,
+		"widgets: the wheel spins with the car, takes a kick on a change and the kick dies away")
+	PresentationSettings.reduce_motion = true
+	var calm := TyreWheel.new()
+	root.add_child(calm)
+	calm.hit()
+	calm.set_compound(2, true)
+	var held: bool = calm.impulse == 0.0 and calm.shake == 0.0
+	calm.speed_kmh = 100.0
+	var turned: float = calm.angle
+	calm._process(0.1)
+	check(held and calm.angle != turned, "widgets: under reduce motion the wheel takes no kick or shake but still turns with the car")
+	PresentationSettings.reduce_motion = false
+	wheel.queue_free()
+	calm.queue_free()
+
+	var counted: int = _total_clicks()
+	AudioManager.click_pitched(root, 1.2)
+	check(_total_clicks() == counted + 1, "audio: click_pitched logs one click")
+
+	var host := Control.new()
+	host.size = Vector2(1888.0, 140.0)
+	root.add_child(host)
+	var tip := DeckTip.new()
+	host.add_child(tip)
+	var left_target := Control.new()
+	left_target.size = Vector2(60.0, 20.0)
+	left_target.position = Vector2(10.0, 40.0)
+	host.add_child(left_target)
+	var right_target := Control.new()
+	right_target.size = Vector2(60.0, 20.0)
+	right_target.position = Vector2(1860.0, 40.0)
+	host.add_child(right_target)
+	tip.show_for(left_target, 1, "PACE: ATTACK", "Maximum speed.", "LAP -0.7 s", "Tyres end at ~24%", true)
+	var left_ok: bool = tip.position.x >= 0.0 and tip.visible and tip.plain_label.visible and tip.position.y < 0.0
+	tip.show_for(right_target, 2, "PACE: ATTACK", "Maximum speed.", "LAP -0.7 s", "Tyres pass the cliff", false)
+	check(left_ok and tip.position.x + tip.size.x <= host.size.x + 0.01 and not tip.plain_label.visible and tip.severity_mark.severity == 2,
+		"widgets: the tooltip stays inside the deck width, sits above it and drops the plain sentence when COACH is off")
+	tip.hide_tip()
+	check(not tip.visible, "widgets: the tooltip hides")
+	host.queue_free()
