@@ -85,7 +85,7 @@ flowchart TD
         TimingUI["LiveTimingTowerUI (20 Rows, INT/GAP/LAST via Tab)"]
         TacticalDeck["TacticalDeck (Wide Strip 1888x140px, Pace/Fuel/ERS/Box)"]
         TelemetryDrawer["TelemetryDrawer (Digital Instruments, G-Box, 4-Tyre Matrix)"]
-        CutIn["AnimeRadioCutIn & Hybrid Suggestion Cards"]
+        CutIn["AnimeRadioCutIn & Suggestion Cards"]
         HudRoot --> TimingUI
         HudRoot --> TacticalDeck
         HudRoot --> TelemetryDrawer

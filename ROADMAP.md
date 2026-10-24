@@ -92,3 +92,9 @@
   - [x] `Task 2.3`: Fisika ban di `gt_driving.gd`: air hanya memotong grip tikungan (slick banjir tetap 253 km/jam di lurus, apex turun 44%), aquaplaning rem 3,0×, snap oversteer (`error_timer = 2.0`), WET di trek kering 142 °C / aus 17,9× / puncture lap 1,6.
   - [x] `Task 2.4`: `tests/test_garage_tyre_strategy.gd`: **39 assertions, 0 FAIL**; **27 suite headless, 0 FAIL** setelah dua penyesuaian (`test_race_weekend_and_physics` #19, kalimat radio snap). Smoke native: alur garasi → 3 lap 20 mobil → podium → menu lulus dengan 0 orphan node; **frame time 60 FPS belum sah diukur** (GPU terbagi dengan proses lain, lihat laporan bagian 6).
   - Laporan: `executor-report/reports/FASE-11-LANGKAH-2-GARAGE-UI-AND-PHYSICS-REPORT.md`; bukti visual `executor-report/screenshots/phases/phase-11-step-2-*.png`.
+- [ ] **Fase 11 / Langkah 3: Redesign HUD balapan** (spec `docs/superpowers/specs/2026-10-24-langkah-3-hud-redesign-v2-design.md`; mockup di `docs/design-refs/`)
+  - [x] `Langkah 3a`: Mekanik pit wall. Desk hanya MANUAL / AUTO (HYBRID dihapus; default MANUAL), jendela saran 10 detik di sim (`GtRace.SUGGESTION_WINDOW_S`; MANUAL menutup kartu, AUTO mengeksekusi), `cancel_pit` tanpa penalti, tombol BOX dua-state REQUEST ↔ CANCEL, bar api + label sisa waktu di kartu saran, tombol `B` / `ESC` / `ENTER`. `tests/test_pit_deck_and_radio.gd` (25 assertions), **28 suite headless, 0 FAIL**. Laporan: `executor-report/reports/FASE-11-LANGKAH-3A-PIT-MECHANICS-REPORT.md`.
+  - [ ] `Langkah 3b`: Tema warna tim + drawer telemetry konsep F.
+  - [ ] `Langkah 3c`: Tactical deck N2 (fader, gauge berzona, verdict dari sim, COACH, roda ban).
+  - [ ] `Langkah 3d`: Ribbon cuaca ladder 8 lap + Weather Deck.
+  - [ ] `Langkah 3e`: Radio R2 Wheatpaste dua arah.

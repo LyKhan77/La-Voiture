@@ -92,7 +92,7 @@ flowchart TD
     ShiftOffset --> SyncCamera["Camera Viewport 3D Fokus ke Mobil Terpilih"]
     
     subgraph PitCallFlow["Eksekusi Pit Stop Strategi"]
-        ClickBox["Klik Tombol 'BOX THIS LAP'"] --> ShakeBtn["Micro Camera Shake + Crimson Halftone Pulse"]
+        ClickBox["Klik Tombol 'REQUEST BOX [B]'"] --> ShakeBtn["Micro Camera Shake + Crimson Halftone Pulse"]
         ShakeBtn --> SendRadio["Trigger Anime Radio Cut-In: 'BOX BOX BOX THIS LAP!'"]
         SendRadio --> SendSim["Kirim Sinyal box_requested = true ke RaceSimEngine"]
     end
@@ -127,12 +127,12 @@ flowchart TD
     * Baris Pace (5 tingkat): `CONSERVE`, `LIGHT`, `STANDARD`, `AGGRESSIVE`, `ATTACK` (Shortcut `[` / `]`).
     * Baris Fuel Mix (3 tingkat): `CONSERVE (Lean)`, `STANDARD`, `PUSH (Rich)`.
     * Baris ERS Mode (4 mode): `HARVEST`, `NEUTRAL`, `DEPLOY`, `OVERTAKE` (Shortcut `E`).
-    * Pemilih kompon ban berikutnya (`AUTO`, `S`, `M`, `H`, `I`, `W`) dan tombol besar **`[⚡ BOX THIS LAP]`**.
-    * Tactic Desk selector: `[MANUAL]`, `[AUTO]`, `[HYBRID]`.
+    * Pemilih kompon ban berikutnya (`AUTO`, `S`, `M`, `H`, `I`, `W`) dan tombol besar dua-state **`[REQUEST BOX [B]]`** yang berubah menjadi **`[CANCEL BOX [ESC] // COMPOUND]`** (crimson, tetap bisa diklik) selama panggilan box belum mencapai pit lane.
+    * Tactic Desk selector: `[MANUAL]` (kartu saran menutup sendiri saat bar 10 detik habis, tidak ada eksekusi tanpa pemain) dan `[AUTO]` (kartu mengeksekusi saran saat bar habis), dengan tag status `MODE: ... `. Mode HYBRID dihapus.
     * Tombol lipat **`FOLD DECK [M]`**: Melipat deck menjadi baris tipis agar pandangan 3D sirkuit semakin luas.
     * Baris teks radio terakhir dan jumlah stop pit.
-* **Zone F (Reactive Layers: Hybrid Cards, Dual Anime Radio Cut-Ins & Marquee):**
-  - **Kartu Saran Taktis Hybrid:** Muncul saat Tactic Desk berstatus HYBRID ketika jendela pit terbuka (misal: *"RYU: BOX FOR HARD [ACCEPT] [DISMISS]"*).
+* **Zone F (Reactive Layers: Suggestion Cards, Dual Anime Radio Cut-Ins & Marquee):**
+  - **Kartu Saran Taktis:** Muncul di mode MANUAL maupun AUTO ketika ada saran dari race engineer (jendela pit terbuka, cuaca, ban kritis; misal: *"RYU: BOX FOR HARD [ACCEPT] [DISMISS]"*), dengan bar api 10 detik dan label sisa waktu (`ENTER` terima, `ESC` tutup).
   - **Dual Manga Radio Cut-In Overlays (`RaceHud.RADIO_DOCK`):**
     * **Driver Overlay (Top-Left):** Muncul di sudut kiri atas panggung bebas ($x: 380, y: 116$) dengan potret manga helm pembalap, garis kecepatan miring, dan aksen *Acid Lime*.
     * **Engineer Overlay (Top-Right):** Muncul di sudut kanan atas panggung bebas ($x: 1064, y: 116$) dengan potret manga kepala teknisi berheadset, aksen *Electric Cyan* (atau *Crimson Red* bila urgent/BOX).

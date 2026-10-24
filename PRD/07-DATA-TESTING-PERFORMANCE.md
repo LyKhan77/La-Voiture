@@ -85,7 +85,7 @@ Pengujian regresi dijalankan langsung via Godot Console Headless (`godot --headl
 | 5 | `tests/test_race_world.gd` | **65 PASS** | Ribbon spline sirkuit 3D, 5 kamera siaran TV, batas dinding pembatas Armco, dan sinkronisasi 20 mobil. |
 | 6 | `tests/test_gt_sim.gd` | **43 PASS** | Porting GT Sim kontinu ($s$, lateral), 5 kompon ban, 75% cliff & puncture 96%, 5 tahap bensin, AI racing room 2.4m, SAT 190-pair contact resolver. |
 | 7 | `tests/test_car_dynamics_vfx.gd` | **18 PASS** | Steering roda depan adaptif, body roll tikungan, nose dive/squat, filter lolos-rendah dua-tahap `ease2`, tag grafiti manga billboard. |
-| 8 | `tests/test_race_hud.gd` | **31 PASS** | Fused Master HUD 1920x1080: Tactical Deck 1888x140px, Telemetry Drawer, Tab tower INT/GAP/LAST, kartu hybrid. |
+| 8 | `tests/test_race_hud.gd` | **31 PASS** | Fused Master HUD 1920x1080: Tactical Deck 1888x140px, Telemetry Drawer, Tab tower INT/GAP/LAST, kartu saran. |
 | 9 | `tests/test_race_weekend_and_physics.gd` | **30 PASS** | Prosedur balap resmi FIA, gantry 5 lampu merah start, speed limiter pit lane 80 km/jam, koreografi pit stop 3D (dongkrak hidrolik 15cm & 4 roda lepas/pasang). |
 | 10 | `tests/test_audio_and_race_weekend.gd` | **35 PASS** | Routing 5 bus audio, suara mesin GT3 3D modulasi pitch RPM (1200-8500), decit ban lateral $G > 1.8G$, letupan knalpot, beep start, 8 tembakan pit gun, dual anime radio overlay (kiri & kanan bebas tabrakan UI), 64 suara TTS neural Kokoro-82M, music ducking (-8dB), dan layar selebrasi podium juara FIA GT3. |
 | **Total** | **10 Test Suites Lengkap** | **322 PASS** | **0 FAIL (100% Green, Zero Regressions)** |
