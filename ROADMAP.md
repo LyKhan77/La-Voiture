@@ -94,7 +94,7 @@
   - Laporan: `executor-report/reports/FASE-11-LANGKAH-2-GARAGE-UI-AND-PHYSICS-REPORT.md`; bukti visual `executor-report/screenshots/phases/phase-11-step-2-*.png`.
 - [ ] **Fase 11 / Langkah 3: Redesign HUD balapan** (spec `docs/superpowers/specs/2026-10-24-langkah-3-hud-redesign-v2-design.md`; mockup di `docs/design-refs/`)
   - [x] `Langkah 3a`: Mekanik pit wall. Desk hanya MANUAL / AUTO (HYBRID dihapus; default MANUAL), jendela saran 10 detik di sim (`GtRace.SUGGESTION_WINDOW_S`; MANUAL menutup kartu, AUTO mengeksekusi), `cancel_pit` tanpa penalti, tombol BOX dua-state REQUEST ↔ CANCEL, bar api + label sisa waktu di kartu saran, tombol `B` / `ESC` / `ENTER`. `tests/test_pit_deck_and_radio.gd` (26 assertions), **28 suite headless, 0 FAIL**. Laporan: `executor-report/reports/FASE-11-LANGKAH-3A-PIT-MECHANICS-REPORT.md`.
-  - [ ] `Langkah 3b`: Tema warna tim + drawer telemetry konsep F.
+  - [x] `Langkah 3b`: Tema warna tim (`GarageStyle.engineer_for`, skin logo/marquee/header deck lewat `RaceHud.set_team_accent`) dan drawer telemetry konsep F (`TelemetryState` + `TelemetryPainter`, onomatope, caption, hero mobil X-ray). `tests/test_hud_theme_and_telemetry.gd` (26 assertions), **29 suite headless, 0 FAIL** (pembungkus ketat). Laporan: `executor-report/reports/FASE-11-LANGKAH-3B-TEAM-THEME-TELEMETRY-REPORT.md`; bukti visual `phase-11-langkah-3b-*.png`.
   - [ ] `Langkah 3c`: Tactical deck N2 (fader, gauge berzona, verdict dari sim, COACH, roda ban).
   - [ ] `Langkah 3d`: Ribbon cuaca ladder 8 lap + Weather Deck.
   - [ ] `Langkah 3e`: Radio R2 Wheatpaste dua arah.
