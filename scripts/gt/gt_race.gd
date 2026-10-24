@@ -4,7 +4,7 @@ extends RefCounted
 ## The GT race sim: a GDScript port of gt-manager's `Race` (race.ts). Cars are points
 ## with a continuous `s` and `lateral` (no lanes), driven by an AI with overtaking,
 ## defending, side-by-side and blue-flag rules, DRS / ERS / slipstream, tyre and fuel
-## models, incidents, FIA flags with a safety car, a pit lane and a hybrid tactic desk.
+## models, incidents, FIA flags with a safety car, a pit lane and a manual / auto tactic desk.
 ## Per tick: weather, race control, every car (GtDriving), the contact resolver, tactics.
 ## GtRace owns state and rules the world and the HUD read; the heavy per-car logic is
 ## in gt_driving.gd, contacts and incidents in gt_contacts.gd.
@@ -16,6 +16,8 @@ signal suggestion_changed(suggestion: Dictionary)
 
 const GRID_ROW_M: float = 8.0
 const GRID_COLUMN_M: float = 2.5
+## Race seconds a suggestion card stays open: MANUAL closes it, AUTO executes it when the window ends.
+const SUGGESTION_WINDOW_S: float = 10.0
 
 var track: GtTrack
 var laps: int = 10
@@ -28,7 +30,7 @@ var best_session_sectors: Array[float] = [-1.0, -1.0, -1.0]
 var speed_trap_max: Dictionary = {}
 var radio_history: Array[Dictionary] = []
 var latest_radio: Dictionary = {}
-var tactic_mode: int = GtTypes.TacticMode.HYBRID
+var tactic_mode: int = GtTypes.TacticMode.MANUAL
 var player_team_id: int = 0
 var latest_suggestion: Dictionary = {}
 var latest_collision: Dictionary = {}
@@ -214,8 +216,8 @@ func step(dt: float = GtTypes.TICK_DT) -> void:
 		if car.is_racing():
 			active.append(car)
 	contacts.resolve(active, dt)
-	if tactic_mode == GtTypes.TacticMode.HYBRID:
-		_check_hybrid_tactics()
+	_check_advisor_tactics()
+	_expire_suggestion()
 	time += dt
 	var order: Array[GtCar] = standings()
 	for index: int in range(order.size()):
@@ -438,9 +440,30 @@ func suggest_tactic(car: GtCar, type: int, action_value: int, action_label: Stri
 		"id": _radio_counter, "car_id": car.id, "code": car.code, "type": type,
 		"title": "%s: %s" % [car.code, action_label], "description": description,
 		"action_label": action_label, "action_value": action_value, "time": time,
+		"deadline": time + SUGGESTION_WINDOW_S,
 	}
 	push_radio(car, "engineer", description, true)
 	suggestion_changed.emit(latest_suggestion)
+
+
+## Race seconds left on the open suggestion card, 0.0 when there is none.
+func suggestion_remaining() -> float:
+	if latest_suggestion.is_empty():
+		return 0.0
+	return maxf(0.0, float(latest_suggestion["deadline"]) - time)
+
+
+## Window over: AUTO executes the card (unless its car is already boxing), MANUAL just closes it.
+func _expire_suggestion() -> void:
+	if latest_suggestion.is_empty() or time < float(latest_suggestion["deadline"]):
+		return
+	var car: GtCar = get_car(int(latest_suggestion["car_id"]))
+	var boxing: bool = car == null or car.pit != null or car.pit_request >= 0
+	var is_pit: bool = int(latest_suggestion["type"]) == GtTypes.TacticType.PIT
+	if tactic_mode == GtTypes.TacticMode.AUTO and not (is_pit and boxing):
+		accept_suggestion()
+	else:
+		dismiss_suggestion()
 
 
 func accept_suggestion() -> void:
@@ -472,8 +495,8 @@ func dismiss_suggestion() -> void:
 	suggestion_changed.emit(latest_suggestion)
 
 
-## Strategy desk: at a lap line, rivals (and auto-mode player cars) decide pit calls;
-## hybrid mode turns the player's calls into suggestion cards.
+## Strategy desk: at a lap line, rivals decide pit calls themselves; the player's calls become suggestion
+## cards (MANUAL closes the card when its window ends, AUTO executes it).
 func decide_strategy(car: GtCar) -> void:
 	if car.pit != null or car.finished_at >= 0.0:
 		return
@@ -481,8 +504,6 @@ func decide_strategy(car: GtCar) -> void:
 	if laps_left <= 0:
 		return
 	var is_player: bool = car.team_id == player_team_id
-	if is_player and tactic_mode == GtTypes.TacticMode.MANUAL:
-		return
 	var water: float = weather.track_water_pct
 	var slick: bool = GtTypes.is_slick(car.compound)
 	var target: int = -1
@@ -501,14 +522,15 @@ func decide_strategy(car: GtCar) -> void:
 		reason = "Tyre wear critical (%d%%)." % roundi(car.wear * 100.0)
 	if target < 0:
 		return
-	if is_player and tactic_mode == GtTypes.TacticMode.HYBRID:
+	if is_player:
 		suggest_tactic(car, GtTypes.TacticType.PIT, target, "BOX FOR %s" % GtTypes.COMPOUND_NAME[target],
 			"%s Suggest box this lap for %s tyres." % [reason, GtTypes.COMPOUND_NAME[target]])
 	else:
 		car.pit_request = target
 
 
-func _check_hybrid_tactics() -> void:
+## The engineer watches the player's cars in every desk mode and raises suggestion cards.
+func _check_advisor_tactics() -> void:
 	var leader_lap: int = 0
 	var order: Array[GtCar] = standings()
 	if not order.is_empty():

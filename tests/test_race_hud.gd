@@ -177,7 +177,7 @@ func _test_deck_writes_to_sim() -> void:
 	deck.refresh()
 	check(deck.pace_row.active == GtTypes.PaceMode.ATTACK and deck.ers_row.active == GtTypes.ErsMode.DEPLOY and deck.tactic_row.active == GtTypes.TacticMode.AUTO,
 		"deck: the active button follows the sim state")
-	race.set_tactic_mode(GtTypes.TacticMode.HYBRID)
+	race.set_tactic_mode(GtTypes.TacticMode.MANUAL)
 
 	var other: GtCar = mine[1]
 	deck.tabs[1].pressed.emit()

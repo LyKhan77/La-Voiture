@@ -645,7 +645,7 @@ func _test_tactics() -> void:
 	var player: CarScript = _player_of(race)
 	_park_others(race, [player])
 	_place(player, 400.0, 50.0, 0.0)
-	race.set_tactic_mode(Types.TacticMode.HYBRID)
+	race.set_tactic_mode(Types.TacticMode.MANUAL)
 	player.wear = 0.7
 	race.step()
 	var offered: bool = not race.latest_suggestion.is_empty() and int(race.latest_suggestion["type"]) == Types.TacticType.PIT
@@ -658,14 +658,14 @@ func _test_tactics() -> void:
 	_park_others(race, [player])
 	_place(player, 400.0, 50.0, 0.0)
 	player.wear = 0.7
-	race.set_tactic_mode(Types.TacticMode.MANUAL)
-	race.step()
-	var manual_quiet: bool = race.latest_suggestion.is_empty() and player.pit_request < 0
 	race.set_tactic_mode(Types.TacticMode.AUTO)
 	race.decide_strategy(player)
-	var auto_calls: bool = player.pit_request >= 0
-	check(offered and accepted and manual_quiet and auto_calls,
-		"tactics: hybrid offers a BOX card at 62 %% wear and accept calls the stop; manual stays quiet; auto calls the stop itself")
+	var auto_card: bool = not race.latest_suggestion.is_empty() and player.pit_request < 0
+	race.time += RaceScript.SUGGESTION_WINDOW_S + 0.1
+	race.step()
+	var auto_calls: bool = player.pit_request >= 0 and race.latest_suggestion.is_empty()
+	check(offered and accepted and auto_card and auto_calls,
+		"tactics: MANUAL and AUTO both raise a BOX card at 70 %% wear; accept calls the stop; AUTO calls it itself when the 10 s window ends")
 	race.set_pace_mode(player.id, Types.PaceMode.ATTACK)
 	race.set_fuel_mode(player.id, Types.FuelMode.PUSH)
 	race.set_ers_mode(player.id, Types.ErsMode.HARVEST)
