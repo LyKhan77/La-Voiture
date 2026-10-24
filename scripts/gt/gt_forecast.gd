@@ -62,6 +62,16 @@ static func recommended_compound(water_pct: float, rain: float) -> int:
 	return GtTypes.Compound.MEDIUM
 
 
+## The tyre a box call without a choice fits: wets or inters by the track water, otherwise the next slick
+## in the S-M-H rotation (a wet tyre in the dry goes to MEDIUM). The one rule RaceWeekendWorld.request_pit uses.
+static func auto_compound(car: GtCar, water_pct: float) -> int:
+	if water_pct > WET_WATER_PCT:
+		return GtTypes.Compound.WET
+	if water_pct > INTER_WATER_PCT:
+		return GtTypes.Compound.INTERMEDIATE
+	return (car.compound + 1) % 3 if GtTypes.is_slick(car.compound) else GtTypes.Compound.MEDIUM
+
+
 ## The verdict of option `index` of `kind` ("pace", "fuel" or "ers") against the car as it is now: a
 ## pace option is judged with the car's fuel mode kept, a fuel option with its pace kept.
 ## Returns {"severity": OK / WATCH / DANGER, "text": String, "projected": float 0..1 or laps for fuel}.
@@ -78,9 +88,11 @@ static func _pace_verdict(index: int, car: GtCar, laps: float) -> Dictionary:
 	var life: float = tyre_life_at_finish(car, index, laps)
 	var rate: float = wear_per_lap(car, index)
 	if life < TYRE_DANGER_LIFE:
+		if car.wear >= GtTypes.TYRE_CLIFF_WEAR:
+			return {"severity": DANGER, "projected": life, "text": "Tyres are already past the cliff (25%): grip is falling."}
 		var until: int = maxi(1, roundi((GtTypes.TYRE_CLIFF_WEAR - car.wear) / maxf(rate, 0.0001)))
 		return {"severity": DANGER, "projected": life,
-			"text": "Tyres pass the cliff (25%%) about %d laps from now, well before the finish." % until}
+			"text": "Tyres pass the cliff (25%%) about %d %s from now, well before the finish." % [until, "lap" if until == 1 else "laps"]}
 	if life < TYRE_WATCH_LIFE:
 		return {"severity": WATCH, "projected": life, "text": "Tyres end at ~%d%%: right at the cliff (25%%) by the finish." % roundi(life * 100.0)}
 	return {"severity": OK, "projected": life, "text": "Tyres end at ~%d%%: above the cliff." % roundi(life * 100.0)}
@@ -103,6 +115,8 @@ static func _ers_verdict(index: int, car: GtCar) -> Dictionary:
 		return {"severity": OK, "projected": minf(1.0, car.ers_battery / 100.0 + (GtTypes.ERS_HARVEST_PER_S * 3.0 / 100.0 if harvesting else 0.0)),
 			"text": "Recharges while you drive." if harvesting else "Battery stays level."}
 	var seconds: float = ers_seconds(car.ers_battery, index)
+	if seconds < 1.0:
+		return {"severity": DANGER, "projected": after, "text": "Battery nearly empty: no boost left."}
 	var severity: int = DANGER if seconds < ERS_DANGER_S else (WATCH if seconds < ERS_WATCH_S else OK)
 	var text: String = "Battery lasts ~%.0f s of deploying: save it for a pass." % seconds if severity != OK else "Battery lasts ~%.0f s of deploying." % seconds
 	return {"severity": severity, "projected": after, "text": text}

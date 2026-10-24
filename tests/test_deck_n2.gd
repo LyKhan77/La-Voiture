@@ -47,6 +47,7 @@ func _run() -> void:
 	_test_forecast()
 	await _test_widgets()
 	await _test_deck_layout_and_flow()
+	await _test_review_fixes()
 	race.dispose()
 	world.queue_free()
 	await process_frame
@@ -246,6 +247,7 @@ func _test_deck_layout_and_flow() -> void:
 	var car: GtCar = mine[0]
 	var saved_laps: int = race.laps
 	race.laps = 30
+	race.latest_suggestion = {} # an open engineer card keeps the tooltip off
 	_known(car)
 	car.pit_request = -1
 	deck.deck_car_id = car.id
@@ -358,4 +360,77 @@ func _test_deck_layout_and_flow() -> void:
 	weather.rain_intensity = saved_rain
 	race.laps = saved_laps
 	_known(car)
+	deck.refresh()
+
+
+# --- final review fixes -------------------------------------------------------------------------------------------------
+
+func _test_review_fixes() -> void:
+	var deck: TacticalDeck = hud.deck
+	var car: GtCar = mine[0]
+	var saved_laps: int = race.laps
+	race.laps = 30
+	_known(car)
+	car.pit_request = -1
+	deck.deck_car_id = car.id
+	deck.pit_compound = -1
+	deck.refresh()
+
+	deck.wheel.mouse_entered.emit()
+	deck.wheel.clicked.emit()
+	var wheel_tip: String = deck.tip.title_label.text
+	deck.wheel.mouse_exited.emit()
+	check(wheel_tip == "TYRES: SOFT", "review: the wheel tooltip follows the tyre the click picked (%s)" % wheel_tip)
+	deck.tyre_row.buttons[0].pressed.emit()
+
+	deck.pace_row.hovered.emit(GtTypes.PaceMode.ATTACK)
+	var before_click: String = deck.tip.numbers_label.text
+	deck.pace_row.buttons[GtTypes.PaceMode.ATTACK].pressed.emit()
+	var after_click: String = deck.tip.numbers_label.text
+	deck.pace_row.unhovered.emit()
+	check(before_click.contains("SPEED +4.8%") and after_click.contains("SPEED +0.0%") and deck.tip.visible == false,
+		"review: the tooltip and forecast line are recomputed after a fader click (%s -> %s)" % [before_click, after_click])
+	_known(car)
+	deck.refresh()
+
+	car.wear = 0.8
+	var past: String = String(GtForecast.verdict("pace", GtTypes.PaceMode.ATTACK, car, 10.0)["text"])
+	var calm: String = String(GtForecast.verdict("pace", GtTypes.PaceMode.CONSERVE, car, 10.0)["text"])
+	_known(car)
+	car.wear = 0.5
+	var later: String = String(GtForecast.verdict("pace", GtTypes.PaceMode.ATTACK, car, 30.0)["text"])
+	_known(car)
+	car.ers_battery = 10.0
+	var empty: Dictionary = GtForecast.verdict("ers", GtTypes.ErsMode.OVERTAKE, car, 10.0)
+	_known(car)
+	check(past.begins_with("Tyres are already past the cliff") and calm.begins_with("Tyres are already past the cliff") and not later.contains("1 laps")
+			and int(empty["severity"]) == 2 and String(empty["text"]).contains("nearly empty"),
+		"review: verdict texts say when the tyres are past the cliff and the battery is nearly empty (%s | %s)" % [past, empty["text"]])
+
+	race.latest_suggestion = {"deadline": race.time + 5.0}
+	deck.fuel_row.hovered.emit(GtTypes.FuelMode.PUSH)
+	var hidden: bool = not deck.tip.visible and deck.forecast_label.text.begins_with("FUEL: PUSH")
+	deck.fuel_row.unhovered.emit()
+	race.latest_suggestion = {}
+	deck.fuel_row.hovered.emit(GtTypes.FuelMode.PUSH)
+	var shown: bool = deck.tip.visible
+	deck.fuel_row.unhovered.emit()
+	check(hidden and shown, "review: the tooltip stays off while an engineer card is open, the forecast line still carries the impact")
+
+	car.compound = GtTypes.Compound.HARD
+	var fit: int = GtForecast.auto_compound(car, 5.0)
+	deck.refresh()
+	var hint_ok: bool = fit == GtTypes.Compound.SOFT and deck.wheel.auto_hint == fit and GtForecast.auto_compound(car, 30.0) == GtTypes.Compound.INTERMEDIATE
+	var called: bool = deck.press_box()
+	var asked: int = car.pit_request
+	deck.cancel_box()
+	check(hint_ok and called and asked == fit, "review: the AUTO wheel colour is the tyre the world fits for this car (%d)" % asked)
+	_known(car)
+
+	deck.pit_compound = GtTypes.Compound.WET
+	deck.tabs[1].pressed.emit()
+	var reset: bool = deck.pit_compound == -1 and deck.tyre_row.active == 0
+	deck.tabs[0].pressed.emit()
+	check(reset, "review: switching car drops the tyre picked for the other car")
+	race.laps = saved_laps
 	deck.refresh()

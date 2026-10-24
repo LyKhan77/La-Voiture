@@ -154,13 +154,7 @@ func request_pit(car_id: int, compound: int = -1) -> bool:
 	if car == null or car.pit != null or car.pit_request >= 0 or car.finished_at >= 0.0:
 		return false
 	if compound < 0:
-		var water: float = race.weather.track_water_pct
-		if water > 45.0:
-			compound = Types.Compound.WET
-		elif water > 18.0:
-			compound = Types.Compound.INTERMEDIATE
-		else:
-			compound = (car.compound + 1) % 3 if Types.is_slick(car.compound) else Types.Compound.MEDIUM
+		compound = GtForecast.auto_compound(car, race.weather.track_water_pct)
 	race.request_pit(car_id, compound)
 	return true
 

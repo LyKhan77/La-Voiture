@@ -89,6 +89,7 @@ var _box_clicked_at: int = -100000
 var _ers_before: int = GtTypes.ErsMode.NEUTRAL
 var _hover_kind: String = ""
 var _hover_index: int = -1
+var _last_car_id: int = -1
 
 
 func _init() -> void:
@@ -380,6 +381,8 @@ func _on_tyre(index: int) -> void:
 	tyre_row.set_active(index)
 	wheel.set_compound(index, true)
 	apply_click_feedback(tyre_row.buttons[index], TYRE_WORDS[index], 0.85 + 0.07 * float(index))
+	if _hover_kind == "wheel":
+		_hover_index = index
 	_refresh_hover()
 
 
@@ -520,6 +523,9 @@ func _refresh_hover() -> void:
 		"box":
 			tip.show_for(box_button, 0, "BOX", DeckCoach.BOX, "", "Best lap to pit: %s" % window_label.text.get_slice("\n", 0), coach)
 	_update_gauges(car)
+	# The engineer's card counts down in the same screen area: the forecast line carries the impact meanwhile.
+	if race.suggestion_remaining() > 0.0:
+		tip.hide_tip()
 
 
 ## What choosing `index` changes against the option now active, in the sim's own units.
@@ -547,6 +553,10 @@ func refresh() -> void:
 	var car: GtCar = race.get_car(deck_car_id)
 	if car == null:
 		return
+	if car.id != _last_car_id:
+		# The tyre picked for one car is not the other car's call.
+		_last_car_id = car.id
+		pit_compound = -1
 	pace_row.set_active(car.pace_mode)
 	fuel_row.set_active(car.fuel_mode)
 	ers_row.set_active(car.ers_mode)
@@ -572,11 +582,13 @@ func refresh() -> void:
 	wheel.set_compound(pit_compound + 1, false)
 	wheel.armed = cancelling
 	wheel.speed_kmh = car.speed_kmh()
-	wheel.auto_hint = GtForecast.recommended_compound(race.weather.track_water_pct, race.weather.rain_intensity)
+	wheel.auto_hint = GtForecast.auto_compound(car, race.weather.track_water_pct)
 	_update_gauges(car)
 	_update_window(car)
 	if _hover_kind == "":
 		forecast_label.text = _forecast_text(car)
+	else:
+		_refresh_hover()
 
 
 ## One verdict per option of the three faders, kept for the tooltips; marks, pills and big numbers follow.
