@@ -21,6 +21,7 @@ const BRAKE_STORY: float = 0.5
 const CRITICAL_TEMP: float = 125.0
 const STRESS_STORY: float = 80.0
 const POP_TEXT: Dictionary = {"brake": "GUOOO!!", "shift": "KACHA!", "drs": "VWOOOM!", "tyre": "JIRI JIRI", "ers": "DON!!"}
+const TYPE_CPS: float = 42.0
 const WHEEL_CODE: Array[String] = ["FL", "FR", "RL", "RR"]
 
 var car_id: int = -1
@@ -45,16 +46,22 @@ var stress: float = 0.0
 var confidence: float = 1.0
 var heart_rate: float = 125.0
 var damage: float = 0.0
+var fuel: float = 1.0 # laps of fuel left over the race length, 0..1
 var caption: String = ""
+## Characters of the caption shown so far (typewriter); restarts when the story changes.
+var caption_chars: float = 0.0
 ## {"text": String, "kind": String, "born": float (clock)}, oldest first, at most MAX_POPS.
 var pops: Array[Dictionary] = []
 var clock: float = 0.0
+## Clock value of the last upshift (the gear numeral kicks for 0.3 s after it).
+var shift_time: float = -10.0
 
 var _prev: Dictionary = {}
+var _typed: String = ""
 
 
 ## Reads one sample from the car. A different car starts with fresh traces, no pops and no edge memory.
-func update(car: GtCar, _laps: int) -> void:
+func update(car: GtCar, laps: int) -> void:
 	var fresh: bool = car.id != car_id
 	if fresh:
 		car_id = car.id
@@ -90,13 +97,18 @@ func update(car: GtCar, _laps: int) -> void:
 	confidence = clampf(car.driver_confidence / 100.0, 0.0, 1.0)
 	heart_rate = maxf(car.driver_heart_rate, 0.0)
 	damage = clampf(car.damage / 100.0, 0.0, 1.0)
+	fuel = clampf(car.fuel / maxf(car.fuel_burn_rate, 0.01) / float(maxi(laps, 1)), 0.0, 1.0)
 	caption = caption_for(car)
+	if caption != _typed:
+		_typed = caption
+		caption_chars = 0.0
 	_raise_pops(car)
 
 
 ## Advances the animation clock and drops onomatopoeia older than POP_LIFETIME_S.
 func advance(delta: float) -> void:
 	clock += delta
+	caption_chars = minf(float(caption.length()), caption_chars + TYPE_CPS * delta)
 	for index: int in range(pops.size() - 1, -1, -1):
 		if clock - float(pops[index]["born"]) > POP_LIFETIME_S:
 			pops.remove_at(index)
@@ -144,13 +156,17 @@ func _raise_pops(car: GtCar) -> void:
 		if overtaking and not bool(_prev["overtaking"]):
 			_add_pop("ers")
 		var was_critical: Array = _prev["critical"]
+		var newly_critical: bool = false
 		for index: int in range(critical.size()):
-			if critical[index] and not bool(was_critical[index]):
-				_add_pop("tyre")
+			newly_critical = newly_critical or (critical[index] and not bool(was_critical[index]))
+		if newly_critical:
+			_add_pop("tyre") # one call-out per sample, even when two tyres cross together
 	_prev = {"braking": braking, "gear": car.gear, "drs": car.drs_active, "overtaking": overtaking, "critical": critical}
 
 
 func _add_pop(kind: String) -> void:
+	if kind == "shift":
+		shift_time = clock
 	pops.append({"text": String(POP_TEXT[kind]), "kind": kind, "born": clock})
 	while pops.size() > MAX_POPS:
 		pops.pop_front()

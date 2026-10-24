@@ -129,6 +129,7 @@ func bind(p_world: Node3D) -> void:
 	deck.set_accent(style.accent, style.on_accent)
 	drawer = TelemetryDrawer.new()
 	drawer.name = "TelemetryDrawer"
+	drawer.style = style
 	stage.add_child(drawer)
 	drawer.position = Vector2(1598.0, 372.0)
 	_build_card()

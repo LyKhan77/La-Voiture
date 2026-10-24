@@ -261,22 +261,22 @@ func _test_drawer() -> void:
 	car.driver_confidence = 30.0
 	hud.refresh_all()
 	var drawer: TelemetryDrawer = hud.drawer
-	check(drawer.gear_label.text == "5" and drawer.speed_label.text == "252 KM/H" and drawer.title.text.contains(car.code) and drawer.rpm.lit_blocks() == drawer.rpm.count and drawer.speed_bar.lit_blocks() == 16,
-		"telemetry: gear box %s, speed bar %d of 20 blocks (%s), shift lights full at the limiter" % [drawer.gear_label.text, drawer.speed_bar.lit_blocks(), drawer.speed_label.text])
-	check(drawer.drs_label.get_theme_color("font_color") == T.INK_BORDER_BLACK and (drawer.drs_label.get_theme_stylebox("normal") as StyleBoxFlat).bg_color == T.ACCENT_ELECTRIC_CYAN,
-		"telemetry: the DRS chip lights cyan while the wing is open")
-	check(drawer.pedals.throttle[TelemetryWidgets.PedalTrace.SAMPLES - 1] == 1.0 and drawer.pedals.brake[TelemetryWidgets.PedalTrace.SAMPLES - 1] == 0.0
-			and drawer.gball.trail.size() >= 1 and drawer.gball.trail[drawer.gball.trail.size() - 1] == Vector2(2.4, -1.5),
-		"telemetry: the pedal trace and the G box record the live throttle, brake and G samples")
-	check(drawer.tyres.blown == GtTypes.Wheel.FL and drawer.tyres.heat_of(0) == T.ACCENT_ANIME_CRIMSON and drawer.tyres.heat_of(1) == T.ACCENT_ANIME_CRIMSON
-			and drawer.tyres.heat_of(3) == T.ACCENT_ACID_LIME and drawer.tyres.blisters[1] == 40.0,
-		"telemetry: the tyre matrix paints a blown tyre and an overheated one crimson, a healthy one lime, and carries the blister flag")
-	check(drawer.fuel_stage_label.text.contains("LIMP") and drawer.fuel_delta_label.text.ends_with(" L") and drawer.fuel_bar.marker >= 0.0
-			and drawer.ers.chevron_count() == 3 and drawer.ers.charge == 0.55 and drawer.mood.stress == 0.8 and drawer.mood.confidence == 0.3 and drawer.damage_bar.invert_scale,
-		"telemetry: fuel stage with the margin to the flag, ERS charge with three overtake chevrons, stress and confidence on one diverging bar")
+	var state: TelemetryState = drawer.state
+	check(state.gear == 5 and roundi(state.speed_kmh) == 252 and state.header_text.contains(car.code) and is_equal_approx(state.rpm, 1.0) and state.limiter,
+		"telemetry: gear %d, %d km/h and the shift lights full at the limiter (%s)" % [state.gear, roundi(state.speed_kmh), state.header_text])
+	check(state.drs == 2,
+		"telemetry: the DRS chip reads open while the wing is open")
+	check(state.throttle[state.throttle.size() - 1] == 1.0 and state.brake[state.brake.size() - 1] == 0.0
+			and state.g_trail.size() >= 1 and state.g_trail[state.g_trail.size() - 1] == Vector2(2.4, -1.5),
+		"telemetry: the pedal trace and the G trace record the live throttle, brake and G samples")
+	check(state.blown == GtTypes.Wheel.FL and state.heat_tint[0] == T.ACCENT_ANIME_CRIMSON and state.heat_tint[1] == T.ACCENT_ANIME_CRIMSON
+			and state.heat_tint[3] == T.ACCENT_ACID_LIME and state.blister[1] == 40.0,
+		"telemetry: a blown tyre and an overheated one are crimson, a healthy one lime, and the blister flag is carried")
+	check(state.ers_mode == GtTypes.ErsMode.OVERTAKE and state.ers_charge == 0.55 and state.stress == 0.8 and state.confidence == 0.3,
+		"telemetry: ERS overtake with its charge, stress and confidence on one pair of bars")
 	var rival: GtCar = race.cars[0] if race.cars[0] != car else race.cars[1]
 	drawer.show_car(rival, race.laps)
-	var cleared: bool = drawer.gball.trail.size() == 1
+	var cleared: bool = state.g_trail.size() == 1
 	drawer.show_car(car, race.laps)
 	car.is_punctured = false
 	car.punctured_wheel = -1
@@ -295,7 +295,7 @@ func _test_drawer() -> void:
 	check(cleared and shown and folded and drawer.visible, "telemetry: another car starts with fresh traces, T hides and shows the drawer")
 	check(TelemetryDrawer.temp_tint(60.0) == T.ACCENT_ELECTRIC_CYAN and TelemetryDrawer.temp_tint(95.0) == T.ACCENT_ACID_LIME and TelemetryDrawer.temp_tint(118.0) == T.ACCENT_CYBER_YELLOW and TelemetryDrawer.temp_tint(130.0) == T.ACCENT_ANIME_CRIMSON,
 		"telemetry: tyre temperature colour is cold cyan, ideal lime, hot yellow, critical crimson")
-	check(TelemetryWidgets.PulseTrace.beat(0.35) > 0.9 and absf(TelemetryWidgets.PulseTrace.beat(0.0)) < 0.001 and TelemetryWidgets.PulseTrace.beat(0.66) > 0.2,
+	check(TelemetryDrawer.heartbeat(0.35) > 0.9 and absf(TelemetryDrawer.heartbeat(0.0)) < 0.001 and TelemetryDrawer.heartbeat(0.66) > 0.2,
 		"telemetry: the heartbeat trace has its QRS spike and T wave")
 
 

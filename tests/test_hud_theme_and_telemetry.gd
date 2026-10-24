@@ -50,6 +50,8 @@ func _run() -> void:
 	_test_engineer_colour()
 	_test_hud_accent()
 	_test_telemetry_state()
+	_test_caption_typing()
+	await _test_drawer_theme_and_draw()
 	race.dispose()
 	world.queue_free()
 	await process_frame
@@ -170,8 +172,15 @@ func _test_telemetry_state() -> void:
 		"telemetry state: a blown and an overheated tyre are crimson, a healthy one lime, and the blister flag is carried")
 	check(state.ers_mode == GtTypes.ErsMode.OVERTAKE and is_equal_approx(state.ers_charge, 0.55) and is_equal_approx(state.stress, 0.8) and is_equal_approx(state.confidence, 0.3),
 		"telemetry state: ERS charge, stress and confidence are 0..1")
+	car.fuel = 30.0
+	car.fuel_burn_rate = 3.0
+	state.update(car, 20)
+	check(is_equal_approx(state.fuel, 0.5), "telemetry state: the tank level is the laps of fuel left over the race length (%.2f)" % state.fuel)
+	car.fuel = 0.0
+	state.update(car, 20)
+	var empty_tank: bool = state.fuel == 0.0
 	state.update(rival, race.laps)
-	check(state.g_trail.size() == 1 and state.pops.is_empty() and state.car_id == rival.id,
+	check(empty_tank and state.g_trail.size() == 1 and state.pops.is_empty() and state.car_id == rival.id,
 		"telemetry state: another car starts with fresh traces and no onomatopoeia")
 
 	_calm(car)
@@ -207,6 +216,15 @@ func _test_telemetry_state() -> void:
 		"telemetry state: ERS overtake and a tyre passing 125 C raise their own onomatopoeia")
 
 	_calm(car)
+	var both := TelemetryState.new()
+	both.update(car, race.laps)
+	car.wheel_temp[2] = 130.0
+	car.wheel_temp[3] = 128.0
+	both.update(car, race.laps)
+	check(_pop_kinds(both) == ["tyre"],
+		"telemetry state: two tyres passing 125 C on the same sample raise one onomatopoeia, not two (%s)" % [_pop_kinds(both)])
+
+	_calm(car)
 	var calm_caption: String = TelemetryState.caption_for(car)
 	car.drs_active = true
 	var drs_caption: String = TelemetryState.caption_for(car)
@@ -235,4 +253,67 @@ func _test_telemetry_state() -> void:
 	extreme.update(car, race.laps)
 	check(extreme.caption != "" and extreme.heart_rate >= 0.0 and extreme.stress == 0.0 and extreme.confidence == 1.0,
 		"telemetry state: a DNF car and extreme driver values still give a valid view")
+	_calm(car)
+
+
+# --- the drawer ------------------------------------------------------------------------------------------------------
+
+func _test_drawer_theme_and_draw() -> void:
+	var drawer: TelemetryDrawer = hud.drawer
+	check(drawer.size == Vector2(312.0, 496.0) and drawer.position == Vector2(1598.0, 372.0),
+		"drawer: the layout box is unchanged")
+	var car: GtCar = mine[0]
+	_calm(car)
+	world.followed_id = car.id
+	hud.refresh_all()
+	await process_frame
+	var drawn: int = drawer.draw_count
+	check(drawn > 0, "drawer: it paints from its state in _draw (%d draws)" % drawn)
+	var samples: int = drawer.state.g_trail.size()
+	hud.handle_key(KEY_T)
+	hud.refresh_all()
+	await process_frame
+	await process_frame
+	var asleep: bool = not drawer.visible and drawer.draw_count == drawn and drawer.state.g_trail.size() == samples
+	hud.handle_key(KEY_T)
+	hud.refresh_all()
+	await process_frame
+	check(asleep and drawer.visible and drawer.draw_count > drawn and drawer.state.g_trail.size() == samples + 1,
+		"drawer: hidden it neither paints nor collects samples, shown again it resumes")
+	var livery: Color = Liveries.color_for(race.player_team_id)
+	var follows: bool = drawer.accent_color() == livery
+	hud.set_team_accent(2)
+	hud.refresh_all()
+	check(follows and drawer.accent_color() == Color("#FF1E56"),
+		"drawer: the skin follows the team accent")
+	check(TelemetryDrawer.temp_tint(60.0) == T.ACCENT_ELECTRIC_CYAN and TelemetryDrawer.temp_tint(95.0) == T.ACCENT_ACID_LIME and TelemetryDrawer.temp_tint(118.0) == T.ACCENT_CYBER_YELLOW and TelemetryDrawer.temp_tint(130.0) == T.ACCENT_ANIME_CRIMSON and drawer.state.heat_tint[3] == T.ACCENT_ACID_LIME,
+		"drawer: tyre heat colours stay fixed whatever the team colour")
+	hud.set_team_accent(race.player_team_id)
+	var rival: GtCar = race.cars[0] if race.cars[0] != car else race.cars[1]
+	drawer.show_car(rival, race.laps)
+	var fresh: bool = drawer.state.g_trail.size() == 1
+	drawer.show_car(car, race.laps)
+	check(fresh and drawer.state.car_id == car.id, "drawer: another car starts with fresh traces")
+	check(TelemetryDrawer.heartbeat(0.35) > 0.9 and absf(TelemetryDrawer.heartbeat(0.0)) < 0.001 and TelemetryDrawer.heartbeat(0.66) > 0.2,
+		"drawer: the heartbeat trace keeps its QRS spike and T wave")
+
+
+func _test_caption_typing() -> void:
+	var car: GtCar = mine[0]
+	_calm(car)
+	var state := TelemetryState.new()
+	state.update(car, race.laps)
+	var start: float = state.caption_chars
+	state.advance(0.5)
+	var half: bool = is_equal_approx(state.caption_chars, 21.0)
+	state.advance(5.0)
+	var full: bool = is_equal_approx(state.caption_chars, float(state.caption.length()))
+	car.brake = 0.8
+	state.update(car, race.laps)
+	var retyped: bool = state.caption_chars == 0.0
+	car.brake = 0.0
+	car.gear += 1
+	state.update(car, race.laps)
+	check(start == 0.0 and half and full and retyped and is_equal_approx(state.shift_time, state.clock),
+		"telemetry state: the caption types at 42 characters per second and restarts when the story changes, an upshift stamps shift_time")
 	_calm(car)
