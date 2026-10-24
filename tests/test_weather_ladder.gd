@@ -109,6 +109,17 @@ func _test_outlook() -> void:
 			and (GtWeatherOutlook.summary(short_race)["tyre_change"] as Dictionary).is_empty() and int(GtWeatherOutlook.summary(short_race)["box_k"]) == 0,
 		"outlook: laps after the chequered flag never ask for a tyre change")
 
+	# Review: a box call on the chequered lap is no use, so a change that only fits then is not offered.
+	var last_rain: Array = [0, 0, 0, 0, 0, 0]
+	var last_water: Array = [3, 3, 3, 70, 70, 70]
+	var final_weather: GtWeather = _weather(0.0, 3.0, _forecast(last_rain, last_water))
+	var final_rows: Array[Dictionary] = GtWeatherOutlook.ahead(final_weather, 3, 3, 4)
+	var final_summary: Dictionary = GtWeatherOutlook.summary(final_rows)
+	var roomy: Dictionary = GtWeatherOutlook.summary(GtWeatherOutlook.ahead(final_weather, 3, 3, 5))
+	check(not bool(final_rows[1]["box_ok"]) and (final_summary["tyre_change"] as Dictionary).is_empty() and int(final_summary["box_k"]) == 0
+				and int(final_summary["state_change"]["k"]) == 1 and int(roomy["box_k"]) == 1,
+		"outlook: no tyre change is offered for a box call on the chequered lap")
+
 	var late: Array[Dictionary] = GtWeatherOutlook.ahead(_case_a(), 12, 6)
 	var nothing: Array[Dictionary] = []
 	var bare: Array[Dictionary] = GtWeatherOutlook.ahead(_weather(0.0, 3.0, nothing), 4, 5)
@@ -304,6 +315,14 @@ func _test_hud() -> void:
 	hud.refresh_all()
 	check(rain_window == "BOX WINDOW L+3 -> INTERMEDIATE" and hud.deck.window_label.text == "NO TYRE CHANGE" and (hud.weather_status()["forecast"] as Array).size() == 5,
 		"hud: the deck's window card and the weather deck read the same outlook (%s)" % rain_window)
+
+	var far: Array[Dictionary] = []
+	for k: int in range(1, 13):
+		far.append({"lap": lead + k, "rain_intensity": 0.0 if k < 7 else 0.9, "water_pct": 3.0 if k < 7 else 70.0, "cloud_cover": 0.3, "wind_speed": 10.0})
+	weather.forecast = far
+	hud.refresh_all()
+	check(hud.deck.window_label.text == "BOX WINDOW L+6 -> WET" and bool(hud.weather_widget.columns[7]["crossover"]) and hud.weather_widget.columns[6]["tag"] == "BOX",
+		"hud: the window card looks as far ahead as the chip and the weather deck do (%s)" % hud.deck.window_label.text)
 
 	weather.forecast = saved
 	weather.rain_intensity = saved_rain

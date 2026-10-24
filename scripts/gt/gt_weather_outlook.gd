@@ -62,12 +62,14 @@ static func ahead(weather: GtWeather, lap: int, count: int, race_laps: int = 0) 
 			"k": k, "lap": lap + k, "rain": rain, "water": water,
 			"tyre": GtForecast.recommended_compound(water, rain), "state": state_of(rain, water),
 			"past_finish": race_laps > 0 and lap + k > race_laps,
+			# Boxing on the chequered lap is no use, so a change that only fits then is not a candidate.
+			"box_ok": race_laps == 0 or lap + maxi(1, k - 1) < race_laps,
 		})
 	return rows
 
 
 ## {"now", "tyre_change", "state_change" ({} when none), "box_k" (0 when none), "confidence"}. Rows after the
-## flag and the live row are not candidates for a change.
+## flag, the live row, and tyre changes whose box lap would be the chequered lap are not candidates.
 static func summary(rows: Array[Dictionary]) -> Dictionary:
 	var result: Dictionary = {"now": {}, "tyre_change": {}, "state_change": {}, "box_k": 0, "confidence": STABLE_CONFIDENCE}
 	if rows.is_empty():
@@ -77,7 +79,7 @@ static func summary(rows: Array[Dictionary]) -> Dictionary:
 	for row: Dictionary in rows:
 		if int(row["k"]) == 0 or bool(row["past_finish"]):
 			continue
-		if (result["tyre_change"] as Dictionary).is_empty() and int(row["tyre"]) != int(now["tyre"]):
+		if (result["tyre_change"] as Dictionary).is_empty() and int(row["tyre"]) != int(now["tyre"]) and bool(row["box_ok"]):
 			result["tyre_change"] = row
 		if (result["state_change"] as Dictionary).is_empty() and int(row["state"]) != int(now["state"]):
 			result["state_change"] = row

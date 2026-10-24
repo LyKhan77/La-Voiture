@@ -666,7 +666,7 @@ func _forecast_text(car: GtCar) -> String:
 ## BOX WINDOW: the first lap the weather asks for different tyres than the track does now (the weather deck
 ## reads the same GtWeatherOutlook), with a chip per coming lap showing the tyre it asks for.
 func _update_window(_car: GtCar) -> void:
-	var rows: Array[Dictionary] = GtWeatherOutlook.ahead(race.weather, _leader_lap(), WINDOW_LAPS, race.laps)
+	var rows: Array[Dictionary] = GtWeatherOutlook.ahead(race.weather, _leader_lap(), GtWeatherOutlook.CHART_LAPS, race.laps)
 	var change: Dictionary = GtWeatherOutlook.summary(rows)["tyre_change"]
 	for index: int in range(_window_chips.size()):
 		var chip: ColorRect = _window_chips[index]
