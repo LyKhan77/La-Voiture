@@ -40,6 +40,9 @@ var collapse_button: Button
 var info_label: Label
 var radio_label: Label
 var desk_status: Label
+## The chamfered header plate and its title, repainted when the team accent changes.
+var header_shape: ColorRect
+var header_title: Label
 
 var _world: Node3D
 var _body: Control
@@ -58,6 +61,8 @@ func _init() -> void:
 	add_child(header)
 	header.position = Vector2(6.0, 6.0)
 	header.size = Vector2(SIZE_OPEN.x - 12.0, 28.0)
+	header_shape = header.get_child(0) as ColorRect
+	header_title = header.get_child(1) as Label
 	_body = Control.new()
 	_body.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_body)
@@ -68,6 +73,12 @@ func _init() -> void:
 	_build_pit()
 	_build_tactics()
 	_build_radio()
+
+
+## The team accent skins the header plate; `on_accent` is the type colour that stays readable on it.
+func set_accent(accent: Color, on_accent: Color) -> void:
+	(header_shape.material as ShaderMaterial).set_shader_parameter("fill_color", accent)
+	header_title.add_theme_color_override("font_color", on_accent)
 
 
 func bind(p_world: Node3D) -> void:

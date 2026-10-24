@@ -22,6 +22,8 @@ const RadioScene := preload("res://scenes/pit_wall/anime_radio_cutin.tscn")
 const PORTRAIT := preload("res://assets/original-manga-racing-driver-portrait-he-cmvgxpt8.png")
 const ENGINEER_PORTRAIT := preload("res://assets/manga-race-engineer-portrait.png")
 const CutInScript := preload("res://scripts/ui/anime_radio_cutin.gd")
+const GarageStyleScript := preload("res://scripts/ui/manga/garage_style.gd")
+const Liveries := preload("res://scripts/car/team_liveries.gd")
 const RadioAudioScript := preload("res://scripts/audio/radio_audio_director.gd")
 
 const STAGE := Vector2(1920.0, 1080.0)
@@ -65,6 +67,11 @@ var tower: Control
 var radar: Control
 var weather_widget: WeatherRadarWidget
 var drawer: TelemetryDrawer
+## Team accent of the HUD skin (logo, marquee, deck header, drawer): the player team's livery colour.
+var style: GarageStyleScript
+var logo_label: Label
+var marquee_bar: ColorRect
+var marquee_texts: Array[Label] = []
 var deck: TacticalDeck
 ## Driver calls cut in at the bottom left, the pit wall engineer at the bottom right.
 var radio: CanvasLayer
@@ -104,6 +111,8 @@ var _tower_column: Label
 func bind(p_world: Node3D) -> void:
 	world = p_world
 	race = p_world.race
+	style = GarageStyleScript.new()
+	style.set_accent(Liveries.color_for(race.player_team_id))
 	stage = Control.new()
 	stage.name = "Stage"
 	stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -117,12 +126,14 @@ func bind(p_world: Node3D) -> void:
 	deck.position = Vector2(16.0, 880.0)
 	deck.bind(world)
 	deck.car_picked.connect(_on_car_picked)
+	deck.set_accent(style.accent, style.on_accent)
 	drawer = TelemetryDrawer.new()
 	drawer.name = "TelemetryDrawer"
 	stage.add_child(drawer)
 	drawer.position = Vector2(1598.0, 372.0)
 	_build_card()
 	_build_marquee()
+	style.changed.connect(_on_style_changed)
 	_build_speedlines()
 	tape = CautionTape.new()
 	tape.name = "CautionTape"
@@ -192,7 +203,7 @@ func _text(parent: Control, text: String, at: Vector2, font_size: int, color: Co
 func _build_ribbon() -> void:
 	var ribbon: Control = _panel(Vector2(16.0, 12.0), Vector2(1888.0, 60.0))
 	ribbon.name = "ZoneARibbon"
-	_text(ribbon, "LA VOITURE", Vector2(20.0, 8.0), 32, T.ACCENT_ACID_LIME, UI.DISPLAY)
+	logo_label = _text(ribbon, "LA VOITURE", Vector2(20.0, 8.0), 32, style.accent, UI.DISPLAY)
 	lap_label = _text(ribbon, "LAP 01/%d" % race.laps, Vector2(236.0, 14.0), 24, T.TEXT_PRIMARY, UI.HEADER)
 	flag_label = _text(ribbon, "", Vector2(420.0, 12.0), 28, T.ACCENT_ACID_LIME, UI.DISPLAY)
 	flag_label.size = Vector2(540.0, 36.0)
@@ -268,19 +279,21 @@ func _build_card() -> void:
 func _build_marquee() -> void:
 	var bar := ColorRect.new()
 	bar.name = "RaceControlMarquee"
-	bar.color = T.ACCENT_ACID_LIME
+	bar.color = style.accent
+	marquee_bar = bar
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	stage.add_child(bar)
 	bar.position = Vector2(0.0, 1032.0)
 	bar.size = Vector2(1920.0, 48.0)
-	_text(bar, "RACE CONTROL", Vector2(32.0, 10.0), 23, T.INK_BORDER_BLACK, UI.HEADER)
+	marquee_texts.append(_text(bar, "RACE CONTROL", Vector2(32.0, 10.0), 23, style.on_accent, UI.HEADER))
 	var clip := Control.new()
 	clip.clip_contents = true
 	clip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bar.add_child(clip)
 	clip.position = Vector2(226.0, 0.0)
 	clip.size = Vector2(TICKER_VIEW_W, 48.0)
-	ticker = _text(clip, "LIVE TIMING ONLINE   //   GREEN FLAG   //   %d LAPS   //   [B] REQUEST BOX  [ESC] CANCEL BOX  [M] DECK  [T] TELEMETRY  [TAB] TOWER  [N] NEXT CAR  [E] ERS  [ ] PACE  [H] HIDE" % race.laps, Vector2(0.0, 12.0), 20, T.INK_BORDER_BLACK, UI.RADIO)
+	ticker = _text(clip, "LIVE TIMING ONLINE   //   GREEN FLAG   //   %d LAPS   //   [B] REQUEST BOX  [ESC] CANCEL BOX  [M] DECK  [T] TELEMETRY  [TAB] TOWER  [N] NEXT CAR  [E] ERS  [ ] PACE  [H] HIDE" % race.laps, Vector2(0.0, 12.0), 20, style.on_accent, UI.RADIO)
+	marquee_texts.append(ticker)
 
 
 func _build_speedlines() -> void:
@@ -423,6 +436,19 @@ func _on_car_picked(car_id: int) -> void:
 
 func _on_rate(index: int) -> void:
 	world.set_time_scale(TIME_SCALES[index])
+
+
+## Switches the HUD skin to another team's livery colour (data colours never follow it).
+func set_team_accent(team_id: int) -> void:
+	style.set_accent(Liveries.color_for(team_id))
+
+
+func _on_style_changed() -> void:
+	logo_label.add_theme_color_override("font_color", style.accent)
+	marquee_bar.color = style.accent
+	for label: Label in marquee_texts:
+		label.add_theme_color_override("font_color", style.on_accent)
+	deck.set_accent(style.accent, style.on_accent)
 
 
 func _on_accept() -> void:

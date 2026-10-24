@@ -48,6 +48,7 @@ func _run() -> void:
 	race.step_ticks(200)
 	hud.refresh_all()
 	_test_engineer_colour()
+	_test_hud_accent()
 	race.dispose()
 	world.queue_free()
 	await process_frame
@@ -78,3 +79,30 @@ func _test_engineer_colour() -> void:
 	style.set_accent(Color("#CCFF00"))
 	check(blue_engineer == pink and style.engineer == cyan,
 		"style: set_accent keeps the engineer colour in step with the accent")
+
+
+# --- the team accent skins the HUD ---------------------------------------------------------------------------------
+
+func _skin_matches(accent: Color, on_accent: Color) -> bool:
+	var texts_ok: bool = true
+	for label: Label in hud.marquee_texts:
+		texts_ok = texts_ok and label.get_theme_color("font_color") == on_accent
+	var fill: Color = (hud.deck.header_shape.material as ShaderMaterial).get_shader_parameter("fill_color")
+	return hud.style.accent == accent and hud.logo_label.get_theme_color("font_color") == accent and hud.marquee_bar.color == accent 		and texts_ok and fill == accent and hud.deck.header_title.get_theme_color("font_color") == on_accent
+
+
+func _test_hud_accent() -> void:
+	var team: int = race.player_team_id
+	var livery: Color = Liveries.color_for(team)
+	check(_skin_matches(livery, hud.style.on_accent) and not hud.marquee_texts.is_empty(),
+		"theme: the HUD skin starts in the player team's livery colour")
+	hud.set_team_accent(2)
+	check(_skin_matches(Color("#FF1E56"), Color.WHITE),
+		"theme: switching to a crimson team repaints the skin and flips the type on it to white")
+	hud.set_team_accent(7)
+	check(_skin_matches(Color("#F4F5F7"), T.INK_BORDER_BLACK),
+		"theme: a light team colour keeps ink type")
+	hud.set_team_accent(2)
+	check(RaceHud.burn_color(0.1) == T.ACCENT_ANIME_CRIMSON and RaceHud.burn_color(1.0) == T.ACCENT_CYBER_YELLOW and TelemetryDrawer.temp_tint(95.0) == T.ACCENT_ACID_LIME and TelemetryDrawer.temp_tint(60.0) == T.ACCENT_ELECTRIC_CYAN,
+		"theme: data colours do not follow the team colour")
+	hud.set_team_accent(team)
