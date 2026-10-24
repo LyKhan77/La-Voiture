@@ -19,6 +19,11 @@ const STABLE_CONFIDENCE: float = 0.95
 const CONE_WIDTH_PCT: float = 38.0
 
 
+## The lap the leader is on, which GtWeather.forecast is indexed by.
+static func leader_lap(race: GtRace, track_length_m: float) -> int:
+	return maxi(1, floori(1.0 + maxf(0.0, race.standings()[0].s) / track_length_m))
+
+
 ## 0 dry, 1 drizzle, 2 heavy rain, 3 drying (wet track, no rain).
 static func state_of(rain: float, water_pct: float) -> int:
 	if rain > HEAVY_RAIN:

@@ -477,10 +477,15 @@ func verdict_for(kind: String, index: int) -> Dictionary:
 	return GtForecast.verdict(kind, index, car, GtForecast.laps_left(race, car))
 
 
-func _upcoming(car: GtCar) -> Array[Dictionary]:
+func _leader_lap() -> int:
+	return GtWeatherOutlook.leader_lap(race, _world.track.length)
+
+
+func _upcoming(_car: GtCar) -> Array[Dictionary]:
 	var found: Array[Dictionary] = []
+	var lead: int = _leader_lap()
 	for entry: Dictionary in race.weather.forecast:
-		if int(entry["lap"]) > car.lap:
+		if int(entry["lap"]) > lead:
 			found.append(entry)
 			if found.size() >= WINDOW_LAPS:
 				break
@@ -658,28 +663,20 @@ func _forecast_text(car: GtCar) -> String:
 		GtForecast.fuel_margin_laps(car, car.pace_mode, car.fuel_mode, laps), roundi(car.ers_battery)]
 
 
-## BOX WINDOW: the first lap the weather asks for different tyres than the track does now, with a chip per
-## coming lap showing the tyre it asks for. 3d replaces this card with the full ladder.
-func _update_window(car: GtCar) -> void:
-	var weather: GtWeather = race.weather
-	var upcoming: Array[Dictionary] = _upcoming(car)
-	var now: int = GtForecast.recommended_compound(weather.track_water_pct, weather.rain_intensity)
-	var change_at: int = -1
-	var change_to: int = now
+## BOX WINDOW: the first lap the weather asks for different tyres than the track does now (the weather deck
+## reads the same GtWeatherOutlook), with a chip per coming lap showing the tyre it asks for.
+func _update_window(_car: GtCar) -> void:
+	var rows: Array[Dictionary] = GtWeatherOutlook.ahead(race.weather, _leader_lap(), WINDOW_LAPS, race.laps)
+	var change: Dictionary = GtWeatherOutlook.summary(rows)["tyre_change"]
 	for index: int in range(_window_chips.size()):
 		var chip: ColorRect = _window_chips[index]
-		chip.visible = index < upcoming.size()
-		if index >= upcoming.size():
-			continue
-		var wanted: int = GtForecast.recommended_compound(float(upcoming[index]["water_pct"]), float(upcoming[index]["rain_intensity"]))
-		chip.color = GtTypes.COMPOUND_COLOR[wanted]
-		if wanted != now and change_at < 0:
-			change_at = index
-			change_to = wanted
-	if change_at >= 0:
-		window_label.text = "BOX WINDOW L+%d -> %s" % [maxi(1, change_at), GtTypes.COMPOUND_NAME[change_to]]
+		chip.visible = index + 1 < rows.size() and not bool(rows[index + 1]["past_finish"])
+		if chip.visible:
+			chip.color = GtTypes.COMPOUND_COLOR[int(rows[index + 1]["tyre"])]
+	if not change.is_empty():
+		window_label.text = "BOX WINDOW L+%d -> %s" % [maxi(1, int(change["k"]) - 1), GtTypes.COMPOUND_NAME[int(change["tyre"])]]
 	else:
-		window_label.text = "NO TYRE CHANGE" if not upcoming.is_empty() else "NO TYRE CHANGE\nweather stable"
+		window_label.text = "NO TYRE CHANGE" if not race.weather.forecast.is_empty() else "NO TYRE CHANGE\nweather stable"
 
 
 ## Crimson while the button cancels a call, its own look otherwise.

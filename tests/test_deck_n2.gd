@@ -342,15 +342,16 @@ func _test_deck_layout_and_flow() -> void:
 	var saved_rain: float = weather.rain_intensity
 	weather.track_water_pct = 0.0
 	weather.rain_intensity = 0.0
+	var lead: int = GtWeatherOutlook.leader_lap(race, world.track.length)
 	var coming: Array[Dictionary] = []
 	for index: int in range(5):
-		coming.append({"lap": car.lap + 1 + index, "rain_intensity": 0.0 if index < 3 else 0.9, "water_pct": 5.0 if index < 3 else 60.0})
+		coming.append({"lap": lead + 1 + index, "rain_intensity": 0.0 if index < 3 else 0.9, "water_pct": 5.0 if index < 3 else 60.0})
 	weather.forecast = coming
 	deck.refresh()
 	var rain_text: String = deck.window_label.text
 	var dry: Array[Dictionary] = []
 	for index: int in range(5):
-		dry.append({"lap": car.lap + 1 + index, "rain_intensity": 0.0, "water_pct": 5.0})
+		dry.append({"lap": lead + 1 + index, "rain_intensity": 0.0, "water_pct": 5.0})
 	weather.forecast = dry
 	deck.refresh()
 	check(rain_text.contains("BOX WINDOW") and rain_text.contains("WET") and deck.window_label.text.contains("NO TYRE CHANGE"),

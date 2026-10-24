@@ -48,6 +48,7 @@ func _run() -> void:
 	_test_outlook()
 	_test_chip()
 	_test_deck()
+	_test_hud()
 	race.dispose()
 	world.queue_free()
 	await process_frame
@@ -239,3 +240,72 @@ func _test_deck() -> void:
 	deck.set_open(false)
 	check(animated and still and live and not deck.is_processing(), "deck: the bracket blinks only while open, and reduce motion or closing stops it")
 	deck.queue_free()
+
+
+# --- HUD wiring ------------------------------------------------------------------------------------------------------
+
+## The 12 coming laps relative to the leader: dry for 3, drizzle (water 30) at L+4, a downpour (water 70) from L+5.
+func _hud_forecast(lead: int) -> Array[Dictionary]:
+	var rows: Array[Dictionary] = []
+	for k: int in range(1, 13):
+		var rain: float = 0.0 if k < 4 else (0.3 if k == 4 else 0.9)
+		var water: float = 3.0 if k < 4 else (30.0 if k == 4 else 70.0)
+		rows.append({"lap": lead + k, "rain_intensity": rain, "water_pct": water, "cloud_cover": 0.3, "wind_speed": 10.0})
+	return rows
+
+
+func _test_hud() -> void:
+	var weather: GtWeather = race.weather
+	var saved: Array[Dictionary] = weather.forecast.duplicate()
+	var saved_rain: float = weather.rain_intensity
+	var saved_water: float = weather.track_water_pct
+	var saved_laps: int = race.laps
+	race.latest_suggestion = {}
+	race.laps = 40
+	var lead: int = hud.leader_lap()
+	weather.forecast = _hud_forecast(lead)
+	weather.rain_intensity = 0.0
+	weather.track_water_pct = 3.0
+	var car: GtCar = mine[0]
+	hud.deck.deck_car_id = car.id
+	hud.deck.pit_compound = -1
+	car.pit_request = -1
+	hud.refresh_all()
+
+	hud.weather_widget.clicked.emit()
+	var opened: bool = hud.weather_deck.is_open
+	var closed_by_key: bool = hud.handle_key(KEY_W) and not hud.weather_deck.is_open
+	hud.handle_key(KEY_W)
+	var reopened: bool = hud.weather_deck.is_open
+	var esc: bool = hud.handle_key(KEY_ESCAPE) and not hud.weather_deck.is_open
+	hud.handle_key(KEY_W)
+	hud.set_shown(false)
+	var hidden_closes: bool = not hud.weather_deck.is_open and not hud.handle_key(KEY_W) and not hud.weather_deck.is_open
+	hud.set_shown(true)
+	check(GtWeatherOutlook.leader_lap(race, world.track.length) == lead and opened and closed_by_key and reopened and esc and hidden_closes,
+		"hud: the chip and W open the weather deck, ESC closes it first, hiding the HUD closes it")
+
+	hud.weather_widget.clicked.emit()
+	var offered: String = hud.weather_deck.action_button.text
+	hud.weather_deck.action_button.pressed.emit()
+	check(offered == "SET TYRES  L+3 > INTERMEDIATE" and hud.deck.pit_compound == GtTypes.Compound.INTERMEDIATE
+			and hud.deck.wheel.compound == 1 + GtTypes.Compound.INTERMEDIATE and hud.deck.tyre_row.active == 1 + GtTypes.Compound.INTERMEDIATE and car.pit_request == -1,
+		"hud: the weather deck picks the tyre for the next box call and does not call the car (%s)" % offered)
+	hud.weather_deck.set_open(false)
+
+	hud.deck.refresh()
+	var rain_window: String = hud.deck.window_label.text
+	var quiet: Array[Dictionary] = []
+	for k: int in range(1, 13):
+		quiet.append({"lap": lead + k, "rain_intensity": 0.0, "water_pct": 3.0, "cloud_cover": 0.3, "wind_speed": 10.0})
+	weather.forecast = quiet
+	hud.refresh_all()
+	check(rain_window == "BOX WINDOW L+3 -> INTERMEDIATE" and hud.deck.window_label.text == "NO TYRE CHANGE" and (hud.weather_status()["forecast"] as Array).size() == 5,
+		"hud: the deck's window card and the weather deck read the same outlook (%s)" % rain_window)
+
+	weather.forecast = saved
+	weather.rain_intensity = saved_rain
+	weather.track_water_pct = saved_water
+	race.laps = saved_laps
+	hud.deck.pit_compound = -1
+	hud.refresh_all()

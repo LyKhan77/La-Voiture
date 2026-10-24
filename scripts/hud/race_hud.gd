@@ -66,6 +66,7 @@ var stage: Control
 var tower: Control
 var radar: Control
 var weather_widget: WeatherRadarWidget
+var weather_deck: WeatherDeck
 var drawer: TelemetryDrawer
 ## Team accent of the HUD skin (logo, marquee, deck header, drawer): the player team's livery colour.
 var style: GarageStyleScript
@@ -132,6 +133,13 @@ func bind(p_world: Node3D) -> void:
 	drawer.style = style
 	stage.add_child(drawer)
 	drawer.position = Vector2(1598.0, 372.0)
+	weather_deck = WeatherDeck.new()
+	weather_deck.name = "WeatherDeck"
+	stage.add_child(weather_deck)
+	weather_deck.position = Vector2(1006.0, 76.0)
+	weather_deck.set_ribbon(world.ribbon, world.ribbon.length_m)
+	weather_deck.tyres_chosen.connect(_on_weather_tyres)
+	weather_widget.clicked.connect(toggle_weather_deck)
 	_build_card()
 	_build_marquee()
 	style.changed.connect(_on_style_changed)
@@ -373,8 +381,12 @@ func handle_key(keycode: Key) -> bool:
 			if not card.visible:
 				return false
 			_on_accept()
+		KEY_W:
+			toggle_weather_deck()
 		KEY_ESCAPE:
-			if card.visible:
+			if weather_deck.is_open:
+				weather_deck.set_open(false)
+			elif card.visible:
 				_on_dismiss()
 			elif _deck_box_called():
 				deck.cancel_box()
@@ -409,6 +421,8 @@ func _deck_box_called() -> bool:
 ## Shows or hides the whole HUD, the radio banner (a layer of its own) included.
 func set_shown(shown: bool) -> void:
 	stage.visible = shown
+	if not shown:
+		weather_deck.set_open(false)
 	radio.visible = shown
 	engineer_radio.visible = shown
 
@@ -691,6 +705,32 @@ func _update_flag_banner() -> void:
 
 func _update_weather() -> void:
 	weather_widget.update_status(weather_status())
+	var weather: GtWeather = race.weather
+	var rows: Array[Dictionary] = GtWeatherOutlook.ahead(weather, leader_lap(), GtWeatherOutlook.CHART_LAPS, race.laps)
+	var summary: Dictionary = GtWeatherOutlook.summary(rows)
+	weather_widget.update_outlook(rows.slice(0, GtWeatherOutlook.LADDER_LAPS), summary, weather.air_temp, weather.track_temp)
+	if weather_deck.is_open:
+		weather_deck.update_outlook(rows, summary, {
+			"air": weather.air_temp, "track": weather.track_temp, "humidity": weather.humidity, "wind_kmh": weather.wind_speed,
+			"wind_dir": weather.wind_direction, "water": weather.track_water_pct, "drying_line": weather.drying_line_pct,
+		})
+
+
+## The chip and [W] open and close the weather deck, which is refreshed as it opens.
+func toggle_weather_deck() -> void:
+	AudioManager.click(self)
+	weather_deck.toggle()
+	if weather_deck.is_open:
+		_update_weather()
+
+
+## The weather deck's button: the engineer's tyre for the next box call, shown on the chips and the wheel.
+func _on_weather_tyres(compound: int, _box_k: int) -> void:
+	deck.pit_compound = compound
+	deck.tyre_row.set_active(compound + 1)
+	deck.wheel.set_compound(compound + 1, true)
+	deck.apply_click_feedback(deck.wheel, "TYRES", 1.1)
+	deck.refresh()
 
 
 ## The GT weather in the shape the pit wall radar widget draws (dry / drizzle / heavy / drying).
@@ -715,4 +755,4 @@ static func weather_state(rain: float, water_pct: float) -> int:
 
 ## The lap the leader is on, which the weather forecast is indexed by.
 func leader_lap() -> int:
-	return maxi(1, floori(1.0 + maxf(0.0, race.standings()[0].s) / world.track.length))
+	return GtWeatherOutlook.leader_lap(race, world.track.length)
