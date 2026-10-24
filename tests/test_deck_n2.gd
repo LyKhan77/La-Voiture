@@ -46,6 +46,7 @@ func _run() -> void:
 	hud.refresh_all()
 	_test_forecast()
 	await _test_widgets()
+	await _test_deck_layout_and_flow()
 	race.dispose()
 	world.queue_free()
 	await process_frame
@@ -236,3 +237,125 @@ func _test_widgets() -> void:
 	tip.hide_tip()
 	check(not tip.visible, "widgets: the tooltip hides")
 	host.queue_free()
+
+
+# --- the deck itself --------------------------------------------------------------------------------------------------
+
+func _test_deck_layout_and_flow() -> void:
+	var deck: TacticalDeck = hud.deck
+	var car: GtCar = mine[0]
+	var saved_laps: int = race.laps
+	race.laps = 30
+	_known(car)
+	car.pit_request = -1
+	deck.deck_car_id = car.id
+	deck.pit_compound = -1
+	deck.refresh()
+
+	var frame := Rect2(Vector2.ZERO, deck.size)
+	var inside: bool = true
+	var parts: Array[Control] = [deck.pace_row, deck.fuel_row, deck.ers_row, deck.pace_gauge, deck.fuel_gauge, deck.ers_gauge,
+		deck.wheel, deck.tyre_row, deck.box_button, deck.tabs[0], deck.tabs[1], deck.window_label.get_parent() as Control]
+	for part: Control in parts:
+		inside = inside and frame.encloses(Rect2(part.position, part.size))
+	var header_ok: bool = true
+	for part: Control in [deck.coach_button, deck.tactic_row, deck.radio_label, deck.collapse_button]:
+		header_ok = header_ok and part.position.y + part.size.y <= 36.0
+	check(deck.position == Vector2(16.0, 880.0) and deck.size == Vector2(1888.0, 140.0) and inside and header_ok,
+		"deck N2: every control sits inside the unchanged 1888x140 box, the header holds COACH, desk, radio and fold")
+
+	deck.pace_row.buttons[GtTypes.PaceMode.ATTACK].pressed.emit()
+	deck.fuel_row.buttons[GtTypes.FuelMode.PUSH].pressed.emit()
+	deck.ers_row.buttons[GtTypes.ErsMode.OVERTAKE].pressed.emit()
+	check(car.pace_mode == GtTypes.PaceMode.ATTACK and deck.pace_row.active == GtTypes.PaceMode.ATTACK
+			and car.fuel_mode == GtTypes.FuelMode.PUSH and deck.fuel_row.active == GtTypes.FuelMode.PUSH
+			and car.ers_mode == GtTypes.ErsMode.OVERTAKE and deck.ers_row.active == GtTypes.ErsMode.OVERTAKE,
+		"deck N2: faders write straight into the sim")
+
+	_known(car)
+	car.wear = 0.5
+	deck.refresh()
+	var active_severity: int = int(deck.verdict_for("pace", car.pace_mode)["severity"])
+	check(deck.pace_row.marks()[GtTypes.PaceMode.ATTACK] >= 1 and deck.pace_pill.text == TacticalDeck.SEVERITY_WORD[active_severity]
+			and is_equal_approx(deck.pace_gauge.value, 1.0 - car.wear) and deck.pace_gauge.lit_blocks() == 6
+			and not deck.pace_row.buttons[GtTypes.PaceMode.ATTACK].disabled,
+		"deck N2: option marks, pills and gauges follow the model and nothing is locked")
+
+	deck.pace_row.hovered.emit(GtTypes.PaceMode.ATTACK)
+	var hovered_ok: bool = deck.tip.visible and deck.forecast_label.text.contains("ATTACK") and deck.tip.plain_label.visible
+	deck.pace_row.unhovered.emit()
+	check(hovered_ok and deck.forecast_label.text.begins_with("NEXT LAP") and not deck.tip.visible,
+		"deck N2: hovering an option shows its effect and the tooltip, leaving restores the forecast line")
+
+	deck.coach_button.pressed.emit()
+	deck.pace_row.hovered.emit(GtTypes.PaceMode.ATTACK)
+	var coach_off: bool = not deck.coach and deck.tip.visible and not deck.tip.plain_label.visible and deck.coach_button.text == "COACH OFF"
+	deck.coach_button.pressed.emit()
+	var coach_on: bool = deck.coach and deck.tip.plain_label.visible
+	deck.pace_row.unhovered.emit()
+	check(coach_off and coach_on, "deck N2: COACH toggles the plain-language sentence")
+
+	deck.tyre_row.buttons[1 + GtTypes.Compound.INTERMEDIATE].pressed.emit()
+	var chip_ok: bool = deck.wheel.compound == 1 + GtTypes.Compound.INTERMEDIATE and deck.pit_compound == GtTypes.Compound.INTERMEDIATE and deck.wheel.impulse > 800.0
+	deck.wheel.clicked.emit()
+	var next_ok: bool = deck.wheel.compound == 1 + GtTypes.Compound.WET and deck.pit_compound == GtTypes.Compound.WET and deck.tyre_row.active == deck.wheel.compound
+	deck.wheel.scrolled.emit(-1)
+	check(chip_ok and next_ok and deck.wheel.compound == 1 + GtTypes.Compound.INTERMEDIATE,
+		"deck N2: the wheel and the chips pick the next tyre and the wheel is kicked")
+
+	deck.press_box()
+	deck.refresh()
+	var armed: bool = deck.wheel.armed and car.pit_request >= 0 and deck.box_button.text.begins_with("CANCEL BOX [ESC]  //  ")
+	deck.cancel_box()
+	deck.refresh()
+	var released: bool = not deck.wheel.armed and car.pit_request == -1
+	deck._box_clicked_at = -100000
+	deck.on_box_pressed()
+	deck.on_box_pressed()
+	deck.refresh()
+	var single: bool = car.pit_request >= 0 and deck.wheel.armed
+	deck.cancel_box()
+	deck.refresh()
+	check(armed and released and single, "deck N2: BOX arms the wheel, cancel releases it, a double click does not call then cancel")
+
+	deck.tabs[1].pressed.emit()
+	var other_ok: bool = deck.deck_car_id == mine[1].id and is_equal_approx(deck.pace_gauge.value, 1.0 - mine[1].wear) and deck.tabs[1].text.contains(mine[1].code)
+	deck.tabs[0].pressed.emit()
+	check(other_ok and deck.deck_car_id == mine[0].id, "deck N2: switching car swaps verdicts, gauges and the active card")
+
+	var clicks: int = _total_clicks()
+	var started: int = deck.feedback_tweens
+	deck.pace_row.buttons[GtTypes.PaceMode.LIGHT].pressed.emit()
+	var animated: bool = deck.feedback_tweens > started and _total_clicks() == clicks + 1
+	PresentationSettings.reduce_motion = true
+	started = deck.feedback_tweens
+	deck.apply_click_feedback(deck.box_button, "BOX", 1.0)
+	var calm: bool = deck.feedback_tweens == started and _total_clicks() == clicks + 2
+	PresentationSettings.reduce_motion = false
+	check(animated and calm, "deck N2: every control gives audible and visible click feedback (no animation under reduce motion)")
+
+	var weather: GtWeather = race.weather
+	var saved_forecast: Array[Dictionary] = weather.forecast.duplicate()
+	var saved_water: float = weather.track_water_pct
+	var saved_rain: float = weather.rain_intensity
+	weather.track_water_pct = 0.0
+	weather.rain_intensity = 0.0
+	var coming: Array[Dictionary] = []
+	for index: int in range(5):
+		coming.append({"lap": car.lap + 1 + index, "rain_intensity": 0.0 if index < 3 else 0.9, "water_pct": 5.0 if index < 3 else 60.0})
+	weather.forecast = coming
+	deck.refresh()
+	var rain_text: String = deck.window_label.text
+	var dry: Array[Dictionary] = []
+	for index: int in range(5):
+		dry.append({"lap": car.lap + 1 + index, "rain_intensity": 0.0, "water_pct": 5.0})
+	weather.forecast = dry
+	deck.refresh()
+	check(rain_text.contains("BOX WINDOW") and rain_text.contains("WET") and deck.window_label.text.contains("NO TYRE CHANGE"),
+		"deck N2: the window card reads the weather forecast (%s)" % rain_text)
+	weather.forecast = saved_forecast
+	weather.track_water_pct = saved_water
+	weather.rain_intensity = saved_rain
+	race.laps = saved_laps
+	_known(car)
+	deck.refresh()

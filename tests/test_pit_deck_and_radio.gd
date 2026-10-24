@@ -200,6 +200,7 @@ func _test_deck_box_and_desk() -> void:
 	deck.refresh()
 	check(car.pit_request == GtTypes.Compound.WET and deck.box_button.text == "CANCEL BOX [ESC]  //  WET" and not deck.box_button.disabled,
 		"deck: after a box call the button becomes CANCEL BOX [ESC] // WET and stays enabled")
+	deck._box_clicked_at = -100000 # the button ignores a second click inside 0.25 s
 	deck.box_button.pressed.emit()
 	deck.refresh()
 	check(car.pit_request == -1 and deck.box_button.text == "REQUEST BOX [B]",
