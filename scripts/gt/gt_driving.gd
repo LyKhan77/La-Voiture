@@ -75,8 +75,8 @@ func build_contexts(racing: Array[GtCar]) -> Dictionary:
 func tyre_grip(car: GtCar) -> float:
 	var w: float = car.wear
 	var cliff: float = 0.0
-	if w > 0.75:
-		cliff = pow((w - 0.75) / 0.25, 1.8) * 0.55
+	if w > GtTypes.TYRE_CLIFF_WEAR:
+		cliff = pow((w - GtTypes.TYRE_CLIFF_WEAR) / (1.0 - GtTypes.TYRE_CLIFF_WEAR), 1.8) * 0.55
 	var base: float = GtTypes.COMPOUND_GRIP[car.compound] * (1.0 - 0.25 * w * w - maxf(0.0, w - 0.7) * 0.6 - cliff)
 	if car.is_punctured:
 		base *= 0.22
@@ -181,44 +181,22 @@ func update_car(car: GtCar, ctx: Variant, dt: float) -> void:
 	_driver_errors(car, dt)
 
 	# --- pace, fuel and ERS modes
-	var pace_mult: float = 1.0
-	var wear_rate_mult: float = 1.0
-	var fuel_burn_mult: float = 1.0
-	var target_temp: float = 92.0
-	match car.pace_mode:
-		GtTypes.PaceMode.CONSERVE:
-			pace_mult = 0.948
-			wear_rate_mult = 0.45
-			fuel_burn_mult = 0.85
-			target_temp = 80.0
-		GtTypes.PaceMode.LIGHT:
-			pace_mult = 0.978
-			wear_rate_mult = 0.72
-			fuel_burn_mult = 0.93
-			target_temp = 86.0
-		GtTypes.PaceMode.AGGRESSIVE:
-			pace_mult = 1.025
-			wear_rate_mult = 1.45
-			fuel_burn_mult = 1.12
-			target_temp = 104.0
-		GtTypes.PaceMode.ATTACK:
-			pace_mult = 1.048
-			wear_rate_mult = 2.1
-			fuel_burn_mult = 1.25
-			target_temp = 116.0
+	var pace_mult: float = GtTypes.PACE_SPEED_MULT[car.pace_mode]
+	var wear_rate_mult: float = GtTypes.PACE_WEAR_MULT[car.pace_mode]
+	var fuel_burn_mult: float = GtTypes.PACE_FUEL_MULT[car.pace_mode]
+	var target_temp: float = GtTypes.PACE_TARGET_TEMP[car.pace_mode]
 	var top_speed_bonus: float = 0.0
 	var accel_bonus: float = 0.0
 	if car.fuel_mode == GtTypes.FuelMode.CONSERVE:
 		top_speed_bonus -= 2.2
 		accel_bonus -= 0.9
-		fuel_burn_mult *= 0.80
 	elif car.fuel_mode == GtTypes.FuelMode.PUSH:
 		top_speed_bonus += 2.6
 		accel_bonus += 1.5
-		fuel_burn_mult *= 1.25
+	fuel_burn_mult *= GtTypes.FUEL_MODE_BURN_MULT[car.fuel_mode]
 	var deploying: bool = (car.ers_mode == GtTypes.ErsMode.DEPLOY or car.ers_mode == GtTypes.ErsMode.OVERTAKE) and car.ers_battery > 0.0 and car.v > 12.0 and car.pit == null
 	if deploying:
-		var drain_rate: float = 24.0 if car.ers_mode == GtTypes.ErsMode.OVERTAKE else 12.0
+		var drain_rate: float = GtTypes.ERS_DRAIN_PER_S[car.ers_mode]
 		car.ers_battery -= minf(car.ers_battery, drain_rate * dt)
 		if car.ers_mode == GtTypes.ErsMode.OVERTAKE:
 			top_speed_bonus += 6.0
@@ -231,7 +209,7 @@ func update_car(car: GtCar, ctx: Variant, dt: float) -> void:
 	elif car.ers_mode == GtTypes.ErsMode.HARVEST:
 		top_speed_bonus -= 2.5
 		accel_bonus -= 1.2
-		car.ers_battery = minf(100.0, car.ers_battery + 4.0 * dt)
+		car.ers_battery = minf(100.0, car.ers_battery + GtTypes.ERS_HARVEST_PER_S * dt)
 
 	# --- DRS and slipstream
 	var was_in_drs: bool = not track.drs_zone_at(car.prev_s).is_empty()
@@ -628,7 +606,7 @@ func _wear_and_fuel(car: GtCar, ds: float, wear_rate_mult: float, fuel_burn_mult
 	if car.tyre_temp > 112.0:
 		wear_inc *= 1.4
 	car.wear = minf(1.0, car.wear + wear_inc)
-	if car.wear > 0.75 and not car.tyre_cliff_called and race.can_push_driver_radio(car.id):
+	if car.wear > GtTypes.TYRE_CLIFF_WEAR and not car.tyre_cliff_called and race.can_push_driver_radio(car.id):
 		car.tyre_cliff_called = true
 		race.push_radio(car, "driver", "Tyres are cooked! Rear is sliding everywhere!")
 	car.fuel = maxf(0.0, car.fuel - car.fuel_use * laps_driven * fuel_burn_mult)

@@ -30,6 +30,18 @@ const COMPOUND_COLOR: Array[Color] = [
 const PACE_NAME: Array[String] = ["CONSERVE", "LIGHT", "STANDARD", "AGGRESSIVE", "ATTACK"]
 const FUEL_NAME: Array[String] = ["CONSERVE", "STANDARD", "PUSH"]
 const ERS_NAME: Array[String] = ["HARVEST", "NEUTRAL", "DEPLOY", "OVERTAKE"]
+## Multipliers by PaceMode (CONSERVE..ATTACK): speed, tyre wear, fuel burn, and the tyre temperature the pace aims at.
+const PACE_SPEED_MULT: Array[float] = [0.948, 0.978, 1.0, 1.025, 1.048]
+const PACE_WEAR_MULT: Array[float] = [0.45, 0.72, 1.0, 1.45, 2.1]
+const PACE_FUEL_MULT: Array[float] = [0.85, 0.93, 1.0, 1.12, 1.25]
+const PACE_TARGET_TEMP: Array[float] = [80.0, 86.0, 92.0, 104.0, 116.0]
+## Fuel burn multiplier by FuelMode (CONSERVE, STANDARD, PUSH).
+const FUEL_MODE_BURN_MULT: Array[float] = [0.80, 1.0, 1.25]
+## ERS battery per second while deploying (index ErsMode: DEPLOY and OVERTAKE only), and harvest charge per second.
+const ERS_DRAIN_PER_S: Array[float] = [0.0, 0.0, 12.0, 24.0]
+const ERS_HARVEST_PER_S: float = 4.0
+## Tyre wear past which grip falls off a cliff (and the driver calls it).
+const TYRE_CLIFF_WEAR: float = 0.75
 const FLAG_NAME: Array[String] = ["GREEN", "YELLOW", "VSC", "SC"]
 const FUEL_STAGE_NAME: Array[String] = ["OPTIMAL", "WARNING", "SPUTTER", "LIMP", "FLAMEOUT"]
 
