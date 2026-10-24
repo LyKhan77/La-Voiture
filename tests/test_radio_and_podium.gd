@@ -178,6 +178,7 @@ func _test_driver_triggers() -> void:
 	race._driving.announce_pass(others[0], others[1])
 	check(race.radio_history.size() == mark, "#20c a pass between two AI cars stays off the radio")
 	var hud_card: Dictionary = race.radio_history[mark - 1]
+	world.hud.radio._hide_banner() # an urgent card still up would hold this routine call back
 	world.hud._on_radio(hud_card)
 	check(world.hud.radio._portrait_texture == (load(GarageRoster.portrait_path(int(hud_card["car_id"]))) as Texture2D),
 		"#20d the HUD shows the rival driver's banner with that driver's portrait")
