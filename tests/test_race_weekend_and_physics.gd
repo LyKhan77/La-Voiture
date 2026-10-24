@@ -619,6 +619,8 @@ func _test_pit_in_world() -> void:
 	var min_gap: float = INF
 	var queued: bool = false
 	var a_done_at: float = -1.0
+	# Wear when the stop ends: WETs on this dry track wear ~18x faster afterwards, which is the point of Langkah 2.
+	var a_wear_at_exit: float = -1.0
 	var b_done_at: float = -1.0
 	var frames: int = 0
 	while frames < 60 * 150 and not (car_a.stops >= 1 and car_b.stops >= 1 and car_a.pit == null and car_b.pit == null):
@@ -640,6 +642,7 @@ func _test_pit_in_world() -> void:
 				queued = true
 		if car_a.stops >= 1 and a_done_at < 0.0:
 			a_done_at = race.time
+			a_wear_at_exit = car_a.wear
 		if car_b.stops >= 1 and b_done_at < 0.0:
 			b_done_at = race.time
 	world.set_time_scale(1.0)
@@ -659,7 +662,7 @@ func _test_pit_in_world() -> void:
 		var wheel := socket.get_child(0) as WheelScript
 		var stripe := wheel.find_child("GT3_SidewallStripe", true, false) as MeshInstance3D
 		wheel_ok = wheel_ok and stripe.get_surface_override_material(0).resource_path == "res://materials/tire_stripe_wet.tres"
-	check(wheel_ok and first_actor.wheel_controllers.size() == 4 and car_a.compound == target_a and car_a.wear < 0.05,
+	check(wheel_ok and first_actor.wheel_controllers.size() == 4 and car_a.compound == target_a and a_wear_at_exit < 0.05,
 		"#19 the crew took the four old wheels off and fitted four WET wheels (%d swaps, sockets empty during service: %s), the sim car runs on fresh WETs" % [corners.size(), saw_empty_socket])
 	check(queued and min_gap >= 4.45 and car_b.stops == 1 and b_done_at > a_done_at and world.choreographer.jobs.is_empty(),
 		"#20 the second teammate queued behind the stall (closest %.1f m, car length 4.45 m) and was serviced after the first" % min_gap)

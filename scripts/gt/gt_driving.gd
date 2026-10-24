@@ -71,7 +71,8 @@ func build_contexts(racing: Array[GtCar]) -> Dictionary:
 
 # --- tyres ---------------------------------------------------------------------
 
-func tyre_factor(car: GtCar) -> float:
+## Grip of the rubber itself: compound, wear, puncture and temperature, before any water.
+func tyre_grip(car: GtCar) -> float:
 	var w: float = car.wear
 	var cliff: float = 0.0
 	if w > 0.75:
@@ -80,6 +81,17 @@ func tyre_factor(car: GtCar) -> float:
 	if car.is_punctured:
 		base *= 0.22
 	base = maxf(0.10, base)
+	if car.tyre_temp < 78.0:
+		base *= 0.94
+	elif car.tyre_temp > 112.0:
+		base *= maxf(0.85, 1.0 - (car.tyre_temp - 112.0) / 25.0 * 0.15)
+	return base
+
+
+## What the water on the track does to this compound: slicks lose their bite as it deepens, wets
+## suffer on a dry line. `update_car` applies it to the corners only, so a slick on a flooded
+## straight keeps its top speed and pays in the braking zone and at the apex instead.
+func water_grip(car: GtCar) -> float:
 	var track: GtTrack = race.track
 	var weather: GtWeather = race.weather
 	var off_line: float = absf(car.lateral - track.ideal_lateral_at(car.s))
@@ -93,7 +105,8 @@ func tyre_factor(car: GtCar) -> float:
 	match car.compound:
 		GtTypes.Compound.SOFT, GtTypes.Compound.MEDIUM, GtTypes.Compound.HARD:
 			if water > 12.0:
-				mult = maxf(0.40, 1.0 - (water - 12.0) / 60.0 * 0.70)
+				# 35 % less cornering grip from 40 % water on (the weather's own slowdown adds the rest).
+				mult = maxf(0.65, 1.0 - (water - 12.0) / 28.0 * 0.35)
 		GtTypes.Compound.INTERMEDIATE:
 			if water < 12.0:
 				mult = 0.86
@@ -108,11 +121,12 @@ func tyre_factor(car: GtCar) -> float:
 				mult = 1.08 + (car.wet_skill - 0.9) * 0.25
 			else:
 				mult = 0.94
-	if car.tyre_temp < 78.0:
-		base *= 0.94
-	elif car.tyre_temp > 112.0:
-		base *= maxf(0.85, 1.0 - (car.tyre_temp - 112.0) / 25.0 * 0.15)
-	return base * mult
+	return mult
+
+
+## The whole tyre: its own grip times what the water does to this compound.
+func tyre_factor(car: GtCar) -> float:
+	return tyre_grip(car) * water_grip(car)
 
 
 # --- the update ------------------------------------------------------------------
@@ -250,7 +264,11 @@ func update_car(car: GtCar, ctx: Variant, dt: float) -> void:
 	var fuel_factor: float = 1.0 - 0.0004 * car.fuel
 	var error_factor: float = 0.85 if car.error_timer > 0.0 else 1.0
 	var damage_factor: float = 1.0 - car.damage / 100.0 * 0.22
-	var pace: float = car.grip * car.skill * tyre_factor(car) * fuel_factor * error_factor * damage_factor * pace_mult
+	# Water takes grip from the corners only: the blend runs over 0.0025..0.0045 of curvature, centred
+	# on the 0.0035 corner threshold, so a slick on a wet straight keeps its top speed without a step.
+	var corner_weight: float = smoothstep(0.0025, 0.0045, absf(curv_now))
+	var tyre_applied: float = tyre_grip(car) * lerpf(1.0, water_grip(car), corner_weight)
+	var pace: float = car.grip * car.skill * tyre_applied * fuel_factor * error_factor * damage_factor * pace_mult
 	_target = minf(car.top_speed + top_speed_bonus, track.speed_limit_at(car.s) * pace)
 	if car.fuel <= 0.0:
 		_target = 0.0
@@ -261,7 +279,9 @@ func update_car(car: GtCar, ctx: Variant, dt: float) -> void:
 	if car.is_punctured:
 		_target = minf(_target, 15.2)
 	if race.weather.track_water_pct > 40.0:
-		_target *= maxf(0.70, 1.0 - (race.weather.track_water_pct - 40.0) * 0.004)
+		# Spray and standing water slow the corners in full and the straights only a little.
+		var water_slowdown: float = maxf(0.70, 1.0 - (race.weather.track_water_pct - 40.0) * 0.004)
+		_target *= lerpf(1.0, water_slowdown, lerpf(0.35, 1.0, corner_weight))
 
 	var ideal_lateral: float = track.ideal_lateral_at(car.s)
 	_target_lateral = ideal_lateral
@@ -270,6 +290,7 @@ func update_car(car: GtCar, ctx: Variant, dt: float) -> void:
 	if absf(curv_now) > 0.006 and off_line > 1.2 and car.pit == null:
 		_target *= 1.0 - minf(0.045, (off_line - 1.2) * 0.01)
 
+	_snap_oversteer(car, corner_weight, under_caution)
 	_apply_flags(car, lead, ideal_lateral)
 	if not under_caution and car.pit == null and car.finished_at < 0.0:
 		_defend_and_race(car, lead, behind, curv_now, ideal_lateral, dt)
@@ -305,6 +326,8 @@ func update_car(car: GtCar, ctx: Variant, dt: float) -> void:
 	# --- longitudinal step
 	var effective_accel: float = GtTypes.ACCEL + accel_bonus
 	var brake_rate: float = 38.0 if car.pit != null else GtTypes.BRAKE
+	if car.pit == null and GtTypes.is_slick(car.compound):
+		brake_rate *= aquaplane_brake_mult(race.weather.track_water_pct)
 	var is_braking: bool = car.v > _target
 	var previous_v: float = car.v
 	if car.v < _target:
@@ -339,6 +362,28 @@ func update_car(car: GtCar, ctx: Variant, dt: float) -> void:
 
 # --- parts of the update -------------------------------------------------------------
 
+## Share of the braking deceleration a slick keeps over standing water: all of it up to 20 % water,
+## a third (so 3x the braking distance) from about 75 % water up.
+static func aquaplane_brake_mult(water_pct: float) -> float:
+	if water_pct <= 20.0:
+		return 1.0
+	return maxf(0.33, 1.0 - (water_pct - 20.0) / 55.0 * 0.67)
+
+
+## A slick carrying more than 10 % over the limit of a wet corner snaps: the driver loses the rear for
+## two seconds (the pace penalty of `error_timer`) and says so on the radio.
+func _snap_oversteer(car: GtCar, corner_weight: float, under_caution: bool) -> void:
+	if under_caution or car.pit != null or car.error_timer > 0.0 or car.finished_at >= 0.0:
+		return
+	if not GtTypes.is_slick(car.compound) or race.weather.track_water_pct <= 25.0 or corner_weight < 0.5:
+		return
+	if car.v <= _target * 1.10:
+		return
+	car.error_timer = 2.0
+	if car.team_id == race.player_team_id and race.can_push_driver_radio(car.id):
+		race.push_radio(car, "driver", "Had a snap of oversteer! Lost some time.") # an existing voiced line: every radio call needs a clip
+
+
 func _spin_recovery(car: GtCar, dt: float) -> void:
 	var track: GtTrack = race.track
 	car.spin_timer -= dt
@@ -361,7 +406,8 @@ func _driver_errors(car: GtCar, dt: float) -> void:
 		var worn_risk: float = maxf(0.0, car.wear - 0.65) * 3.2
 		var wet_mismatch: float = 0.0
 		if not (car.compound == GtTypes.Compound.INTERMEDIATE or car.compound == GtTypes.Compound.WET) and race.weather.track_water_pct > 25.0:
-			wet_mismatch = (race.weather.track_water_pct - 25.0) / 18.0
+			# Capped so that a slick in standing water is five times as likely to spin on its own.
+			wet_mismatch = minf(4.0, (race.weather.track_water_pct - 25.0) / 18.0 * 1.6)
 		var attack_risk: float = 2.0 if car.pace_mode == GtTypes.PaceMode.ATTACK else (1.4 if car.pace_mode == GtTypes.PaceMode.AGGRESSIVE else 1.0)
 		var probability: float = (1.0 - car.consistency) * 0.00045 * attack_risk * (1.0 + worn_risk + wet_mismatch) * dt
 		if race.rng.next() < probability:
@@ -578,7 +624,7 @@ func _wear_and_fuel(car: GtCar, ds: float, wear_rate_mult: float, fuel_burn_mult
 	var wet_on_dry: bool = (car.compound == GtTypes.Compound.INTERMEDIATE or car.compound == GtTypes.Compound.WET) and weather.track_water_pct < 15.0
 	if wet_on_dry:
 		blister_rate += 1.2 * dt
-		wear_inc *= 3.5
+		wear_inc *= 5.0 if car.compound == GtTypes.Compound.WET else 3.5
 	if car.tyre_temp > 112.0:
 		wear_inc *= 1.4
 	car.wear = minf(1.0, car.wear + wear_inc)
@@ -633,7 +679,10 @@ func _wear_and_fuel(car: GtCar, ds: float, wear_rate_mult: float, fuel_burn_mult
 			race.set_flag(GtTypes.Flag.YELLOW, sector, "YELLOW FLAG (SEC %d) - CAR #%d STOPPED (SUSPENSION FAILURE)" % [sector, car.number], 18.0)
 
 	var track_offset: float = (weather.track_temp - 30.0) * 0.35
-	var wet_on_dry_heat: float = 9.0 if wet_on_dry and weather.track_water_pct < 12.0 else 0.0
+	var wet_on_dry_heat: float = 0.0
+	if wet_on_dry and weather.track_water_pct < 12.0:
+		# Full wets cook on dry asphalt (past 130 C, so the 115 C blistering and 112 C wear multipliers kick in).
+		wet_on_dry_heat = 38.0 if car.compound == GtTypes.Compound.WET else 9.0
 	var water_cooling: float = weather.track_water_pct / 100.0 * 14.0
 	var heat: float = car.v / 65.0 * 4.0 + (6.0 if is_braking else 0.0) + track_offset + wet_on_dry_heat - water_cooling
 	car.tyre_temp += (target_temp + heat - car.tyre_temp) * minf(1.0, 0.22 * dt)
