@@ -1,17 +1,17 @@
 class_name BroadcastCameraDirector
 extends Node
 
-## TV broadcast cut for the race weekend (FASE 5.5). Five cameras, `C` cycles
-## them; while a pit stop is running the close-up pit camera takes over on its own
-## and the previous camera comes back afterwards.
+## TV broadcast cameras: C cycles normal views and the active Safety Car.
+## Automatic pit close-ups and the SC deployment cut restore the chosen view afterwards.
 
-enum Mode { CHASE, COCKPIT, HELI, TRACKSIDE_TV, PITSTOP }
+enum Mode { CHASE, COCKPIT, HELI, TRACKSIDE_TV, PITSTOP, SAFETY_CAR }
 
-const MODE_NAMES: Array[String] = ["CHASE CAM", "COCKPIT CAM", "HELI CAM", "TRACKSIDE TV", "PIT CLOSE-UP"]
+const MODE_NAMES: Array[String] = ["CHASE CAM", "COCKPIT CAM", "HELI CAM", "TRACKSIDE TV", "PIT CLOSE-UP", "SAFETY CAR CAM"]
+const SC_CAM_FOV: float = 65.0
 const TrackRibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const PitLaneScript := preload("res://scripts/world/pit_lane_complex.gd")
 
-## The four cameras the C key cycles through; PITSTOP is automatic.
+## Normal C cycle; active Safety Car follows TRACKSIDE_TV. PITSTOP is automatic.
 const CYCLE: Array[int] = [Mode.CHASE, Mode.COCKPIT, Mode.HELI, Mode.TRACKSIDE_TV]
 
 const CHASE_BACK_M: float = 8.5
@@ -43,6 +43,8 @@ var camera: Camera3D
 var target: Node3D
 var ribbon: TrackRibbonScript
 var auto_pit_camera: bool = true
+var safety_car_actor: Node3D = null
+var safety_car_cut_s: float = 0.0
 
 ## Set by the world while a stop runs: the stall's transform, or null when idle.
 var pit_focus: Variant = null
@@ -71,11 +73,25 @@ func set_target(p_target: Node3D) -> void:
 	_snap = true
 
 
-## The mode actually on screen: the pit camera overrides while a stop runs.
+## Deployment cut has priority, then the selected car's automatic pit close-up.
 func active_mode() -> int:
+	if is_instance_valid(safety_car_actor) and safety_car_cut_s > 0.0:
+		return Mode.SAFETY_CAR
 	if auto_pit_camera and pit_focus != null:
 		return Mode.PITSTOP
+	if mode == Mode.SAFETY_CAR and not _safety_car_available():
+		return Mode.CHASE
 	return mode
+
+
+func _safety_car_available() -> bool:
+	return is_instance_valid(safety_car_actor) and safety_car_actor.is_visible_in_tree()
+
+
+func trigger_safety_car_cut(sc_actor: Node3D, duration_s: float = 4.0) -> void:
+	safety_car_actor = sc_actor
+	safety_car_cut_s = maxf(0.0, duration_s)
+	_snap = true
 
 
 func set_mode(p_mode: int) -> void:
@@ -85,6 +101,9 @@ func set_mode(p_mode: int) -> void:
 
 
 func cycle() -> void:
+	if _safety_car_available() and _manual_mode == Mode.TRACKSIDE_TV:
+		set_mode(Mode.SAFETY_CAR)
+		return
 	var index: int = CYCLE.find(_manual_mode)
 	set_mode(CYCLE[(index + 1) % CYCLE.size()])
 
@@ -116,7 +135,18 @@ func update(dt: float) -> void:
 			_update_trackside()
 		Mode.PITSTOP:
 			_update_pit()
+		Mode.SAFETY_CAR:
+			_update_safety_car(dt)
+	safety_car_cut_s = maxf(0.0, safety_car_cut_s - dt)
 	_snap = false
+
+
+func _update_safety_car(dt: float) -> void:
+	_set_lens(SC_CAM_FOV, 0.1)
+	var pose: Transform3D = safety_car_actor.global_transform
+	var wanted: Vector3 = pose.origin - pose.basis.z * 7.2 + pose.basis.x * 2.6 + Vector3.UP * 1.3
+	camera.global_position = camera.global_position.lerp(wanted, 1.0 if _snap else 1.0 - exp(-8.0 * dt))
+	camera.look_at(pose.origin + Vector3.UP * 0.75, Vector3.UP)
 
 
 func _update_chase(dt: float) -> void:

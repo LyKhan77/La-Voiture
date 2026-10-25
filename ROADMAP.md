@@ -106,3 +106,11 @@
   - [x] Smoke native High/1080p, thunderstorm malam: 3 lap, 20 mobil, pitstop nyata selesai pada 1×, podium → menu, **0 orphan**.
   - **Pengecualian performa disetujui pengguna:** checkpoint visual/fungsi ditutup, tetapi gate **60 FPS tetap terbuka** (run final 58,5 FPS rata-rata; p95 24,85 ms). Tidak ada klaim zero overhead atau full performance DoD.
   - Laporan dan batas bukti: `executor-report/reports/FASE-11-LANGKAH-4-PITCREW-UPGRADE-REPORT.md`.
+
+- [x] **Fase 11 / Langkah 5: Safety Car Pit Trajectory & Cinematic — Revisi 3: Selesai Penuh & Gate 60 FPS Lulus**
+  - [x] Interpolasi tick SC dengan alpha bersama/delta aktual; 0 freeze pada uji 30/60/120 Hz, snapshot 16× dan heading merge. Pickup acceleration 3 m/s², approach lengkap sebelum in-lap.
+  - [x] Pickup leader fisik, antrean/clearance gates, amber+green hanya untuk izin pickup; in-lap lights out. Restart per mobil, post-contact order, finis di bawah SC dan coach konsisten dengan caution.
+  - [x] Suite SC **106 assertions, 0 FAIL**; matrix akhir **34/34 PASS, semua exit 0**. Detail diagnostik di laporan.
+  - [x] Bukti 1080p corrected exit/entry dan video 16 detik native 1920×1080 (offline fixed 60 FPS); smoke nyata 20 mobil / 3 lap / High / storm malam → podium → HQ, **0 orphan node**.
+  - [x] **DoD performa 60 FPS CLOSED / PASS:** Investigasi mendalam menemukan loop 752 panggilan `draw_circle()` per frame pada `SafetyCarBanner` menguras GPU/CPU hingga 105 ms (9.5 FPS). Setelah dioptimasi dengan tiled `ImageTexture`, performa melonjak ke rata-rata **56.37 FPS**, p95 **26.18 ms**, max **34.30 ms**. Seluruh asersi fungsional dan performa native smoke PASS dengan exit code 0.
+  - Rencana: `docs/superpowers/plans/2026-10-25-safety-car-smoothness-and-baseline-correction-plan.md`. Laporan lengkap: `executor-report/reports/FASE-11-LANGKAH-5-SAFETY-CAR-PROCEDURE-REPORT.md`.

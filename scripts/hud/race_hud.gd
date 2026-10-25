@@ -25,6 +25,7 @@ const CutInScript := preload("res://scripts/ui/anime_radio_cutin.gd")
 const GarageStyleScript := preload("res://scripts/ui/manga/garage_style.gd")
 const Liveries := preload("res://scripts/car/team_liveries.gd")
 const RadioAudioScript := preload("res://scripts/audio/radio_audio_director.gd")
+const SafetyCarBannerScript := preload("res://scripts/hud/safety_car_banner.gd")
 
 const STAGE := Vector2(1920.0, 1080.0)
 ## Free viewport between the tower, the telemetry drawer, the ribbon and the deck (stage pixels):
@@ -83,6 +84,8 @@ var radio: CanvasLayer
 var engineer_radio: CanvasLayer
 var radio_audio: RadioAudioScript
 var tape: CautionTape
+var sc_banner: SafetyCarBannerScript
+var _last_sc_phase: int = GtTypes.SafetyCarPhase.HIDDEN
 var rate_row: ModeRow
 var lap_label: Label
 var flag_label: Label
@@ -158,6 +161,10 @@ func bind(p_world: Node3D) -> void:
 	stage.add_child(tape)
 	tape.position = Vector2(650.0, 84.0)
 	tape.visible = false
+	sc_banner = SafetyCarBannerScript.new()
+	sc_banner.name = "SafetyCarBanner"
+	stage.add_child(sc_banner)
+	sc_banner.position = Vector2(570.0, 90.0)
 	radio_audio = RadioAudioScript.new()
 	radio_audio.name = "RadioAudioDirector"
 	add_child(radio_audio)
@@ -546,6 +553,7 @@ func _on_radio(message: Dictionary) -> void:
 
 
 func _on_flag_changed(flag: int, message: String) -> void:
+	sc_banner.trigger(flag, message)
 	_set_ticker("%s  //  %s   //   %s" % [GtTypes.FLAG_NAME[flag], message, ticker.text])
 
 
@@ -570,6 +578,11 @@ func _set_ticker(text: String) -> void:
 func update(delta: float) -> void:
 	if race == null:
 		return
+	sc_banner.advance(delta)
+	var sc_phase: int = int(race.safety_car["phase"])
+	if sc_phase != _last_sc_phase and sc_phase == GtTypes.SafetyCarPhase.IN_THIS_LAP:
+		sc_banner.trigger(GtTypes.Flag.SC, "IN THIS LAP")
+	_last_sc_phase = sc_phase
 	_frame += 1
 	_update_speedlines()
 	_update_burn()

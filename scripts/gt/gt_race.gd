@@ -15,6 +15,9 @@ signal flag_changed(flag: int, message: String)
 signal suggestion_changed(suggestion: Dictionary)
 
 const GRID_ROW_M: float = 8.0
+const PitLaneScript := preload("res://scripts/world/pit_lane_complex.gd")
+const SC_QUEUE_GAP_M: float = 46.0
+const SC_PICKUP_GAP_M: float = 50.0
 const GRID_COLUMN_M: float = 2.5
 ## Race seconds a suggestion card stays open: MANUAL closes it, AUTO executes it when the window ends.
 const SUGGESTION_WINDOW_S: float = 10.0
@@ -221,6 +224,8 @@ func step(dt: float = GtTypes.TICK_DT) -> void:
 		if car.is_racing():
 			active.append(car)
 	contacts.resolve(active, dt)
+	if contacts.contacts_last > 0:
+		_protect_caution_order(active, contexts)
 	_check_advisor_tactics()
 	_expire_suggestion()
 	_check_flood_radio()
@@ -274,7 +279,7 @@ const _FLAG_SEVERITY: Array[int] = [0, 1, 2, 3]
 
 func set_flag(flag: int, sector: int = 1, message: String = "", duration: float = 14.0) -> void:
 	var current: int = race_control["flag"]
-	var current_active: bool = current != GtTypes.Flag.GREEN and (float(race_control["timer"]) > 0.0 or int(race_control["sc_laps_remaining"]) > 0)
+	var current_active: bool = current != GtTypes.Flag.GREEN and (float(race_control["timer"]) > 0.0 or int(race_control["sc_laps_remaining"]) > 0 or bool(safety_car["active"]))
 	if flag != GtTypes.Flag.GREEN and current_active and _FLAG_SEVERITY[flag] < _FLAG_SEVERITY[current]:
 		# FIA priority: a yellow never downgrades an active VSC or safety car.
 		race_control["timer"] = maxf(float(race_control["timer"]), duration)
@@ -282,24 +287,135 @@ func set_flag(flag: int, sector: int = 1, message: String = "", duration: float 
 	var was_sc: bool = current == GtTypes.Flag.SC and current_active
 	race_control = {
 		"flag": flag, "sector": sector, "message": message, "timer": duration,
-		"sc_laps_remaining": maxi(2, int(race_control["sc_laps_remaining"])) if flag == GtTypes.Flag.SC else 0,
+		"sc_laps_remaining": maxi(1 if laps <= 3 else 2, int(race_control["sc_laps_remaining"])) if flag == GtTypes.Flag.SC else 0,
 		"drs_enabled": false if flag != GtTypes.Flag.GREEN else bool(race_control["drs_enabled"]),
 	}
+	if flag == GtTypes.Flag.SC:
+		for car: GtCar in cars:
+			car.sc_restart_line_s = -1.0
 	if flag == GtTypes.Flag.SC and not was_sc:
 		var leader: GtCar = null
 		for car: GtCar in standings():
 			if not car.is_dnf and car.finished_at < 0.0:
 				leader = car
 				break
+		var leader_s: float = leader.s if leader != null else 0.0
+		var lap_base: float = floorf(leader_s / track.length) * track.length
+		var spawn_s: float = lap_base + PitLaneScript.EXIT_S - 60.0
+		if spawn_s <= leader_s:
+			spawn_s += track.length
 		safety_car = {
-			"active": true, "phase": GtTypes.SafetyCarPhase.DEPLOYED, "s": (leader.s if leader != null else 0.0) + 18.0,
-			"v": 31.0, "lateral": 0.0, "lights_on": true,
+			"active": true, "phase": GtTypes.SafetyCarPhase.DEPLOYED, "s": spawn_s,
+			"prev_s": spawn_s, "prev_lateral": sc_pit_exit_lateral(fposmod(spawn_s, track.length)),
+			"v": 20.0, "lateral": sc_pit_exit_lateral(fposmod(spawn_s, track.length)),
+			"lights_on": true, "just_deployed": true,
+			"exit_end_s": floorf(spawn_s / track.length) * track.length + PitLaneScript.EXIT_S + 70.0,
+			"entry_start_s": -1.0, "restart_s": -1.0,
+			"picked_up": false, "leader_id": leader.id if leader != null else -1, "wave_by": false,
+			"finish_under_caution": leader != null and leader.s >= float(laps - 1) * track.length,
 		}
+	elif flag == GtTypes.Flag.SC and int(safety_car["phase"]) == GtTypes.SafetyCarPhase.IN_THIS_LAP:
+		safety_car["phase"] = GtTypes.SafetyCarPhase.DEPLOYED
+		safety_car["lights_on"] = true
+		if float(safety_car["s"]) < float(safety_car["entry_start_s"]):
+			safety_car["entry_start_s"] = -1.0
+			safety_car["restart_s"] = -1.0
 	elif flag == GtTypes.Flag.GREEN:
 		safety_car["active"] = false
 		safety_car["phase"] = GtTypes.SafetyCarPhase.HIDDEN
 		safety_car["lights_on"] = false
 	flag_changed.emit(flag, message)
+
+
+## Zero lateral slope at both ends of each blend segment.
+static func sc_pit_exit_lateral(s_lap: float) -> float:
+	var s_rel: float = s_lap - PitLaneScript.EXIT_S
+	if s_rel <= -60.0:
+		return PitLaneScript.FAST_LANE_M
+	if s_rel <= 0.0:
+		return lerpf(PitLaneScript.FAST_LANE_M, PitLaneScript.EDGE_LATERAL_M, smoothstep(-60.0, 0.0, s_rel))
+	return lerpf(PitLaneScript.EDGE_LATERAL_M, 0.0, smoothstep(0.0, 70.0, s_rel))
+
+
+static func sc_pit_entry_lateral(s_lap: float) -> float:
+	var s_rel: float = s_lap - PitLaneScript.ENTRY_S
+	if s_rel <= -80.0:
+		return 0.0
+	if s_rel <= 0.0:
+		return lerpf(0.0, PitLaneScript.EDGE_LATERAL_M, smoothstep(-80.0, 0.0, s_rel))
+	return lerpf(PitLaneScript.EDGE_LATERAL_M, PitLaneScript.FAST_LANE_M, smoothstep(0.0, 60.0, s_rel))
+
+
+func restart_pending(car: GtCar) -> bool:
+	return car.sc_restart_line_s >= 0.0 and car.s < car.sc_restart_line_s and car.finished_at < 0.0 and not car.is_dnf
+
+
+## Contact position corrections must not bypass the no-pass rule enforced by driving.
+func _protect_caution_order(active: Array[GtCar], contexts: Dictionary) -> void:
+	for car: GtCar in active:
+		if is_under_caution(car):
+			car.s = maxf(car.s, car.prev_s)
+	for pass_index: int in range(active.size()):
+		var changed: bool = false
+		for car: GtCar in active:
+			if not is_under_caution(car):
+				continue
+			var lead: Dictionary = contexts[car]["lead"]
+			if lead.is_empty():
+				continue
+			var ahead: GtCar = lead["car"]
+			if not ahead.is_racing():
+				continue
+			var minimum: float = GtTypes.CAR_LENGTH_M + 1.0 if absf(ahead.lateral - car.lateral) < GtTypes.CAR_WIDTH_M + 0.1 else 0.01
+			var gap: float = float(lead["dist"]) + ahead.s - float(lead["start_s"]) - (car.s - car.prev_s)
+			if gap < minimum:
+				ahead.s += minimum - gap
+				changed = true
+		if not changed:
+			break
+
+
+func _sc_leader() -> GtCar:
+	for car: GtCar in standings():
+		if not car.is_dnf and car.pit == null:
+			return car
+	return null
+
+
+## Minimal pickup permission, not an unlapping procedure; race-car order remains protected.
+func sc_may_pass(car: GtCar) -> bool:
+	return int(race_control["flag"]) == GtTypes.Flag.SC and int(safety_car["phase"]) == GtTypes.SafetyCarPhase.DEPLOYED and not bool(safety_car.get("picked_up", false)) and car.id != int(safety_car.get("leader_id", -1))
+
+
+func sc_blocks_car(car: GtCar) -> bool:
+	if int(race_control["flag"]) != GtTypes.Flag.SC or not bool(safety_car["active"]) or sc_may_pass(car):
+		return false
+	if int(safety_car["phase"]) == GtTypes.SafetyCarPhase.DEPLOYED:
+		return true
+	return int(safety_car["phase"]) == GtTypes.SafetyCarPhase.IN_THIS_LAP and float(safety_car["s"]) < float(safety_car["entry_start_s"]) + 80.0
+
+
+func _sc_track_clear() -> bool:
+	for car: GtCar in cars:
+		if (car.is_dnf and not car.is_cleared) or (not car.is_dnf and car.spin_timer > 0.0):
+			return false
+	return true
+
+
+func _sc_queue_ready(leader: GtCar) -> bool:
+	if leader == null or not bool(safety_car.get("picked_up", false)):
+		return false
+	var gaps: Array[float] = []
+	for car: GtCar in cars:
+		if not car.is_dnf and car.finished_at < 0.0 and car.pit == null:
+			gaps.append(fposmod(float(safety_car["s"]) - car.s, track.length))
+	gaps.sort()
+	var previous: float = 0.0
+	for gap: float in gaps:
+		if gap - previous > SC_QUEUE_GAP_M:
+			return false
+		previous = gap
+	return not gaps.is_empty()
 
 
 func _update_race_control(dt: float) -> void:
@@ -311,27 +427,80 @@ func _update_race_control(dt: float) -> void:
 			race_control["message"] = "TRACK CLEAR - GREEN FLAG"
 			flag_changed.emit(GtTypes.Flag.GREEN, race_control["message"])
 	elif flag == GtTypes.Flag.SC:
+		if dt > 0.0:
+			safety_car["prev_s"] = safety_car["s"]
+			safety_car["prev_lateral"] = safety_car["lateral"]
 		race_control["timer"] = float(race_control["timer"]) - dt
-		var leader: GtCar = null
-		for car: GtCar in standings():
-			if not car.is_dnf and car.finished_at < 0.0 and car.pit == null:
-				leader = car
-				break
+		var leader: GtCar = _sc_leader()
 		safety_car["active"] = true
-		var gap_to_leader: float = float(safety_car["s"]) - leader.s if leader != null else 15.0
-		var target_v: float = 25.0 if gap_to_leader > 28.0 else 27.0
-		safety_car["v"] = float(safety_car["v"]) + (target_v - float(safety_car["v"])) * minf(1.0, 6.0 * dt)
-		safety_car["s"] = float(safety_car["s"]) + float(safety_car["v"]) * dt
-		if leader != null and float(safety_car["s"]) < leader.s + 8.0:
-			safety_car["s"] = leader.s + 8.0
-		safety_car["lateral"] = track.ideal_lateral_at(float(safety_car["s"])) * 0.35
-		if int(race_control["sc_laps_remaining"]) <= 0 or float(race_control["timer"]) <= 5.0:
+		var gap_to_leader: float = fposmod(float(safety_car["s"]) - leader.s, track.length) if leader != null else track.length
+		if leader != null and int(safety_car.get("leader_id", -1)) != leader.id:
+			safety_car["picked_up"] = false
+		if leader != null:
+			safety_car["leader_id"] = leader.id
+		var leader_first: bool = leader != null and gap_to_leader <= SC_PICKUP_GAP_M
+		safety_car["wave_by"] = false
+		for car: GtCar in cars:
+			if car == leader or not car.is_racing():
+				continue
+			var gap: float = fposmod(float(safety_car["s"]) - car.s, track.length)
+			if gap < gap_to_leader:
+				leader_first = false
+			if gap <= SC_PICKUP_GAP_M and sc_may_pass(car):
+				safety_car["wave_by"] = true
+		if leader_first:
+			safety_car["picked_up"] = true
+			safety_car["leader_id"] = leader.id
+			safety_car["wave_by"] = false
+		var entry_start: float = floorf(float(safety_car["s"]) / track.length) * track.length + PitLaneScript.ENTRY_S - 80.0
+		var complete_approach: bool = float(safety_car["s"]) <= entry_start - 30.0 and float(safety_car["s"]) > float(safety_car.get("exit_end_s", 0.0))
+		if int(race_control["sc_laps_remaining"]) <= 0 and float(race_control["timer"]) <= 0.0 and _sc_track_clear() and _sc_queue_ready(leader) and complete_approach and int(safety_car["phase"]) != GtTypes.SafetyCarPhase.IN_THIS_LAP:
 			safety_car["phase"] = GtTypes.SafetyCarPhase.IN_THIS_LAP
 			safety_car["lights_on"] = false
+			safety_car["wave_by"] = false
+			safety_car["entry_start_s"] = entry_start
+			safety_car["restart_s"] = (floorf(entry_start / track.length) + 1.0) * track.length
+			for car: GtCar in cars:
+				var lap_offset: float = floorf((float(safety_car["s"]) - car.s) / track.length)
+				car.sc_restart_line_s = float(safety_car["restart_s"]) - lap_offset * track.length if car.pit == null else -1.0
+			race_control["message"] = "SAFETY CAR IN THIS LAP - PREPARE FOR RESTART"
+		var pit_start: float = float(safety_car.get("entry_start_s", -1.0))
+		var pit_exit: float = float(safety_car.get("restart_s", -1.0)) + PitLaneScript.EXIT_S - 60.0
+		if int(safety_car["phase"]) == GtTypes.SafetyCarPhase.DEPLOYED and pit_start >= 0.0 and float(safety_car["s"]) >= pit_exit:
+			# Renewed caution after peel-off must finish the pit route before merging again.
+			safety_car["entry_start_s"] = -1.0
+			safety_car["restart_s"] = -1.0
+			safety_car["exit_end_s"] = pit_exit + 130.0
+			pit_start = -1.0
+		var peeling: bool = pit_start >= 0.0 and float(safety_car["s"]) >= pit_start
+		var target_v: float = 25.0 if gap_to_leader > 28.0 else 27.0
+		if not bool(safety_car.get("picked_up", false)):
+			target_v = 18.0
+		if peeling and float(safety_car["lateral"]) >= PitLaneScript.EDGE_LATERAL_M:
+			target_v = 80.0 / 3.6
+		safety_car["v"] = move_toward(float(safety_car["v"]), target_v, (3.0 if target_v > float(safety_car["v"]) else 4.5) * dt)
+		safety_car["s"] = float(safety_car["s"]) + float(safety_car["v"]) * dt
+		if int(safety_car["phase"]) == GtTypes.SafetyCarPhase.IN_THIS_LAP and float(safety_car["s"]) >= pit_exit:
+			# Wait at the standby ramp instead of driving off the pit asphalt before the restart.
+			safety_car["s"] = pit_exit
+			safety_car["v"] = 0.0
+		var sc_s: float = float(safety_car["s"])
+		entry_start = float(safety_car.get("entry_start_s", -1.0))
+		var exit_end: float = float(safety_car.get("exit_end_s", 0.0))
+		if entry_start >= 0.0 and sc_s >= entry_start:
+			# Unwrapped progress keeps the car inside the pit lane across start/finish.
+			safety_car["lateral"] = sc_pit_entry_lateral(PitLaneScript.ENTRY_S - 80.0 + sc_s - entry_start)
+		elif sc_s <= exit_end:
+			safety_car["lateral"] = sc_pit_exit_lateral(fposmod(sc_s, track.length))
 		else:
-			safety_car["phase"] = GtTypes.SafetyCarPhase.DEPLOYED
-			safety_car["lights_on"] = true
-		if float(race_control["timer"]) <= 0.0 and int(race_control["sc_laps_remaining"]) <= 0:
+			var line_blend: float = smoothstep(exit_end, exit_end + 30.0, sc_s)
+			if entry_start >= 0.0:
+				line_blend *= 1.0 - smoothstep(entry_start - 30.0, entry_start, sc_s)
+			safety_car["lateral"] = track.ideal_lateral_at(sc_s) * 0.35 * line_blend
+		var ready_for_green: bool = int(race_control["sc_laps_remaining"]) <= 0 and float(race_control["timer"]) <= 0.0 and entry_start >= 0.0 and sc_s >= entry_start + 140.0 and leader != null and leader.s >= float(safety_car["restart_s"]) and float(safety_car["restart_s"]) < float(laps) * track.length
+		if leader != null and leader.s >= float(laps - 1) * track.length and not ready_for_green:
+			safety_car["finish_under_caution"] = true
+		if ready_for_green and not bool(safety_car.get("finish_under_caution", false)):
 			race_control["flag"] = GtTypes.Flag.GREEN
 			race_control["message"] = "SAFETY CAR IN - GREEN FLAG RESTART"
 			safety_car["active"] = false
@@ -365,7 +534,7 @@ func _update_race_control(dt: float) -> void:
 
 func is_under_caution(car: GtCar) -> bool:
 	var flag: int = race_control["flag"]
-	return flag == GtTypes.Flag.SC or flag == GtTypes.Flag.VSC or (flag == GtTypes.Flag.YELLOW and car.current_sector + 1 == int(race_control["sector"]))
+	return restart_pending(car) or flag == GtTypes.Flag.SC or flag == GtTypes.Flag.VSC or (flag == GtTypes.Flag.YELLOW and car.current_sector + 1 == int(race_control["sector"]))
 
 
 # --- radio and tactics -------------------------------------------------------
@@ -636,6 +805,8 @@ func _check_advisor_tactics() -> void:
 			suggest_tactic(car, GtTypes.TacticType.PACE, GtTypes.PaceMode.LIGHT, "PACE: LIGHT",
 				"Tyre temps critical (%d C). Suggest switching pace to LIGHT to cool tyres." % roundi(car.tyre_temp))
 			continue
+		if is_under_caution(car):
+			continue
 		for other: GtCar in cars:
 			if other != car and other.finished_at < 0.0 and other.pit == null and not other.is_dnf and other.s > car.s and other.s - car.s < 14.0:
 				if car.ers_battery > 35.0 and car.ers_mode != GtTypes.ErsMode.OVERTAKE and car.ers_mode != GtTypes.ErsMode.DEPLOY:
@@ -701,8 +872,6 @@ func track_laps(car: GtCar) -> void:
 		if int(race_control["flag"]) == GtTypes.Flag.SC and standings()[0] == car:
 			if int(race_control["sc_laps_remaining"]) > 0:
 				race_control["sc_laps_remaining"] = int(race_control["sc_laps_remaining"]) - 1
-				if int(race_control["sc_laps_remaining"]) <= 0:
-					race_control["message"] = "SAFETY CAR IN THIS LAP - PREPARE FOR RESTART"
 	else:
 		car.sector_entry_time = time
 		car.current_sector = 0

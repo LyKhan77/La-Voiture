@@ -2,9 +2,9 @@ class_name SafetyCarChassis
 extends ModularCarAssembler
 
 ## The official FIA safety car: the Porsche body in a silver livery with SAFETY CAR lettering, hazard chevron tape down both
-## sides and a roof lightbar. The lightbar strobes amber while the car leads the field and holds green on its in lap.
+## sides and a roof lightbar. Amber leads the field; green only permits pickup passes; withdrawal is lights out.
 
-enum StrobeMode { OFF, AMBER, GREEN }
+enum StrobeMode { OFF, AMBER, GREEN, AMBER_GREEN }
 
 const STROBE_HZ: float = 12.0
 const HAZARD_YELLOW := Color("#ffd400")
@@ -52,7 +52,7 @@ func set_strobe_mode(mode: StrobeMode) -> void:
 		return
 	strobe_mode = mode
 	_clock = 0.0
-	set_process(mode == StrobeMode.AMBER)
+	set_process(mode == StrobeMode.AMBER or mode == StrobeMode.AMBER_GREEN)
 	_apply_strobe()
 
 
@@ -67,14 +67,14 @@ func _process(delta: float) -> void:
 
 
 func _apply_strobe() -> void:
-	var amber: bool = strobe_mode == StrobeMode.AMBER
+	var amber: bool = strobe_mode == StrobeMode.AMBER or strobe_mode == StrobeMode.AMBER_GREEN
 	var first_pair_lit: bool = fposmod(_clock * STROBE_HZ, 1.0) < 0.5
 	for index: int in range(amber_leds.size()):
 		amber_leds[index].visible = amber and first_pair_lit == (index % 2 == 0)
 	for index: int in range(grille_leds.size()):
 		grille_leds[index].visible = amber and first_pair_lit == (index % 2 == 0)
 	for led: MeshInstance3D in green_leds:
-		led.visible = strobe_mode == StrobeMode.GREEN
+		led.visible = strobe_mode == StrobeMode.GREEN or strobe_mode == StrobeMode.AMBER_GREEN
 
 
 # --- livery ------------------------------------------------------------------------------------

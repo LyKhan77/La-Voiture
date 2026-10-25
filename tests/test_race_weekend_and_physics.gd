@@ -522,7 +522,7 @@ func _test_broadcast_cameras(world: Node3D) -> void:
 	cameras.pit_focus = null
 	cameras.set_mode(cameras.Mode.CHASE)
 	check(order == [cameras.Mode.COCKPIT, cameras.Mode.HELI, cameras.Mode.TRACKSIDE_TV, cameras.Mode.CHASE] and cockpit_inside and heli_high and tv_beside and distinct
-		and pit_mode == cameras.Mode.PITSTOP and pit_near and cameras.active_mode() == cameras.Mode.CHASE and cameras.MODE_NAMES.size() == 5,
+		and pit_mode == cameras.Mode.PITSTOP and pit_near and cameras.active_mode() == cameras.Mode.CHASE and cameras.MODE_NAMES.size() == 6,
 		"#26 broadcast cameras: C cycles chase > cockpit > heli > trackside TV, the pit close-up cuts in on its own and hands back")
 
 	# The pit close-up belongs to the selected car only: another team's stop must not steal the shot.

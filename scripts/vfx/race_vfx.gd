@@ -143,13 +143,13 @@ func setup(p_world: Node3D) -> void:
 	race.collision_event.connect(_on_collision)
 
 
-func update(delta: float) -> void:
+func update(delta: float, alpha: float = 1.0) -> void:
 	_clock += delta
 	_update_weather(delta)
 	var followed_id: int = world.followed_id
 	for actor: ActorScript in world.actors:
 		_update_car_effects(actor, delta, actor.car.id == followed_id)
-	_update_safety_car()
+	_update_safety_car(delta, alpha)
 	_update_crew_sparks()
 
 
@@ -874,28 +874,34 @@ func _build_safety_car() -> void:
 	safety_car_actor.visible = false
 
 
-## DEPLOYED: amber strobe. IN_THIS_LAP: the strobe goes out and the green lights hold. HIDDEN: nothing to show.
+## Amber during deployment; withdrawal and hidden are lights out. Green is pickup permission only.
 func _strobe_mode_for(phase: int) -> SafetyCarChassis.StrobeMode:
 	match phase:
 		GtTypes.SafetyCarPhase.DEPLOYED:
 			return SafetyCarChassis.StrobeMode.AMBER
 		GtTypes.SafetyCarPhase.IN_THIS_LAP:
-			return SafetyCarChassis.StrobeMode.GREEN
+			return SafetyCarChassis.StrobeMode.OFF
 	return SafetyCarChassis.StrobeMode.OFF
 
 
-func _update_safety_car() -> void:
+func _update_safety_car(delta: float, alpha: float) -> void:
 	var state: Dictionary = race.safety_car
 	var active: bool = bool(state["active"])
 	safety_car_actor.visible = active
 	var official := safety_car_actor.chassis as SafetyCarChassis
-	official.set_strobe_mode(_strobe_mode_for(int(state["phase"])) if active else SafetyCarChassis.StrobeMode.OFF)
+	var strobe: SafetyCarChassis.StrobeMode = _strobe_mode_for(int(state["phase"])) if active else SafetyCarChassis.StrobeMode.OFF
+	if active and int(state["phase"]) == GtTypes.SafetyCarPhase.DEPLOYED and bool(state.get("wave_by", false)):
+		strobe = SafetyCarChassis.StrobeMode.AMBER_GREEN
+	official.set_strobe_mode(strobe)
 	if not active:
 		return
 	var sc: GtCar = _safety_car_state
-	sc.prev_s = sc.s
-	sc.prev_lateral = sc.lateral
+	sc.prev_s = float(state.get("prev_s", state["s"]))
+	sc.prev_lateral = float(state.get("prev_lateral", state["lateral"]))
 	sc.s = float(state["s"])
 	sc.lateral = float(state["lateral"])
 	sc.v = float(state["v"])
-	safety_car_actor.present(1.0, 0.016)
+	var distance: float = sc.s - sc.prev_s
+	if distance > 0.0001:
+		sc.yaw_offset = atan2(sc.lateral - sc.prev_lateral, distance)
+	safety_car_actor.present(alpha, delta)

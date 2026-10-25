@@ -33,6 +33,8 @@ var lane_offset: float = 0.0 # post-collision lateral hold
 var lap: int = -1
 var stops: int = 0
 var position: int = 0
+## Own control-line crossing required after a Safety Car restart; -1 outside restart.
+var sc_restart_line_s: float = -1.0
 
 # Tyres, fuel, pace
 var compound: int = GtTypes.Compound.SOFT

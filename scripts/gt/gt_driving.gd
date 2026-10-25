@@ -61,7 +61,7 @@ func build_contexts(racing: Array[GtCar]) -> Dictionary:
 		var lead: Dictionary = {}
 		if lead_car != null:
 			var lap_diff: int = roundi((lead_car.s - car.s) / length)
-			lead = {"car": lead_car, "dist": closest, "lapped_ahead": lap_diff < 0, "lapping_us": lap_diff > 0}
+			lead = {"car": lead_car, "dist": closest, "start_s": lead_car.s, "lapped_ahead": lap_diff < 0, "lapping_us": lap_diff > 0}
 		var behind: Dictionary = {}
 		if behind_car != null:
 			behind = {"car": behind_car, "dist": closest_behind, "lapping_us": (behind_car.s - car.s) > length - 40.0}
@@ -315,6 +315,20 @@ func update_car(car: GtCar, ctx: Variant, dt: float) -> void:
 	var a_long: float = (car.v - previous_v) / maxf(dt, 1.0e-4)
 	var ds: float = car.v * dt
 	car.s += ds
+	if under_caution and car.pit == null and not lead.is_empty():
+		var predecessor: GtCar = lead["car"]
+		if predecessor.pit == null and not predecessor.is_dnf:
+			var front_progress: float = maxf(0.0, predecessor.s - float(lead["start_s"]))
+			var allowed: float = maxf(0.0, float(lead["dist"]) + front_progress - GtTypes.CAR_LENGTH_M - 1.0)
+			car.s = minf(car.s, car.prev_s + allowed)
+			car.v = minf(car.v, maxf(0.0, (car.s - car.prev_s) / dt))
+			ds = car.s - car.prev_s
+	if car.pit == null and race.sc_blocks_car(car):
+		var sc_gap: float = fposmod(float(race.safety_car["s"]) - car.prev_s, track.length)
+		if sc_gap < 30.0:
+			car.s = minf(car.s, car.prev_s + maxf(0.0, sc_gap - 8.0))
+			car.v = minf(car.v, maxf(0.0, (car.s - car.prev_s) / dt))
+			ds = car.s - car.prev_s
 	if car.pit != null and _teammate_ahead != null and car.pit.phase != GtTypes.PitPhase.OUT and car.pit.phase != GtTypes.PitPhase.EXIT:
 		if car.s > _teammate_ahead.s - 7.5:
 			car.s = _teammate_ahead.s - 7.5
@@ -407,14 +421,19 @@ func _apply_flags(car: GtCar, lead: Dictionary, ideal_lateral: float) -> void:
 		car.pass_timer = 0.0
 		car.defend_timer = 0.0
 		car.overtake_phase = GtTypes.Overtake.NONE
-	elif flag == GtTypes.Flag.SC:
-		_target = minf(_target, 31.0)
+	elif flag == GtTypes.Flag.SC or race.restart_pending(car):
+		_target = minf(_target, 110.0 / 3.6)
+		# Hold the queue leader's pace even while the deployed SC is beyond the local 24 m sensor.
+		if car.position == 1 and int(race.safety_car["phase"]) == GtTypes.SafetyCarPhase.DEPLOYED:
+			_target = minf(_target, 27.0)
+		elif car.position == 1:
+			_target = minf(_target, 27.0 * GtTypes.PACE_SPEED_MULT[car.pace_mode])
 		car.pass_timer = 0.0
 		car.defend_timer = 0.0
 		car.overtake_phase = GtTypes.Overtake.NONE
 		_target_lateral = ideal_lateral * 0.35
-		var gap_to_sc: float = float(race.safety_car["s"]) - car.s
-		if gap_to_sc > -5.0 and gap_to_sc < 24.0:
+		var gap_to_sc: float = fposmod(float(race.safety_car["s"]) - car.s, race.track.length)
+		if race.sc_blocks_car(car) and gap_to_sc < 24.0:
 			_target = minf(_target, maxf(0.0, float(race.safety_car["v"]) * 0.90) if gap_to_sc < 11.0 else float(race.safety_car["v"]))
 		if not lead.is_empty() and float(lead["dist"]) < 14.0:
 			var ahead: GtCar = lead["car"]

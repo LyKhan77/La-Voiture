@@ -426,10 +426,17 @@ func _test_safety_car_deployed(official: SafetyCarChassis, race: GtRace) -> void
 
 func _test_safety_car_in_this_lap(official: SafetyCarChassis, race: GtRace, vfx: RaceVfx) -> void:
 	race.race_control["sc_laps_remaining"] = 0
-	race.step()
+	race.race_control["timer"] = 0.0
+	race.safety_car["s"] = floorf(float(race.safety_car["s"]) / race.track.length) * race.track.length + 1000.0
+	for index: int in range(race.cars.size()):
+		var car: GtCar = race.cars[index]
+		car.s = float(race.safety_car["s"]) - 14.0 - float(index) * 14.0
+		car.is_cleared = car.is_dnf
+		car.spin_timer = 0.0
+	race._update_race_control(0.0)
 	vfx.update(FRAME)
 	official.advance(0.3)
-	check(int(race.safety_car["phase"]) == Types.SafetyCarPhase.IN_THIS_LAP and official.strobe_mode == SafetyCarChassis.StrobeMode.GREEN,
-		"safety car: IN_THIS_LAP switches the lightbar to green")
-	check(_lit(official.amber_leds).count(true) == 0 and _lit(official.green_leds).count(false) == 0 and official.green_leds.size() == 2,
-		"safety car: IN_THIS_LAP kills the amber strobe and holds both green lights solid")
+	check(int(race.safety_car["phase"]) == Types.SafetyCarPhase.IN_THIS_LAP and official.strobe_mode == SafetyCarChassis.StrobeMode.OFF,
+		"safety car: IN_THIS_LAP switches the lightbar off")
+	check(_lit(official.amber_leds).count(true) == 0 and _lit(official.green_leds).count(true) == 0,
+		"safety car: withdrawal extinguishes amber; green is not a restart signal")

@@ -107,6 +107,7 @@ func _ready() -> void:
 	camera_director.set_target(actor_of(followed_id))
 	vfx.setup(self)
 	vfx.update(0.0)
+	race.flag_changed.connect(_on_race_flag_changed)
 	hud.bind(self)
 	if race_config != null:
 		SettingsScript.apply_to_tree(self)
@@ -188,9 +189,9 @@ func step(delta: float) -> void:
 		actor.present(alpha, delta, spin_scale, audible)
 		_present_pit(actor)
 	_update_pit_crews(delta)
-	_update_cameras(delta)
 	_update_podium(delta)
-	vfx.update(delta)
+	vfx.update(delta, alpha)
+	_update_cameras(delta)
 	# After RaceVfx: the set lighting scales the sun, ambient and sky values it just wrote.
 	environment.update(delta, race)
 	hud.update(delta)
@@ -240,6 +241,14 @@ func _present_pit(actor: ActorScript) -> void:
 
 
 # --- start lights ----------------------------------------------------------------
+
+func _on_race_flag_changed(flag: int, _message: String) -> void:
+	if flag == Types.Flag.SC and camera_director.safety_car_actor != vfx.safety_car_actor:
+		camera_director.trigger_safety_car_cut(vfx.safety_car_actor, 4.0)
+	elif flag == Types.Flag.GREEN:
+		camera_director.safety_car_cut_s = 0.0
+		camera_director.safety_car_actor = null
+
 
 func _on_light_lit(count: int) -> void:
 	gantry.set_lights(count)
