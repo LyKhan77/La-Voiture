@@ -27,6 +27,17 @@ const Liveries := preload("res://scripts/car/team_liveries.gd")
 const FigureScript := preload("res://scripts/car/pit_crew_figure.gd")
 const MeshBatchScript := preload("res://scripts/world/mesh_batch.gd")
 
+const PitCrewMasterScene := preload("res://assets/characters/pitcrew/pitcrew_master.glb")
+const PitCrewUniformShader := preload("res://shaders/pit_crew_uniform.gdshader")
+const PitCrewAlbedoTex := preload("res://assets/characters/pitcrew/textures/base_color.png")
+const PitCrewNormalTex := preload("res://assets/characters/pitcrew/textures/normal.png")
+
+const WheelGunScene := preload("res://assets/props/wheel_gun.glb")
+const QuickJackScene := preload("res://assets/props/quick_jack.glb")
+const FuelNozzleScene := preload("res://assets/props/fuel_nozzle.glb")
+const LollipopBoardScene := preload("res://assets/props/lollipop_board.glb")
+const FireExtinguisherScene := preload("res://assets/props/fire_extinguisher.glb")
+
 const PIT_GUN_STREAM := preload("res://assets/audio/sfx/pit_gun.wav")
 
 ## People per team by role; the garage's standing crew (PitLaneComplex.standby_roles) is the same set.
@@ -71,6 +82,21 @@ const TYRE_WIDTH_M: float = 0.3
 const COMPOUND_COLORS: Array[Color] = [Color("#e0212e"), Color("#ffd400"), Color("#f4f5f7"), Color("#2f6fe0")]
 const NEUTRAL_RIM := Color("#6b7080")
 const JACK_REACH_M: float = 2.1
+## Extremal boot vertices of the master mesh, sampled across all four clips at 30 Hz.
+## ponytail: tied to this master topology; resample with scratch/calibrate_pitcrew_soles.gd if it changes.
+const SOLE_VERTICES: Array[int] = [5416, 8760, 12883, 7711, 4978, 145, 8758, 2273, 4975, 4979, 7428, 8592, 4224, 4228, 8587, 8574]
+const ANIMATION_BLEND_S: float = 0.18
+
+## Bend the torso toward carried equipment before arm IK; feet keep their authored locomotion.
+class CarryPose extends SkeletonModifier3D:
+	var spine: int = -1
+	var lean: float = 0.65
+
+	func _process_modification_with_delta(_delta: float) -> void:
+		var skeleton: Skeleton3D = get_skeleton()
+		var pose: Transform3D = skeleton.get_bone_global_pose(spine)
+		pose.basis = Basis(Vector3.RIGHT, lean) * pose.basis
+		skeleton.set_bone_global_pose(spine, pose)
 
 class Job extends RefCounted:
 	var car_id: int = 0
@@ -103,12 +129,21 @@ class Member extends RefCounted:
 	var ready: Vector3 = Vector3.ZERO # waiting spot (the end of the route)
 	var work: Vector3 = Vector3.ZERO # working spot beside the stopped car
 	var work_blend: float = 0.0 # 0 = waiting, 1 = working
+	var service_blend: float = 0.0
 	var facing: float = 0.0 # yaw at the ready and working spots (toward the car)
 	var yaw: float = 0.0
 	var speed: float = WALK_SPEED_MPS
 	var tyre: MeshInstance3D # the fresh tyre a handler carries
 	var pole: Node3D # the lollipop man's board
 	var disc: MeshInstance3D
+	var character_model: Node3D
+	var anim_player: AnimationPlayer
+	var tool_prop: Node3D
+	var skeleton: Skeleton3D
+	var arm_ik: TwoBoneIK3D
+	var grips: Array[Node3D] = []
+	var sole_poses: Array[Transform3D] = []
+	var carry_pose: CarryPose
 
 class Crew extends RefCounted:
 	var team: int = 0
@@ -128,6 +163,13 @@ var _tyre_meshes: Dictionary = {}
 var _clock: float = 0.0
 var _gun_players: Array[AudioStreamPlayer3D] = []
 var _next_gun: int = 0
+var _uniforms: Dictionary = {}
+var _sole_points: PackedVector3Array = PackedVector3Array()
+var _sole_bones: PackedInt32Array = PackedInt32Array()
+var _sole_weights: PackedFloat32Array = PackedFloat32Array()
+var _bind_poses: Array[Transform3D] = []
+var _bind_bones: Array[int] = []
+var _clips_prepared: bool = false
 
 
 func setup(p_pit_lane: PitLaneScript, p_wheel_scenes: Array[PackedScene]) -> void:
@@ -277,10 +319,81 @@ func _make_member(crew: Crew, role: int, index: int, slot: int, color: Color) ->
 	node.add_child(body)
 	var hands := Node3D.new()
 	hands.name = "Hands"
-	hands.position = Vector3(0.0, 0.7, -0.5)
+	hands.position = Vector3(0.0, 0.75, -0.55)
 	node.add_child(hands)
 	crew.root.add_child(node)
 	member.node = node
+
+	# Instantiate master anime rigged character model
+	if PitCrewMasterScene != null:
+		var model: Node3D = PitCrewMasterScene.instantiate() as Node3D
+		model.name = "PitCrewModel"
+		# Face towards -Z (Godot standard forward direction)
+		model.rotation.y = PI
+		node.add_child(model)
+		member.character_model = model
+		# Hide low-poly box fallback
+		body.visible = false
+
+		var mesh_inst: MeshInstance3D = model.find_child("char1", true, false) as MeshInstance3D
+		if mesh_inst != null:
+			if not _uniforms.has(color):
+				var mat := ShaderMaterial.new()
+				mat.shader = PitCrewUniformShader
+				mat.set_shader_parameter("albedo_texture", PitCrewAlbedoTex)
+				mat.set_shader_parameter("normal_texture", PitCrewNormalTex)
+				mat.set_shader_parameter("team_color", color)
+				mat.set_shader_parameter("accent_color", Color.WHITE)
+				mat.set_shader_parameter("suit_color_strength", 1.0)
+				mat.set_shader_parameter("rim_color", color)
+				_uniforms[color] = mat
+			mesh_inst.material_override = _uniforms[color]
+
+		var ap: AnimationPlayer = model.find_child("AnimationPlayer", true, false) as AnimationPlayer
+		if ap != null:
+			member.anim_player = ap
+			ap.playback_default_blend_time = ANIMATION_BLEND_S
+			for clip: StringName in [&"idle", &"walk", &"run", &"tire_service"]:
+				ap.get_animation(clip).loop_mode = Animation.LOOP_LINEAR
+				if not _clips_prepared:
+					var animation: Animation = ap.get_animation(clip)
+					for track: int in range(animation.get_track_count()):
+						if animation.track_get_type(track) != Animation.TYPE_ROTATION_3D or not String(animation.track_get_path(track)).ends_with(":Hips"):
+							continue
+						# Route yaw owns facing; the source idle turns its hips away from the tools.
+						for key: int in range(animation.track_get_key_count(track)):
+							var rotation: Quaternion = animation.track_get_key_value(track, key)
+							var angles: Vector3 = rotation.get_euler()
+							angles.y = 0.0
+							animation.track_set_key_value(track, key, Quaternion.from_euler(angles))
+			_clips_prepared = true
+			ap.play("idle")
+
+		# Role equipment attachment
+		match role:
+			FigureScript.Role.GUNNER:
+				if WheelGunScene != null:
+					var gun: Node3D = WheelGunScene.instantiate() as Node3D
+					gun.name = "WheelGun"
+					gun.position = Vector3(0.0, 0.85, -0.30)
+					gun.rotation.y = PI
+					node.add_child(gun)
+					member.tool_prop = gun
+			FigureScript.Role.FUELER:
+				if FuelNozzleScene != null:
+					var nozzle: Node3D = FuelNozzleScene.instantiate() as Node3D
+					nozzle.name = "FuelNozzle"
+					nozzle.position = Vector3(0.0, 1.0, -0.30)
+					nozzle.rotation.y = PI
+					node.add_child(nozzle)
+					member.tool_prop = nozzle
+			FigureScript.Role.FIRE:
+				if FireExtinguisherScene != null:
+					var ext: Node3D = FireExtinguisherScene.instantiate() as Node3D
+					ext.name = "FireExtinguisher"
+					ext.position = Vector3(0.30, 0.38, -0.12)
+					node.add_child(ext)
+					member.tool_prop = ext
 	var spot: Vector3 = (READY_SPOTS[role_name] as Array)[index]
 	member.ready = spot
 	member.work = (WORK_SPOTS[role_name] as Array)[index]
@@ -298,8 +411,102 @@ func _make_member(crew: Crew, role: int, index: int, slot: int, color: Color) ->
 		hands.add_child(member.tyre)
 	elif role == FigureScript.Role.LOLLIPOP:
 		_build_lollipop(member)
+	if member.character_model != null:
+		_prepare_rig(member)
 	_place(member, 0.0, true)
 	return member
+
+
+func _play_member(member: Member, clip: StringName) -> void:
+	if member.anim_player != null and member.anim_player.current_animation != clip:
+		member.anim_player.speed_scale = 1.3 if clip == &"walk" else 1.0
+		member.anim_player.play(clip, ANIMATION_BLEND_S)
+
+
+func _prepare_rig(member: Member) -> void:
+	member.skeleton = member.character_model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
+	var mesh: MeshInstance3D = member.character_model.find_child("char1", true, false) as MeshInstance3D
+	if _sole_points.is_empty():
+		var arrays: Array = mesh.mesh.surface_get_arrays(0)
+		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var bones: PackedInt32Array = arrays[Mesh.ARRAY_BONES]
+		var weights: PackedFloat32Array = arrays[Mesh.ARRAY_WEIGHTS]
+		for vertex: int in SOLE_VERTICES:
+			_sole_points.append(vertices[vertex])
+			for influence: int in range(4):
+				_sole_bones.append(bones[vertex * 4 + influence])
+				_sole_weights.append(weights[vertex * 4 + influence])
+		for bind: int in range(mesh.skin.get_bind_count()):
+			_bind_poses.append(mesh.skin.get_bind_pose(bind))
+			_bind_bones.append(member.skeleton.find_bone(mesh.skin.get_bind_name(bind)))
+	member.sole_poses.resize(_bind_poses.size())
+	member.skeleton.skeleton_updated.connect(_ground_member.bind(member))
+
+	var grip_parent: Node3D = member.node
+	var offsets: Array[Vector3] = [Vector3(0.25, 0.95, -0.25), Vector3(-0.25, 0.95, -0.25)]
+	match member.role:
+		FigureScript.Role.GUNNER:
+			grip_parent = member.tool_prop
+			offsets = [Vector3.ZERO, Vector3(0.04, 0.08, 0.10)]
+		FigureScript.Role.HANDLER:
+			grip_parent = member.node.get_node("Hands")
+			offsets = [Vector3(0.22, 0.23, 0.22), Vector3(-0.22, 0.23, 0.22)]
+		FigureScript.Role.FUELER:
+			grip_parent = member.tool_prop
+			offsets = [Vector3(0.0, 0.15, 0.03), Vector3(0.14, 0.0, 0.05)]
+		FigureScript.Role.FIRE:
+			grip_parent = member.tool_prop
+			offsets = [Vector3(0.0, 0.51, -0.04), Vector3(-0.10, 0.30, 0.0)]
+		FigureScript.Role.LOLLIPOP:
+			grip_parent = member.pole
+			offsets = [Vector3.ZERO, Vector3(0.0, -0.18, 0.0)]
+	if member.role in [FigureScript.Role.HANDLER, FigureScript.Role.FUELER, FigureScript.Role.LOLLIPOP, FigureScript.Role.JACK]:
+		member.carry_pose = CarryPose.new()
+		member.carry_pose.spine = member.skeleton.find_bone("Spine02")
+		member.skeleton.add_child(member.carry_pose)
+		member.carry_pose.lean = 0.9 if member.role in [FigureScript.Role.HANDLER, FigureScript.Role.FUELER] else 0.65
+		if member.role == FigureScript.Role.JACK:
+			member.carry_pose.lean = 0.0
+	var ik := TwoBoneIK3D.new()
+	ik.name = "ToolGripIK"
+	member.skeleton.add_child(ik)
+	member.arm_ik = ik
+	ik.setting_count = 1 if member.role == FigureScript.Role.FIRE else 2
+	ik.active = member.role != FigureScript.Role.JACK
+	for hand: int in range(ik.setting_count):
+		var grip := Node3D.new()
+		grip.name = "RightGrip" if hand == 0 else "LeftGrip"
+		grip_parent.add_child(grip)
+		grip.position = offsets[hand]
+		member.grips.append(grip)
+		var pole := Node3D.new()
+		pole.name = "RightElbow" if hand == 0 else "LeftElbow"
+		member.node.add_child(pole)
+		pole.position = Vector3(0.65 if hand == 0 else -0.65, 0.85, 0.12)
+		var side: String = "Right" if hand == 0 else "Left"
+		ik.set_root_bone_name(hand, side + "Arm")
+		ik.set_middle_bone_name(hand, side + "ForeArm")
+		ik.set_end_bone_name(hand, side + "Hand")
+		ik.set_target_node(hand, ik.get_path_to(grip))
+		ik.set_pole_node(hand, ik.get_path_to(pole))
+	member.anim_player.advance(0.0)
+	_ground_member(member)
+
+
+## Skin only sixteen measured support vertices; reuse pose storage instead of reading the mesh each frame.
+func _ground_member(member: Member) -> void:
+	var frame: Transform3D = member.node.global_transform.affine_inverse() * member.skeleton.global_transform
+	for bind: int in range(_bind_poses.size()):
+		member.sole_poses[bind] = frame * member.skeleton.get_bone_global_pose(_bind_bones[bind]) * _bind_poses[bind]
+	var minimum: float = INF
+	for vertex: int in range(_sole_points.size()):
+		var height: float = 0.0
+		for influence: int in range(4):
+			var index: int = vertex * 4 + influence
+			if _sole_weights[index] > 0.0:
+				height += (member.sole_poses[_sole_bones[index]] * _sole_points[vertex]).y * _sole_weights[index]
+		minimum = minf(minimum, height)
+	member.character_model.position.y -= minimum
 
 
 ## Straight to the spot on the garage side; around the nose or the tail to the lane side.
@@ -335,10 +542,19 @@ func _place(member: Member, delta: float, outbound: bool) -> void:
 		remaining -= length
 	if not walking:
 		heading = member.facing if member.walked >= member.route_length else _yaw_for(Vector3(-1.0, 0.0, 0.0))
-	position.y = absf(sin(member.walked * 3.4)) * 0.05 if walking else 0.0
+	position.y = 0.0
 	member.node.position = position
 	member.yaw = lerp_angle(member.yaw, heading, minf(1.0, delta * TURN_RATE)) if delta > 0.0 else heading
 	member.node.rotation = Vector3(0.0, member.yaw, 0.0)
+	if member.anim_player != null:
+		if walking:
+			if member.anim_player.current_animation != "walk":
+				member.anim_player.play("walk")
+				member.anim_player.speed_scale = 1.3
+		else:
+			if member.anim_player.current_animation != "idle":
+				member.anim_player.play("idle")
+				member.anim_player.speed_scale = 1.0
 
 
 ## True while someone still stands at his working spot: the crew steps back to its waiting spots before
@@ -353,16 +569,22 @@ func _stepping_out_of_work(crew: Crew) -> bool:
 ## A crew that is out turns to the car. While it waits it shifts its weight; once the car has stopped
 ## (a job runs) it steps in from its waiting spot to its working spot, and steps back when the car is gone.
 func _wait_or_work(crew: Crew, delta: float, working: bool) -> void:
+	var servicing: bool = false
+	for job: Job in jobs:
+		if job.team == crew.team:
+			servicing = job.phase == Phase.SERVICING
 	for member: Member in crew.members:
 		member.work_blend = move_toward(member.work_blend, 1.0 if working else 0.0, delta * WORK_STEP_RATE)
+		member.service_blend = move_toward(member.service_blend, 1.0 if servicing else 0.0, delta / ANIMATION_BLEND_S)
 		var spot: Vector3 = member.ready.lerp(member.work, smoothstep(0.0, 1.0, member.work_blend))
 		member.node.position.x = spot.x
 		member.node.position.z = spot.z
 		member.yaw = lerp_angle(member.yaw, member.facing, minf(1.0, delta * TURN_RATE))
 		member.node.rotation.y = member.yaw
 		if not working:
-			member.node.rotation.x = sin(_clock * 1.3 + float(member.slot) * 1.7) * 0.025
+			member.node.rotation.x = 0.0
 			member.node.position.y = 0.0
+			_play_member(member, &"idle")
 
 
 # --- sim-driven presentation -------------------------------------------------
@@ -380,6 +602,8 @@ func present(car_id: int, team: int, actor: Node3D, compound: int, in_service: b
 	if job == null:
 		job = _open_job(car_id, team, actor, compound)
 	job.lift_m = lift_m
+	if job.chassis != null:
+		job.chassis.position.y = lift_m
 	if progress < 0.09:
 		job.phase = Phase.LIFTING
 	elif progress < 0.86:
@@ -388,13 +612,13 @@ func present(car_id: int, team: int, actor: Node3D, compound: int, in_service: b
 		job.phase = Phase.LOWERING
 	else:
 		job.phase = Phase.RELEASE
-	_animate_crew(job, progress)
 	if job.phase == Phase.SERVICING:
 		_service_wheels_at(job, clampf((progress - 0.09) / 0.77, 0.0, 1.0))
 	elif job.phase == Phase.RELEASE:
 		_animate_lollipop(job, clampf((progress - 0.94) / 0.06, 0.0, 1.0))
-	if job.chassis != null:
-		job.chassis.position.y = lift_m
+	elif job.phase == Phase.LIFTING:
+		_animate_lollipop(job, 1.0 - clampf(progress / 0.09, 0.0, 1.0))
+	_animate_crew(job, progress)
 
 
 func _open_job(car_id: int, team: int, actor: Node3D, compound: int) -> Job:
@@ -451,6 +675,10 @@ func _assign_corners(job: Job, crew: Crew) -> void:
 					best_distance = distance
 			best.corner = corner
 			taken.append(best)
+			var side: float = signf(wheels[corner].x)
+			best.work = Vector3(wheels[corner].x + side * (0.58 if role == FigureScript.Role.GUNNER else 1.12), 0.0,
+				wheels[corner].z + (0.0 if role == FigureScript.Role.GUNNER else 0.72))
+			best.facing = _yaw_for(Vector3(-side, 0.0, 0.0))
 
 
 func _close(job: Job) -> void:
@@ -466,6 +694,16 @@ func _close(job: Job) -> void:
 		for member: Member in crew.members:
 			member.node.rotation.x = 0.0
 			member.node.position.y = 0.0
+			member.service_blend = 0.0
+			_play_member(member, &"idle")
+			if member.role == FigureScript.Role.GUNNER:
+				member.tool_prop.position = Vector3(0.0, 0.85, -0.30)
+				member.tool_prop.rotation = Vector3(0.0, PI, 0.0)
+			elif member.role == FigureScript.Role.JACK:
+				member.arm_ik.active = false
+				member.carry_pose.lean = 0.0
+			elif member.pole != null:
+				member.pole.rotation.x = 0.0
 			if member.tyre != null:
 				member.tyre.visible = false
 	jobs.erase(job)
@@ -491,7 +729,6 @@ func _service_wheels_at(job: Job, t: float) -> void:
 			wheel_swapped.emit(job.car_id, corner, job.compound)
 			if _all(job.wheels_on) and job.actor.has_method("wheels_swapped"):
 				job.actor.call("wheels_swapped", job.compound)
-	_animate_crew(job, t)
 
 
 ## The pneumatic gun of the mechanic at `corner`, heard from his spot at the box.
@@ -526,14 +763,20 @@ func _all(flags: Array[bool]) -> bool:
 
 
 func _carry_away(job: Job, corner: int, wheel: Node3D) -> void:
-	var member: Node3D = job.crew_members[corner] if corner < job.crew_members.size() else null
+	var crew: Crew = _crews.get(job.team) as Crew
+	var member: Member = null
+	if crew != null:
+		for candidate: Member in crew.members:
+			if candidate.role == FigureScript.Role.HANDLER and candidate.corner == corner:
+				member = candidate
+				break
 	if member == null:
 		wheel.queue_free()
 		return
-	var hold := member.get_node("Hands") as Node3D
+	var hold := member.node.get_node("Hands") as Node3D
 	hold.add_child(wheel)
 	wheel.transform = Transform3D.IDENTITY
-	wheel.scale = Vector3.ONE * 0.8
+	member.tyre.visible = false
 	job.carried[corner] = wheel
 
 
@@ -550,17 +793,30 @@ func _spawn_jacks(job: Job, crew: Crew) -> void:
 		jack.mesh = piston
 		jack.material_override = paint
 		crew.root.add_child(jack)
-		jack.position = Vector3(0.0, 0.25, end)
+		jack.position = Vector3(0.0, 0.05, end)
 		job.jacks.append(jack)
+		if QuickJackScene != null:
+			var qj: Node3D = QuickJackScene.instantiate() as Node3D
+			qj.name = "QuickJackModel"
+			qj.rotation.y = 0.0 if end < 0.0 else PI
+			jack.add_child(qj)
+			qj.position.y = -0.05
+			jack.transparency = 1.0
 
 
 ## The board on a pole, lowered across the nose until the stop is done.
 func _build_lollipop(member: Member) -> void:
 	member.pole = Node3D.new()
 	member.pole.name = "Pole"
-	member.pole.position = Vector3(0.45, 0.9, -0.1)
+	member.pole.position = Vector3(0.0, 1.0, -0.35)
 	member.node.add_child(member.pole)
-	ToonMaterials.box(member.pole, "Stick", Vector3(0.05, 1.7, 0.05), Vector3(0.0, 0.85, 0.0), ToonMaterials.make(Color("#d9d9df")))
+	if LollipopBoardScene != null:
+		var lp: Node3D = LollipopBoardScene.instantiate() as Node3D
+		lp.name = "LollipopModel"
+		lp.position.y = -0.95
+		member.pole.add_child(lp)
+	else:
+		ToonMaterials.box(member.pole, "Stick", Vector3(0.05, 1.7, 0.05), Vector3(0.0, 0.85, 0.0), ToonMaterials.make(Color("#d9d9df")))
 	member.disc = MeshInstance3D.new()
 	member.disc.name = "Disc"
 	var disc := CylinderMesh.new()
@@ -572,8 +828,10 @@ func _build_lollipop(member: Member) -> void:
 	member.disc.material_override = ToonMaterials.emissive(Color("#e0212e"), 1.5)
 	member.disc.position = Vector3(0.0, 1.75, 0.0)
 	member.disc.rotation.x = PI * 0.5
+	if LollipopBoardScene != null:
+		member.disc.transparency = 1.0
 	member.pole.add_child(member.disc)
-	member.pole.rotation.x = deg_to_rad(-80.0)
+	member.pole.rotation.x = 0.0
 
 
 ## A fresh tyre of `compound` (-1: not known yet) as a handler holds it, axis across his body.
@@ -592,40 +850,51 @@ func _tyre_mesh(compound: int) -> ArrayMesh:
 
 
 ## Each role works its part of the stop; `t` is service progress 0..1.
-func _animate_crew(job: Job, t: float) -> void:
+func _animate_crew(job: Job, _t: float) -> void:
 	var crew: Crew = _crews.get(job.team) as Crew
 	if crew == null:
 		return
 	var servicing: bool = job.phase == Phase.SERVICING
-	var jacking: bool = job.phase == Phase.LIFTING or job.phase == Phase.LOWERING
 	for member: Member in crew.members:
-		var lean: float = 5.0
-		var bob: float = 0.0
-		match member.role:
-			FigureScript.Role.GUNNER:
-				lean = 30.0 if servicing else 6.0
-				bob = sin(t * 38.0 + float(member.corner)) * 0.02 if servicing else 0.0
-			FigureScript.Role.HANDLER:
-				var fitting: bool = job.wheels_off[member.corner] and not job.wheels_on[member.corner]
-				lean = 16.0 if fitting else 4.0
-				member.tyre.visible = not job.wheels_on[member.corner]
-			FigureScript.Role.JACK:
-				lean = 12.0 if jacking else 5.0
-				bob = absf(sin(t * 42.0 + float(member.slot))) * 0.05 if jacking else 0.0
-			FigureScript.Role.FUELER:
-				lean = 14.0 if servicing else 4.0
-			FigureScript.Role.FIRE:
-				lean = 0.0
-		member.node.rotation.x = deg_to_rad(-lean)
-		member.node.position.y = bob
+		member.node.rotation.x = 0.0
+		member.node.position.y = 0.0
+		if member.role == FigureScript.Role.GUNNER:
+			_play_member(member, &"tire_service" if servicing else &"idle")
+			if job.chassis != null:
+				var socket: Marker3D = job.chassis._wheel_sockets[member.corner]
+				var target: Vector3 = socket.global_position
+				var forward: Vector3 = -member.node.global_basis.z
+				var rest: Vector3 = member.node.to_global(Vector3(0.0, 0.85, -0.30))
+				var grip: Vector3 = target - forward * 0.205 - Vector3.UP * 0.08
+				member.tool_prop.global_position = rest.lerp(grip, member.service_blend)
+				member.tool_prop.look_at(member.tool_prop.global_position + forward, Vector3.UP, true)
+		elif member.role == FigureScript.Role.HANDLER:
+			member.tyre.visible = not job.wheels_on[member.corner] and job.carried[member.corner] == null
+		elif member.role == FigureScript.Role.FUELER:
+			member.work = Vector3(1.6, 0.0, 0.8)
+			member.facing = _yaw_for(Vector3.LEFT)
 	for jack: MeshInstance3D in job.jacks:
 		# The jack head follows the underside of the car: 25 cm up plus the lift.
-		var reach: float = 0.25 + job.lift_m
-		jack.scale.y = reach / 0.5
-		jack.position.y = reach * 0.5
+		# The real low-profile lever pivots around its wheel axle, never scales the whole GLB.
+		jack.rotation.x = -asin(clampf(job.lift_m / 0.32, 0.0, 0.8)) * (-1.0 if jack.position.z > 0.0 else 1.0)
+	for member: Member in crew.members:
+		if member.role != FigureScript.Role.JACK:
+			continue
+		var jacking: bool = job.phase == Phase.LIFTING or job.phase == Phase.LOWERING
+		_play_member(member, &"tire_service" if jacking else &"idle")
+		member.carry_pose.lean = 0.9 if jacking else 0.0
+		member.arm_ik.active = jacking
+		member.arm_ik.influence = clampf(1.0 - job.lift_m / 0.10, 0.0, 1.0)
+		var jack: MeshInstance3D = job.jacks[0 if member.node.name == &"Jack0" else 1]
+		for hand: int in range(member.grips.size()):
+			member.grips[hand].global_position = jack.to_global(Vector3(0.14 if hand == 0 else -0.14, 0.58, -1.15 if jack.position.z < 0.0 else 1.15))
 
 
 func _animate_lollipop(job: Job, amount: float) -> void:
 	var pole := job.lollipop.get_node("Pole") as Node3D
 	pole.rotation.x = lerpf(deg_to_rad(-80.0), 0.0, smoothstep(0.0, 1.0, amount))
-	job.lollipop_disc.material_override = ToonMaterials.emissive(Color("#26e07a") if amount > 0.5 else Color("#e0212e"), 1.5)
+	var release: float = amount if job.phase == Phase.RELEASE else 0.0
+	var material: StandardMaterial3D = job.lollipop_disc.material_override as StandardMaterial3D
+	material.albedo_color = Color("#26e07a") if release > 0.5 else Color("#e0212e")
+	material.emission = material.albedo_color
+	pole.get_node("LollipopModel").rotation.y = PI * smoothstep(0.0, 1.0, release)
