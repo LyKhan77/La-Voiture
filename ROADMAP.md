@@ -114,3 +114,13 @@
   - [x] Bukti 1080p corrected exit/entry dan video 16 detik native 1920×1080 (offline fixed 60 FPS); smoke nyata 20 mobil / 3 lap / High / storm malam → podium → HQ, **0 orphan node**.
   - [x] **DoD performa 60 FPS CLOSED / PASS:** Investigasi mendalam menemukan loop 752 panggilan `draw_circle()` per frame pada `SafetyCarBanner` menguras GPU/CPU hingga 105 ms (9.5 FPS). Setelah dioptimasi dengan tiled `ImageTexture`, performa melonjak ke rata-rata **56.37 FPS**, p95 **26.18 ms**, max **34.30 ms**. Seluruh asersi fungsional dan performa native smoke PASS dengan exit code 0.
   - Rencana: `docs/superpowers/plans/2026-10-25-safety-car-smoothness-and-baseline-correction-plan.md`. Laporan lengkap: `executor-report/reports/FASE-11-LANGKAH-5-SAFETY-CAR-PROCEDURE-REPORT.md`.
+
+- [x] **Fase 11 / Langkah 6: Dinamika Insiden GT3, Panel Bendera Digital & Steward Penalty**
+  - [x] Slide snap-oversteer teredam (puncak 0,45 rad, tanpa putaran 360°), opposite lock roda depan, guncangan suspensi; match collider 190 pasangan utuh.
+  - [x] 8 panel bendera LED dalam satu `MultiMeshInstance3D` (hijau redup / chevron kuning 4 Hz / `SC`), mengikuti `race_control["flag"]` dan sektor.
+  - [x] Bangkai DNF (asap, hazard, sandar 17,5°) dan evakuasi fade 2 s saat Safety Car `IN_THIS_LAP` + radio Race Control; `race.cars` tetap 20.
+  - [x] `GtStewards`: investigasi 10 s → +5 s atau NFA; banner HUD; penalti dilayani di box atau ditambah ke waktu dan urutan podium.
+  - [x] Suara steward (beep + palu), klip suara radio evakuasi dan balon radio manga di sudut bawah (tidak lagi menimpa alert).
+  - [x] Review independen fresh-context: 2 Important + 8 Minor, **semuanya diperbaiki** dengan tes yang gagal dulu.
+  - [x] `tests/test_track_incidents_and_stewards.gd` 55 assertions; **35/35 suite headless, 909 assertions, 0 FAIL**. Smoke native High/1080p storm malam 3 lap 20 mobil dengan insiden: **55,38 FPS, p95 25,79 ms**, 0 orphan (tren turun dari 60,05; lihat laporan bagian 4). Belum di-commit.
+  - Laporan: `executor-report/reports/FASE-11-LANGKAH-6-INCIDENTS-AND-STEWARDING-REPORT.md`; bukti visual `executor-report/screenshots/phases/phase-11-step-6-*.png`.

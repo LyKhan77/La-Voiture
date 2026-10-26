@@ -341,9 +341,14 @@ func _build_standee(place: int, car: GtCar) -> Control:
 	var team: Label = _text(standee, "%s // %s" % [car.code, car.team_name.to_upper()], Vector2(172.0, 116.0), 16, T.TEXT_PRIMARY, UI.HEADER)
 	team.size = Vector2(176.0, 22.0)
 	team.clip_text = true
-	var time_label: Label = _text(standee, format_time(car.finished_at), Vector2(172.0, 148.0), 20, T.ACCENT_ACID_LIME)
+	var time_label: Label = _text(standee, format_time(race.classified_time(car)), Vector2(172.0, 148.0), 20, T.ACCENT_ACID_LIME)
 	time_label.size = Vector2(176.0, 28.0)
 	time_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	var penalty_s: float = car.penalty_owed_s
+	if penalty_s > 0.0:
+		var penalty_tag: Label = _text(standee, "+%ds PENALTY" % int(penalty_s), Vector2(172.0, 170.0), 14, T.ACCENT_ANIME_CRIMSON, UI.HEADER)
+		penalty_tag.size = Vector2(176.0, 20.0)
+		penalty_tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	var driver: Label = _text(standee, car.driver_name.to_upper(), Vector2(14.0, 192.0), 28, T.TEXT_PRIMARY, UI.DISPLAY)
 	driver.size = Vector2(STANDEE_SIZE.x - 28.0, 34.0)
 	driver.clip_text = true

@@ -14,5 +14,8 @@ var wheel_swap_progress: float = 0.0
 var repairing_damage: bool = false
 var initial_damage: float = 0.0
 var initial_fuel: float = 0.0
+## Steward penalty taken on arrival in the box: the stopped car waits this long before the crew starts work.
+var penalty_hold_s: float = 0.0
+var penalty_taken: bool = false
 ## Total race time the car spent from entry to exit, for the pit wall.
 var elapsed: float = 0.0

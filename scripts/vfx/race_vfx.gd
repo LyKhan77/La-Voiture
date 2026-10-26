@@ -72,6 +72,13 @@ const TIP_STATUS_OPACITY: float = 0.92
 const TIP_STATUS_PAINT: Dictionary = {
 	"HAZARD": Color("#ffaa00"), "PIT": Color("#00f0ff"), "DRS": Color("#00f0ff"), "BRAKE": Color("#ff1e56"),
 }
+## Retired cars: smoke pours from the bonnet, four orange hazard lamps blink at the body corners (actor space, nose is -Z).
+const WRECK_SMOKE_AT := Vector3(0.0, 0.85, -1.2)
+const HAZARD_LAMPS: Array[Vector3] = [Vector3(-0.92, 0.66, -2.0), Vector3(0.92, 0.66, -2.0), Vector3(-0.92, 0.66, 2.05), Vector3(0.92, 0.66, 2.05)]
+const HAZARD_COLOR := Color("#ff8a00")
+const HAZARD_ENERGY: float = 6.0
+const HAZARD_HZ: float = 1.5
+const HAZARD_SIZE_M: float = 0.16
 const WAKES: Array[Vector3] = [Vector3(-0.84, 0.46, -2.4), Vector3(0.84, 0.46, -2.4)]
 const SPARK_POOL: int = 10
 const SMOKE_LAUNCH_V: float = 18.0
@@ -86,6 +93,8 @@ var rain: MangaRain3D
 var track_material: ShaderMaterial
 var sprays: Dictionary = {} # car id -> MangaRoadSpray
 var smokes: Dictionary = {} # car id -> Array[GPUParticles3D]
+var wreck_smokes: Dictionary = {} # car id -> GPUParticles3D, made the first time that car retires
+var wreck_hazards: Dictionary = {} # car id -> Array[MeshInstance3D], the four blinking lamps
 var wakes: Dictionary = {} # car id -> Array[MeshInstance3D]
 var flames: Dictionary = {} # car id -> Array[MeshInstance3D]
 var tips: Dictionary = {} # car id -> Node3D holding the Code and Status sprites
@@ -677,6 +686,7 @@ func _update_car_effects(actor: ActorScript, delta: float, followed: bool) -> vo
 	_update_lamp_vfx(actor)
 
 	_update_tip(actor, followed, delta)
+	_update_wreck_effects(actor)
 
 	# A burst rim grinds sparks on the asphalt.
 	if car.is_punctured and car.v > 2.0 and randf() < 0.65:
@@ -684,6 +694,64 @@ func _update_car_effects(actor: ActorScript, delta: float, followed: bool) -> vo
 		var wheel_z: float = -1.19 if car.punctured_wheel == GtTypes.Wheel.FL or car.punctured_wheel == GtTypes.Wheel.FR else 1.26
 		var local := Vector3(-0.98 if wheel_index == 0 else 0.98, 0.1, wheel_z)
 		_spark(actor.global_transform * local)
+
+
+# --- wreckage ------------------------------------------------------------------------
+
+## Built the first time a car retires (a healthy field carries none of it). Smoke rises from the bonnet; the
+## hazard lamps are small unshaded emissive beads, so they cost no lights.
+func _build_wreck_effects(actor: ActorScript) -> void:
+	var id: int = actor.car.id
+	var smoke := SmokeScene.instantiate() as GPUParticles3D
+	smoke.name = "WreckSmoke"
+	smoke.position = WRECK_SMOKE_AT
+	smoke.draw_pass_1 = _smoke_mesh
+	var plume := smoke.process_material.duplicate() as ParticleProcessMaterial
+	plume.direction = Vector3.UP
+	plume.spread = 18.0
+	plume.initial_velocity_min = 1.2
+	plume.initial_velocity_max = 2.6
+	plume.gravity = Vector3(0.0, 0.8, 0.0)
+	plume.anim_offset_min = 0.0
+	plume.anim_offset_max = 1.0
+	plume.angle_min = -180.0
+	plume.angle_max = 180.0
+	smoke.process_material = plume
+	smoke.lifetime = 1.6
+	actor.add_child(smoke)
+	wreck_smokes[id] = smoke
+	var bead := SphereMesh.new()
+	bead.radius = HAZARD_SIZE_M * 0.5
+	bead.height = HAZARD_SIZE_M
+	var material: StandardMaterial3D = _lamp(HAZARD_COLOR, HAZARD_ENERGY)
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	var lamps: Array[MeshInstance3D] = []
+	for offset: Vector3 in HAZARD_LAMPS:
+		var lamp := MeshInstance3D.new()
+		lamp.name = "HazardLamp"
+		lamp.mesh = bead
+		lamp.material_override = material
+		lamp.position = offset
+		lamp.visible = false
+		lamp.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		actor.add_child(lamp)
+		lamps.append(lamp)
+	wreck_hazards[id] = lamps
+
+
+## Smoke while the wreck is on the track, hazards blinking in step; both stop once the marshals start the recovery.
+func _update_wreck_effects(actor: ActorScript) -> void:
+	var car: GtCar = actor.car
+	if not car.is_dnf:
+		return
+	var id: int = car.id
+	if not wreck_smokes.has(id):
+		_build_wreck_effects(actor)
+	var on_track: bool = car.evac_started_at < 0.0
+	(wreck_smokes[id] as GPUParticles3D).emitting = on_track
+	var lit: bool = on_track and sin(_clock * TAU * HAZARD_HZ) > 0.0
+	for lamp: MeshInstance3D in wreck_hazards[id]:
+		lamp.visible = lit
 
 
 # --- floating tip -----------------------------------------------------------------

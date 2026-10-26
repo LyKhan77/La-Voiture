@@ -49,6 +49,11 @@ const TAIL_NIGHT_ENERGY: float = 1.2
 const TAIL_ATTACK: float = 18.0 # energy per second: a brake light is a switch, not a fade
 const BRAKE_LIGHT_G: float = 0.5
 const NIGHT_LAMPS_ON: float = 0.5
+const SHUDDER_HZ: float = 9.0 # suspension shudder while a car is dragged sideways
+const SHUDDER_ROLL: float = 0.018
+const SHUDDER_PITCH: float = 0.008
+const WRECK_LEAN_RAD: float = deg_to_rad(17.5) # a retired car rests 15-20 degrees off the barrier line
+const WRECK_WALL_M: float = 7.4 # where GtContacts parks a crashed car
 const LAMP_SPREAD: float = 0.24 # lamp anchors sit this share of the body width off the centre line
 
 var car: GtCar
@@ -65,6 +70,9 @@ var night_lights: float = 0.0
 var lamp_anchors: Dictionary = {"tail": [], "head": [], "wing": []}
 
 # Roll, pitch, yaw and steer as (first, second) stage of ease2().
+var _shudder_phase: float = 0.0
+var _fade_alpha: float = 1.0
+var _fade_meshes: Array[MeshInstance3D] = []
 var _roll: Vector2 = Vector2.ZERO
 var _pitch: Vector2 = Vector2.ZERO
 var _yaw: Vector2 = Vector2.ZERO
@@ -108,6 +116,7 @@ func _use_chassis_for(team_id: int) -> void:
 	remove_child(old)
 	old.queue_free()
 	chassis = fresh
+	_fade_meshes.clear()
 	wheel_controllers.clear()
 
 
@@ -150,33 +159,57 @@ func present(alpha: float, dt: float, spin_scale: float = 1.0, audible: bool = t
 	var s: float = lerpf(car.prev_s, car.s, alpha)
 	var lateral: float = lerpf(car.prev_lateral, car.lateral, alpha)
 	var pose: Transform3D = track.point_at(s, lateral)
-	var yaw: float = car.spin_angle
 	if car.spin_timer > 0.0:
-		_yaw = Vector2(car.yaw_offset, car.yaw_offset) # a spin is drawn raw, the heading resumes from the sim value
+		_yaw = Vector2(car.yaw_offset, car.yaw_offset) # a slide is drawn raw, the heading resumes from the sim value
 	else:
-		_yaw = ease2(_yaw, car.yaw_offset, dt)
-		yaw = _yaw.y
+		_yaw = ease2(_yaw, wreck_yaw(car) if car.is_dnf else car.yaw_offset, dt)
+	var yaw: float = _yaw.y
 	pose.basis = pose.basis.rotated(pose.basis.y, -yaw)
 	global_transform = pose
 	if _wheel_compound != car.compound and car.pit == null:
 		mount_wheels(car.compound)
 	_tilt_chassis(dt)
+	_fade_wreck()
 	_animate_wheels(dt, spin_scale)
 	_update_lamps(dt)
 	if audio != null:
 		audio.update_from_car(car, audible)
 
 
+## A retired car rests nose-first against the barrier it hit: the nearer the wall, the nearer to WRECK_LEAN_RAD.
+static func wreck_yaw(retired: GtCar) -> float:
+	return signf(retired.lateral) * WRECK_LEAN_RAD * clampf(absf(retired.lateral) / WRECK_WALL_M, 0.0, 1.0)
+
+
+## Marshals take a recovered wreck away: the whole body fades out (per-mesh transparency) over GtRace.WRECK_FADE_S, then it is hidden.
+func _fade_wreck() -> void:
+	if car.wreck_alpha == _fade_alpha:
+		return
+	_fade_alpha = car.wreck_alpha
+	if _fade_meshes.is_empty():
+		for node: Node in chassis.find_children("*", "MeshInstance3D", true, false):
+			_fade_meshes.append(node as MeshInstance3D)
+	for mesh: MeshInstance3D in _fade_meshes:
+		mesh.transparency = 1.0 - _fade_alpha
+	visible = _fade_alpha > 0.0
+
+
 ## Roll leans the body to the outside of the corner (+ = right turn), pitch dives the nose under braking.
 func _tilt_chassis(dt: float) -> void:
-	var spin_roll: float = sin(car.spin_angle * 2.0) * 0.12 if car.spin_timer > 0.0 else 0.0
+	# Dragged sideways over the asphalt the body shudders on its springs; the sim already supplies the hard roll.
+	var shudder_roll: float = 0.0
+	var shudder_pitch: float = 0.0
+	if car.spin_timer > 0.0:
+		_shudder_phase += dt * SHUDDER_HZ * TAU
+		shudder_roll = sin(_shudder_phase) * SHUDDER_ROLL
+		shudder_pitch = sin(_shudder_phase * 1.37) * SHUDDER_PITCH
 	var puncture_roll: float = 0.0
 	var puncture_pitch: float = 0.0
 	if car.is_punctured and car.punctured_wheel >= 0:
 		puncture_roll = (-1.0 if car.punctured_wheel == GtTypes.Wheel.FL or car.punctured_wheel == GtTypes.Wheel.RL else 1.0) * 0.065
 		puncture_pitch = (1.0 if car.punctured_wheel == GtTypes.Wheel.FL or car.punctured_wheel == GtTypes.Wheel.FR else -1.0) * 0.045
-	_roll = ease2(_roll, (0.08 if car.is_dnf else 0.0) + car.chassis_roll + spin_roll + puncture_roll, dt)
-	_pitch = ease2(_pitch, (0.0 if car.is_dnf else car.chassis_pitch) + puncture_pitch, dt)
+	_roll = ease2(_roll, (0.08 if car.is_dnf else 0.0) + car.chassis_roll + shudder_roll + puncture_roll, dt)
+	_pitch = ease2(_pitch, (0.0 if car.is_dnf else car.chassis_pitch) + shudder_pitch + puncture_pitch, dt)
 	var roll: float = _roll.y
 	var pitch: float = _pitch.y
 	var basis := Basis(Vector3(0.0, 0.0, 1.0), roll) * Basis(Vector3(1.0, 0.0, 0.0), -pitch) * Basis(Vector3.UP, PI)
@@ -211,7 +244,10 @@ func _update_lamps(dt: float) -> void:
 
 
 func _animate_wheels(dt: float, spin_scale: float) -> void:
-	_steer = ease2(_steer, -car.steer_angle, dt)
+	if car.spin_timer > 0.0:
+		_steer = Vector2(-car.steer_angle, -car.steer_angle) # the opposite lock is a snap of the wheel, not an ease
+	else:
+		_steer = ease2(_steer, -car.steer_angle, dt)
 	steer_visual = _steer.y
 	# The model's front is chassis +Z: FL / FR are the steering corners.
 	chassis.socket_wheel_fl.rotation.y = steer_visual

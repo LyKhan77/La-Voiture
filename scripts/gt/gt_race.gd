@@ -13,6 +13,8 @@ signal radio_message(message: Dictionary)
 signal collision_event(event: Dictionary)
 signal flag_changed(flag: int, message: String)
 signal suggestion_changed(suggestion: Dictionary)
+## Steward banner events: {"phase": "investigation" | "verdict", "case_id", "car_id", "text", ...} (see GtStewards).
+signal steward_event(event: Dictionary)
 
 const GRID_ROW_M: float = 8.0
 const PitLaneScript := preload("res://scripts/world/pit_lane_complex.gd")
@@ -63,6 +65,7 @@ var _pending_replies: Array[Dictionary] = [] # {"due", "car_id", "reply_to", "dr
 var _flood_called: Dictionary = {} # car id -> true while a flood episode has been called
 var _suggestion_cooldowns: Dictionary = {} # "car-type" -> time
 var contacts: GtContacts
+var stewards: GtStewards
 
 var _driving: GtDriving
 
@@ -76,6 +79,7 @@ func _init(p_track: GtTrack, p_laps: int = 10, seed_value: int = 1, weather_over
 	weather.advisory.connect(_on_weather_advisory)
 	_driving = GtDriving.new(self)
 	contacts = GtContacts.new(self)
+	stewards = GtStewards.new(self)
 	# Keep the reference's deterministic qualifying offset in the stream.
 	if rng.next() > 0.35:
 		rng.next()
@@ -92,6 +96,9 @@ func dispose() -> void:
 		contacts.race = null
 	_driving = null
 	contacts = null
+	if stewards != null:
+		stewards.race = null
+	stewards = null
 	if weather != null and weather.advisory.is_connected(_on_weather_advisory):
 		weather.advisory.disconnect(_on_weather_advisory)
 
@@ -172,12 +179,17 @@ func _standing_before(a: GtCar, b: GtCar) -> bool:
 		var laps_b: int = floori(b.s / track.length)
 		if laps_a != laps_b:
 			return laps_a > laps_b
-		return a.finished_at < b.finished_at
+		return classified_time(a) < classified_time(b)
 	if a.finished_at >= 0.0:
 		return true
 	if b.finished_at >= 0.0:
 		return false
 	return a.s > b.s
+
+
+## Time over the line plus the steward penalty the car never served in the pits.
+func classified_time(car: GtCar) -> float:
+	return car.finished_at + car.penalty_owed_s
 
 
 ## Rows for the timing tower and the pit wall, in race order. `interval_s` and `gap_s`
@@ -226,10 +238,14 @@ func step(dt: float = GtTypes.TICK_DT) -> void:
 	contacts.resolve(active, dt)
 	if contacts.contacts_last > 0:
 		_protect_caution_order(active, contexts)
+	stewards.step()
+	if is_finished():
+		stewards.close_all()
 	_check_advisor_tactics()
 	_expire_suggestion()
 	_check_flood_radio()
 	time += dt
+	_update_wreck_fade()
 	var order: Array[GtCar] = standings()
 	for index: int in range(order.size()):
 		order[index].position = index + 1
@@ -402,6 +418,33 @@ func _sc_track_clear() -> bool:
 	return true
 
 
+## Seconds a recovered wreck takes to fade out of the picture.
+const WRECK_FADE_S: float = 2.0
+
+
+## The safety car announces its in-lap: the marshals have cleared the track, so every retired car begins to fade
+## and race control tells the pit wall.
+func _start_wreck_evacuation() -> void:
+	var cleared_sector: int = -1
+	var latest_retirement: float = -INF
+	for car: GtCar in cars:
+		if car.is_dnf and car.evac_started_at < 0.0:
+			car.evac_started_at = time
+			# The call names the wreck that brought the safety car out: the most recent retirement.
+			if car.finished_at > latest_retirement:
+				latest_retirement = car.finished_at
+				cleared_sector = car.current_sector + 1
+	var player: GtCar = _player_car()
+	if cleared_sector > 0 and player != null:
+		push_radio(player, "engineer", "Track clear in Sector %d. Recovery complete, Safety Car in this lap." % cleared_sector, true)
+
+
+func _update_wreck_fade() -> void:
+	for car: GtCar in cars:
+		if car.evac_started_at >= 0.0:
+			car.wreck_alpha = clampf(1.0 - (time - car.evac_started_at) / WRECK_FADE_S, 0.0, 1.0)
+
+
 func _sc_queue_ready(leader: GtCar) -> bool:
 	if leader == null or not bool(safety_car.get("picked_up", false)):
 		return false
@@ -464,6 +507,7 @@ func _update_race_control(dt: float) -> void:
 				var lap_offset: float = floorf((float(safety_car["s"]) - car.s) / track.length)
 				car.sc_restart_line_s = float(safety_car["restart_s"]) - lap_offset * track.length if car.pit == null else -1.0
 			race_control["message"] = "SAFETY CAR IN THIS LAP - PREPARE FOR RESTART"
+			_start_wreck_evacuation()
 		var pit_start: float = float(safety_car.get("entry_start_s", -1.0))
 		var pit_exit: float = float(safety_car.get("restart_s", -1.0)) + PitLaneScript.EXIT_S - 60.0
 		if int(safety_car["phase"]) == GtTypes.SafetyCarPhase.DEPLOYED and pit_start >= 0.0 and float(safety_car["s"]) >= pit_exit:

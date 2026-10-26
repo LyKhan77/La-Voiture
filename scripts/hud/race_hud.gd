@@ -26,6 +26,7 @@ const GarageStyleScript := preload("res://scripts/ui/manga/garage_style.gd")
 const Liveries := preload("res://scripts/car/team_liveries.gd")
 const RadioAudioScript := preload("res://scripts/audio/radio_audio_director.gd")
 const SafetyCarBannerScript := preload("res://scripts/hud/safety_car_banner.gd")
+const StewardBannerScript := preload("res://scripts/hud/steward_banner.gd")
 
 const STAGE := Vector2(1920.0, 1080.0)
 ## Free viewport between the tower, the telemetry drawer, the ribbon and the deck (stage pixels):
@@ -85,6 +86,7 @@ var engineer_radio: CanvasLayer
 var radio_audio: RadioAudioScript
 var tape: CautionTape
 var sc_banner: SafetyCarBannerScript
+var steward_banner: StewardBannerScript
 var _last_sc_phase: int = GtTypes.SafetyCarPhase.HIDDEN
 var rate_row: ModeRow
 var lap_label: Label
@@ -165,6 +167,10 @@ func bind(p_world: Node3D) -> void:
 	sc_banner.name = "SafetyCarBanner"
 	stage.add_child(sc_banner)
 	sc_banner.position = Vector2(570.0, 90.0)
+	steward_banner = StewardBannerScript.new()
+	steward_banner.name = "StewardBanner"
+	stage.add_child(steward_banner)
+	steward_banner.position = Vector2(580.0, 196.0)
 	radio_audio = RadioAudioScript.new()
 	radio_audio.name = "RadioAudioDirector"
 	add_child(radio_audio)
@@ -175,6 +181,7 @@ func bind(p_world: Node3D) -> void:
 		_portraits[car.id] = _load_portrait(car.id)
 	race.radio_message.connect(_on_radio)
 	race.flag_changed.connect(_on_flag_changed)
+	race.steward_event.connect(_on_steward_event)
 	race.suggestion_changed.connect(_on_suggestion)
 	get_viewport().size_changed.connect(fit)
 	fit()
@@ -552,6 +559,16 @@ func _on_radio(message: Dictionary) -> void:
 	_set_ticker("%s %s: %s   //   %s" % [String(message["code"]), String(message["speaker"]).to_upper(), String(message["text"]), ticker.text])
 
 
+## The stewards' banner, with a beep for an investigation and the gavel for a penalty (no action is silent).
+func _on_steward_event(event: Dictionary) -> void:
+	steward_banner.show_event(event)
+	var audio: AudioManager = AudioManager.of(self)
+	if String(event.get("phase", "")) != "verdict":
+		audio.play_steward_investigation()
+	elif int(event.get("verdict", 0)) == GtStewards.Verdict.PENALTY:
+		audio.play_steward_penalty()
+
+
 func _on_flag_changed(flag: int, message: String) -> void:
 	sc_banner.trigger(flag, message)
 	_set_ticker("%s  //  %s   //   %s" % [GtTypes.FLAG_NAME[flag], message, ticker.text])
@@ -579,6 +596,7 @@ func update(delta: float) -> void:
 	if race == null:
 		return
 	sc_banner.advance(delta)
+	steward_banner.advance(delta)
 	var sc_phase: int = int(race.safety_car["phase"])
 	if sc_phase != _last_sc_phase and sc_phase == GtTypes.SafetyCarPhase.IN_THIS_LAP:
 		sc_banner.trigger(GtTypes.Flag.SC, "IN THIS LAP")

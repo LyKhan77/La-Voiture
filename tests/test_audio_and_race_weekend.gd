@@ -382,11 +382,11 @@ func _test_overlay_placement(hud: RaceHud, driver_banner: Control, engineer_bann
 	for banner: Control in [driver_banner, engineer_banner]:
 		var box := Rect2((banner.global_position - hud.stage.position) / f, banner.size * banner.scale / f)
 		boxes.append(box)
-		inside = inside and RaceHud.RADIO_DOCK.encloses(box.grow(-1.0)) and is_equal_approx(banner.modulate.a, 1.0)
+		inside = inside and RaceHud.RADIO_DOCK.encloses(box.grow(-1.0)) and banner.modulate.a >= 0.59 # visible: full, or dimmed to 0.6 while the other balloon speaks
 		for blocked: Rect2 in keep_clear:
 			clear = clear and not blocked.intersects(box.grow(-4.0))
 	check(clear and inside and not boxes[0].intersects(boxes[1]),
-		"#30 the driver and engineer banners dock at the top of the free viewport, clear of the tower, drawer, radar, ribbon and deck, and of each other (driver %s, engineer %s)" % [str(boxes[0]), str(boxes[1])])
+		"#30 the driver and engineer balloons dock in the lower corners of the free viewport, clear of the tower, drawer, radar, ribbon and deck, and of each other (driver %s, engineer %s)" % [str(boxes[0]), str(boxes[1])])
 
 func _test_engineer_overlay(hud: RaceHud) -> void:
 	hud.radio._hide_banner()

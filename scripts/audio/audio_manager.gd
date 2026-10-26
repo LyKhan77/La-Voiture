@@ -26,8 +26,12 @@ const START_BEEP := &"start_beep"
 const LIGHTS_OUT := &"lights_out"
 const SQUELCH_IN := &"squelch_in"
 const SQUELCH_OUT := &"squelch_out"
+const STEWARD_INVESTIGATION := &"steward_investigation"
+const STEWARD_PENALTY := &"steward_penalty"
 
 const STREAMS: Dictionary = {
+	STEWARD_INVESTIGATION: preload("res://assets/audio/sfx/steward_investigation.wav"),
+	STEWARD_PENALTY: preload("res://assets/audio/sfx/steward_penalty.wav"),
 	CLICK: preload("res://assets/audio/ui/click_snap.wav"),
 	WARNING: preload("res://assets/audio/ui/warning_siren.wav"),
 	START_BEEP: preload("res://assets/audio/ui/start_beep.wav"),
@@ -142,6 +146,15 @@ func play_ui_click_pitched(pitch: float) -> void:
 ## Emergency alarm: BOX call, critical tyres, urgent radio.
 func play_warning() -> void:
 	_play_ui(WARNING, 1.0)
+
+
+## Stewards: a short beep when an incident goes under investigation, the gavel and buzzer for a time penalty.
+func play_steward_investigation() -> void:
+	_play_ui(STEWARD_INVESTIGATION, 1.0)
+
+
+func play_steward_penalty() -> void:
+	_play_ui(STEWARD_PENALTY, 1.0)
 
 
 ## Light pair `pair` (1..5) of the FIA start sequence; each pair beeps a step higher.

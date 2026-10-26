@@ -357,6 +357,27 @@
 		"spoken": "Safety car deployed! A car is heavily in the wall. Cheap pit stop window open!"
 	},
 	{
+		"id": "eng_track_clear_1",
+		"speaker": "engineer",
+		"pattern": "^Track clear in Sector 1\\. Recovery complete, Safety Car in this lap\\.$",
+		"file": "res://assets/audio/radio/voice/eng_track_clear_1.wav",
+		"spoken": "Track clear in sector one. Recovery complete, safety car in this lap."
+	},
+	{
+		"id": "eng_track_clear_2",
+		"speaker": "engineer",
+		"pattern": "^Track clear in Sector 2\\. Recovery complete, Safety Car in this lap\\.$",
+		"file": "res://assets/audio/radio/voice/eng_track_clear_2.wav",
+		"spoken": "Track clear in sector two. Recovery complete, safety car in this lap."
+	},
+	{
+		"id": "eng_track_clear_3",
+		"speaker": "engineer",
+		"pattern": "^Track clear in Sector 3\\. Recovery complete, Safety Car in this lap\\.$",
+		"file": "res://assets/audio/radio/voice/eng_track_clear_3.wav",
+		"spoken": "Track clear in sector three. Recovery complete, safety car in this lap."
+	},
+	{
 		"id": "drv_pass_made",
 		"speaker": "driver",
 		"pattern": "^Pass made on \\w+! Clean move down the inside!$",

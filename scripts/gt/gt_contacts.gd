@@ -75,6 +75,9 @@ func _resolve_pair(car_a: GtCar, car_b: GtCar, ds: float, d_lat: float, pass_ind
 		# Nose to tail: the rear car is held back, a touch of bump draft goes to the front.
 		var front: GtCar = car_a if ds >= 0.0 else car_b
 		var rear: GtCar = car_b if ds >= 0.0 else car_a
+		if pass_index == 0:
+			# Reported before the hold-back below trims the closing speed.
+			race.stewards.report_nose_to_tail(rear, front, rear.v - front.v)
 		var sep_s: float = pen_s + 0.08
 		rear.s -= sep_s * 0.85
 		front.s += sep_s * 0.15
@@ -178,6 +181,7 @@ func _collision_incident(car_a: GtCar, car_b: GtCar, s: float, lateral: float) -
 	race.last_incident_time = race.time
 	car_a.incident_cooldown = 45.0
 	car_b.incident_cooldown = 45.0
+	race.stewards.report_racing_incident(car_a, car_b)
 	var roll: float = race.rng.next()
 	var sector: int = _sector_of(car_a)
 	var victim: GtCar = car_a if race.rng.next() < 0.5 else car_b
@@ -190,8 +194,7 @@ func _collision_incident(car_a: GtCar, car_b: GtCar, s: float, lateral: float) -
 		if victim.team_id == race.player_team_id:
 			race.push_radio(victim, "driver", "We touched with %s! Front wing damage!" % other.code, true)
 	elif roll < 0.92:
-		victim.spin_timer = 4.0
-		victim.spin_angle = 0.0
+		victim.start_spin(4.0)
 		victim.error_timer = 4.5
 		victim.damage = minf(100.0, victim.damage + 20.0)
 		victim.wear = minf(1.0, victim.wear + 0.08)
@@ -225,8 +228,7 @@ func solo_incident(car: GtCar) -> void:
 	var sector: int = _sector_of(car)
 	var roll: float = race.rng.next()
 	if roll < 0.78:
-		car.spin_timer = 3.6
-		car.spin_angle = 0.0
+		car.start_spin(3.6)
 		car.error_timer = 4.0
 		car.impact_jolt = 0.9
 		car.wear = minf(1.0, car.wear + 0.06)
@@ -237,8 +239,7 @@ func solo_incident(car: GtCar) -> void:
 			_radio_to_player(car, "Yellow Flag Sector %d. Car #%d (%s) spun out." % [sector, car.number, car.code])
 	elif roll < 0.94:
 		car.damage = minf(100.0, car.damage + 25.0 + floorf(race.rng.next() * 15.0))
-		car.spin_timer = 4.0
-		car.spin_angle = 0.0
+		car.start_spin(4.0)
 		car.error_timer = 4.5
 		car.impact_jolt = 1.0
 		_emit_collision(GtTypes.CollisionKind.MINOR, car.code, "BARRIER", car.s, car.lateral)

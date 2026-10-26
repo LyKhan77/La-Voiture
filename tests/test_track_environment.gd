@@ -383,8 +383,8 @@ func _test_stage2_furniture() -> void:
 			if child is MultiMeshInstance3D:
 				instances.append(child)
 				surfaces += (child as MultiMeshInstance3D).multimesh.mesh.get_surface_count()
-	check(furniture != null and instances.size() == 4 and surfaces <= 10,
-		"#F1 furniture is four MultiMeshInstance3D (armco, tecpro, markers, floodlights) with %d surfaces in total" % surfaces)
+	check(furniture != null and instances.size() == 5 and surfaces <= 10,
+		"#F1 furniture is five MultiMeshInstance3D (armco, tecpro, markers, floodlights, flag panels) with %d surfaces in total" % surfaces)
 
 	var half: float = world.ribbon.road_half_width_m
 	var armco_poses: Array[Transform3D] = poses_of(furniture, "armco_transforms")
@@ -848,7 +848,7 @@ func _test_stage5_budget() -> void:
 		var node: Node = prop(world.environment, group)
 		singles += node.find_children("*", "MeshInstance3D", true, false).size() if node != null else 99
 		multimeshes += node.find_children("*", "MultiMeshInstance3D", true, false).size() if node != null else 0
-	check(singles == 0 and multimeshes == 7, "#P3 guardrail, Tecpro, braking boards, floodlights and trees are %d MultiMeshInstance3D and %d single meshes" % [multimeshes, singles])
+	check(singles == 0 and multimeshes == 8, "#P3 guardrail, Tecpro, braking boards, floodlights, flag panels and trees are %d MultiMeshInstance3D and %d single meshes" % [multimeshes, singles])
 
 # --- feedback round: barriers, lane lines, pit lane ---------------------------------------------
 

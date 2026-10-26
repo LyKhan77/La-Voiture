@@ -77,9 +77,17 @@ var is_dnf: bool = false
 var dnf_reason: String = ""
 var dnf_timer: float = 0.0
 var is_cleared: bool = false
+## Race time the marshals began taking a retired car away (safety car in-lap), -1 until then. The car stays in
+## `GtRace.cars` for the collider and the classification; only its picture fades (`wreck_alpha`, 1 -> 0).
+var evac_started_at: float = -1.0
+## Steward time penalty: owed until the car serves it in its pit box; what is still owed at the flag is added to its time.
+var penalty_owed_s: float = 0.0
+var penalty_served_s: float = 0.0
+var wreck_alpha: float = 1.0
 var damage: float = 0.0
 var spin_timer: float = 0.0
-var spin_angle: float = 0.0
+## Seconds since the current loss of control began; drives the damped snap-oversteer envelope.
+var slide_time: float = 0.0
 var incident_cooldown: float = 0.0
 ## The driver has already complained about this set of tyres being past the wear cliff.
 var tyre_cliff_called: bool = false
@@ -121,6 +129,12 @@ var wheel_temp: PackedFloat64Array = PackedFloat64Array([90.0, 90.0, 88.0, 88.0]
 var wheel_pressure_psi: PackedFloat64Array = PackedFloat64Array([28.5, 28.5, 27.8, 27.8])
 var wheel_blister_pct: PackedFloat64Array = PackedFloat64Array([0.0, 0.0, 0.0, 0.0])
 var wheel_brake_temp: PackedFloat64Array = PackedFloat64Array([350.0, 350.0, 320.0, 320.0])
+
+
+## Loses control for `duration` seconds; the slide envelope always starts from its snap.
+func start_spin(duration: float) -> void:
+	spin_timer = duration
+	slide_time = 0.0
 
 
 func is_racing() -> bool:

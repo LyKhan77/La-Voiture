@@ -78,6 +78,10 @@ for (const n of [1, 2, 3]) {
 	add(`eng_vsc_${n}`, "engineer", `^Virtual Safety Car deployed! Debris in Sector ${n}\\. Reduce delta\\.$`, `Virtual safety car deployed! Debris in sector ${SECTOR_WORD[n]}. Reduce delta.`);
 }
 add("eng_sc_wall", "engineer", "^Safety Car deployed! #\\d+ \\(\\w+\\) heavily in the wall\\. Cheap pit stop window open!$", "Safety car deployed! A car is heavily in the wall. Cheap pit stop window open!");
+// The marshals have cleared a wreck as the safety car comes in (GtRace._start_wreck_evacuation, FASE 11 Langkah 6).
+for (const n of [1, 2, 3]) {
+	add(`eng_track_clear_${n}`, "engineer", `^Track clear in Sector ${n}\\. Recovery complete, Safety Car in this lap\\.$`, `Track clear in sector ${SECTOR_WORD[n]}. Recovery complete, safety car in this lap.`);
+}
 
 // --- driver --------------------------------------------------------------------------------
 // High-drama wheel-to-wheel calls (FASE 8.4): GtDriving.announce_pass / announce_ers_boost, the tyre

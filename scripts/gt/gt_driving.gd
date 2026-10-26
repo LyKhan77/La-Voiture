@@ -7,6 +7,11 @@ extends RefCounted
 ## the chassis angles the 3D car shows. Reads and writes GtCar; rules live in GtRace.
 
 const PitLaneScript := preload("res://scripts/world/pit_lane_complex.gd")
+## Loss of control: damped slip-angle swing (rad, 1/s, rad/s) and the speed a sliding car keeps (m/s).
+const SLIDE_MAX_SLIP: float = 0.45
+const SLIDE_DAMPING: float = 1.15
+const SLIDE_OMEGA: float = 7.5
+const SLIDE_SPEED_FLOOR: float = 12.0
 
 var race: GtRace
 
@@ -163,6 +168,8 @@ func update_car(car: GtCar, ctx: Variant, dt: float) -> void:
 	if car.is_dnf:
 		car.v = 0.0
 		car.v_lat = 0.0
+		car.spin_timer = 0.0 # a wreck that was mid-slide when it retired is parked, not still spinning
+		car.slide_time = 0.0
 		car.dnf_timer += dt
 		if car.dnf_timer >= 24.0:
 			car.is_cleared = true
@@ -379,15 +386,19 @@ func _snap_oversteer(car: GtCar, corner_weight: float, under_caution: bool) -> v
 func _spin_recovery(car: GtCar, dt: float) -> void:
 	var track: GtTrack = race.track
 	car.spin_timer -= dt
-	car.v = maxf(0.0, car.v - 20.0 * dt)
-	car.spin_angle += (14.0 - (4.0 - car.spin_timer) * 2.6) * dt
+	# Snap oversteer: a GT3 car does not pirouette, it throws its tail out and the driver catches it, so the
+	# slip angle is a damped swing (tank-slapper) and the slide carries the car to the outside verge.
+	var t_loss: float = car.slide_time
+	car.slide_time = t_loss + dt if car.spin_timer > 0.0 else 0.0
+	car.v = minf(car.v, maxf(SLIDE_SPEED_FLOOR, car.v - 16.0 * dt))
 	car.s += car.v * dt
 	var slide_dir: float = 1.0 if car.lateral >= 0.0 else -1.0
-	car.v_lat = slide_dir * 2.2
+	car.v_lat = slide_dir * 2.8
 	car.lateral = track.clamp_to_width(car.lateral + car.v_lat * dt, 0.4)
-	car.yaw_offset = car.spin_angle
-	car.chassis_roll = sin(car.spin_angle * 2.0) * 0.12
-	car.chassis_pitch = 0.03
+	car.yaw_offset = slide_dir * SLIDE_MAX_SLIP * exp(-SLIDE_DAMPING * t_loss) * cos(SLIDE_OMEGA * t_loss)
+	car.steer_angle = -clampf(car.yaw_offset * 1.6, -0.65, 0.65) # opposite lock: the driver catches the slide
+	car.chassis_roll = sin(car.yaw_offset * 1.8) * 0.12
+	car.chassis_pitch = 0.04 # nose dive under hard braking
 	race.track_laps(car)
 	race.update_sector_and_speed_trap(car)
 
@@ -662,8 +673,7 @@ func _wear_and_fuel(car: GtCar, ds: float, wear_rate_mult: float, fuel_burn_mult
 			car.puncture_distance_driven = 0.0
 			race.push_radio(car, "driver", "Puncture! The tyre has delaminated!", true)
 			if car.v > 45.0 and race.rng.next() < 0.75:
-				car.spin_timer = 1.8
-				car.spin_angle = PI * 0.9
+				car.start_spin(1.8)
 				race.push_radio(car, "driver", "I'm spinning! Tyre blew out on the high speed section!", true)
 	if car.is_punctured:
 		car.puncture_distance_driven += ds
@@ -952,6 +962,15 @@ func _service_car(car: GtCar, pit: GtPit, dt: float) -> void:
 	car.v_lat = 0.0
 	car.s = pit.box_s # parked exactly on the stall
 	car.lateral = PitLaneScript.STALL_LANE_M
+	if not pit.penalty_taken:
+		pit.penalty_taken = true
+		pit.penalty_hold_s = car.penalty_owed_s
+		car.penalty_served_s += car.penalty_owed_s
+		car.penalty_owed_s = 0.0
+	if pit.penalty_hold_s > 0.0:
+		# Stop-and-hold: the crew keeps clear until the steward penalty is served.
+		pit.penalty_hold_s = maxf(0.0, pit.penalty_hold_s - dt)
+		return
 	pit.timer += dt
 	var progress: float = minf(1.0, pit.timer / maxf(0.1, pit.duration))
 	pit.wheel_swap_progress = progress
