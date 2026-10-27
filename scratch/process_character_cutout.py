@@ -105,6 +105,8 @@ DRIVER_HINTS: dict[str, dict] = {
     "pierre-mercier": {"crop": (2, 95, 355, 675)},
     "arthur-sterling-jr": {"crop": (10, 55, 380, 1100), "enclosed_cleanup": True, "raw_outside_below": 300},
     "harrison-croft": {"crop": (2, 70, 380, 715)},
+    "wyatt-cooper": {"crop": (0, 0, 384, 1376)},
+    "rin-takahashi": {"crop": (0, 0, 310, 768), "canvas_size": (768, 1376)},
 }
 
 BG_TOLERANCE = 9.0
@@ -569,7 +571,8 @@ def _process(source: Path, hint: dict) -> tuple[Image.Image, dict]:
         opaque &= ~(outside & (rows > int(hint["raw_outside_below"])))
 
     alpha = np.where(opaque, soft_alpha, 0).astype(np.uint8)
-    composed = _compose(fig, alpha, width, height)
+    canvas_w, canvas_h = hint.get("canvas_size", (width, height))
+    composed = _compose(fig, alpha, canvas_w, canvas_h)
     meta = {
         "source": str(source),
         "source_size": (width, height),

@@ -124,7 +124,8 @@ func _test_menu_scenes(config_script: Script) -> void:
 	await scene_changed
 	var garage: Node = current_scene
 	check(garage.config.total_laps == 10 and garage.config.weather_preset == 2 and garage.config.time_of_day == 1, "Setup selections survive replacement by the 3D garage")
-	check(garage.environment.stalls.size() == 10 and garage.environment.cars.size() == 10, "All ten occupied stalls exist before team switching")
+	var roster: Script = load("res://scripts/ui/garage_roster.gd")
+	check(garage.environment.stalls.size() == roster.TEAM_SLUGS.size() and garage.environment.cars.size() == roster.TEAM_SLUGS.size(), "All occupied stalls exist before team switching")
 	garage.orbit.focus(garage.environment.cars[0], true)
 	garage.orbit.yaw = PI
 	garage.orbit._process(0.0)
@@ -144,14 +145,17 @@ func _test_menu_scenes(config_script: Script) -> void:
 	root.push_input(right)
 	await process_frame
 	check(garage.config.selected_team_id == 1, "Team-switch arrows work even while Launch owns keyboard focus")
-	var expected_slugs: Array[String] = ["mercedes_amg", "audi_r8", "nissan_gtr", "bmw_m4", "aston_vantage", "chevy_corvette", "honda_nsx", "lexus_rcf", "mclaren_720s", "lambo_huracan"]
-	for index: int in range(10):
+	var expected_slugs: Array[String] = [
+		"mercedes_amg", "audi_r8", "nissan_gtr", "bmw_m4", "aston_vantage",
+		"chevy_corvette", "honda_nsx", "lexus_rcf", "mclaren_720s", "lambo_huracan",
+		"ferrari_296", "ford_mustang", "toyota_supra"
+	]
+	for index: int in range(expected_slugs.size()):
 		var model: Node3D = garage.environment.cars[index]
 		var slug: String = expected_slugs[index]
 		check(model.scene_file_path == "res://scenes/car/%s_chassis.tscn" % slug and is_equal_approx(garage.environment.stalls[index].position.x, float(index) * 14.0), "Stall %02d rides its race chassis at its dolly stop" % index)
-	var roster: Script = load("res://scripts/ui/garage_roster.gd")
 	check(GarageRoster.CAR_NAMES[0].begins_with("Mercedes-AMG") and ResourceLoader.exists(roster.car_path(0)) and roster.car_path(0).ends_with("mercedes_amg/mercedes_amg_full.glb"), "Team 0 garage card names the Mercedes-AMG and points at its full GLB")
-	for slot: int in range(20):
+	for slot: int in range(roster.DRIVER_SLUGS.size()):
 		var texture: Texture2D = load(roster.portrait_path(slot))
 		check(texture != null and texture.get_width() == 1024 and texture.get_height() == 1024, "Driver %02d has the original sharp radio portrait" % (slot + 1))
 	garage.select_team(8)

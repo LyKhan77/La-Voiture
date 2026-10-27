@@ -235,6 +235,96 @@ Setiap pembalap dirancang dengan prinsip **Dual-Role Visual Asset**:
 
 ---
 
+### TIM 10: SCUDERIA MARANELLO
+**Mobil Pabrikan:** **Ferrari 296 GT3** (`reference-assets/cars/ferrari-296-gt3`)  
+**Pemilik Tim / Team Principal:** **Enzo Cavalli** — Taipan mode haute couture Milan dan kurator seni modern yang memadukan warisan balap darah murni Maranello dengan aerodinamika radikal abad ke-21. Menuntut kesempurnaan estetika dan presisi telemetri di setiap tikungan.  
+**Warna Livery:** *Rosso Corsa* (`#E60026`) $\times$ *Solar Gold Accent* (`#FFD000`) $\times$ *Deep Carbon Obsidian* (`#0A0A0A`)  
+**Filosofi Tim:** Kemegahan aristokrasi balap Italia; kecepatan murni yang dibalut keanggunan eksotis dan teknologi hybrid aero mutakhir.
+
+#### 21. Marco Bellini (`#21 BEL`) — "The Monza Virtuoso"
+* **Inspirasi Legenda Real-Life:** *Michele Alboreto* (karisma pejuang Ferrari sejati) $\times$ *Lorenzo Bandini* (gairah balap Italia) $\times$ *Giancarlo Fisichella*.
+* **Visual Karakter (Anime Streetwear):**
+  - **Wajah & Rambut:** Pemuda Italia usia 23 tahun berparas flamboyan, senyum menawan penuh percaya diri, rambut ikal hitam bertekstur lebat disisir samping dengan highlight merah tua (*dark crimson*).
+  - **Pakaian Balap:** Racing suit merah menyala *Rosso Corsa* beraksen striping emas tipis pada bahu, dipadukan jaket bomber balap satin hitam berkerah terbuka bergaya streetwear Milan.
+  - **Sepatu & Aksesoris:** Kacamata hitam berbingkai emas tipis yang diselipkan di kerah leher, sarung tangan balap merah berpanel pelindung titanium, jam tangan kronograf mewah.
+* **Helm:** Merah gloss dengan strip tricolor bendera Italia vertikal di bagian tengah, visor cermin emas (*solar gold mirror visor*).
+* **Persona Radio:** Emosional, penuh gairah balap, ekspresif saat duel sengit (*"Mama mia! The balance is exquisite! Push, push, we take the lead!"*).
+* **Animasi Selebrasi Podium (P1):** Mencondongkan badan ke depan lalu mencium piala emas dengan penuh penghormatan sebelum mengangkatnya tinggi-tinggi ke arah langit.
+* **Stance HQ:** Berdiri santai menyandarkan satu lengan di atas kap belakang Ferrari 296 GT3 sambil memutar-mutar kacamata hitam di tangan kanannya.
+
+#### 22. Alessia Rossi (`#22 ROS`) — "The Aero Donna"
+* **Inspirasi Legenda Real-Life:** *Lella Lombardi* (pencetak poin wanita legendaris Italia) $\times$ *Maria Teresa de Filippis*.
+* **Visual Karakter (Anime Streetwear):**
+  - **Wajah & Rambut:** Wanita muda usia 25 tahun asal Bologna, tatapan mata cokelat hazel tajam berwibawa, rambut pirang gelap lurus dipotong bob pendek asimetris yang rapi.
+  - **Pakaian Balap:** Racing suit slim-fit hitam karbon doff dengan panel dada dan lengan merah Rosso Corsa tegas, rompi techwear serat karbon dengan saku telemetri kompak.
+  - **Sepatu & Aksesoris:** Racing boots merah beraksen sol hitam tebal, earset radio mikro nirkabel di telinga kiri, sarung tangan balap dengan grip silikon emas.
+* **Helm:** Hitam matte berpadu corak grafiti aero streamlines merah menyala dan aksen stensil mahkota daun salam emas.
+* **Persona Radio:** Tegas, presisi, fokus pada stabilitas downforce dan slipstream (*"Rear downforce is locked. Keep the pace steady, the apex is ours."*).
+* **Animasi Selebrasi Podium:** Berdiri tegak elegan bersedekap dada sambil memegang piala di sisi pinggangnya dengan senyum anggun dan percaya diri.
+* **Stance HQ:** Memeriksa layar telemetri suspensi di pit wall dengan tablet digital sambil berdiskusi intens dengan kepala mekanik.
+
+---
+
+### TIM 11: IRONHORSE MOTORSPORT
+**Mobil Pabrikan:** **Ford Mustang GT3** (`reference-assets/cars/ford-mustang-gt3`)  
+**Pemilik Tim / Team Principal:** **"Jax" Jackson** — Veteran kepala kru balap mobil stok Detroit berotot liat; pria bertopi koboi dan rompi kulit yang memandang balapan GT3 sebagai arena pertarungan banteng mekanis tanpa kompromi.  
+**Warna Livery:** *Steel Navy Blue* (`#1D3557`) $\times$ *Hazard Blaze Orange* (`#FF5400`) $\times$ *Raw Brushed Metal* (`#B0B7C3`)  
+**Filosofi Tim:** Otot liar distrik industri Motor City Detroit; suara gahar V8 naturally aspirated, ketahanan sasis baja, dan gaya bertarung agresif jarak dekat (*door-to-door brawling*).
+
+#### 23. Colt Vance (`#23 VAN`) — "The Detroit Brawler"
+* **Inspirasi Legenda Real-Life:** *Parnelli Jones* (raja sirkuit jalanan Trans-Am tanpa rasa takut) $\times$ *Dan Gurney* (pelopor inovasi dan keberanian Amerika).
+* **Visual Karakter (Anime Streetwear):**
+  - **Wajah & Rambut:** Pria Amerika usia 26 tahun bertubuh kekar tegap, rahang persegi keras berjanggut tipis (*rugged stubble*), rambut cokelat pirang bergaya undercut acak-acakan.
+  - **Pakaian Balap:** Racing suit biru baja tahan api yang dipadukan dengan rompi denim robek ber-emblem kuda liar Mustang bordir besar di punggungnya.
+  - **Sepatu & Aksesoris:** Sarung tangan balap kulit cokelat bertulang pelindung buku jari, sepatu balap mid-top bernuansa koboi retro, bandana oranye di pergelangan tangan kiri.
+* **Helm:** Biru dongker doff dengan grafiti tengkorak kuda besi bertanduk dan garis chevron hazard oranye menyala di rahang helm.
+* **Persona Radio:** Keras, penuh tawa percaya diri, bersemangat saat kontak bodi mobil (*"Let that V8 eat! Rubbing is racing, boys, I'm diving inside!"*).
+* **Animasi Selebrasi Podium:** Mengangkat trofi dengan dua tangan lalu menghentakkannya ke udara disertai auman semangat ke arah penonton paddock.
+* **Stance HQ:** Duduk santai di atas ban balap bekas sambil mengunyah tusuk gigi dan mengamati mesin V8 Mustang yang sedang di-tuning.
+
+#### 24. Wyatt Cooper (`#24 COO`) — "The High-Plains Drifter"
+* **Inspirasi Legenda Real-Life:** *Mark Donohue* (Captain Nice, mekanik jenius sekaligus pembalap tanpa ragu) $\times$ *Carroll Shelby*.
+* **Visual Karakter (Anime Streetwear):**
+  - **Wajah & Rambut:** Pemuda jangkung usia 24 tahun asal Texas, tatapan mata abu-abu dingin fokus, rambut hitam lurus berantakan yang sering tertutup topi trucker terbalik saat di paddock.
+  - **Pakaian Balap:** Racing suit abu-abu baja berserat kevlar dengan strip balap ganda oranye terang vertikal dari kerah hingga ujung kaki.
+  - **Sepatu & Aksesoris:** Kacamata hitam aviator berbingkai perak tebal, jam tangan mekanik militer analog, sarung tangan balap bermotif sirkuit cetak.
+* **Helm:** Abu-abu brushed metal dengan motif garis balap klasik ganda oranye dan visor hitam pekat anti-silau matahari senja.
+* **Persona Radio:** Santai, tenang di bawah tekanan, taktis saat pengereman lambat (*"Draft acquired. Late braking into turn four... got him clean."*).
+* **Animasi Selebrasi Podium:** Menyandarkan trofi di salah satu pundaknya lalu memberikan gestur hormat dua jari santai ke kamera.
+* **Stance HQ:** Membuka kap mesin serat karbon Mustang dan menyetel bilah sayap depan dengan obeng torsi di tangan.
+
+---
+
+### TIM 12: NEO-WANGAN WORKS
+**Mobil Pabrikan:** **Toyota GR Supra GT** (`reference-assets/cars/toyota-supra-gt`)  
+**Pemilik Tim / Team Principal:** **Kenichi Shindo** — Tuner legenda jalan layang Shuto Expressway Daikoku Futo yang kini memimpin operasi balap sirkuit profesional resmi dengan etos perakitan mesin tangan (*Takumi precision*).  
+**Warna Livery:** *Pearl Ghost White* (`#F8F9FA`) $\times$ *Infrared Neo-Red* (`#FF0055`) $\times$ *Ink Black Halftone* (`#050505`)  
+**Filosofi Tim:** Kultur tuner jalanan Wangan Tokyo bertemu presisi GT3 sirkuit dunia; responsivitas turbo instan, bobot gesit di chicane, dan gaya grafiti manga halftone murni.
+
+#### 25. Hayato Kazama (`#25 KAZ`) — "The Midnight Ghost"
+* **Inspirasi Legenda Real-Life:** *Akio Asakura (Wangan Midnight)* $\times$ *Keiichi Tsuchiya muda* $\times$ *Takumi Fujiwara*.
+* **Visual Karakter (Anime Streetwear):**
+  - **Wajah & Rambut:** Pemuda Jepang usia 22 tahun asal Shinjuku, sorot mata tajam berkonsentrasi tinggi dengan pupil kemerahan redup, rambut hitam pekat berponi belah tengah khas anime 90-an modern.
+  - **Pakaian Balap:** Jaket racing windbreaker putih mutiara bermotif kanji reflektif `湾岸` (Wangan) di dada kanan, dipadukan celana balap hitam berpotongan streetwear longgar (*tapered track pants*).
+  - **Sepatu & Aksesoris:** Sneakers balap retro putih-merah bersol tipis untuk sensitivitas pedal heel-and-toe maksimal, plester hitam di dagu.
+* **Helm:** Putih mutiara mengilap berhias kaligrafi sapuan kuas kanji tinta hitam `鬼神` (Oni Demon God) dan visor merah infrared pelangi.
+* **Persona Radio:** Pendiam, hanya bicara saat perlu, sangat peka terhadap grip aspal (*"Boost is peaking. Car is rotating beautifully. Clearing the pack now."*).
+* **Animasi Selebrasi Podium (P1):** Berdiri tenang di puncak podium, menurunkan resleting jaket windbreaker-nya sedikit, lalu mengangkat trofi setinggi dada dengan seringai tipis misterius.
+* **Stance HQ:** Berjongkok di samping roda depan Supra memeriksa keausan tapak ban slick dengan telapak tangannya.
+
+#### 26. Rin Takahashi (`#26 TAK`) — "The Touge Empress"
+* **Inspirasi Legenda Real-Life:** *Satoshi Motoyama* (ketangguhan JGTC/Super GT legendaris) $\times$ *Juichi Wakisaka*.
+* **Visual Karakter (Anime Streetwear):**
+  - **Wajah & Rambut:** Gadis muda usia 21 tahun asal Gunma, senyum berani dan ceria, rambut panjang merah tua diikat ekor kuda tinggi (*high anime ponytail*) dengan dua jepit rambut perak berbentuk kunci pas mini.
+  - **Pakaian Balap:** Racing suit putih bersih beraksen garis halftone manga merah neon di sepanjang paha dan pinggang, sarung tangan balap merah berpotongan pendek.
+  - **Sepatu & Aksesoris:** High-top sneakers merah mencolok dengan tali sepatu putih neon, smartwatch dengan pemantau detak jantung dan G-force.
+* **Helm:** Gradasi merah infrared ke putih mutiara dengan ilustrasi manga bunga sakura mekar yang terbang terbawa angin kecepatan tinggi.
+* **Persona Radio:** Ceria, lincah, selalu bersemangat saat melibas tikungan kombinasi S (*"Whew! That chicane was butter! Tyres are singing, let's hunt down P1!"*).
+* **Animasi Selebrasi Podium:** Melompat ke podium dengan kedua tangan membentuk pose V-sign di dekat mata sambil tersenyum lebar ke arah kamera penggemar.
+* **Stance HQ:** Bersandar di pintu samping Supra sambil memegang botol minum olahraga dan mendengarkan musik lewat headphone nirkabel.
+
+---
+
 ## 3. Matriks Referensi Tim, Mobil Pabrikan & Karakter Pembalap
 
 | Kode | Nama Pembalap | Tim | Mobil GT3 | Pemilik Tim (Principal) | Aksen Warna | Pose Selebrasi Podium |
@@ -259,6 +349,12 @@ Setiap pembalap dirancang dengan prinsip **Dual-Role Visual Asset**:
 | `DUV` | Felix Duval | Chrome Syndicate| McLaren 720S GT3 | Lord Vincent Chen | Seafoam Mint (`#34D399`) | Tiup Ciuman + Piala di Pundak |
 | `PET` | Igor Petrov | Night Shift | Lambo Huracán GT3 | Klaus Richter | Ultra Violet (`#9B5CFF`) | Tatap Trofi Dingin Setinggi Mata |
 | `MBE` | Omar Mbeki | Night Shift | Lambo Huracán GT3 | Klaus Richter | Deep Purple (`#7C3AED`) | Street Squat Pose di Depan Trofi |
+| `BEL` | Marco Bellini | Scuderia Maranello | Ferrari 296 GT3 | Enzo Cavalli | Rosso Corsa (`#E60026`) | Cium Trofi Emas + Angkat ke Langit |
+| `ROS` | Alessia Rossi | Scuderia Maranello | Ferrari 296 GT3 | Enzo Cavalli | Solar Gold (`#FFD000`) | Sedekap Dada Elegan + Senyum Anggun |
+| `VAN` | Colt Vance | Ironhorse Motorsport | Ford Mustang GT3 | "Jax" Jackson | Blaze Orange (`#FF5400`) | Hentakkan Trofi 2 Tangan + Auman Keras |
+| `COO` | Wyatt Cooper | Ironhorse Motorsport | Ford Mustang GT3 | "Jax" Jackson | Steel Navy (`#1D3557`) | Trofi di Pundak + Hormat 2 Jari |
+| `KAZ` | Hayato Kazama | Neo-Wangan Works | Toyota GR Supra GT | Kenichi Shindo | Infrared Red (`#FF0055`) | Turunkan Resleting + Trofi di Dada |
+| `TAK` | Rin Takahashi | Neo-Wangan Works | Toyota GR Supra GT | Kenichi Shindo | Pearl White (`#F8F9FA`) | Pose V-Sign Ceria di Kedua Mata |
 
 ---
 

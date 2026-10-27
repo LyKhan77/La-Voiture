@@ -9,39 +9,45 @@ const Liveries := preload("res://scripts/car/team_liveries.gd")
 const TEAM_NAMES: Array[String] = [
 	"Apex Racing", "Neon Drift", "Kurogane GT", "Vanta Motors", "Razorline",
 	"Zero Hour", "Oni Works", "Static Speed", "Chrome Syndicate", "Night Shift",
+	"Scuderia Maranello", "Ironhorse Motorsport", "Neo-Wangan Works",
 ]
 const DRIVER_NAMES: Array[String] = [
 	"K. Ryu", "S. Ren", "M. Ito", "A. Vale", "J. Cruz",
 	"N. Sato", "L. Moreau", "R. Silva", "T. Kade", "E. Novak",
 	"H. Mori", "D. Reyes", "V. Sokol", "P. Aoki", "G. Alves",
 	"C. Weiss", "B. Tanaka", "F. Duval", "I. Petrov", "O. Mbeki",
+	"M. Bellini", "A. Rossi", "C. Vance", "W. Cooper", "H. Kazama", "R. Takahashi",
 ]
 
 ## Broadcast codes, one per driver slot (unique).
 const DRIVER_CODES: Array[String] = [
 	"RYU", "REN", "ITO", "VAL", "CRU", "SAT", "MOR", "SIL", "KAD", "NOV",
 	"MRI", "REY", "SOK", "AOK", "ALV", "WEI", "TAN", "DUV", "PET", "MBE",
+	"BEL", "ROS", "VAN", "COO", "KAZ", "TAK",
 ]
 
 ## Per team: top speed (m/s), cornering grip, tyre wear rate, fuel kg per lap. Top
 ## speeds are the reference's scaled so a GT3 tops out near 290 km/h.
-const TOP_SPEED: Array[float] = [79.0, 81.5, 78.0, 80.5, 79.5, 81.5, 77.0, 80.5, 79.0, 79.5]
-const GRIP: Array[float] = [1.010, 0.985, 1.025, 1.005, 0.995, 0.980, 1.030, 0.990, 1.020, 1.022]
-const TYRE_WEAR: Array[float] = [0.98, 1.08, 0.96, 1.02, 0.95, 1.06, 0.88, 1.02, 0.92, 0.99]
-const FUEL_USE: Array[float] = [2.9, 3.3, 3.0, 3.2, 2.9, 3.4, 2.7, 3.1, 2.8, 3.0]
+const TOP_SPEED: Array[float] = [79.0, 81.5, 78.0, 80.5, 79.5, 81.5, 77.0, 80.5, 79.0, 79.5, 80.5, 82.0, 80.0]
+const GRIP: Array[float] = [1.010, 0.985, 1.025, 1.005, 0.995, 0.980, 1.030, 0.990, 1.020, 1.022, 1.015, 0.985, 1.020]
+const TYRE_WEAR: Array[float] = [0.98, 1.08, 0.96, 1.02, 0.95, 1.06, 0.88, 1.02, 0.92, 0.99, 1.02, 1.05, 0.95]
+const FUEL_USE: Array[float] = [2.9, 3.3, 3.0, 3.2, 2.9, 3.4, 2.7, 3.1, 2.8, 3.0, 3.1, 3.3, 2.9]
 
 ## Per driver (team * 2 + slot): skill, consistency, wet skill.
 const SKILL: Array[float] = [
 	1.012, 1.004, 1.010, 1.002, 1.015, 1.008, 1.014, 1.011, 1.016, 1.006,
 	1.009, 1.005, 1.012, 1.003, 1.008, 1.006, 1.017, 1.010, 1.009, 1.005,
+	1.015, 1.012, 1.011, 1.008, 1.016, 1.009,
 ]
 const CONSISTENCY: Array[float] = [
 	0.92, 0.91, 0.89, 0.92, 0.94, 0.90, 0.93, 0.91, 0.95, 0.90,
 	0.93, 0.91, 0.94, 0.89, 0.91, 0.92, 0.93, 0.92, 0.90, 0.92,
+	0.93, 0.95, 0.91, 0.93, 0.94, 0.90,
 ]
 const WET_SKILL: Array[float] = [
 	0.93, 0.90, 0.92, 0.88, 0.91, 0.94, 0.89, 0.92, 0.95, 0.91,
 	0.90, 0.89, 0.93, 0.88, 0.90, 0.92, 0.96, 0.92, 0.89, 0.91,
+	0.91, 0.94, 0.92, 0.90, 0.95, 0.91,
 ]
 
 

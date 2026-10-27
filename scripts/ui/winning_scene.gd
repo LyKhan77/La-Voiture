@@ -811,9 +811,15 @@ TAKES IT" % Roster.CAR_NAMES[team].split(" ")[0].to_upper()
 	if not fastest.is_empty():
 		fastest_label.text = "FL %s / %s / %s" % [fastest.code, format_time(float(fastest.time)), "+1 PT BONUS" if int(fastest.bonus) == 1 else "NO BONUS"]
 	var team_points: Dictionary = results.get("team_points", {})
-	for team: int in range(GtData.TEAM_NAMES.size()):
+	var competing_teams: Array = team_points.keys()
+	competing_teams.sort()
+	if competing_teams.is_empty():
+		for t: int in range(mini(10, GtData.TEAM_NAMES.size())):
+			competing_teams.append(t)
+	for i: int in range(competing_teams.size()):
+		var team: int = int(competing_teams[i])
 		team_labels.append(_text(leaderboard, "%s  %d" % [GtData.TEAM_NAMES[team], int(team_points.get(team, 0))],
-			Vector2(20 + (team % 2) * 280, 679 + (team / 2) * 28), 16, Liveries.color_for(team)))
+			Vector2(20 + (i % 2) * 280, 679 + (i / 2) * 28), 16, Liveries.color_for(team)))
 	start_cuts()
 
 

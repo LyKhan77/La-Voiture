@@ -62,7 +62,7 @@ Stage "refine" {
     if ($text -notmatch "FINAL tris (\d+)") { Fail "no FINAL line in $log" }
     $tris = [int]$Matches[1]
     if ($tris -lt 80000 -or $tris -gt 120000) { Fail "$tris triangles, outside 80k-120k" }
-    if ($text -notmatch "bbox \[\s*-?[\d.]+\s+-?[\d.]+\s+(-?[\d.]+)\s*\]") { Fail "no bbox in the FINAL line" }
+    if ($text -notmatch "FINAL[^\r\n]*bbox \[\s*-?[\d.]+\s+-?[\d.]+\s+(-?[\d.]+)\s*\]") { Fail "no bbox in the FINAL line" }
     if ([double]$Matches[1] -lt 0.049) { Fail "lowest body point z $($Matches[1]) is below the ground clamp" }
     ($text -split "`n" | Where-Object { $_ -match "fender lift applied|wheel cut:|ground clamp|FINAL tris" }) | ForEach-Object { Write-Host ("    " + ($_ -replace "^RC +[\d.]+s ", "").Trim()) }
 }
@@ -70,10 +70,13 @@ Stage "refine" {
 Stage "install" {
     $dest = Join-Path $Project (Split-Path $cfg.body_glb -Parent)
     $tex = Join-Path $Project $cfg.texture_dir
+    New-Item -ItemType Directory -Force $dest | Out-Null
+    New-Item -ItemType Directory -Force $tex | Out-Null
     $stamp = Get-Date -Format "yyyyMMdd_HHmmss"
     $backup = Join-Path $Project "temp\backup_${Car}_$stamp"
     New-Item -ItemType Directory -Force $backup | Out-Null
-    foreach ($f in @((Join-Path $Project $cfg.body_glb), (Join-Path $Project ($cfg.body_glb -replace "_body\.glb$", "_full.glb"))) + (Get-ChildItem $tex -Filter *.png | ForEach-Object { $_.FullName })) {
+    $existingTex = if (Test-Path $tex) { @(Get-ChildItem $tex -Filter *.png | ForEach-Object { $_.FullName }) } else { @() }
+    foreach ($f in @((Join-Path $Project $cfg.body_glb), (Join-Path $Project ($cfg.body_glb -replace "_body\.glb$", "_full.glb"))) + $existingTex) {
         if (Test-Path $f) { Copy-Item $f $backup }
     }
     foreach ($f in "base_color.png", "normal.png", "orm.png") { if (-not (Test-Path (Join-Path $Out $f))) { Fail "$f was not written to $Out" } }
@@ -92,6 +95,12 @@ Stage "gate" {
     $code = Run $Godot @("--headless", "--path", ".", "-s", "scratch/fit_cars.gd", "--", "--apply", $Car) $log
     $text = Get-Content $log -Raw
     ($text -split "`n" | Where-Object { $_ -match "^\s+[FR][LR] |floor y|proposed|applied|FIT GATE" -and $_ -notmatch "^(porsche|audi)" }) | ForEach-Object { Write-Host ("    " + ($_ -replace "\(sock x [\d.]+\) ", "").TrimEnd()) }
+    if ($code -ne 0 -and $text -match "applied: (\d+) socket" -and [int]$Matches[1] -gt 0) {
+        Write-Host "    retrying gate with newly applied sockets..."
+        $code = Run $Godot @("--headless", "--path", ".", "-s", "scratch/fit_cars.gd", "--", "--apply", $Car) $log
+        $text = Get-Content $log -Raw
+        ($text -split "`n" | Where-Object { $_ -match "^\s+[FR][LR] |floor y|proposed|applied|FIT GATE" -and $_ -notmatch "^(porsche|audi)" }) | ForEach-Object { Write-Host ("    " + ($_ -replace "\(sock x [\d.]+\) ", "").TrimEnd()) }
+    }
     if ($code -ne 0) { Fail "the fit gate failed, see $log" }
     if ($text -match "applied: (\d+) socket" -and [int]$Matches[1] -gt 0) { Write-Host "    socket x changed: the full GLB is rebuilt next" }
 }

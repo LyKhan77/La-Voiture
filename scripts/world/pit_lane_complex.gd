@@ -129,10 +129,10 @@ static func standby_spot(slot: int) -> Vector3:
 
 
 ## Builds the lane, garages and markings against `p_ribbon`.
-func build(p_ribbon: TrackRibbonScript) -> void:
+func build(p_ribbon: TrackRibbonScript, team_ids: Array[int] = []) -> void:
 	ribbon = p_ribbon
 	length_m = fposmod(EXIT_S - ENTRY_S, ribbon.length_m)
-	_build_stalls()
+	_build_stalls(team_ids)
 	_build_asphalt()
 	_build_markings()
 	_build_pit_wall()
@@ -176,10 +176,16 @@ func get_pit_transform(u: float, lateral_m: float) -> Transform3D:
 
 
 func stall_u(team: int) -> float:
+	for stall: Dictionary in stalls:
+		if int(stall.get("team", -1)) == team:
+			return float(stall["u"])
 	return float(stalls[clampi(team, 0, stalls.size() - 1)]["u"])
 
 
 func stall_transform(team: int) -> Transform3D:
+	for stall: Dictionary in stalls:
+		if int(stall.get("team", -1)) == team:
+			return stall["pose"]
 	return stalls[clampi(team, 0, stalls.size() - 1)]["pose"]
 
 
@@ -188,12 +194,20 @@ func wall_lateral(u: float) -> float:
 	return lane_edges(u).x - (FAST_LANE_M - LANE_HALF_WIDTH_M - PIT_WALL_M)
 
 
-func _build_stalls() -> void:
+func _build_stalls(team_ids: Array[int] = []) -> void:
 	stalls.clear()
-	for team: int in range(TEAM_COUNT):
-		var s: float = STALL_FIRST_S + STALL_PITCH_M * float(team)
+	var teams: Array[int] = []
+	if not team_ids.is_empty():
+		for t: int in team_ids:
+			teams.append(t)
+	else:
+		for t: int in range(TEAM_COUNT):
+			teams.append(t)
+	for i: int in range(mini(TEAM_COUNT, teams.size())):
+		var team: int = teams[i]
+		var s: float = STALL_FIRST_S + STALL_PITCH_M * float(i)
 		stalls.append({
-			"team": team, "s": s, "u": u_from_s(s), "lateral": STALL_LANE_M,
+			"stall_index": i, "team": team, "s": s, "u": u_from_s(s), "lateral": STALL_LANE_M,
 			"pose": ribbon.get_point_at_offset(s, STALL_LANE_M),
 		})
 

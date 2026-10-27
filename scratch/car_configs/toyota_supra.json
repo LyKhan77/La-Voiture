@@ -1,0 +1,66 @@
+{
+  "car": "toyota_supra",
+  "raw_glb": "assets/cars/toyota_supra/raw/toyota_supra_raw.glb",
+  "body_glb": "assets/cars/toyota_supra/toyota_supra_body.glb",
+  "texture_dir": "assets/cars/toyota_supra/textures",
+  "mesh_name": "ToyotaSupra_Body",
+  "paint_material": "ToyotaSupra_Paint",
+  "front_axis_raw": "auto",
+  "length_m": 4.57,
+  "raw_axle": "auto",
+  "axle_z": 0.33,
+  "arch_radius": 0.372,
+  "tub_radius": 0.369,
+  "tub_inner_x": 0.65,
+  "voxel_m": 0.01,
+  "smooth_iterations": 40,
+  "target_tris": 115000,
+  "texture_px": 4096,
+  "texture_clean": {
+    "enabled": false,
+    "band_low": 0.22,
+    "band_margin": 0.03,
+    "open_radius": 3,
+    "grow": 2
+  },
+  "ao_distance_m": 0.2,
+  "toon_normals": {
+    "iterations": 30,
+    "feature_angle": 35.0
+  },
+  "fender_lift": "auto",
+  "ground_clamp": {
+    "enabled": true,
+    "target_z": 0.05
+  },
+  "detail_zones": [
+    {
+      "name": "front_splitter",
+      "box_min": [
+        -1.25,
+        -2.6,
+        -0.15
+      ],
+      "box_max": [
+        1.25,
+        -1.62,
+        0.42
+      ],
+      "margin": 0.12
+    },
+    {
+      "name": "rear_diffuser",
+      "box_min": [
+        -1.25,
+        1.78,
+        -0.15
+      ],
+      "box_max": [
+        1.25,
+        2.6,
+        0.45
+      ],
+      "margin": 0.12
+    }
+  ]
+}

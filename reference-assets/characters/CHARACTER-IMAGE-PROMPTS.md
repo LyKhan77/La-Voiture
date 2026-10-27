@@ -273,6 +273,81 @@ Setiap pembalap memiliki **2 Jenis Prompt**:
 
 ---
 
+### TIM 10: SCUDERIA MARANELLO (Ferrari 296 GT3 | Pemilik: Enzo Cavalli)
+**Palet Warna:** *Rosso Corsa* (`#E60026`) $\times$ *Solar Gold Accent* (`#FFD000`) $\times$ *Deep Carbon Obsidian* (`#0A0A0A`)
+
+#### 21. Marco Bellini (`#21 BEL`) — The Monza Virtuoso
+* **Prompt A (2D Comms Radio Portrait):**
+  ```text
+  Bust-up anime portrait of Marco Bellini, 23-year-old Italian racing prodigy, charismatic handsome face with slight confident smirk, voluminous wavy dark anime hair with dark crimson highlights, gold chain necklace tucked into collar. Wearing fiery Rosso Corsa red racing suit with thin solar gold pinstripes, radio microphone on lapel. Heavy black manga inking, dynamic speed lines, Ben-Day dot halftone screentone, cel-shaded anime style, transparent background --transparent
+  ```
+* **Prompt B (Full-Body 3D Reference Concept):**
+  ```text
+  Full-body character concept turnaround of Marco Bellini in stylish Italian streetwear stance. Wearing an open black satin bomber jacket over a vivid red racing suit with gold accents, luxury red sneakers. Holding a glossy red racing helmet with Italian tricolor stripes and gold visor in his hand, sunglasses pushed up on forehead. Clean front turnaround view, neutral studio grey background, cel-shaded anime outline
+  ```
+
+#### 22. Alessia Rossi (`#22 ROS`) — The Aero Donna
+* **Prompt A (2D Comms Radio Portrait):**
+  ```text
+  Bust-up anime portrait of Alessia Rossi, 25-year-old female Italian racing engineer and driver, sleek asymmetrical dark-blonde bob hair, sharp intense hazel eyes, focused commanding expression. Wearing high-collar matte carbon black and Rosso Corsa racing suit with gold telemetry icon patches, slim ear-mounted comms headset on left ear. Crisp manga ink lines, graphic novel screentone, high contrast cel-shading, transparent background --transparent
+  ```
+* **Prompt B (Full-Body 3D Reference Concept):**
+  ```text
+  Full-body character concept turnaround of Alessia Rossi in confident upright stance with arms crossed. Tall athletic build, wearing form-fitting matte carbon racing suit with bold crimson geometric chest panels and gold trim, red racing boots. Holding a matte black aerodynamic helmet with gold laurel wreath stencils under one arm, digital telemetry tablet in hand. Neutral grey studio background, crisp cel-shaded anime turnaround
+  ```
+
+---
+
+### TIM 11: IRONHORSE MOTORSPORT (Ford Mustang GT3 | Pemilik: "Jax" Jackson)
+**Palet Warna:** *Steel Navy Blue* (`#1D3557`) $\times$ *Hazard Blaze Orange* (`#FF5400`) $\times$ *Raw Brushed Metal* (`#B0B7C3`)
+
+#### 23. Colt Vance (`#23 VAN`) — The Detroit Brawler
+* **Prompt A (2D Comms Radio Portrait):**
+  ```text
+  Bust-up anime portrait of Colt Vance, 26-year-old rugged American muscle car racer, square jaw with light stubble, messy dirty-blonde undercut hair, fierce aggressive grin, small scar across right cheek. Wearing steel navy blue racing suit under distressed denim racing vest with orange hazard stitching, orange bandana tied around neck. Heavy comic ink contours, gritty manga halftone dots, industrial neo-brutalist aesthetic, transparent background --transparent
+  ```
+* **Prompt B (Full-Body 3D Reference Concept):**
+  ```text
+  Full-body character concept turnaround of Colt Vance in wide relaxed brawler stance. Broad athletic build, wearing steel navy racing suit with sleeveless distressed denim vest sporting embroidered wild mustang emblem on back, brown leather reinforced racing gloves, vintage brown racing boots. Resting a matte navy helmet with roaring iron horse skull graffiti on his hip. Neutral grey studio background, cel-shaded anime
+  ```
+
+#### 24. Wyatt Cooper (`#24 COO`) — The High-Plains Drifter
+* **Prompt A (2D Comms Radio Portrait):**
+  ```text
+  Bust-up anime portrait of Wyatt Cooper, 24-year-old lanky Texas GT3 driver, calm cool steady grey eyes, unruly dark brown hair peeking out from a backward dark trucker cap, toothpick in mouth with dry smirk. Wearing brushed steel grey racing suit with dual blaze orange vertical center stripes, heavy silver aviator shades hanging on collar. Thick manga ink lines, high-contrast screentone, cel-shaded anime style, transparent background --transparent
+  ```
+* **Prompt B (Full-Body 3D Reference Concept):**
+  ```text
+  Full-body character concept turnaround of Wyatt Cooper in lean slouching stance with two-finger salute. Tall slim build, wearing brushed metal grey kevlar racing suit with dual hazard orange racing stripes, black mechanic work gloves, black racing boots. A brushed metal helmet with vintage orange stripes held under arm. Neutral studio grey background, clean turnaround view, cel-shaded anime outline
+  ```
+
+---
+
+### TIM 12: NEO-WANGAN WORKS (Toyota GR Supra GT | Pemilik: Kenichi Shindo)
+**Palet Warna:** *Pearl Ghost White* (`#F8F9FA`) $\times$ *Infrared Neo-Red* (`#FF0055`) $\times$ *Ink Black Halftone* (`#050505`)
+
+#### 25. Hayato Kazama (`#25 KAZ`) — The Midnight Ghost
+* **Prompt A (2D Comms Radio Portrait):**
+  ```text
+  Bust-up anime portrait of Hayato Kazama, 22-year-old Japanese midnight highway racer, center-parted messy jet-black anime hair, intense piercing dark eyes with faint infrared reflection, band-aid on chin, focused taciturn expression. Wearing pearl-white racing windbreaker with reflective Japanese kanji on collar, high techwear neck gaiter pulled down. Thick comic ink contours, Ben-Day dot halftone screentone, speed lines background, cel-shaded anime, transparent background --transparent
+  ```
+* **Prompt B (Full-Body 3D Reference Concept):**
+  ```text
+  Full-body character concept turnaround of Hayato Kazama in street racer stance with zipper slightly lowered. Slender agile build, wearing oversized pearl-white racing windbreaker with 'Wangan' kanji graphics, tapered black track pants with red seam stripes, retro red and white thin-soled racing sneakers. Holding a pearl-white helmet with brush-stroke demon kanji under left arm. Neutral studio grey background, cel-shaded anime
+  ```
+
+#### 26. Rin Takahashi (`#26 TAK`) — The Touge Empress
+* **Prompt A (2D Comms Radio Portrait):**
+  ```text
+  Bust-up anime portrait of Rin Takahashi, 21-year-old cheerful female Japanese mountain pass racer, long vibrant crimson-red hair tied in high anime ponytail with two silver wrench-shaped hairpins, energetic sparkling amber eyes, playful confident grin. Wearing clean pearl-white racing suit with neon infrared halftone sleeve patterns, slim racing mic on collar. Bold manga ink lines, comic halftone dots, pop-anime aesthetic, transparent background --transparent
+  ```
+* **Prompt B (Full-Body 3D Reference Concept):**
+  ```text
+  Full-body character concept turnaround of Rin Takahashi in dynamic cheerful standing pose with double V-sign. Slender athletic build, wearing white and infrared racing suit with graphic halftone pattern on thighs, red short racing gloves, bright red high-top streetwear sneakers with neon white laces. A white-and-red gradient helmet with flying cherry blossom manga graphics sitting beside feet. Neutral grey background, cel-shaded anime turnaround
+  ```
+
+---
+
 ## 3. Skrip Perintah Cepat via Genex Tools CLI
 
 Untuk men-generate gambar 2D secara instan melalui terminal menggunakan Genex (biaya 7 kredit per gambar):

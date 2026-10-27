@@ -36,6 +36,9 @@ const CHASSIS_BY_TEAM: Dictionary = {
 	7: preload("res://scenes/car/lexus_rcf_chassis.tscn"), # Static Speed
 	8: preload("res://scenes/car/mclaren_720s_chassis.tscn"), # Chrome Syndicate
 	9: preload("res://scenes/car/lambo_huracan_chassis.tscn"), # Night Shift
+	10: preload("res://scenes/car/ferrari_296_chassis.tscn"), # Scuderia Maranello
+	11: preload("res://scenes/car/ford_mustang_chassis.tscn"), # Ironhorse Motorsport
+	12: preload("res://scenes/car/toyota_supra_chassis.tscn"), # Neo-Wangan Works
 }
 const GRAVITY: float = 9.81
 const BRAKE_GLOW_G: float = 1.5

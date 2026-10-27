@@ -832,7 +832,8 @@ func pit_length() -> float:
 
 
 func stall_offset(team_id: int) -> float:
-	return PitLaneScript.STALL_FIRST_S - PitLaneScript.ENTRY_S + PitLaneScript.STALL_PITCH_M * float(team_id)
+	var stall_idx: int = race.stall_index_for_team(team_id) if race.has_method("stall_index_for_team") else team_id
+	return PitLaneScript.STALL_FIRST_S - PitLaneScript.ENTRY_S + PitLaneScript.STALL_PITCH_M * float(stall_idx)
 
 
 ## Lateral of the pit lane path at `u`: off the right half of the circuit, along the fast lane and back.

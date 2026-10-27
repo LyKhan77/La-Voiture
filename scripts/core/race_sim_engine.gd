@@ -54,12 +54,14 @@ const ENGINE_POWER_MULT: Array[float] = [0.92, 1.00, 1.04]
 const TEAM_NAMES: Array[String] = [
 	"Apex Racing", "Neon Drift", "Kurogane GT", "Vanta Motors", "Razorline",
 	"Zero Hour", "Oni Works", "Static Speed", "Chrome Syndicate", "Night Shift",
+	"Scuderia Maranello", "Ironhorse Motorsport", "Neo-Wangan Works",
 ]
 const DRIVER_NAMES: Array[String] = [
 	"K. Ryu", "S. Ren", "M. Ito", "A. Vale", "J. Cruz",
 	"N. Sato", "L. Moreau", "R. Silva", "T. Kade", "E. Novak",
 	"H. Mori", "D. Reyes", "V. Sokol", "P. Aoki", "G. Alves",
 	"C. Weiss", "B. Tanaka", "F. Duval", "I. Petrov", "O. Mbeki",
+	"M. Bellini", "A. Rossi", "C. Vance", "W. Cooper", "H. Kazama", "R. Takahashi",
 ]
 
 

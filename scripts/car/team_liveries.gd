@@ -6,6 +6,7 @@ extends RefCounted
 const COLORS: Array[Color] = [
 	Color("#CCFF00"), Color("#00F0FF"), Color("#FF1E56"), Color("#FFE600"), Color("#D946EF"),
 	Color("#FF7A00"), Color("#3D7BFF"), Color("#F4F5F7"), Color("#00E08A"), Color("#9B5CFF"),
+	Color("#D40000"), Color("#1E3A8A"), Color("#E2E8F0"),
 ]
 
 

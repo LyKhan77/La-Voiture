@@ -37,6 +37,8 @@ var radio_history: Array[Dictionary] = []
 var latest_radio: Dictionary = {}
 var tactic_mode: int = GtTypes.TacticMode.MANUAL
 var player_team_id: int = 0
+var active_teams: Array[int] = []
+var race_seed: int = 1
 var latest_suggestion: Dictionary = {}
 var latest_collision: Dictionary = {}
 ## Rare solo spins, barrier taps and contact incidents. Tests that need a quiet field turn it off.
@@ -74,6 +76,7 @@ var _driving: GtDriving
 func _init(p_track: GtTrack, p_laps: int = 10, seed_value: int = 1, weather_override: int = -1, car_count: int = 20) -> void:
 	track = p_track
 	laps = maxi(1, p_laps)
+	race_seed = seed_value
 	rng = GtRng.new(seed_value)
 	weather = GtWeather.new(laps, seed_value, weather_override)
 	weather.advisory.connect(_on_weather_advisory)
@@ -103,12 +106,28 @@ func dispose() -> void:
 		weather.advisory.disconnect(_on_weather_advisory)
 
 
-func _build_grid(count: int, _seed_value: int) -> void:
+func stall_index_for_team(team_id: int) -> int:
+	var idx: int = active_teams.find(team_id)
+	return idx if idx >= 0 else posmod(team_id, 10)
+
+
+func _build_grid(count: int, _seed_value: int, target_teams: Array[int] = []) -> void:
+	cars.clear()
+	var total_teams: int = GtData.TEAM_NAMES.size()
+	var needed_teams: int = clampi(count / 2, 1, total_teams)
+	if target_teams.is_empty():
+		active_teams.clear()
+		for t: int in range(needed_teams):
+			active_teams.append(t)
+	else:
+		active_teams = target_teams.duplicate()
 	var entries: Array[Dictionary] = []
-	for slot: int in range(20):
-		var car := GtCar.new()
-		GtData.apply_entry(car, slot)
-		entries.append({"car": car, "pace": car.grip * car.skill + (rng.next() - 0.5) * 0.02})
+	for team_id: int in active_teams:
+		for d: int in range(2):
+			var slot: int = team_id * 2 + d
+			var car := GtCar.new()
+			GtData.apply_entry(car, slot)
+			entries.append({"car": car, "pace": car.grip * car.skill + (rng.next() - 0.5) * 0.02})
 	entries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return float(a["pace"]) > float(b["pace"]))
 	var initial_water: float = weather.track_water_pct
 	for index: int in range(count):
@@ -663,6 +682,26 @@ func set_tactic_mode(mode: int) -> void:
 
 func set_player_team(team_id: int) -> void:
 	player_team_id = team_id
+	if not active_teams.has(team_id) or active_teams.size() < 10:
+		var total_teams: int = GtData.TEAM_NAMES.size()
+		var needed_teams: int = 10
+		var selected_teams: Array[int] = [team_id]
+		var rivals: Array[int] = []
+		for t: int in range(total_teams):
+			if t != team_id:
+				rivals.append(t)
+		var shuffle_rng := RandomNumberGenerator.new()
+		shuffle_rng.seed = race_seed + 777
+		for i: int in range(rivals.size() - 1, 0, -1):
+			var j: int = shuffle_rng.randi_range(0, i)
+			var tmp: int = rivals[i]
+			rivals[i] = rivals[j]
+			rivals[j] = tmp
+		for t: int in rivals:
+			if selected_teams.size() >= needed_teams:
+				break
+			selected_teams.append(t)
+		_build_grid(20, race_seed, selected_teams)
 
 
 func request_pit(car_id: int, compound: int) -> void:

@@ -99,7 +99,7 @@ func _ready() -> void:
 	director.light_lit.connect(_on_light_lit)
 	director.state_changed.connect(_on_director_state)
 	gantry.global_transform = ribbon.get_point_on_ribbon(0.0, 1)
-	pit_lane.build(ribbon)
+	pit_lane.build(ribbon, race.active_teams)
 	environment.build(ribbon, track.line)
 	environment.bind_world($WorldEnvironment, $Sun, camera)
 	choreographer.setup(pit_lane, ActorScript.WHEEL_SCENES)
