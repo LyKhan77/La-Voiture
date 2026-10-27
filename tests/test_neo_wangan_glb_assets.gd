@@ -23,14 +23,17 @@ func _initialize() -> void:
 		var bounds := AABB()
 		var triangles: int = 0
 		var material_names: Array[String] = []
+		var vertex_colors: bool = true
 		for child: Node in node.find_children("*", "MeshInstance3D", true, false):
 			var instance := child as MeshInstance3D
 			bounds = bounds.merge(instance.transform * instance.get_aabb())
 			for surface: int in range(instance.mesh.get_surface_count()):
 				var arrays: Array = instance.mesh.surface_get_arrays(surface)
+				vertex_colors = vertex_colors and arrays[Mesh.ARRAY_COLOR] is PackedColorArray and (arrays[Mesh.ARRAY_COLOR] as PackedColorArray).size() > 0
 				triangles += (arrays[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
 				material_names.append(instance.mesh.surface_get_material(surface).resource_name)
 		check(triangles > 100 and triangles <= 5000, "%s meaningful mesh within 5000 tris (%d)" % [model, triangles])
+		check(vertex_colors, model + " retains authored palette vertex colors")
 		if model == "shuto_bridge_pylon":
 			check(bounds.size.y >= 65.0 and bounds.size.x >= 44.0 and material_names.has("StayCablesMat"), "44 x 65 m H-frame and steel cable surface")
 		elif model == "tunnel_portal_overpass":

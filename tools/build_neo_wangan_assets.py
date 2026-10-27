@@ -24,7 +24,11 @@ def solid(name, vertices, faces, color="concrete"):
     offset = len(verts)
     verts.extend(vertices)
     polys.extend(tuple(offset + i for i in face) for face in faces)
-    colors.extend([PALETTE[color]] * len(faces))
+    value = PALETTE[color]
+    # Vertex alpha is the shared Godot cel shader's emission mask, not transparency.
+    if name in ("WindowsMat", "StayCablesMat") and color in ("cyan", "magenta", "window"):
+        value = (*value[:3], 0.25)
+    colors.extend([value] * len(faces))
 
 
 def box(name, center, size, color="concrete"):
@@ -79,7 +83,7 @@ def pylon():
         box("StayCablesMat", (x-2.03,0,33), (0.1,3.2,62), "cyan")
         for direction in (-1,1):
             for n in range(4):
-                beam("StayCablesMat", (x,0,61-n*5), (x,direction*(24+n*13),2), 0.13)
+                beam("StayCablesMat", (x,0,61-n*5), (math.copysign(7.2,x),direction*(24+n*13),2), 0.13)
     for z in (20,57,63):
         box("PylonConcreteMat", (0,0,z), (44,4,2.0))
     for x in range(-18,19,6):

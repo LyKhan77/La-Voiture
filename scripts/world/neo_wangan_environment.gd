@@ -19,6 +19,7 @@ const RibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const CircuitScript := preload("res://scripts/world/neo_wangan_circuit_builder.gd")
 const SkylineShader := preload("res://shaders/neo_wangan_skyline.gdshader")
 const PoolShader := preload("res://shaders/neo_wangan_light_pool.gdshader")
+const MODEL_DIR := "res://assets/tracks/neo_wangan/models/"
 
 const BARRIER_LATERAL_M: float = 6.35
 const BARRIER_STEP_M: float = 3.0
@@ -95,13 +96,25 @@ var _neon_material: StandardMaterial3D
 var _lamp_material: StandardMaterial3D
 var _window_material: ShaderMaterial
 var _clock_s: float = 0.0
+var urban_island_root: Node3D
+var hero_landmarks_root: Node3D
+var midground_corridor_root: Node3D
+var near_track_buildings: Array[Dictionary] = []
+var ground_spans: Array[Vector2] = []
+var light_pool_poses: Array[Transform3D] = []
+var crane_poses: Array[Transform3D] = []
+var bridge_pier_poses: Array[Transform3D] = []
 
 
 ## Builds the whole set against the circuit's ribbon and its authored spans.
 func build(p_ribbon: RibbonScript, p_circuit) -> void:
 	ribbon = p_ribbon
 	circuit = p_circuit
+	urban_island_root = _layer("UrbanIslandRoot")
+	hero_landmarks_root = _layer("HeroLandmarksRoot")
+	midground_corridor_root = _layer("MidgroundCorridorRoot")
 	_build_ground()
+	_build_urban_island()
 	_build_barriers()
 	_build_kerbs()
 	_build_streetlights()
@@ -110,6 +123,8 @@ func build(p_ribbon: RibbonScript, p_circuit) -> void:
 	_build_bridge()
 	_build_harbor()
 	_build_skyline()
+	_build_hero_landmarks()
+	_build_street_corridor()
 	_apply_night_sky()
 	measure()
 
@@ -164,15 +179,28 @@ func _measure_node(node: Node) -> void:
 		var instanced := node as MultiMeshInstance3D
 		if instanced.multimesh != null and instanced.multimesh.mesh != null:
 			multimesh_count += 1
-			draw_calls += instanced.multimesh.mesh.get_surface_count()
-			triangle_count += _mesh_triangles(instanced.multimesh.mesh) * instanced.multimesh.instance_count
+			_measure_mesh(instanced.multimesh.mesh, instanced.multimesh.instance_count, instanced.material_override)
 	elif node is MeshInstance3D:
 		var mesh_instance := node as MeshInstance3D
 		if mesh_instance.mesh != null:
-			draw_calls += mesh_instance.mesh.get_surface_count()
-			triangle_count += _mesh_triangles(mesh_instance.mesh)
+			_measure_mesh(mesh_instance.mesh, 1, mesh_instance.material_override)
 	for child: Node in node.get_children():
 		_measure_node(child)
+
+
+func _measure_mesh(mesh: Mesh, copies: int, override: Material) -> void:
+	for surface: int in range(mesh.get_surface_count()):
+		var material: Material = override if override != null else mesh.surface_get_material(surface)
+		var passes: int = 1
+		while material != null and material.next_pass != null:
+			passes += 1
+			material = material.next_pass
+		var arrays: Array = mesh.surface_get_arrays(surface)
+		var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX] if arrays[Mesh.ARRAY_INDEX] is PackedInt32Array else PackedInt32Array()
+		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var count: int = indices.size() / 3 if not indices.is_empty() else vertices.size() / 3
+		draw_calls += passes
+		triangle_count += count * copies * passes
 
 
 static func _mesh_triangles(mesh: Mesh) -> int:
@@ -213,7 +241,7 @@ func _water_material() -> StandardMaterial3D:
 	var material := StandardMaterial3D.new()
 	material.albedo_color = WATER_COLOR
 	material.metallic = 0.75
-	material.roughness = 0.08
+	material.roughness = 0.2
 	material.emission_enabled = true
 	material.emission = Color(0.0, 0.35, 0.5)
 	material.emission_energy_multiplier = 0.18
@@ -318,12 +346,21 @@ func _build_streetlights() -> void:
 ## circuit has to stay readable at 60 FPS, so the light is painted rather than cast.
 func _build_light_pools(lamp_transforms: Array[Transform3D]) -> void:
 	var quad := QuadMesh.new()
-	quad.size = Vector2(17.0, 11.0)
+	quad.size = Vector2(9.0, 5.5)
 	var pools: Array[Transform3D] = []
+	var laterals: Array[float] = []
 	for pose: Transform3D in lamp_transforms:
-		var flat := Transform3D(pose.basis * Basis(Vector3.RIGHT, -PI * 0.5), pose.origin + Vector3.UP * 0.04)
+		var s: float = ribbon.curve.get_closest_offset(pose.origin)
+		var centre: Transform3D = ribbon.get_point_at_offset(s, 0.0)
+		var side: float = signf((pose.origin - centre.origin).dot(centre.basis.x))
+		var road: Transform3D = ribbon.get_point_at_offset(s, side * 3.2)
+		var flat := Transform3D(road.basis * Basis(Vector3.UP, PI * 0.5) * Basis(Vector3.RIGHT, -PI * 0.5), road.origin + Vector3.UP * 0.04)
 		pools.append(flat)
-	_multimesh("StreetlightPools", quad, pools, _pool_material(Color("#ffcf8a"), 0.5))
+		laterals.append(side * 3.2)
+	var material: ShaderMaterial = _pool_material(Color("#ffcf8a"), 0.5)
+	material.set_shader_parameter("clip_to_road", true)
+	light_pool_poses = pools
+	_multimesh("StreetlightPools", quad, pools, material, laterals)
 
 
 func _pool_material(color: Color, intensity: float) -> ShaderMaterial:
@@ -455,11 +492,12 @@ func _build_bridge() -> void:
 		for side: float in [-1.0, 1.0]:
 			var pose: Transform3D = ribbon.get_point_at_offset(s, side * PIER_LATERAL_M)
 			var road_y: float = pose.origin.y
-			var height: float = maxf(road_y - BASE_Y, 2.0)
-			pose.origin = Vector3(pose.origin.x, BASE_Y, pose.origin.z)
+			var height: float = maxf(road_y - BASE_Y - DECK_SIZE.y, 2.0)
+			pose.origin = Vector3(pose.origin.x, BASE_Y + height * 0.5, pose.origin.z)
 			pose.basis = Basis.IDENTITY.scaled(Vector3(2.4, height, 2.4))
 			piers.append(pose)
 		s += PIER_PITCH_M
+	bridge_pier_poses = piers
 	_multimesh("BridgePillars", deck_mesh, piers, ToonMaterials.make(Color("#8b8f99")))
 
 
@@ -484,7 +522,7 @@ func _build_harbor() -> void:
 	for index: int in range(per_color.size()):
 		var instance := _multimesh("HarborContainers%d" % index, container_mesh, per_color[index], ToonMaterials.make(CONTAINER_COLORS[index]))
 		container_instances.append(instance)
-	_build_cranes()
+	# Harbor crane geometry comes from the Blender kit, instanced under HeroLandmarksRoot.
 
 
 ## Two container gantry cranes over the stacks: four legs, a top beam and a trolley.
@@ -558,13 +596,254 @@ func _build_skyline() -> void:
 
 # --- shared --------------------------------------------------------------------------------------
 
-func _multimesh(node_name: String, mesh: Mesh, transforms: Array, material: Material) -> MultiMeshInstance3D:
+func _layer(node_name: String) -> Node3D:
+	var layer := Node3D.new()
+	layer.name = node_name
+	add_child(layer)
+	return layer
+
+
+func _merged(parent: Node3D, node_name: String, batch: MeshBatchScript) -> MeshInstance3D:
+	var instance := MeshInstance3D.new()
+	instance.name = node_name
+	instance.mesh = batch.commit()
+	parent.add_child(instance)
+	return instance
+
+
+## Continuous land strips, seawalls and cut-and-cover excavation; only the bridge exposes water.
+func _build_urban_island() -> void:
+	ground_spans = [Vector2(0.0, CircuitScript.BRIDGE_START_M), Vector2(CircuitScript.BRIDGE_END_M, ribbon.length_m)]
+	# Raster union prevents a broad slab on one chicane leg from burying an adjacent lower road.
+	var grid: Dictionary = {}
+	const CELL: float = 5.0
+	const RADIUS: int = 15
+	for span: Vector2 in ground_spans:
+		for sample: int in range(ceili(span.x), ceili(span.y) + 1, 4):
+			var road: Vector3 = ribbon.get_point_at_offset(float(sample), 0.0).origin
+			var centre := Vector2i(roundi(road.x / CELL), roundi(road.z / CELL))
+			for dx: int in range(-RADIUS, RADIUS + 1):
+				for dz: int in range(-RADIUS, RADIUS + 1):
+					var key := centre + Vector2i(dx, dz)
+					var distance_sq: float = Vector2(float(key.x) * CELL - road.x, float(key.y) * CELL - road.z).length_squared()
+					if distance_sq > 72.0 * 72.0:
+						continue
+					var height: float = road.y - 0.15 if distance_sq < 14.0 * 14.0 else maxf(-0.35, road.y - 0.35)
+					if not grid.has(key):
+						grid[key] = Vector2(distance_sq, height)
+					else:
+						var old: Vector2 = grid[key]
+						if distance_sq < old.x:
+							grid[key] = Vector2(distance_sq, height)
+	var ground := MeshBatchScript.new()
+	var walls := MeshBatchScript.new()
+	var plaza := MeshBatchScript.new()
+	var material: Material = ToonMaterials.vertex_colored(false)
+	for key: Vector2i in grid:
+		var corners: Array[Vector2i] = [key, key + Vector2i(1, 0), key + Vector2i(1, 1), key + Vector2i(0, 1)]
+		var points: Array[Vector3] = []
+		var complete: bool = true
+		for corner: Vector2i in corners:
+			if not grid.has(corner):
+				complete = false
+				break
+			points.append(Vector3(float(corner.x) * CELL, (grid[corner] as Vector2).y, float(corner.y) * CELL))
+		if not complete:
+			continue
+		ground.quad(material, Color("#30394a"), points[0], points[1], points[2], points[3], Vector3.UP)
+		for index: int in range(4):
+			var neighbour: Vector2i = key + [Vector2i(0, -1), Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0)][index]
+			if grid.has(neighbour) and grid.has(neighbour + Vector2i(1, 1)) and grid.has(neighbour + Vector2i(1, 0)) and grid.has(neighbour + Vector2i(0, 1)):
+				continue
+			var a: Vector3 = points[index]
+			var b: Vector3 = points[(index + 1) % 4]
+			walls.quad(material, Color("#59667b"), a, b, Vector3(b.x, BASE_Y - 1.0, b.z), Vector3(a.x, BASE_Y - 1.0, a.z), (b - a).cross(Vector3.UP).normalized())
+	_merged(urban_island_root, "UrbanGroundSlab", ground)
+	_merged(urban_island_root, "QuayWalls", walls)
+	var s: float = CircuitScript.TUNNEL_START_M
+	while s < CircuitScript.TUNNEL_END_M:
+		var pose: Transform3D = ribbon.get_point_at_offset(s + 3.0, 0.0)
+		var roof_y: float = pose.origin.y + TUNNEL_CLEARANCE_M
+		var thickness: float = maxf(0.7, 5.3 - roof_y)
+		pose.basis = Basis(Vector3.UP, pose.basis.get_euler().y)
+		pose.origin.y = 5.3 - thickness * 0.5
+		plaza.box(material, Color("#596479"), pose, Vector3(32.0, thickness, 6.3))
+		s += 6.0
+	_merged(urban_island_root, "TunnelOverpassPlaza", plaza)
+
+
+func _land_height(s: float) -> float:
+	return maxf(-0.35, ribbon.get_point_at_offset(s, 0.0).origin.y - 0.35)
+
+
+func _model_parts(filename: String) -> Array[Dictionary]:
+	var scene: PackedScene = load(MODEL_DIR + filename + ".glb") as PackedScene
+	var model: Node3D = scene.instantiate() as Node3D
+	var parts: Array[Dictionary] = []
+	for child: Node in model.find_children("*", "MeshInstance3D", true, false):
+		var instance := child as MeshInstance3D
+		# Godot's GLB import keeps COLOR_0 but disables its albedo flag; use our shared cel shader.
+		instance.mesh = instance.mesh.duplicate() as Mesh
+		for surface: int in range(instance.mesh.get_surface_count()):
+			instance.mesh.surface_set_material(surface, ToonMaterials.vertex_colored(true))
+		parts.append({"mesh": instance.mesh, "pose": instance.transform})
+	model.free()
+	return parts
+
+
+func _model_at(filename: String, node_name: String, s: float, lateral: float) -> Node3D:
+	var scene: PackedScene = load(MODEL_DIR + filename + ".glb") as PackedScene
+	var model: Node3D = scene.instantiate() as Node3D
+	model.name = node_name
+	var pose: Transform3D = ribbon.get_point_at_offset(s, lateral)
+	# Foundations stay plumb while the road follows its independent grade.
+	pose.basis = Basis(Vector3.UP, pose.basis.get_euler().y)
+	model.transform = pose
+	for child: Node in model.find_children("*", "MeshInstance3D", true, false):
+		(child as MeshInstance3D).material_override = ToonMaterials.vertex_colored(true)
+	hero_landmarks_root.add_child(model)
+	model.set_meta(&"arc_s", s)
+	return model
+
+
+func _instanced_model(filename: String, node_name: String, poses: Array[Transform3D], parent: Node3D) -> void:
+	var parts: Array[Dictionary] = _model_parts(filename)
+	for index: int in range(parts.size()):
+		var transformed: Array[Transform3D] = []
+		for pose: Transform3D in poses:
+			transformed.append(pose * (parts[index]["pose"] as Transform3D))
+		var instance: MultiMeshInstance3D = _multimesh(node_name if index == 0 else node_name + "Detail", parts[index]["mesh"], transformed, null)
+		instance.reparent(parent, false)
+
+
+func _build_hero_landmarks() -> void:
+	var bridge_length: float = CircuitScript.BRIDGE_END_M - CircuitScript.BRIDGE_START_M
+	var cables := MeshBatchScript.new()
+	var cable_material: Material = ToonMaterials.vertex_colored(false)
+	for index: int in range(2):
+		var s: float = CircuitScript.BRIDGE_START_M + bridge_length * (0.3 + float(index) * 0.4)
+		var pylon: Node3D = _model_at("shuto_bridge_pylon", "BridgePylon%d" % index, s, 0.0)
+		pylon.position.y = BASE_Y
+		# The exported module has straight-span cables; replace them with spline-anchored steel.
+		var straight_cables: MeshInstance3D = pylon.find_child("StayCablesMat", true, false) as MeshInstance3D
+		if straight_cables != null:
+			straight_cables.hide()
+		for side: float in [-1.0, 1.0]:
+			var tower_top: Vector3 = pylon.transform * Vector3(side * 20.0, 61.0, 0.0)
+			for direction: float in [-1.0, 1.0]:
+				for stay: int in range(4):
+					var anchor_s: float = s + direction * (24.0 + float(stay) * 13.0)
+					var anchor: Vector3 = _at(anchor_s, side * 7.1, 0.7)
+					cables.strut(cable_material, Color("#839bb8"), tower_top - Vector3.UP * float(stay) * 5.0, anchor, 0.14)
+			cables.strut(cable_material, Color(0.0, 0.94, 1.0, 0.15), pylon.transform * Vector3(side * 18.0, 5.0, 0.0), tower_top, 0.32)
+	_merged(hero_landmarks_root, "BridgeStayCables", cables)
+	var truss := MeshBatchScript.new()
+	var material: Material = ToonMaterials.vertex_colored(false)
+	truss.truss(material, METAL, Vector3(0.0, 0.0, -3.0), Vector3(0.0, 0.0, 3.0), Vector3.UP, 1.6, 2, 0.12)
+	var transforms: Array[Transform3D] = []
+	var s: float = CircuitScript.BRIDGE_START_M
+	while s < CircuitScript.BRIDGE_END_M:
+		for side: float in [-1.0, 1.0]:
+			var pose: Transform3D = ribbon.get_point_at_offset(s + 3.0, side * 7.1)
+			pose.origin.y += 0.4
+			transforms.append(pose)
+		s += 6.0
+	_multimesh("BridgeSideTrussMM", truss.commit(), transforms, null).reparent(hero_landmarks_root, false)
+	for index: int in range(2):
+		var portal_s: float = CircuitScript.TUNNEL_START_M if index == 0 else CircuitScript.TUNNEL_END_M
+		var portal: Node3D = _model_at("tunnel_portal_overpass", "TunnelPortal%d" % index, portal_s, 0.0)
+		if index == 1:
+			portal.rotate_y(PI)
+	for index: int in range(4):
+		var crane_s: float = CircuitScript.HARBOR_HAIRPIN_S - 100.0 + float(index) * 52.0
+		for lateral: float in [-55.0, 55.0, -65.0, 65.0]:
+			var pose: Transform3D = ribbon.get_point_at_offset(crane_s, lateral)
+			pose.basis = Basis(Vector3.UP, pose.basis.get_euler().y)
+			pose.origin.y = _land_height(crane_s)
+			if _building_clear(pose, Vector2(8.0, 10.0)):
+				crane_poses.append(pose)
+				break
+	_instanced_model("harbor_gantry_crane", "HarborCraneMM", crane_poses, hero_landmarks_root)
+
+
+## Check every road section: adjacent chicane legs must also clear building footprints.
+func _building_clear(pose: Transform3D, half_size: Vector2) -> bool:
+	var inverse: Transform3D = pose.affine_inverse()
+	for along: int in range(0, ceili(ribbon.length_m), 5):
+		var point: Vector3 = inverse * ribbon.get_point_at_offset(float(along), 0.0).origin
+		if absf(point.x) < half_size.x + 8.0 and absf(point.z) < half_size.y + 8.0:
+			return false
+	return true
+
+
+func _build_street_corridor() -> void:
+	var per_model: Array[Array] = [[], [], []]
+	var billboards: Array[Transform3D] = []
+	var counter: int = 0
+	for sample: int in range(52):
+		var s: float = 170.0 + float(sample) * 55.0
+		if s > CircuitScript.BRIDGE_START_M - 45.0 and s < CircuitScript.BRIDGE_END_M + 45.0:
+			continue
+		for side: float in [-1.0, 1.0]:
+			var lateral: float = side * (24.0 + float(sample % 3) * 8.0)
+			var pose: Transform3D = ribbon.get_point_at_offset(s, lateral)
+			pose.basis = Basis(Vector3.UP, pose.basis.get_euler().y)
+			pose.origin.y = _land_height(s)
+			if not _building_clear(pose, Vector2(10.0, 9.0)):
+				continue
+			var harbor_clear: bool = true
+			for crane_pose: Transform3D in crane_poses:
+				if Vector2(pose.origin.x - crane_pose.origin.x, pose.origin.z - crane_pose.origin.z).length() < 32.0:
+					harbor_clear = false
+			if not harbor_clear:
+				continue
+			var variant: int = counter % 3
+			per_model[variant].append(pose)
+			near_track_buildings.append({"s": s, "lateral_m": lateral, "pose": pose, "variant": variant})
+			if billboards.size() < 24:
+				var board: Transform3D = ribbon.get_point_at_offset(s, side * 13.5)
+				board.basis = Basis(Vector3.UP, board.basis.get_euler().y + side * PI * 0.5)
+				board.origin.y = _land_height(s) + 6.5
+				billboards.append(board)
+			counter += 1
+	for variant: int in range(3):
+		# City-wide MultiMeshes keep every tower in every shadow/frustum submission; district bounds cull them.
+		var districts: Dictionary = {}
+		for pose: Transform3D in per_model[variant]:
+			var district := Vector2i(floori(pose.origin.x / 300.0), floori(pose.origin.z / 300.0))
+			if not districts.has(district):
+				districts[district] = []
+			(districts[district] as Array).append(pose)
+		for district: Vector2i in districts:
+			var poses: Array[Transform3D] = []
+			poses.assign(districts[district])
+			_instanced_model("skyscraper_tower_" + ["a", "b", "c"][variant], "CorridorTower%d_%d_%d" % [variant, district.x, district.y], poses, midground_corridor_root)
+	var panels := MeshBatchScript.new()
+	var material: Material = ToonMaterials.vertex_colored(false)
+	panels.box(material, Color("#101827"), Transform3D.IDENTITY, Vector3(10.0, 5.5, 0.45))
+	for side: float in [-1.0, 1.0]:
+		panels.box(material, Color(1.0, 1.0, 1.0, 0.0), Transform3D(Basis.IDENTITY, Vector3(0.0, 0.0, side * 0.26)), Vector3(9.4, 4.9, 0.06))
+	for row: int in range(3):
+		for side: float in [-1.0, 1.0]:
+			panels.box(material, Color("#192c40"), Transform3D(Basis.IDENTITY, Vector3(0.0, 1.4 - float(row) * 1.2, side * 0.31)), Vector3(6.3 - float(row), 0.22, 0.06))
+	var billboard_mm: MultiMeshInstance3D = _multimesh("StreetBillboardMM", panels.commit(), billboards, null, [], true)
+	var colors: Array[Color] = [Color("#00f0ff"), Color("#ff1e56"), Color("#ccff00")]
+	for index: int in range(billboards.size()):
+		billboard_mm.multimesh.set_instance_color(index, colors[index % 3])
+	billboard_mm.reparent(midground_corridor_root, false)
+
+
+func _multimesh(node_name: String, mesh: Mesh, transforms: Array, material: Material, lateral_data: Array[float] = [], colored: bool = false) -> MultiMeshInstance3D:
 	var multimesh := MultiMesh.new()
 	multimesh.transform_format = MultiMesh.TRANSFORM_3D
+	multimesh.use_custom_data = not lateral_data.is_empty()
+	multimesh.use_colors = colored
 	multimesh.mesh = mesh
 	multimesh.instance_count = transforms.size()
 	for index: int in range(transforms.size()):
 		multimesh.set_instance_transform(index, transforms[index])
+		if not lateral_data.is_empty():
+			multimesh.set_instance_custom_data(index, Color(lateral_data[index], 0.0, 0.0, 0.0))
 	var instance := MultiMeshInstance3D.new()
 	instance.name = node_name
 	instance.multimesh = multimesh
@@ -595,8 +874,9 @@ func _apply_night_sky() -> void:
 	# read the asphalt and the barriers without a light per street lamp.
 	environment.ambient_light_energy = 0.85
 	environment.fog_enabled = true
+	environment.glow_enabled = true
 	environment.fog_light_color = Color("#232c4a")
-	environment.fog_density = 0.0009
+	environment.fog_density = 0.00055
 	if _sun != null:
 		_sun.light_energy = 0.5
 		_sun.light_color = Color("#9db4ff")

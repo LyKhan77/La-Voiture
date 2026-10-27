@@ -50,6 +50,7 @@ func _run() -> void:
 	_test_road_surface()
 	_test_pit_connection()
 	_test_urban_set()
+	await _test_ground_clearance()
 	_test_apex_preserved()
 	await _test_race_weekend_integration()
 	print("%d assertions, %d failure(s)" % [assertions, failures])
@@ -211,6 +212,7 @@ func _test_urban_set() -> void:
 	if environment == null:
 		check(false, "#W16 the circuit carries its urban environment")
 		return
+	_test_civil_layers(environment)
 	var barriers: MultiMeshInstance3D = environment.get_node_or_null("ConcreteBarriers")
 	var lights: MultiMeshInstance3D = environment.get_node_or_null("Streetlights")
 	var heads: MultiMeshInstance3D = environment.get_node_or_null("StreetlightHeads")
@@ -324,6 +326,99 @@ func _test_race_weekend_integration() -> void:
 	await process_frame
 
 
+func _test_civil_layers(environment: Node3D) -> void:
+	var island: Node3D = environment.get_node_or_null("UrbanIslandRoot")
+	var heroes: Node3D = environment.get_node_or_null("HeroLandmarksRoot")
+	var corridor: Node3D = environment.get_node_or_null("MidgroundCorridorRoot")
+	check(island != null and island.has_node("UrbanGroundSlab") and island.has_node("QuayWalls") and island.has_node("TunnelOverpassPlaza"), "#W26 land sectors have continuous ground, seawalls and tunnel rooftop plaza")
+	check(heroes != null and heroes.has_node("BridgePylon0") and heroes.has_node("BridgePylon1") and heroes.has_node("BridgeSideTrussMM") and heroes.has_node("TunnelPortal0") and heroes.has_node("TunnelPortal1") and heroes.has_node("HarborCraneMM"), "#W27 Blender pylons, tunnel portals, four instanced harbor cranes and side trusses integrated")
+	var building_count: int = 0
+	if corridor != null:
+		for child: Node in corridor.get_children():
+			if child is MultiMeshInstance3D and child.name.begins_with("CorridorTower"):
+				building_count += (child as MultiMeshInstance3D).multimesh.instance_count
+	# Each GLB has two material meshes; only shell instances count as buildings.
+	building_count /= 2
+	check(building_count >= 48, "#W28 street canyon contains at least 48 GLB buildings (%d)" % building_count)
+	var billboard: MultiMeshInstance3D = corridor.get_node_or_null("StreetBillboardMM") if corridor != null else null
+	check(billboard != null and billboard.multimesh.instance_count == 24, "#W29 24 instanced neon billboards face the road")
+	var pool: MultiMeshInstance3D = environment.get_node_or_null("StreetlightPools")
+	var pool_ok: bool = pool != null
+	if pool != null:
+		var quad := pool.multimesh.mesh as QuadMesh
+		pool_ok = quad != null and quad.size == Vector2(9.0, 5.5)
+		# Dummy headless renderer returns identity for MultiMesh readback; inspect submitted poses.
+		pool_ok = pool_ok and environment.light_pool_poses.size() == pool.multimesh.instance_count
+		for pose: Transform3D in environment.light_pool_poses:
+			var closest: float = ribbon.curve.get_closest_offset(pose.origin)
+			var road: Transform3D = ribbon.get_point_at_offset(closest, 0.0)
+			var lateral: float = absf((pose.origin - road.origin).dot(road.basis.x))
+			pool_ok = pool_ok and absf(lateral - 3.2) < 0.15
+	check(pool_ok, "#W30 9 x 5.5 m light pools centred at +/-3.2 m on asphalt")
+	var palettes_ok: bool = true
+	if heroes != null:
+		for mesh_node: Node in heroes.find_children("*", "MeshInstance3D", true, false):
+			if mesh_node.name == "PylonConcreteMat":
+				palettes_ok = palettes_ok and mesh_node.material_override is ShaderMaterial
+	check(palettes_ok and heroes != null, "#W31 GLB palette uses shared cel vertex-color material")
+	var footprints_ok: bool = true
+	for building: Dictionary in environment.near_track_buildings:
+		var pose: Transform3D = building["pose"]
+		var lateral: float = absf(float(building["lateral_m"]))
+		footprints_ok = footprints_ok and lateral >= 14.0 and lateral <= 45.0
+		for s: int in range(0, ceili(ribbon.length_m), 10):
+			var local: Vector3 = pose.affine_inverse() * ribbon.get_point_at_offset(float(s), 0.0).origin
+			footprints_ok = footprints_ok and not (absf(local.x) < 17.5 and absf(local.z) < 16.5)
+	check(footprints_ok, "#W32 all corridor footprints clear every road segment and lie 14–45 m laterally")
+	var crane_poses: Variant = environment.get("crane_poses")
+	var crane_clear: bool = crane_poses is Array and crane_poses.size() == 4
+	if crane_poses is Array:
+		for pose: Transform3D in crane_poses:
+			for s: int in range(0, 3150, 5):
+				var local: Vector3 = pose.affine_inverse() * ribbon.get_point_at_offset(float(s), 0.0).origin
+				crane_clear = crane_clear and not (absf(local.x) < 15.5 and absf(local.z) < 17.5)
+	check(crane_clear, "#W34 all four harbor crane foundations clear all road legs")
+	check(heroes != null and heroes.has_node("BridgeStayCables"), "#W35 bridge steel cables anchor to the curved deck")
+	var pier_poses: Variant = environment.get("bridge_pier_poses")
+	var grounded: bool = pier_poses is Array and pier_poses.size() >= 8
+	if pier_poses is Array:
+		for pose: Transform3D in pier_poses:
+			var bottom: float = pose.origin.y - pose.basis.y.length() * 0.5
+			grounded = grounded and absf(bottom + 6.0) < 0.01
+	check(grounded, "#W36 bridge piers run from seabed to underside of the deck")
+
+
+func _test_ground_clearance() -> void:
+	var ground: MeshInstance3D = circuit.get_node_or_null("Environment/UrbanIslandRoot/UrbanGroundSlab")
+	if ground == null:
+		check(false, "#W33 ground geometry available for surface ray checks")
+		return
+	var body := StaticBody3D.new()
+	var shape := CollisionShape3D.new()
+	shape.shape = ground.mesh.create_trimesh_shape()
+	body.add_child(shape)
+	root.add_child(body)
+	await physics_frame
+	await physics_frame
+	var supported: bool = true
+	var clear: bool = true
+	var checked: int = 0
+	for s: int in range(0, ceili(ribbon.length_m), 8):
+		if s > BuilderScript.BRIDGE_START_M - 8.0 and s < BuilderScript.BRIDGE_END_M + 8.0:
+			continue
+		for lateral: float in [-5.0, 0.0, 5.0]:
+			var road: Vector3 = ribbon.get_point_at_offset(float(s), lateral).origin
+			var query := PhysicsRayQueryParameters3D.create(road + Vector3.UP * 10.0, road + Vector3.DOWN)
+			var hit: Dictionary = root.world_3d.direct_space_state.intersect_ray(query)
+			supported = supported and not hit.is_empty()
+			if not hit.is_empty():
+				clear = clear and float(hit["position"].y) < road.y - 0.01
+			checked += 1
+	check(supported and clear, "#W33 %d land-road samples have support below asphalt, never above" % checked)
+	body.queue_free()
+	await process_frame
+
+
 func _count_finished(race) -> int:
 	var finished: int = 0
 	for car in race.cars:
@@ -358,8 +453,13 @@ func _count_budget(node: Node, total: Dictionary) -> void:
 				count = (raw as PackedInt32Array).size() / 3
 			else:
 				count = (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size() / 3
-			total["draw_calls"] = int(total["draw_calls"]) + 1
-			total["triangles"] = int(total["triangles"]) + count * copies
+			var material: Material = node.material_override if node.material_override != null else mesh.surface_get_material(surface)
+			var passes: int = 1
+			while material != null and material.next_pass != null:
+				passes += 1
+				material = material.next_pass
+			total["draw_calls"] = int(total["draw_calls"]) + passes
+			total["triangles"] = int(total["triangles"]) + count * copies * passes
 	for child: Node in node.get_children():
 		_count_budget(child, total)
 

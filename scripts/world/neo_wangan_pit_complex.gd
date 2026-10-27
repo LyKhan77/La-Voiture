@@ -434,13 +434,21 @@ func _build_shared_paddock() -> void:
 	var material: Material = ToonMaterials.vertex_colored(false)
 	for side: float in [-1.0, 1.0]:
 		var previous := Vector3.ZERO
+		var connected: bool = false
 		for index: int in range(49):
-			var at: Vector3 = get_pit_transform(-40.0 + float(index) * 5.0, side * 6.5).origin
+			var u: float = -40.0 + float(index) * 5.0
+			# Keep entry and exit merge corridors open; the pit-side fence follows only the wall.
+			if side > 0.0 and (u < WALL_START_U or u > LANE_LENGTH_M):
+				connected = false
+				continue
+			var lateral: float = PIT_WALL_M if side > 0.0 else -6.5
+			var at: Vector3 = get_pit_transform(u, lateral).origin
 			fence.box(material, Color("#626c83"), Transform3D(Basis.IDENTITY, at + Vector3.UP * 2.0), Vector3(0.08, 4.0, 0.08))
-			if index > 0:
+			if connected:
 				for height: float in [1.5, 2.3, 3.1, 4.0]:
 					fence.strut(material, Color("#626c83"), previous + Vector3.UP * height, at + Vector3.UP * height, 0.025)
 			previous = at
+			connected = true
 	var catch_fence := MeshInstance3D.new()
 	catch_fence.name = "CatchFence"
 	catch_fence.mesh = fence.commit()

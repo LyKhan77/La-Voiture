@@ -21,6 +21,16 @@ func _run() -> void:
 	check(pit.get("building_length_m") == Pit.LENGTH_M and pit.get("bay_stride_m") == 14.0, "Apex pit defaults preserved")
 	check(stand.get("stand_length_m") == Stand.LENGTH_M, "Apex grandstand default preserved")
 	check(tower.get("accent_color") == Color("#ffd400"), "Apex tower accent preserved")
+	var defaults: Array[Node3D] = [pit, stand, tower]
+	var hashes: Array[String] = ["3cc81bbf459b66856010f98c0043f4a902988a52acf2e8c193d40e09c74ace3e", "55c7660612630520a7e7c705c76cd792c3d995945bdf182ad12023d3438ab759", "0998c81f7c49faf7227e3586d7bbc2c9801570075177ec49240aeb2a046c810e"]
+	for index: int in range(defaults.size()):
+		defaults[index].build()
+		var context := HashingContext.new()
+		context.start(HashingContext.HASH_SHA256)
+		for node: Node in defaults[index].find_children("*", "MeshInstance3D", true, false):
+			for surface: int in range(node.mesh.get_surface_count()):
+				context.update(var_to_bytes(node.mesh.surface_get_arrays(surface)))
+		check(context.finish().hex_encode() == hashes[index], "Apex kit %d mesh arrays match pre-phase geometry byte for byte" % index)
 	pit.free()
 	stand.free()
 	tower.free()

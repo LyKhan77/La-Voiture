@@ -91,13 +91,13 @@ func _build_lounge(batch: MeshBatchScript, cel: ShaderMaterial) -> void:
 	var centre_x: float = front_x + 0.5 + DEPTH_M * 0.5
 	var centre_y: float = garage_top_y + LOUNGE_HEIGHT_M * 0.5
 	batch.box(cel, INTERIOR_COLOR, Transform3D(Basis.IDENTITY, Vector3(centre_x, centre_y, 0.0)), Vector3(DEPTH_M, LOUNGE_HEIGHT_M, building_length_m))
-	var front_x: float = front_x + 0.5
-	batch.box(cel, accent_color, Transform3D(Basis.IDENTITY, Vector3(front_x - 0.1, garage_top_y + 0.35, 0.0)), Vector3(0.5, 0.7, building_length_m))
-	batch.box(cel, accent_color, Transform3D(Basis.IDENTITY, Vector3(front_x - 0.1, garage_top_y + LOUNGE_HEIGHT_M - 0.3, 0.0)), Vector3(0.5, 0.6, building_length_m))
+	var lounge_front_x: float = front_x + 0.5
+	batch.box(cel, accent_color, Transform3D(Basis.IDENTITY, Vector3(lounge_front_x - 0.1, garage_top_y + 0.35, 0.0)), Vector3(0.5, 0.7, building_length_m))
+	batch.box(cel, accent_color, Transform3D(Basis.IDENTITY, Vector3(lounge_front_x - 0.1, garage_top_y + LOUNGE_HEIGHT_M - 0.3, 0.0)), Vector3(0.5, 0.6, building_length_m))
 	var mullions: int = roundi(building_length_m / MULLION_STEP_M)
 	for index: int in range(mullions + 1):
 		var z: float = -building_length_m * 0.5 + building_length_m * float(index) / float(mullions)
-		batch.box(cel, STEEL_COLOR, Transform3D(Basis.IDENTITY, Vector3(front_x - 0.15, centre_y, z)), Vector3(0.18, LOUNGE_HEIGHT_M - 1.2, 0.14))
+		batch.box(cel, STEEL_COLOR, Transform3D(Basis.IDENTITY, Vector3(lounge_front_x - 0.15, centre_y, z)), Vector3(0.18, LOUNGE_HEIGHT_M - 1.2, 0.14))
 	# Lit office windows on the rear face, dim at night.
 	var windows: int = 14
 	for index: int in range(windows):
