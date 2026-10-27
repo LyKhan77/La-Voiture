@@ -30,6 +30,8 @@ enum CircuitType { GRAND_PRIX, SPRINT }
 @export var preview_image_path: String = ""
 ## 0..1 chance of rain in this round's weekend weather, used by Career Mode.
 @export var rain_probability: float = 0.0
+## The round's fastest race lap in seconds; 0 until a lap has been set.
+@export var lap_record_s: float = 0.0
 ## One line of colour for the setup card and the career calendar.
 @export var notes: String = ""
 
@@ -50,3 +52,10 @@ func is_playable() -> bool:
 ## "3.15 KM" for cards and labels.
 func length_label() -> String:
 	return "%.2f KM" % length_km
+
+
+## "1:19.600", or "--:--.---" while the round has no recorded lap.
+func lap_record_label() -> String:
+	if lap_record_s <= 0.0:
+		return "--:--.---"
+	return "%d:%06.3f" % [int(lap_record_s / 60.0), fmod(lap_record_s, 60.0)]

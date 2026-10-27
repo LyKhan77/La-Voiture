@@ -8,6 +8,9 @@ extends RefCounted
 
 const CircuitDataScript := preload("res://scripts/core/circuit_data.gd")
 
+## Recorded race laps (seconds); rounds without one stay at 0 and show --:--.---.
+const LAP_RECORDS: Dictionary = {"apex_ring": 79.6}
+
 const APEX_RING_SCENE := "res://scenes/race_world/track_circuit.tscn"
 const NEO_WANGAN_SCENE := "res://scenes/race_world/neo_wangan_circuit.tscn"
 const DEFAULT_CIRCUIT_ID := "apex_ring"
@@ -104,6 +107,7 @@ static func _ensure_built() -> void:
 		circuit.scene_path = String(row[11])
 		circuit.preview_image_path = preview_root % circuit.circuit_id
 		circuit.rain_probability = float(row[12])
+		circuit.lap_record_s = float(LAP_RECORDS.get(circuit.circuit_id, 0.0))
 		circuit.notes = String(row[13])
 		_circuits.append(circuit)
 	for index: int in range(_circuits.size()):

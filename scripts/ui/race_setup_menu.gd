@@ -1,16 +1,19 @@
 class_name RaceSetupMenu
 extends Control
 
-## Exhibition configuration (spec §2.3), Concept 01 "hero map" layout: the Apex Ring map fills the
-## left of the screen (traced live from the race world's own circuit curve, with sectors, the real
-## DRS zones and numbered corners), a strip of venue cards sits under it (Apex Ring selected, the
-## other two COMING SOON), and laps / weather / time are skewed chips on the right. Choices are
-## written straight into RaceConfigData, so leaving for the garage and coming back keeps them.
-## CONTINUE opens the team garage; BACK returns to the main menu without resetting the draft.
+## Exhibition configuration (spec §2.3), Concept 01 "hero map" layout: the selected round's own
+## circuit map fills the left of the screen (traced live from that circuit's spline, with sectors,
+## the real DRS zones and numbered corners), the Track Selector walks the 12-round championship
+## calendar with its arrows, a strip of venue quick picks sits under the map, and laps / weather /
+## time are skewed chips on the right. Choices are written straight into RaceConfigData, so leaving
+## for the garage and coming back keeps them. CONTINUE opens the team garage; BACK returns to the
+## main menu without resetting the draft.
 
 const UI := preload("res://scripts/ui/pit_wall_ui.gd")
 const T := preload("res://scripts/ui/ui_theme_tokens.gd")
 const ConfigData := preload("res://scripts/core/race_config_data.gd")
+const CircuitDataScript := preload("res://scripts/core/circuit_data.gd")
+const CircuitRegistry := preload("res://scripts/core/circuit_calendar_registry.gd")
 const MapView := preload("res://scripts/ui/track_map.gd")
 const SettingsScript := preload("res://scripts/core/presentation_settings.gd")
 const StreetStyle := preload("res://scripts/ui/street_style.gd")
@@ -37,7 +40,6 @@ const WEATHER_NAMES: Array[String] = [
 	"FULL MONSOON // LOW VISIBILITY",
 ]
 const TIME_NAMES: Array[String] = ["DAYLIGHT", "GOLDEN HOUR SUNSET", "NIGHT CIRCUIT"]
-const RECORD_LAP_S: float = 79.6
 
 var config: ConfigData
 var stage: Control
@@ -48,6 +50,20 @@ var time_select: ChipRow
 var summary_label: Label
 var continue_button: Button
 var back_button: Button
+## The round the setup screen is pointed at, and the Track Selector that changes it.
+var circuit: CircuitDataScript
+var track_prev_button: Button
+var track_next_button: Button
+var circuit_name_label: Label
+var circuit_type_label: Label
+var circuit_length_label: Label
+var circuit_turns_label: Label
+var circuit_round_label: Label
+var map_tag: Label
+var stat_length: Label
+var stat_corners: Label
+var stat_record: Label
+var circuit_facts_label: Label
 
 
 func _ready() -> void:
@@ -57,6 +73,7 @@ func _ready() -> void:
 	_build_header()
 	_build_map_card()
 	_build_venue_strip()
+	_build_track_selector()
 	_build_parameters()
 	_build_actions()
 	get_viewport().size_changed.connect(fit)
@@ -151,10 +168,10 @@ func _build_map_card() -> void:
 	radar.position = Vector2(14.0, 18.0)
 	radar.size = Vector2(1112.0, 614.0)
 	card.add_child(radar)
-	var tag := StreetStyle.badge("CIRCUIT  //  APEX RING INTERNATIONAL")
-	tag.name = "CircuitTag"
-	tag.position = Vector2(-18.0, -22.0)
-	card.add_child(tag)
+	map_tag = StreetStyle.badge("CIRCUIT  //  APEX RING INTERNATIONAL")
+	map_tag.name = "CircuitTag"
+	map_tag.position = Vector2(-18.0, -22.0)
+	card.add_child(map_tag)
 	var active := StreetStyle.badge("ACTIVE", T.ACCENT_ACID_LIME, 20)
 	active.position = Vector2(1012.0, -18.0)
 	card.add_child(active)
@@ -166,11 +183,11 @@ func _build_map_card() -> void:
 ## The venue strip under the map: Apex Ring is selected, the others are COMING SOON.
 func _build_venue_strip() -> void:
 	var header := UI.label("CIRCUIT SELECT", 14, T.TEXT_MUTED, MONO)
-	header.position = Vector2(66.0, 868.0)
+	header.position = Vector2(66.0, 862.0)
 	stage.add_child(header)
-	_venue_card(Vector2(60.0, 892.0), "APEX RING", "CircuitCardAPEX", true)
-	_venue_card(Vector2(448.0, 892.0), "SUZUKA TOUGE NIGHT", "ComingSoonSUZUKA", false)
-	_venue_card(Vector2(836.0, 892.0), "MACAU GUIA CIRCUIT", "ComingSoonMACAU", false)
+	_venue_card(Vector2(60.0, 886.0), "01 APEX RING", "CircuitCardAPEX", true)
+	_venue_card(Vector2(448.0, 886.0), "06 HARUNA TOUGE", "ComingSoonSUZUKA", false)
+	_venue_card(Vector2(836.0, 886.0), "04 MONTE AZURE", "ComingSoonMACAU", false)
 
 
 func _venue_card(at: Vector2, venue: String, node_name: String, active: bool) -> void:
@@ -205,6 +222,46 @@ func _venue_card(at: Vector2, venue: String, node_name: String, active: bool) ->
 		card.add_child(soon)
 
 
+## The championship calendar selector: arrows walk Round 01..12, the plate names the round, its
+## type, length and corner count. Selecting a round writes it into RaceConfigData at once.
+func _build_track_selector() -> void:
+	circuit_name_label = UI.label("", 22, T.TEXT_PRIMARY, DISPLAY)
+	circuit_name_label.name = "CircuitNameLabel"
+	circuit_name_label.position = Vector2(1310.0, 886.0)
+	stage.add_child(circuit_name_label)
+	circuit_round_label = UI.label("", 13, T.ACCENT_CYBER_YELLOW, MONO)
+	circuit_round_label.name = "CircuitRoundLabel"
+	circuit_round_label.position = Vector2(1312.0, 862.0)
+	stage.add_child(circuit_round_label)
+	circuit_type_label = StreetStyle.badge("GRAND PRIX", T.ACCENT_ANIME_CRIMSON, 15)
+	circuit_type_label.name = "CircuitTypeLabel"
+	circuit_type_label.position = Vector2(1650.0, 858.0)
+	stage.add_child(circuit_type_label)
+	circuit_length_label = UI.label("", 16, T.ACCENT_ELECTRIC_CYAN, MONO)
+	circuit_length_label.name = "CircuitLengthLabel"
+	circuit_length_label.position = Vector2(1312.0, 918.0)
+	stage.add_child(circuit_length_label)
+	circuit_turns_label = UI.label("", 16, T.TEXT_SECONDARY, MONO)
+	circuit_turns_label.name = "CircuitTurnsLabel"
+	circuit_turns_label.position = Vector2(1430.0, 918.0)
+	stage.add_child(circuit_turns_label)
+	track_prev_button = _arrow("TrackPrevButton", "<", Vector2(1240.0, 856.0))
+	track_prev_button.pressed.connect(func() -> void: _select_neighbour(-1))
+	track_next_button = _arrow("TrackNextButton", ">", Vector2(1806.0, 856.0))
+	track_next_button.pressed.connect(func() -> void: _select_neighbour(1))
+
+
+func _arrow(node_name: String, text: String, at: Vector2) -> Button:
+	var button := UI.button(text, T.ACCENT_ACID_LIME)
+	button.name = node_name
+	StreetStyle.skin(button, 3, Vector2(4.0, 4.0), 22)
+	button.position = at
+	button.size = Vector2(54.0, 84.0)
+	button.focus_mode = Control.FOCUS_NONE
+	stage.add_child(button)
+	return button
+
+
 ## Laps / weather / time chips, the circuit numbers and the summary plate.
 func _build_parameters() -> void:
 	var header: Control = UI.header("RACE PARAMETERS", T.ACCENT_ELECTRIC_CYAN)
@@ -219,15 +276,13 @@ func _build_parameters() -> void:
 	time_select.item_selected.connect(_on_time_selected)
 
 	var stats: Dictionary = radar.stats()
-	_number(1240.0, 590.0, "LENGTH", "%.2f KM" % (float(stats["length_m"]) / 1000.0), T.TEXT_PRIMARY)
-	_number(1470.0, 590.0, "CORNERS", str(int(stats["corners"])), T.ACCENT_CYBER_YELLOW)
-	_number(1640.0, 590.0, "LAP RECORD", "%d:%06.3f" % [int(RECORD_LAP_S / 60.0), fmod(RECORD_LAP_S, 60.0)], T.ACCENT_ELECTRIC_CYAN)
-	var facts := UI.label(
-		"%s  //  ELEVATION %.1f m  //  %d DRS ZONES" % [String(stats["direction"]), float(stats["elevation_delta"]), radar.drs_zones.size()],
-		14, T.TEXT_MUTED, MONO
-	)
-	facts.position = Vector2(1240.0, 666.0)
-	stage.add_child(facts)
+	stat_length = _number(1240.0, 590.0, "LENGTH", "%.2f KM" % (float(stats["length_m"]) / 1000.0), T.TEXT_PRIMARY)
+	stat_corners = _number(1470.0, 590.0, "CORNERS", str(int(stats["corners"])), T.ACCENT_CYBER_YELLOW)
+	stat_record = _number(1640.0, 590.0, "LAP RECORD", "--:--.---", T.ACCENT_ELECTRIC_CYAN)
+	circuit_facts_label = UI.label("", 14, T.TEXT_MUTED, MONO)
+	circuit_facts_label.name = "CircuitFactsLabel"
+	circuit_facts_label.position = Vector2(1240.0, 666.0)
+	stage.add_child(circuit_facts_label)
 
 	var box := Control.new()
 	box.position = Vector2(1240.0, 712.0)
@@ -259,7 +314,7 @@ func _chips(node_name: String, caption: String, labels: Array[String], y: float,
 	return row
 
 
-func _number(x: float, y: float, caption: String, value: String, accent: Color) -> void:
+func _number(x: float, y: float, caption: String, value: String, accent: Color) -> Label:
 	var label := UI.label(caption, 14, T.TEXT_MUTED, MONO)
 	label.position = Vector2(x, y)
 	stage.add_child(label)
@@ -267,6 +322,7 @@ func _number(x: float, y: float, caption: String, value: String, accent: Color) 
 	number.name = "Stat" + caption.replace(" ", "")
 	number.position = Vector2(x, y + 20.0)
 	stage.add_child(number)
+	return number
 
 
 func _build_actions() -> void:
@@ -344,15 +400,65 @@ func _sync_from_config() -> void:
 	lap_select.select(lap_index)
 	weather_select.select(clampi(config.weather_preset, 0, WEATHER_NAMES.size() - 1))
 	time_select.select(clampi(config.time_of_day, 0, TIME_NAMES.size() - 1))
+	circuit = config.get_active_circuit()
+	_show_circuit(circuit)
 	_refresh_summary()
 
 
+## Walks the calendar by `step` rounds (wrapping) and points the whole screen at the result.
+func _select_neighbour(step: int) -> void:
+	var next: CircuitDataScript = CircuitRegistry.neighbour(config.selected_circuit_id, step)
+	if next == null:
+		return
+	circuit = next
+	config.selected_circuit_id = next.circuit_id
+	_show_circuit(next)
+	_refresh_summary()
+	AudioManager.click(self)
+
+
+## Public API for other screens and tests: select a round by id.
+func select_circuit(circuit_id: String) -> bool:
+	var target: CircuitDataScript = CircuitRegistry.get_circuit(circuit_id)
+	if target == null:
+		return false
+	circuit = target
+	config.selected_circuit_id = target.circuit_id
+	_show_circuit(target)
+	_refresh_summary()
+	return true
+
+
+func _show_circuit(selected: CircuitDataScript) -> void:
+	if selected == null:
+		return
+	circuit_name_label.text = selected.display_name
+	circuit_round_label.text = "ROUND %02d // %s // %s" % [selected.round_number, selected.month_label, selected.country_code]
+	circuit_type_label.text = selected.type_label()
+	circuit_length_label.text = selected.length_label()
+	circuit_turns_label.text = "%d TURNS" % selected.turns_count
+	map_tag.text = "CIRCUIT  //  %s" % selected.display_name.to_upper()
+	radar.load_circuit(selected)
+	var stats: Dictionary = radar.stats()
+	stat_length.text = "%.2f KM" % (float(stats["length_m"]) / 1000.0)
+	stat_corners.text = str(int(stats["corners"]))
+	stat_record.text = selected.lap_record_label()
+	circuit_facts_label.text = "%s  //  ELEVATION %.1f m  //  %d DRS ZONES" % [
+		String(stats["direction"]), float(stats["elevation_delta"]), radar.drs_zones.size()
+	]
+	var ready: bool = selected.is_playable()
+	continue_button.disabled = not ready
+	continue_button.text = "/// CONTINUE: TEAM GARAGE" if ready else "/// %s // IN PREPARATION" % selected.display_name.to_upper()
+
+
 func _refresh_summary() -> void:
-	summary_label.text = "%d LAPS  //  %s\n%s  //  %s" % [
+	var round_text: String = "ROUND %02d" % circuit.round_number if circuit != null else "ROUND --"
+	summary_label.text = "%s  //  %s\n%d LAPS  //  %s  //  %s" % [
+		round_text,
+		circuit.display_name.to_upper() if circuit != null else "",
 		config.total_laps,
 		WEATHER_NAMES[clampi(config.weather_preset, 0, WEATHER_NAMES.size() - 1)].split(" // ")[0],
 		TIME_NAMES[clampi(config.time_of_day, 0, TIME_NAMES.size() - 1)],
-		"TEAM GARAGE NEXT",
 	]
 
 

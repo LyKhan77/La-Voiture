@@ -1,13 +1,14 @@
 class_name TrackMapView
 extends Control
 
-## The Apex Ring radar of the race setup screen, traced live from the race world's own
-## Curve3D (`scenes/race_world/track_circuit.tscn`) instead of a hand-drawn picture:
-## the real length, the real corners numbered from curvature, three sector colours and
-## the real elevation profile. Nothing here is a mock-up — if the circuit changes, the
-## card changes with it.
+## The circuit map of the race setup screen, traced live from the round's own scene instead of a
+## hand-drawn picture: the real length, the real corners numbered from curvature, three sector
+## colours and the real elevation profile. It follows whichever round the Track Selector picks —
+## Apex Ring, Neo-Wangan, or a calendar round whose layout is not built yet (then it says so).
 
 const CircuitScene := preload("res://scenes/race_world/track_circuit.tscn")
+const CircuitDataScript := preload("res://scripts/core/circuit_data.gd")
+const DEFAULT_SCENE_PATH := "res://scenes/race_world/track_circuit.tscn"
 const T := preload("res://scripts/ui/ui_theme_tokens.gd")
 const DISPLAY := preload("res://assets/fonts/Anton.ttf")
 const MONO := preload("res://assets/fonts/JetBrainsMono.ttf")
@@ -38,6 +39,11 @@ var turns: Array[Dictionary] = []
 var drs_zones: Array[Dictionary] = []
 var min_elevation: float = 0.0
 var max_elevation: float = 0.0
+## Which calendar round the map is showing, and the scene it was traced from.
+var circuit_id: String = "apex_ring"
+var scene_path: String = DEFAULT_SCENE_PATH
+## The circuit's own numbered turns, when its scene publishes them (empty for the Apex Ring).
+var official_turns: Array[Dictionary] = []
 
 var _raw := PackedVector2Array() # XZ metres, evenly spaced along the baked curve
 var _elevation := PackedFloat32Array()
@@ -61,15 +67,49 @@ func stats() -> Dictionary:
 	}
 
 
-func _load_track() -> void:
-	var ribbon := CircuitScene.instantiate() as TrackRibbonScript
-	if ribbon == null:
+## Traces another round on the card. A round whose layout is not built yet clears the map.
+func load_circuit(circuit: CircuitDataScript) -> void:
+	if circuit == null:
 		return
-	add_child(ribbon) # the ribbon builds its sample table when it enters the tree
+	circuit_id = circuit.circuit_id
+	if circuit.scene_path == scene_path and length_m > 0.0:
+		queue_redraw()
+		return
+	scene_path = circuit.scene_path
+	_load_track()
+
+
+func _load_track() -> void:
+	length_m = 0.0
+	turns.clear()
+	official_turns.clear()
+	drs_zones.clear()
+	_raw = PackedVector2Array()
+	_elevation = PackedFloat32Array()
+	if scene_path == "" or not ResourceLoader.exists(scene_path):
+		queue_redraw()
+		return
+	var node: Node = (load(scene_path) as PackedScene).instantiate()
+	var ribbon := node as TrackRibbonScript
+	add_child(node) # the ribbon builds its sample table when it enters the tree
+	if ribbon == null:
+		ribbon = node.get_node_or_null("TrackRibbon") as TrackRibbonScript
+	if ribbon == null:
+		remove_child(node)
+		node.free()
+		queue_redraw()
+		return
 	var curve: Curve3D = ribbon.curve.duplicate() as Curve3D
 	drs_zones = GtTrack.new(ribbon).drs_zones
-	remove_child(ribbon)
-	ribbon.free()
+	# A circuit that ships its own numbered turn list (Neo-Wangan) is drawn from that list, so the
+	# map and the circuit's official turn numbers never disagree.
+	var official: Variant = node.get("turns")
+	if official is Array and not (official as Array).is_empty():
+		official_turns.clear()
+		for entry: Dictionary in official:
+			official_turns.append({"s": float(entry["s"]), "angle": -float(entry["direction"])})
+	remove_child(node)
+	node.free()
 	if curve == null:
 		return
 	curve.bake_interval = SAMPLE_STEP_M
@@ -87,6 +127,8 @@ func _load_track() -> void:
 		min_elevation = minf(min_elevation, value)
 		max_elevation = maxf(max_elevation, value)
 	_detect_corners()
+	if not official_turns.is_empty():
+		turns = official_turns.duplicate()
 	queue_redraw()
 
 
@@ -147,7 +189,7 @@ func _detect_corners() -> void:
 
 func _draw() -> void:
 	if _raw.size() < 4:
-		draw_string(MONO, Vector2(18.0, 34.0), "TRACK DATA UNAVAILABLE", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, T.ACCENT_ANIME_CRIMSON)
+		draw_string(MONO, Vector2(18.0, 34.0), "LAYOUT RESERVED // COMING SOON", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, T.ACCENT_ANIME_CRIMSON)
 		return
 	var map_rect := Rect2(0.0, 0.0, size.x, maxf(60.0, size.y - ELEVATION_STRIP_H))
 	var fitted := _fit(map_rect, MARGIN_PX)
