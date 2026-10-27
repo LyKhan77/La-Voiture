@@ -69,8 +69,9 @@ const WALL_COPING := Color("#e4e6ec")
 const CUSHION_ORANGE := Color("#ff6a00")
 const CUSHION_WHITE := Color("#f0f2f5")
 const GARAGE_SHELL := Color("#232630")
-const GARAGE_GLASS := Color("#00f0ff")
-const GARAGE_LED := Color("#ff2d78")
+## Vertex alpha is the cel shader's glow mask: 0 = fully self-lit (see anime_cel_vertex_color).
+const GARAGE_GLASS := Color(0.0, 0.82, 1.0, 0.28)
+const GARAGE_LED := Color(1.0, 0.12, 0.48, 0.0)
 
 var ribbon: TrackRibbonScript
 var stalls: Array[Dictionary] = [] # {index, s, u, lateral, pose, node}
@@ -124,6 +125,8 @@ func build(p_ribbon: TrackRibbonScript) -> void:
 	_build_garages()
 	_build_triggers()
 	_build_bypass_ramp()
+	# Garage glass and LED strips are glow-masked vertices: light them like the city around them.
+	ToonMaterials.set_glow_energy(1.6)
 
 
 func u_from_s(s: float) -> float:

@@ -12,6 +12,7 @@ const ApexScene := preload("res://scenes/race_world/track_circuit.tscn")
 const BuilderScript := preload("res://scripts/world/neo_wangan_circuit_builder.gd")
 const RibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const PitScript := preload("res://scripts/world/neo_wangan_pit_complex.gd")
+const CircuitScript := preload("res://scripts/world/neo_wangan_circuit_builder.gd")
 
 const TARGET_LENGTH_M: float = 3150.0
 const LENGTH_TOLERANCE_M: float = 25.0
@@ -46,6 +47,7 @@ func _run() -> void:
 	_test_elevation()
 	_test_road_surface()
 	_test_pit_connection()
+	_test_urban_set()
 	_test_apex_preserved()
 	print("%d assertions, %d failure(s)" % [assertions, failures])
 	print("NEO-WANGAN CIRCUIT: %s" % ("PASS" if failures == 0 else "%d FAILURES" % failures))
@@ -197,6 +199,98 @@ func _test_pit_connection() -> void:
 		"#W14 an 80 m solid blend line guards a 65 m bypass ramp that rejoins %.0f m past Turn 1's %.0f m apex" % [merge_s - t1_apex, t1_apex])
 	check(is_equal_approx(PitScript.SPEED_LIMIT_MPS, 80.0 / 3.6) and pit.sim_layout()["entry_s"] == PitScript.ENTRY_S,
 		"#W15 the lane is limited to 80 km/h and hands the sim its own entry, exit and lateral layout")
+
+
+## Task 4: the night set — MultiMesh street furniture, the 180 m underpass, the harbor and the
+## Tokyo skyline, inside the 160 draw call / 320 000 triangle budget.
+func _test_urban_set() -> void:
+	var environment = circuit.get_node_or_null("Environment")
+	if environment == null:
+		check(false, "#W16 the circuit carries its urban environment")
+		return
+	var barriers: MultiMeshInstance3D = environment.get_node_or_null("ConcreteBarriers")
+	var lights: MultiMeshInstance3D = environment.get_node_or_null("Streetlights")
+	var heads: MultiMeshInstance3D = environment.get_node_or_null("StreetlightHeads")
+	var caps: MultiMeshInstance3D = environment.get_node_or_null("BarrierHazardCaps")
+	var skyline: MultiMeshInstance3D = environment.get_node_or_null("Skyline")
+	var neon: MultiMeshInstance3D = environment.get_node_or_null("TunnelNeon")
+	var containers: Array[int] = []
+	for index: int in range(3):
+		var box: MultiMeshInstance3D = environment.get_node_or_null("HarborContainers%d" % index)
+		if box != null and box.multimesh != null:
+			containers.append(box.multimesh.instance_count)
+	check(barriers != null and barriers.multimesh.instance_count > 1500 and caps != null and caps.multimesh.instance_count > 20 \
+			and lights != null and lights.multimesh.instance_count > 120 and heads != null and heads.multimesh.instance_count == lights.multimesh.instance_count,
+		"#W16 %d concrete barriers and %d hazard caps down both sides, every one a MultiMesh instance (%d double-arm lamps)" % [
+			barriers.multimesh.instance_count if barriers != null else 0,
+			caps.multimesh.instance_count if caps != null else 0,
+			lights.multimesh.instance_count if lights != null else 0])
+
+	var shell: MeshInstance3D = environment.get_node_or_null("TunnelShell")
+	check(shell != null and shell.mesh != null and neon != null and neon.multimesh.instance_count >= 18 \
+			and is_equal_approx(CircuitScript.TUNNEL_END_M - CircuitScript.TUNNEL_START_M, 180.0),
+		"#W17 the 180 m Cyber City underpass has a concrete shell and %d ceiling neon strips" % (neon.multimesh.instance_count if neon != null else 0))
+
+	var towers: int = 0
+	var window_shader: bool = false
+	if skyline != null and skyline.multimesh != null:
+		towers = skyline.multimesh.instance_count
+		window_shader = skyline.material_override is ShaderMaterial \
+			and (skyline.material_override as ShaderMaterial).shader != null \
+			and (skyline.material_override as ShaderMaterial).shader.resource_path.ends_with("neo_wangan_skyline.gdshader")
+	check(towers >= 80 and window_shader and containers.size() == 3 and containers[0] > 10,
+		"#W18 a %d-tower skyline glows through the window shader, and %d harbor containers are instanced in three colours" % [towers, containers.reduce(func(a: int, b: int) -> int: return a + b, 0)])
+
+	var budget := _budget(circuit)
+	var draw_calls: int = int(budget["draw_calls"])
+	var triangles: int = int(budget["triangles"])
+	check(draw_calls <= 160 and triangles <= 320000,
+		"#W19 the circuit submits %d draw calls and %d triangles — inside the 160 / 320 000 budget" % [draw_calls, triangles])
+
+	var world_environment: WorldEnvironment = circuit.get_node_or_null("WorldEnvironment")
+	var night: bool = world_environment != null and world_environment.environment != null \
+		and world_environment.environment.background_mode == Environment.BG_SKY \
+		and world_environment.environment.sky != null and world_environment.environment.fog_enabled
+	var energy_before: float = 0.0
+	var energy_after: float = 0.0
+	if neon != null and neon.material_override is StandardMaterial3D:
+		energy_before = (neon.material_override as StandardMaterial3D).emission_energy_multiplier
+		environment.update(0.37, null)
+		energy_after = (neon.material_override as StandardMaterial3D).emission_energy_multiplier
+	check(night and not is_equal_approx(energy_before, energy_after),
+		"#W20 the set carries a night sky and fog, and its neon breathes between frames (%.2f -> %.2f)" % [energy_before, energy_after])
+
+
+## Draw calls and triangles of every visible mesh under `root`.
+func _budget(root_node: Node) -> Dictionary:
+	var total := {"draw_calls": 0, "triangles": 0}
+	_count_budget(root_node, total)
+	return total
+
+
+func _count_budget(node: Node, total: Dictionary) -> void:
+	if node is Node3D and not (node as Node3D).visible:
+		return
+	var mesh: Mesh = null
+	var copies: int = 1
+	if node is MultiMeshInstance3D and (node as MultiMeshInstance3D).multimesh != null:
+		mesh = (node as MultiMeshInstance3D).multimesh.mesh
+		copies = (node as MultiMeshInstance3D).multimesh.instance_count
+	elif node is MeshInstance3D:
+		mesh = (node as MeshInstance3D).mesh
+	if mesh != null:
+		for surface: int in range(mesh.get_surface_count()):
+			var arrays: Array = mesh.surface_get_arrays(surface)
+			var raw: Variant = arrays[Mesh.ARRAY_INDEX]
+			var count: int = 0
+			if raw is PackedInt32Array and (raw as PackedInt32Array).size() > 0:
+				count = (raw as PackedInt32Array).size() / 3
+			else:
+				count = (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size() / 3
+			total["draw_calls"] = int(total["draw_calls"]) + 1
+			total["triangles"] = int(total["triangles"]) + count * copies
+	for child: Node in node.get_children():
+		_count_budget(child, total)
 
 
 ## The Apex Ring spline is a different scene and must be byte-for-byte where it was.
