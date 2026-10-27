@@ -1,0 +1,589 @@
+{
+  "engine": "Godot 4.7.2 stable",
+  "renderer": "Forward+ Vulkan / Safe",
+  "code_commit": "03ec1b9",
+  "gpu": "NVIDIA GeForce RTX 3050 Laptop GPU",
+  "full_regression": {
+    "suites": 48,
+    "passed": 48,
+    "failed": 0,
+    "assertions": 1494,
+    "warnings": 0,
+    "errors": 0,
+    "nested_legacy_deduplicated": true,
+    "results": [
+      {
+        "test": "test_aston_vantage_chassis.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 18,
+        "seconds": 0.88,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_audi_r8_chassis.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 17,
+        "seconds": 4.91,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_audio_and_race_weekend.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 35,
+        "seconds": 85.84,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_bmw_m4_chassis.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 18,
+        "seconds": 0.77,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_car_dynamics_vfx.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 29,
+        "seconds": 4.88,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_chevy_corvette_chassis.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 18,
+        "seconds": 0.95,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_circuit_calendar_registry.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 8,
+        "seconds": 0.66,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_circuit_minimap.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 7,
+        "seconds": 5.34,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_deck_n2.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 33,
+        "seconds": 5.16,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_ferrari_296_chassis.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 27,
+        "seconds": 0.77,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_ford_mustang_chassis.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 27,
+        "seconds": 1.12,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_garage_tyre_strategy.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 39,
+        "seconds": 52.45,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_graffiti_kit.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 16,
+        "seconds": 0.59,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_gt_sim.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 43,
+        "seconds": 51.14,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_honda_nsx_chassis.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 18,
+        "seconds": 0.84,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_hud_theme_and_telemetry.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 32,
+        "seconds": 5.42,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_lambo_huracan_chassis.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 18,
+        "seconds": 0.67,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_lexus_rcf_chassis.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 18,
+        "seconds": 0.84,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_main_menu_flow.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 75,
+        "seconds": 8.28,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_mclaren_720s_chassis.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 18,
+        "seconds": 0.77,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_mercedes_amg_chassis.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 18,
+        "seconds": 1.31,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_modular_car.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 18,
+        "seconds": 0.47,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_neo_wangan_circuit.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 40,
+        "seconds": 14.73,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_neo_wangan_glb_assets.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 33,
+        "seconds": 0.58,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_nissan_gtr_chassis.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 18,
+        "seconds": 0.77,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_pit_deck_and_radio.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 34,
+        "seconds": 5.75,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_pit_lane.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 19,
+        "seconds": 9.25,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_pit_wall.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 26,
+        "seconds": 7.8,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_pitcrew_visual.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 32,
+        "seconds": 5.98,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_podium_music.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 7,
+        "seconds": 0.38,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_race_hud.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 31,
+        "seconds": 5.14,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_race_weekend_and_physics.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 30,
+        "seconds": 40.72,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_race_world.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 65,
+        "seconds": 78.41,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_radio_and_podium.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 35,
+        "seconds": 5.03,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_radio_r2.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 28,
+        "seconds": 7.06,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_safety_car_cinematic.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 108,
+        "seconds": 5.75,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_shared_paddock_kit.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 10,
+        "seconds": 1.33,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_simulation_verification.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 43,
+        "seconds": 3.98,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_toyota_supra_chassis.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 27,
+        "seconds": 0.67,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_track_environment.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 40,
+        "seconds": 6.19,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_track_environment_upgrade.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 40,
+        "seconds": 6.47,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_track_incidents_and_stewards.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 55,
+        "seconds": 26.97,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_track_selector_ui.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 7,
+        "seconds": 3.36,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_visual_polish_and_consistency.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 37,
+        "seconds": 5.59,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_weather_and_ai.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 43,
+        "seconds": 20.88,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_weather_ladder.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 23,
+        "seconds": 4.44,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_winning_cut_director.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 15,
+        "seconds": 0.47,
+        "warnings": 0,
+        "errors": 0
+      },
+      {
+        "test": "test_winning_scene_and_standee.gd",
+        "status": "PASS",
+        "exit_code": 0,
+        "assertions": 98,
+        "seconds": 15.84,
+        "warnings": 0,
+        "errors": 0
+      }
+    ]
+  },
+  "focused_after_graphics_fixes": {
+    "test_neo_wangan_circuit.gd": {
+      "assertions": 40,
+      "failures": 0
+    },
+    "test_neo_wangan_glb_assets.gd": {
+      "assertions": 33,
+      "failures": 0
+    },
+    "test_hud_theme_and_telemetry.gd": {
+      "assertions": 32,
+      "failures": 0
+    }
+  },
+  "static_circuit_including_outline": {
+    "draw_calls": 121,
+    "triangles": 229328
+  },
+  "cameras": [
+    {
+      "gate": "cam1-start-paddock",
+      "visible_3d_draw_calls": 54,
+      "visible_3d_triangles": 164440,
+      "shadow_draw_calls": 89,
+      "canvas_draw_calls": 0
+    },
+    {
+      "gate": "cam2-shuto-bridge",
+      "visible_3d_draw_calls": 48,
+      "visible_3d_triangles": 109076,
+      "shadow_draw_calls": 43,
+      "canvas_draw_calls": 0
+    },
+    {
+      "gate": "cam3-tunnel-chicane",
+      "visible_3d_draw_calls": 104,
+      "visible_3d_triangles": 180374,
+      "shadow_draw_calls": 60,
+      "canvas_draw_calls": 0
+    },
+    {
+      "gate": "cam4-harbor-hairpin",
+      "visible_3d_draw_calls": 55,
+      "visible_3d_triangles": 99602,
+      "shadow_draw_calls": 51,
+      "canvas_draw_calls": 0
+    },
+    {
+      "gate": "cam5-aerial-overview",
+      "visible_3d_draw_calls": 124,
+      "visible_3d_triangles": 186926,
+      "shadow_draw_calls": 0,
+      "canvas_draw_calls": 0
+    },
+    {
+      "gate": "cam6-chase-cam-action",
+      "visible_3d_draw_calls": 35,
+      "visible_3d_triangles": 92910,
+      "shadow_draw_calls": 44,
+      "canvas_draw_calls": 153
+    }
+  ],
+  "latest_clean_native_smoke": {
+    "frames": 600,
+    "mean_ms": 16.755,
+    "p95_ms": 21.715,
+    "worst_ms": 76.837,
+    "mean_fps": 59.68,
+    "frame_budget_ms": 16.666667,
+    "late_frames": 210,
+    "fps_gate_passed": false,
+    "finished": true,
+    "finishers": 20,
+    "cars": 20,
+    "laps": 3,
+    "orphans_in_race": 0,
+    "menu_loaded": true,
+    "menu_error": 0,
+    "orphans_after_menu": 0,
+    "exit_code": 1,
+    "texture_rid_shutdown_warning": 7,
+    "warning_upstream_issue": "https://github.com/godotengine/godot/issues/122498"
+  },
+  "telemetry_optimization": {
+    "hero_painter_before_ms": 2.580415,
+    "hero_painter_after_ms": 0.35773,
+    "native_rgba_difference_pixels": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "native_visual_comparison_stress": [
+      0.05,
+      0.14,
+      0.3,
+      0.7,
+      1.0
+    ],
+    "instrumented_uncapped_probe_fps": 101.98,
+    "instrumented_uncapped_probe_p95_ms": 15.357
+  },
+  "acceptance": "OPEN: native locked 60 FPS and shutdown Texture RID warning unresolved",
+  "camera_code_commit": "80035e1",
+  "diagnostic_pacing_modes": [
+    {
+      "mode": "vsync_disabled_cap_60",
+      "frames": 600,
+      "mean_ms": 16.754,
+      "p95_ms": 23.428,
+      "worst_ms": 80.823,
+      "fps": 59.69,
+      "late_frames": 283,
+      "locked_60": false,
+      "adopted_in_production": false
+    },
+    {
+      "mode": "mailbox_cap_60",
+      "frames": 600,
+      "mean_ms": 16.666,
+      "p95_ms": 20.303,
+      "worst_ms": 38.242,
+      "fps": 60.0,
+      "late_frames": 387,
+      "locked_60": false,
+      "adopted_in_production": false
+    },
+    {
+      "mode": "exclusive_fullscreen_mailbox_cap_60",
+      "frames": 600,
+      "mean_ms": 16.672,
+      "p95_ms": 23.616,
+      "worst_ms": 42.303,
+      "fps": 59.98,
+      "late_frames": 276,
+      "locked_60": false,
+      "adopted_in_production": false
+    }
+  ]
+}
