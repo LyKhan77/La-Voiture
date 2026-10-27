@@ -4,10 +4,14 @@ extends RefCounted
 ## One exhibition draft, retained across scene changes; direct race scenes stay standalone.
 const Weather := preload("res://scripts/gt/gt_weather.gd")
 const Rng := preload("res://scripts/gt/gt_rng.gd")
+const CircuitRegistry := preload("res://scripts/core/circuit_calendar_registry.gd")
+const CircuitDataScript := preload("res://scripts/core/circuit_data.gd")
 static var current: RaceConfigData
 
 var selected_team_id: int = 0
 var track_id: String = "apex_ring"
+## Round of the 12-month calendar this exhibition runs on (see CircuitCalendarRegistry).
+var selected_circuit_id: String = "apex_ring"
 var total_laps: int = 5
 var weather_preset: int = 0
 var time_of_day: int = 0
@@ -24,6 +28,14 @@ static func get_config() -> RaceConfigData:
 static func reset() -> RaceConfigData:
 	current = RaceConfigData.new()
 	return current
+
+
+## The selected calendar round; an unknown id falls back to Round 01 instead of failing the race.
+func get_active_circuit() -> CircuitDataScript:
+	var circuit: CircuitDataScript = CircuitRegistry.get_circuit(selected_circuit_id)
+	if circuit == null:
+		circuit = CircuitRegistry.get_circuit(CircuitRegistry.DEFAULT_CIRCUIT_ID)
+	return circuit
 
 func weather_archetype(seed_value: int) -> int:
 	match weather_preset:
