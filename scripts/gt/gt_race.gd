@@ -144,7 +144,7 @@ func stall_index_for_team(team_id: int) -> int:
 func _build_grid(count: int, _seed_value: int, target_teams: Array[int] = []) -> void:
 	cars.clear()
 	var total_teams: int = GtData.TEAM_NAMES.size()
-	var needed_teams: int = clampi(count / 2, 1, total_teams)
+	var needed_teams: int = clampi((count + 1) / 2, 1, total_teams)
 	if target_teams.is_empty():
 		active_teams.clear()
 		for t: int in range(needed_teams):

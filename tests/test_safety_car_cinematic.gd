@@ -281,6 +281,10 @@ func _prepare_withdrawal(race: GtRace, sc_s: float) -> void:
 
 func _test_baseline_rules(track: GtTrack) -> void:
 	var race := Race.new(track, 5, 41, 0, 3)
+	check(race.cars.size() == 3, "Odd three-car grid allocates enough team entries")
+	if race.cars.size() != 3:
+		race.dispose()
+		return
 	race.incidents_enabled = false
 	race.set_flag(Types.Flag.SC, 1, "SC", 0.0)
 	_place_queue(race, 1000.0)
@@ -407,6 +411,10 @@ func _test_review_regressions(track: GtTrack) -> void:
 	check(stayed_behind, "ATTACK leader cannot pass in-lap SC before pit separation")
 	race.dispose()
 	race = Race.new(track, 5, 63, 0, 3)
+	check(race.cars.size() == 3, "Three-car contact regression receives a complete grid")
+	if race.cars.size() != 3:
+		race.dispose()
+		return
 	race.incidents_enabled = false
 	race.set_flag(Types.Flag.SC, 1, "SC", 0.0)
 	for index: int in range(3):
