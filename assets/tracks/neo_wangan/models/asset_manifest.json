@@ -1,0 +1,50 @@
+[
+  {
+    "file": "shuto_bridge_pylon.glb",
+    "triangles": 568,
+    "surfaces": 2,
+    "origin": "foundation",
+    "unit": "metre",
+    "source": "procedural Blender 5.2 / build_neo_wangan_assets.py"
+  },
+  {
+    "file": "tunnel_portal_overpass.glb",
+    "triangles": 244,
+    "surfaces": 2,
+    "origin": "foundation",
+    "unit": "metre",
+    "source": "procedural Blender 5.2 / build_neo_wangan_assets.py"
+  },
+  {
+    "file": "harbor_gantry_crane.glb",
+    "triangles": 836,
+    "surfaces": 1,
+    "origin": "foundation",
+    "unit": "metre",
+    "source": "procedural Blender 5.2 / build_neo_wangan_assets.py"
+  },
+  {
+    "file": "skyscraper_tower_a.glb",
+    "triangles": 968,
+    "surfaces": 2,
+    "origin": "foundation",
+    "unit": "metre",
+    "source": "procedural Blender 5.2 / build_neo_wangan_assets.py"
+  },
+  {
+    "file": "skyscraper_tower_b.glb",
+    "triangles": 724,
+    "surfaces": 2,
+    "origin": "foundation",
+    "unit": "metre",
+    "source": "procedural Blender 5.2 / build_neo_wangan_assets.py"
+  },
+  {
+    "file": "skyscraper_tower_c.glb",
+    "triangles": 456,
+    "surfaces": 2,
+    "origin": "foundation",
+    "unit": "metre",
+    "source": "procedural Blender 5.2 / build_neo_wangan_assets.py"
+  }
+]
