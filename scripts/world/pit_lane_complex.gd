@@ -137,7 +137,7 @@ func build(p_ribbon: TrackRibbonScript, team_ids: Array[int] = []) -> void:
 	_build_markings()
 	_build_pit_wall()
 	for stall: Dictionary in stalls:
-		garages.append(_build_garage(int(stall["team"])))
+		garages.append(_build_garage(stall))
 	_build_signs()
 
 
@@ -158,8 +158,8 @@ func lane_lateral(u: float) -> float:
 ## fast lane, and a wide working lane in front of the boxes.
 func lane_edges(u: float) -> Vector2:
 	var blend: float = lane_blend(u, length_m)
-	var first_u: float = stall_u(0) - 14.0
-	var last_u: float = stall_u(TEAM_COUNT - 1) + 14.0
+	var first_u: float = (float(stalls[0]["u"]) - 14.0) if not stalls.is_empty() else (stall_u(0) - 14.0)
+	var last_u: float = (float(stalls[stalls.size() - 1]["u"]) + 14.0) if not stalls.is_empty() else (stall_u(TEAM_COUNT - 1) + 14.0)
 	var working: float = smoothstep(first_u - 12.0, first_u, u) * smoothstep(last_u + 12.0, last_u, u)
 	var fast_right: float = FAST_LANE_M + LANE_HALF_WIDTH_M
 	var garage_edge: float = GARAGE_FRONT_M - FASCIA_SETBACK_M - 0.05
@@ -179,14 +179,29 @@ func stall_u(team: int) -> float:
 	for stall: Dictionary in stalls:
 		if int(stall.get("team", -1)) == team:
 			return float(stall["u"])
-	return float(stalls[clampi(team, 0, stalls.size() - 1)]["u"])
+	return float(stalls[clampi(team, 0, stalls.size() - 1)]["u"]) if not stalls.is_empty() else 0.0
 
 
 func stall_transform(team: int) -> Transform3D:
 	for stall: Dictionary in stalls:
 		if int(stall.get("team", -1)) == team:
 			return stall["pose"]
-	return stalls[clampi(team, 0, stalls.size() - 1)]["pose"]
+	return stalls[clampi(team, 0, stalls.size() - 1)]["pose"] if not stalls.is_empty() else Transform3D.IDENTITY
+
+
+func garage_for_team(team: int) -> Node3D:
+	for i: int in range(stalls.size()):
+		if int(stalls[i].get("team", -1)) == team:
+			if i < garages.size():
+				return garages[i]
+	return null
+
+
+func stall_index_for_team(team: int) -> int:
+	for i: int in range(stalls.size()):
+		if int(stalls[i].get("team", -1)) == team:
+			return i
+	return -1
 
 
 ## The wall centre's lateral at u (a fixed verge off the lane's left edge, PIT_WALL_M on the full lane).
@@ -255,8 +270,8 @@ func _build_markings() -> void:
 	_strip(batch, paint, PAINT_YELLOW, LINE_Y, 0.0, length_m, func(u: float) -> float: return left.call(u) + 0.25, func(u: float) -> float: return left.call(u) + 0.55)
 	_strip(batch, paint, PAINT_WHITE, LINE_Y, 0.0, length_m, func(u: float) -> float: return right.call(u) - 0.55, func(u: float) -> float: return right.call(u) - 0.25)
 	# The fast lane / working lane separator runs in front of all ten boxes.
-	var first_u: float = stall_u(0) - 22.0
-	var last_u: float = stall_u(TEAM_COUNT - 1) + 22.0
+	var first_u: float = (float(stalls[0]["u"]) - 22.0) if not stalls.is_empty() else (stall_u(0) - 22.0)
+	var last_u: float = (float(stalls[stalls.size() - 1]["u"]) + 22.0) if not stalls.is_empty() else (stall_u(TEAM_COUNT - 1) + 22.0)
 	var separator: float = FAST_LANE_M + LANE_HALF_WIDTH_M
 	_strip(batch, paint, PAINT_WHITE, LINE_Y, first_u, last_u, func(_u: float) -> float: return separator - 0.1, func(_u: float) -> float: return separator + 0.1)
 	lane_separator_count = 1
@@ -265,7 +280,7 @@ func _build_markings() -> void:
 		_strip(batch, paint, PAINT_YELLOW, LINE_Y + 0.003, cross_u, cross_u + 1.5, left, right)
 	speed_limit_lines_u = [0.0, length_m - 1.5]
 	for stall: Dictionary in stalls:
-		_paint_box(batch, paint, int(stall["team"]))
+		_paint_box(batch, paint, stall)
 	var instance := MeshInstance3D.new()
 	instance.name = "PitMarkings"
 	instance.mesh = batch.commit()
@@ -274,8 +289,8 @@ func _build_markings() -> void:
 
 
 ## The team's pit box: coloured pad, white outline, yellow nose line and the box number.
-func _paint_box(batch: MeshBatchScript, material: Material, team: int) -> void:
-	var stall: Dictionary = stalls[team]
+func _paint_box(batch: MeshBatchScript, material: Material, stall: Dictionary) -> void:
+	var team: int = int(stall.get("team", 0))
 	var pose: Transform3D = global_transform.affine_inverse() * (stall["pose"] as Transform3D)
 	var half_w: float = BOX_HALF_WIDTH_M
 	var half_l: float = BOX_LENGTH_M * 0.5
@@ -365,8 +380,8 @@ func _build_pit_wall() -> void:
 
 ## One garage: shell (back and side walls, roof, team fascia, floor), its equipment, and the crew standing by,
 ## each its own merged mesh (the standing crew can be hidden while its animated twin works in the lane).
-func _build_garage(team: int) -> Node3D:
-	var stall: Dictionary = stalls[team]
+func _build_garage(stall: Dictionary) -> Node3D:
+	var team: int = int(stall.get("team", 0))
 	var color: Color = Liveries.color_for(team)
 	var garage := Node3D.new()
 	garage.name = "Garage%02d" % (team + 1)

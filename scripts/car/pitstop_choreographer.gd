@@ -285,9 +285,14 @@ func _dismiss(crew: Crew) -> void:
 
 
 func _set_standby_visible(team: int, shown: bool) -> void:
-	if pit_lane == null or team >= pit_lane.garages.size():
+	if pit_lane == null:
 		return
-	var standby := pit_lane.garages[team].get_node_or_null("StandbyCrew") as Node3D
+	var garage: Node3D = pit_lane.garage_for_team(team) if pit_lane.has_method("garage_for_team") else null
+	if garage == null and team < pit_lane.garages.size():
+		garage = pit_lane.garages[team]
+	if garage == null:
+		return
+	var standby := garage.get_node_or_null("StandbyCrew") as Node3D
 	if standby != null:
 		standby.visible = shown
 

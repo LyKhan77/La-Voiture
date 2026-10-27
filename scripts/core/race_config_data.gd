@@ -38,8 +38,12 @@ func weather_archetype(seed_value: int) -> int:
 func apply_to_race(race: GtRace) -> void:
 	race.set_player_team(selected_team_id)
 	# Qualifying sorts the grid; ids, not array indices, identify the teammates.
-	race.get_car(selected_team_id * 2).compound = car1_starting_compound
-	race.get_car(selected_team_id * 2 + 1).compound = car2_starting_compound
+	var car1: GtCar = race.get_car(selected_team_id * 2)
+	if car1 != null:
+		car1.compound = car1_starting_compound
+	var car2: GtCar = race.get_car(selected_team_id * 2 + 1)
+	if car2 != null:
+		car2.compound = car2_starting_compound
 	var weather: GtWeather = race.weather
 	apply_weather(weather)
 	if weather_preset >= 2:
