@@ -30,6 +30,9 @@ func _initialize() -> void:
 			for surface: int in range(instance.mesh.get_surface_count()):
 				var arrays: Array = instance.mesh.surface_get_arrays(surface)
 				vertex_colors = vertex_colors and arrays[Mesh.ARRAY_COLOR] is PackedColorArray and (arrays[Mesh.ARRAY_COLOR] as PackedColorArray).size() > 0
+				if instance.name.begins_with("WindowsMat"):
+					var colors: PackedColorArray = arrays[Mesh.ARRAY_COLOR]
+					check(colors[0].a < 0.99, model + " retains cel emission mask in COLOR_0 alpha")
 				triangles += (arrays[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
 				material_names.append(instance.mesh.surface_get_material(surface).resource_name)
 		check(triangles > 100 and triangles <= 5000, "%s meaningful mesh within 5000 tris (%d)" % [model, triangles])

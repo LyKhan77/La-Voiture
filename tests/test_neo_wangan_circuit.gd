@@ -273,9 +273,13 @@ func _test_race_weekend_integration() -> void:
 	var config = ConfigScript.get_config()
 	config.selected_circuit_id = "neo_wangan"
 	config.total_laps = 3
+	var prototype: Node3D = WorldScene.instantiate()
+	var shared_environment: Environment = prototype.get_node("WorldEnvironment").environment
+	prototype.free()
 	var world = WorldScene.instantiate()
 	root.add_child(world)
 	world.set_physics_process(false)
+	check(world.get_node("WorldEnvironment").environment != shared_environment, "#W40 Neo-Wangan sky owns an Environment copy and cannot mutate the shared Apex weekend resource")
 	var integrated: bool = world.active_circuit != null \
 		and world.active_circuit.circuit_id == "neo_wangan" \
 		and world.circuit_root != null \
@@ -289,6 +293,9 @@ func _test_race_weekend_integration() -> void:
 		"#W21 a Neo-Wangan race weekend loads the street scene: %.0f m ribbon, %.1f m wide, %d cars, and the sim pits on the street layout" % [world.ribbon.length_m, world.road_width_m, world.actors.size()])
 
 	var radar = world.hud.radar
+	world.environment.update(0.5, world.race)
+	var screen: Jumbotron = world.pit_lane.get_node("MainGrandstand/Jumbotron")
+	check(screen.last_row_values.size() == 10 and screen.last_row_values[0] > 0.9 and screen.last_row_colors[0] == preload("res://scripts/car/team_liveries.gd").color_for(world.race.standings()[0].team_id), "#W37 Neo-Wangan Jumbotron displays the live leading team's color and ten standing bars")
 	var radar_ok: bool = radar.get("_ribbon") == world.ribbon and is_equal_approx(float(radar.get("_sim_length_m")), world.track.length)
 	var radar_points: PackedVector2Array = (radar.get_node("Track") as Line2D).points
 	check(radar_ok and radar_points.size() > 40,
@@ -386,6 +393,15 @@ func _test_civil_layers(environment: Node3D) -> void:
 			var bottom: float = pose.origin.y - pose.basis.y.length() * 0.5
 			grounded = grounded and absf(bottom + 6.0) < 0.01
 	check(grounded, "#W36 bridge piers run from seabed to underside of the deck")
+	var markers: MultiMeshInstance3D = environment.get_node_or_null("BrakingMarkers")
+	check(markers != null and markers.multimesh.instance_count == 36, "#W38 shared FIA 150/100/50 m braking boards cover all twelve corners")
+	var detail_passes_ok: bool = corridor != null
+	if corridor != null:
+		for child: Node in corridor.get_children():
+			if child is MultiMeshInstance3D and child.name.ends_with("Detail"):
+				var detail := child as MultiMeshInstance3D
+				detail_passes_ok = detail_passes_ok and detail.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF and detail.multimesh.mesh.surface_get_material(0).next_pass == null
+	check(detail_passes_ok, "#W39 emissive facade details avoid redundant hull and shadow passes; building shells retain ink")
 
 
 func _test_ground_clearance() -> void:

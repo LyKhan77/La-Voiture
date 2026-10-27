@@ -1,11 +1,10 @@
 class_name NeoWanganEnvironment
 extends Node3D
 
-## The night set of the Neo-Wangan street circuit (FASE 12, Task 4): concrete barrier walls down both
-## sides, double-arm Shuto expressway lamps, green overhead direction gantries, the 180 m Cyber City
-## underpass with its ceiling of neon strips, the Shuto Bay Bridge deck and piers, the harbor
-## container stacks with their gantry cranes, and a 110-tower Tokyo skyline whose windows glow
-## through a world-space shader.
+## Neo-Wangan six-layer environment (FASE 12.1). TrackRibbon owns the road spine; UrbanIslandRoot
+## owns continuous civil ground and cut-and-cover roof mass. PitLane owns the shared FIA kit.
+## MidgroundCorridorRoot owns district-batched GLB towers and neon panels; HeroLandmarksRoot owns
+## spline-anchored bridge/tunnel/harbor architecture. This set owns the night sky and asphalt pools.
 ##
 ## Every element that repeats more than three times is one MultiMeshInstance3D, so the whole set
 ## costs a handful of draw calls (see stats()). No textures: flat cel colours and one shader.
@@ -19,6 +18,8 @@ const RibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const CircuitScript := preload("res://scripts/world/neo_wangan_circuit_builder.gd")
 const SkylineShader := preload("res://shaders/neo_wangan_skyline.gdshader")
 const PoolShader := preload("res://shaders/neo_wangan_light_pool.gdshader")
+const Liveries := preload("res://scripts/car/team_liveries.gd")
+const TracksideKit := preload("res://scripts/world/trackside_furniture_builder.gd")
 const MODEL_DIR := "res://assets/tracks/neo_wangan/models/"
 
 const BARRIER_LATERAL_M: float = 6.35
@@ -96,6 +97,8 @@ var _neon_material: StandardMaterial3D
 var _lamp_material: StandardMaterial3D
 var _window_material: ShaderMaterial
 var _clock_s: float = 0.0
+var _leaderboard_clock: float = 0.0
+var _jumbotron: Jumbotron
 var urban_island_root: Node3D
 var hero_landmarks_root: Node3D
 var midground_corridor_root: Node3D
@@ -110,6 +113,7 @@ var bridge_pier_poses: Array[Transform3D] = []
 func build(p_ribbon: RibbonScript, p_circuit) -> void:
 	ribbon = p_ribbon
 	circuit = p_circuit
+	_jumbotron = get_parent().get_node_or_null("PitLane/MainGrandstand/Jumbotron") as Jumbotron
 	urban_island_root = _layer("UrbanIslandRoot")
 	hero_landmarks_root = _layer("HeroLandmarksRoot")
 	midground_corridor_root = _layer("MidgroundCorridorRoot")
@@ -119,6 +123,7 @@ func build(p_ribbon: RibbonScript, p_circuit) -> void:
 	_build_kerbs()
 	_build_streetlights()
 	_build_gantry_signs()
+	_build_braking_boards()
 	_build_tunnel()
 	_build_bridge()
 	_build_harbor()
@@ -138,7 +143,7 @@ func bind_world(world_environment: WorldEnvironment, sun: DirectionalLight3D, ca
 
 
 ## Neon and window glow breathe a little, like a city that never quite settles.
-func update(delta: float, _race) -> void:
+func update(delta: float, race) -> void:
 	_clock_s += delta
 	var pulse: float = 0.86 + 0.14 * sin(_clock_s * 2.1)
 	if _neon_material != null:
@@ -147,6 +152,16 @@ func update(delta: float, _race) -> void:
 		_lamp_material.emission_energy_multiplier = 2.6
 	if _window_material != null:
 		_window_material.set_shader_parameter("window_energy", 1.8 * pulse)
+	_leaderboard_clock += delta
+	if race != null and _jumbotron != null and _leaderboard_clock >= 0.5:
+		_leaderboard_clock = 0.0
+		var colors: Array[Color] = []
+		var values: Array[float] = []
+		var order: Array[GtCar] = race.standings()
+		for row: int in range(mini(order.size(), _jumbotron.ROWS)):
+			colors.append(Liveries.color_for(order[row].team_id))
+			values.append(1.0 - 0.08 * float(row))
+		_jumbotron.set_leaderboard(colors, values)
 
 
 func stats() -> Dictionary:
@@ -160,6 +175,8 @@ func stats() -> Dictionary:
 		"containers": container_count,
 		"tunnel_lamps": tunnel_lamp_count,
 		"skyline": skyline_buildings.size(),
+		"near_track_buildings": near_track_buildings.size(),
+		"harbor_cranes": crane_poses.size(),
 	}
 
 
@@ -407,6 +424,21 @@ func _build_gantry_signs() -> void:
 
 func _at(s: float, lateral_m: float, height_m: float) -> Vector3:
 	return ribbon.get_point_at_offset(s, lateral_m).origin + Vector3.UP * height_m
+
+
+func _build_braking_boards() -> void:
+	var source := TracksideKit.new()
+	var mesh: ArrayMesh = source._marker_mesh()
+	source.free()
+	var poses: Array[Transform3D] = []
+	var distances: Array[float] = []
+	for turn: Dictionary in circuit.turns:
+		var apex: float = float(turn["apex_s"][0])
+		var side: float = -float(turn["direction"])
+		for distance: float in [150.0, 100.0, 50.0]:
+			poses.append(ribbon.get_point_at_offset(apex - distance, side * 7.0))
+			distances.append(distance)
+	_multimesh("BrakingMarkers", mesh, poses, null, distances)
 
 
 func _box_at(s: float, lateral_m: float, height_m: float, centre_height_m: float) -> Transform3D:
@@ -683,10 +715,11 @@ func _model_parts(filename: String) -> Array[Dictionary]:
 	for child: Node in model.find_children("*", "MeshInstance3D", true, false):
 		var instance := child as MeshInstance3D
 		# Godot's GLB import keeps COLOR_0 but disables its albedo flag; use our shared cel shader.
+		var shell: bool = not instance.name.begins_with("WindowsMat")
 		instance.mesh = instance.mesh.duplicate() as Mesh
 		for surface: int in range(instance.mesh.get_surface_count()):
-			instance.mesh.surface_set_material(surface, ToonMaterials.vertex_colored(true))
-		parts.append({"mesh": instance.mesh, "pose": instance.transform})
+			instance.mesh.surface_set_material(surface, ToonMaterials.vertex_colored(shell))
+		parts.append({"mesh": instance.mesh, "pose": instance.transform, "casts_shadow": shell})
 	model.free()
 	return parts
 
@@ -713,6 +746,8 @@ func _instanced_model(filename: String, node_name: String, poses: Array[Transfor
 		for pose: Transform3D in poses:
 			transformed.append(pose * (parts[index]["pose"] as Transform3D))
 		var instance: MultiMeshInstance3D = _multimesh(node_name if index == 0 else node_name + "Detail", parts[index]["mesh"], transformed, null)
+		if not bool(parts[index]["casts_shadow"]):
+			instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		instance.reparent(parent, false)
 
 
@@ -853,13 +888,15 @@ func _multimesh(node_name: String, mesh: Mesh, transforms: Array, material: Mate
 
 
 func _apply_night_sky() -> void:
-	var environment: Environment = null
+	var owner_environment: WorldEnvironment = null
 	if _world_environment != null and _world_environment.environment != null:
-		environment = _world_environment.environment
+		owner_environment = _world_environment
 	elif get_parent() != null and get_parent().get_node_or_null("WorldEnvironment") != null:
-		environment = (get_parent().get_node("WorldEnvironment") as WorldEnvironment).environment
-	if environment == null:
+		owner_environment = get_parent().get_node("WorldEnvironment") as WorldEnvironment
+	if owner_environment == null or owner_environment.environment == null:
 		return
+	# Like Apex's _build_sky(), keep runtime sky/lighting out of the shared PackedScene resource.
+	var environment: Environment = owner_environment.environment.duplicate() as Environment
 	var sky_material := ProceduralSkyMaterial.new()
 	sky_material.sky_top_color = NIGHT_TOP
 	sky_material.sky_horizon_color = NIGHT_HORIZON
@@ -877,6 +914,7 @@ func _apply_night_sky() -> void:
 	environment.glow_enabled = true
 	environment.fog_light_color = Color("#232c4a")
 	environment.fog_density = 0.00055
+	owner_environment.environment = environment
 	if _sun != null:
 		_sun.light_energy = 0.5
 		_sun.light_color = Color("#9db4ff")

@@ -182,6 +182,7 @@ def export(name, build):
         color_node.layer_name = "Color"
         shader = nodes.get("Principled BSDF")
         material.node_tree.links.new(color_node.outputs["Color"],shader.inputs["Base Color"])
+        material.node_tree.links.new(color_node.outputs["Alpha"],shader.inputs["Alpha"])
         shader.inputs["Roughness"].default_value = 0.65
         if material_name in ("WindowsMat","StayCablesMat"):
             material.node_tree.links.new(color_node.outputs["Color"],shader.inputs["Emission Color"])
