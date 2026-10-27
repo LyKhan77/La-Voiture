@@ -2,6 +2,7 @@ extends SceneTree
 
 ## Native 1080p captures; -- --smoke also runs a real three-lap night-storm race to HQ.
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
+const WinningStudio := preload("res://scripts/ui/winning_scene.gd")
 const Config := preload("res://scripts/core/race_config_data.gd")
 const Types := preload("res://scripts/gt/gt_types.gd")
 const PS := preload("res://scripts/core/presentation_settings.gd")
@@ -19,6 +20,12 @@ func check(ok: bool, message: String) -> void:
 	if not ok:
 		failures += 1
 	print("[%s] %s" % ["PASS" if ok else "FAIL", message])
+
+
+func _studio() -> WinningStudio:
+	if is_instance_valid(current_scene) and current_scene.scene_file_path == WinningStudio.PATH:
+		return current_scene as WinningStudio
+	return null
 
 
 func _save(file_name: String) -> void:
@@ -145,29 +152,32 @@ func _smoke() -> void:
 	var saw_caution_finish: bool = false
 	var stayed_in_pit: bool = true
 	var last_phase: int = -1
-	while world.podium == null and Time.get_ticks_msec() - start_ms < 300000:
+	var studio: WinningStudio = null
+	while studio == null and Time.get_ticks_msec() - start_ms < 300000:
 		await process_frame
-		var phase: int = int(world.race.safety_car["phase"])
-		saw_pickup = saw_pickup or bool(world.race.safety_car.get("picked_up", false))
-		saw_caution_finish = saw_caution_finish or (world.race.flag_time >= 0.0 and int(world.race.race_control["flag"]) == Types.Flag.SC)
-		if phase == Types.SafetyCarPhase.IN_THIS_LAP:
-			stayed_in_pit = stayed_in_pit and float(world.race.safety_car["s"]) <= float(world.race.safety_car["restart_s"]) + 90.0
-		if phase != last_phase:
-			print("SMOKE PHASE %d: leader s=%.1f SC=%s" % [phase, world.race.standings()[0].s, world.race.safety_car])
-			last_phase = phase
-		saw_in_lap = saw_in_lap or int(world.race.safety_car["phase"]) == Types.SafetyCarPhase.IN_THIS_LAP
-		saw_peeloff = saw_peeloff or (saw_in_lap and float(world.race.safety_car["lateral"]) > 10.0)
-		saw_restart = saw_restart or (saw_peeloff and int(world.race.race_control["flag"]) == Types.Flag.GREEN)
+		studio = _studio()
+		if studio == null and is_instance_valid(world) and not world.is_queued_for_deletion():
+			var phase: int = int(world.race.safety_car["phase"])
+			saw_pickup = saw_pickup or bool(world.race.safety_car.get("picked_up", false))
+			saw_caution_finish = saw_caution_finish or (world.race.flag_time >= 0.0 and int(world.race.race_control["flag"]) == Types.Flag.SC)
+			if phase == Types.SafetyCarPhase.IN_THIS_LAP:
+				stayed_in_pit = stayed_in_pit and float(world.race.safety_car["s"]) <= float(world.race.safety_car["restart_s"]) + 90.0
+			if phase != last_phase:
+				print("SMOKE PHASE %d: leader s=%.1f SC=%s" % [phase, world.race.standings()[0].s, world.race.safety_car])
+				last_phase = phase
+			saw_in_lap = saw_in_lap or int(world.race.safety_car["phase"]) == Types.SafetyCarPhase.IN_THIS_LAP
+			saw_peeloff = saw_peeloff or (saw_in_lap and float(world.race.safety_car["lateral"]) > 10.0)
+			saw_restart = saw_restart or (saw_peeloff and int(world.race.race_control["flag"]) == Types.Flag.GREEN)
 	check(saw_pickup, "Native smoke: Safety Car physically collects leader")
 	check((saw_in_lap and saw_peeloff and saw_restart) or saw_caution_finish, "Native smoke: natural withdrawal/restart or legal caution finish")
 	check(stayed_in_pit, "Withdrawn SC stays inside pit until green restart")
-	check(world.podium != null, "Native smoke: three-lap race reaches podium")
-	if world.podium != null:
-		world.podium.exit_requested.emit()
+	check(studio != null, "Native smoke: three-lap race reaches winning studio")
+	if studio != null:
+		studio.exit_button.pressed.emit()
 		for _i: int in range(30):
 			await process_frame
-		check(current_scene != null and current_scene.scene_file_path == "res://scenes/main.tscn", "Podium returns through real HQ exit")
-	else:
+		check(current_scene != null and current_scene.scene_file_path == "res://scenes/main.tscn", "Winning studio returns through real HQ exit")
+	elif is_instance_valid(world) and not world.is_queued_for_deletion():
 		world.queue_free()
 	if current_scene != null:
 		current_scene.queue_free()

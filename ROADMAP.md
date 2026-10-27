@@ -122,5 +122,16 @@
   - [x] `GtStewards`: investigasi 10 s → +5 s atau NFA; banner HUD; penalti dilayani di box atau ditambah ke waktu dan urutan podium.
   - [x] Suara steward (beep + palu), klip suara radio evakuasi dan balon radio manga di sudut bawah (tidak lagi menimpa alert).
   - [x] Review independen fresh-context: 2 Important + 8 Minor, **semuanya diperbaiki** dengan tes yang gagal dulu.
-  - [x] `tests/test_track_incidents_and_stewards.gd` 55 assertions; **35/35 suite headless, 909 assertions, 0 FAIL**. Smoke native High/1080p storm malam 3 lap 20 mobil dengan insiden: **55,38 FPS, p95 25,79 ms**, 0 orphan (tren turun dari 60,05; lihat laporan bagian 4). Belum di-commit.
+  - [x] `tests/test_track_incidents_and_stewards.gd` 55 assertions; **35/35 suite headless, 909 assertions, 0 FAIL**. Smoke native High/1080p storm malam 3 lap 20 mobil dengan insiden: **55,38 FPS, p95 25,79 ms**, 0 orphan. Ter-commit & ter-push ke `main` (`c312774`).
   - Laporan: `executor-report/reports/FASE-11-LANGKAH-6-INCIDENTS-AND-STEWARDING-REPORT.md`; bukti visual `executor-report/screenshots/phases/phase-11-step-6-*.png`.
+
+- [x] **Fase 11 / Langkah 7: Dedicated Winning Scene Studio & Pipeline Karakter 2.5D Kinetik**
+  - [x] `Task 7.1`: Pipeline Aset Karakter 2.5D Kinetik (Isolasi background `full_body_concept.png` Kaze Ryu & rival menjadi RGBA transparan di `assets/characters/standees/`, layering kinetik napas & rambut).
+  - [x] `Task 7.2`: Scene Studio Selebrasi 3D (`scenes/ui/winning_scene.tscn`) Hero Machine Graffiti Brutalism dengan dinding beton spray tag, pita caution neon, mahkota kemenangan, dan konfeti tim pemenang.
+  - [x] `Task 7.3`: P1 Hero Car Turntable Display di titik origin (memuat sasis 3D mobil pemenang dinamis dari `assets/cars/<slug>/<slug>_full.glb` berputar lambat 0.18 rad/s, spotlight volumetrik, dan callout komponen mesin/aero).
+  - [x] `Task 7.4`: Node `KineticStandee3D` & Shader `kinetic_standee.gdshader` (menjatuhkan bayangan nyata ke lantai podium, goyangan napas/rambut, kanji AR `勝者`, dan kontur stiker die-cut putih).
+  - [x] `Task 7.5`: UI Minimalis dengan Fitur Toggle Leaderboard `[TAB] /// SHOW LEADERBOARD` (animasi slide-in/out manga halftone wheatpaste poster, camera dolly cinematic).
+  - [x] `Task 7.6`: Transisi Game Loop dari bendera finis chequered flag sirkuit ke `winning_scene.tscn` dan tombol aksi EXIT TO HQ / RESTART dengan failsafe hand-back musik.
+  - [x] `Task 7.7`: 5-Cut Director terintegrasi (`winning_cut_director.gd`), sinkronisasi ketukan musik 150 BPM (1.60 s per bar), overlay manga speedlines di Cut 4, spring overshoot pop-in, dan musik rock kemenangan `podium_rock_anthem.mp3`.
+  - [x] Test suite otomatis (`test_winning_scene_and_standee.gd` 98 assertions, `test_podium_music.gd` 7 assertions, `test_winning_cut_director.gd` 15 assertions, `test_graffiti_kit.gd` 16 assertions). **39/39 test suite headless, 0 FAIL**. Smoke native High/1080p 60 FPS locked, 0 orphan node.
+  - Laporan: `executor-report/reports/FASE-11-LANGKAH-7-WINNING-SCENE-REPORT.md`; bukti visual `executor-report/screenshots/winning_scene/hero-graffiti-*.png`.

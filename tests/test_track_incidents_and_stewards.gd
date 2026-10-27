@@ -433,13 +433,15 @@ func _test_unserved_penalty_is_added_to_the_podium_time() -> void:
 		entrant.finished_at = 100.0 + float(index) * 2.0
 	var winner: CarScript = race.cars[0]
 	winner.penalty_owed_s = 5.0
-	var podium: PodiumScreen = load("res://scenes/ui/podium_screen.tscn").instantiate()
+	var studio_script: Script = load("res://scripts/ui/winning_scene.gd")
+	var podium: Node3D = load(studio_script.PATH).instantiate()
+	podium.setup_celebration(studio_script.capture_results(race))
 	root.add_child(podium)
-	podium.present(race)
-	check(podium.order[0] != winner and podium.order[2] == winner,
+	check(podium.order[0].id != winner.id and podium.order[2].id == winner.id,
 		"podium: the 5 s penalty drops a 2 s winner to third (order %d, %d, %d)" % [podium.order[0].id, podium.order[1].id, podium.order[2].id])
 	var shown: String = podium.time_labels[2].text if podium.time_labels.size() > 2 else ""
-	check(shown == PodiumScreen.format_time(105.0), "podium: the winner's time includes the penalty (\"%s\")" % shown)
+	check(shown.begins_with("+3.000s") and podium.order[2].time == 105.0,
+		"podium: displayed gap and classified time both include the unserved penalty")
 	podium.queue_free()
 
 

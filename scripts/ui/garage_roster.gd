@@ -17,6 +17,13 @@ const CAR_NAMES: Array[String] = [
 	"Lamborghini Huracan GT3 EVO2",
 ]
 
+## Engine layout per car, in CAR_SLUGS order (winning scene callout). Layout only: tuned BoP power
+## figures change per season and are not carried in game data.
+const CAR_ENGINES: Array[String] = [
+	"6.2L V8 NA", "5.2L V10 NA", "3.8L V6 TWIN-TURBO", "3.0L I6 TWIN-TURBO", "4.0L V8 TWIN-TURBO",
+	"5.5L V8 NA", "3.5L V6 TWIN-TURBO", "5.4L V8 NA", "4.0L V8 TWIN-TURBO", "5.2L V10 NA",
+]
+
 const PRINCIPALS: Array[String] = [
 	"Kenji Takahashi", "Rei Kisaragi", "Daisuke Kurogane", "Henrik von Vanta",
 	"Lady Victoria Sterling", "\"Big Jim\" Callahan", "Ryuji Sakamoto",

@@ -10,7 +10,7 @@ extends SceneTree
 ## Add `-- --skip-legacy` to skip the earlier suites in #20 (they take a few minutes).
 
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
-const PodiumScene := preload("res://scenes/ui/podium_screen.tscn")
+const Studio := preload("res://scripts/ui/winning_scene.gd")
 const DirectorScript := preload("res://scripts/world/race_weekend_director.gd")
 const ActorScript := preload("res://scripts/car/gt_car_actor.gd")
 const Types := preload("res://scripts/gt/gt_types.gd")
@@ -447,78 +447,48 @@ func _test_actor_wiring() -> void:
 # --- #18..#19 the podium --------------------------------------------------------------------
 
 func _test_podium() -> void:
-	var finale: Node3D = WorldScene.instantiate()
-	finale.total_laps = 2
-	root.add_child(finale)
-	finale.set_physics_process(false)
-	finale.race.incidents_enabled = false
-	finale.director._enter(DirectorScript.State.GREEN_RACING)
-	var ticks: int = 0
-	while not finale.race.is_finished() and ticks < MAX_RACE_TICKS:
-		finale.race.step()
-		ticks += 1
-	var frames: int = 0
-	while finale.podium == null and frames < 600:
-		finale.step(FRAME)
-		frames += 1
-	var podium: PodiumScreen = finale.podium
-	check(podium != null and podium.visible and finale.director.state == DirectorScript.State.CHEQUERED_FLAG,
-		"#24 the podium comes up by itself after the chequered flag (%d ticks of racing, %.1f s later)" % [ticks, float(frames) * FRAME])
-	podium.step(2.0)
-	var order: Array[GtCar] = finale.race.standings()
-	var names_ok: bool = podium.winners.size() == 3
-	for place: int in range(mini(3, order.size())):
-		names_ok = names_ok and podium.winners[place] == order[place]
-		names_ok = names_ok and podium.name_labels[place].text == order[place].driver_name.to_upper()
-		names_ok = names_ok and podium.time_labels[place].text == PodiumScreen.format_time(order[place].finished_at)
-	var layout_ok: bool = podium.steps[0].size.y > podium.steps[1].size.y and podium.steps[1].size.y > podium.steps[2].size.y
-	layout_ok = layout_ok and podium.steps[1].position.x < podium.steps[0].position.x and podium.steps[0].position.x < podium.steps[2].position.x
-	check(names_ok and layout_ok, "#18 the podium shows P1, P2 and P3 in finishing order (%s) on three steps, P1 tallest in the middle" % ", ".join(PackedStringArray([order[0].code, order[1].code, order[2].code])))
-	var table_ok: bool = PodiumScreen.points_for(1) == 25 and PodiumScreen.points_for(2) == 18 and PodiumScreen.points_for(3) == 15
-	var scale: Array[int] = []
-	for place: int in range(1, 11):
-		scale.append(PodiumScreen.points_for(place))
-	table_ok = table_ok and scale == [25, 18, 15, 12, 10, 8, 6, 4, 2, 1] and PodiumScreen.points_for(11) == 0
 	var synthetic: Array[GtCar] = []
 	for index: int in range(12):
 		var car := GtCar.new()
 		car.id = index
 		car.team_id = index >> 1
 		synthetic.append(car)
-	var fastest: GtCar = synthetic[4]
-	var awards: Dictionary = PodiumScreen.award_points(synthetic, fastest)
+	var awards: Dictionary = Studio.award_points(synthetic, synthetic[4])
 	var drivers: Dictionary = awards["drivers"]
 	var teams: Dictionary = awards["teams"]
-	table_ok = table_ok and drivers[0] == 25 and drivers[1] == 18 and drivers[2] == 15 and drivers[4] == 11 and drivers[10] == 0
-	table_ok = table_ok and teams[0] == 43 and teams[1] == 27 and teams[2] == 19
-	var late_fastest: Dictionary = PodiumScreen.award_points(synthetic, synthetic[11])["drivers"]
-	table_ok = table_ok and late_fastest[11] == 0
-	var real_awards: Dictionary = PodiumScreen.award_points(order, PodiumScreen.fastest_lap_car(finale.race.cars))
-	var first_points: int = int(real_awards["drivers"][order[0].id])
-	var second_points: int = int(real_awards["drivers"][order[1].id])
-	table_ok = table_ok and podium.points_labels[0].text == "%d PTS" % first_points and podium.points_labels[1].text == "%d PTS" % second_points
-	check(table_ok, "#19 the FIA GT3 table awards 25-18-15-12-10-8-6-4-2-1, adds the fastest-lap point only inside the top ten and sums the constructors (P1 scored %d)" % first_points)
-	var stamp_ok: bool = podium.stamp != null and podium.fastest_car == PodiumScreen.fastest_lap_car(finale.race.cars)
-	var stamp_text: String = ""
-	for child: Node in podium.stamp.get_children():
-		if child is Label and (child as Label).text.begins_with("★"):
-			stamp_text = (child as Label).text
-	check(stamp_ok and stamp_text == "★ FASTEST LAP // +1 PT BONUS" and podium.restart_button.text == "RESTART RACE" and podium.exit_button.text == "EXIT TO HQ",
-		"#25 the purple FASTEST LAP // +1 PT BONUS stamp and the RESTART RACE / EXIT TO HQ buttons are on the podium")
-	# A podium of its own: the world handlers would reload the scene tree.
-	var bare := PodiumScene.instantiate() as PodiumScreen
-	root.add_child(bare)
-	bare.present(finale.race)
-	var restarts: Array[int] = [0]
-	var exits: Array[int] = [0]
-	bare.restart_requested.connect(func() -> void: restarts[0] += 1)
-	bare.exit_requested.connect(func() -> void: exits[0] += 1)
-	bare.restart_button.pressed.emit()
-	bare.exit_button.pressed.emit()
-	check(restarts[0] == 1 and exits[0] == 1, "#26 the podium buttons raise restart_requested and exit_requested")
-	bare.queue_free()
-	finale.race.dispose()
+	check(drivers[0] == 25 and drivers[1] == 18 and drivers[2] == 15
+		and drivers[4] == 11 and drivers[10] == 0 and teams[0] == 43
+		and teams[1] == 27 and teams[2] == 19,
+		"#19 FIA scoring includes exactly one eligible fastest-lap bonus and both constructor entries")
+	var late_fastest: Dictionary = Studio.award_points(synthetic, synthetic[11])["drivers"]
+	check(late_fastest[11] == 0, "Fastest lap outside the top ten earns no bonus")
+	synthetic[0].is_dnf = true
+	var retired: Dictionary = Studio.award_points(synthetic, synthetic[0])["drivers"]
+	check(retired[0] == 0, "A retired entry never earns finishing or fastest-lap points")
+	var finale: Node3D = WorldScene.instantiate()
+	finale.total_laps = 2
+	root.add_child(finale)
+	finale.set_physics_process(false)
+	finale.race.incidents_enabled = false
+	var ticks: int = 0
+	while not finale.race.is_finished() and ticks < MAX_RACE_TICKS:
+		finale.race.step()
+		ticks += 1
+	check(finale.race.is_finished(), "Two-lap race produces complete studio classification")
+	var snapshot: Dictionary = Studio.capture_results(finale.race)
+	var ordered: Array[GtCar] = finale.race.standings()
+	check(snapshot.order[0].id == ordered[0].id and snapshot.order[2].id == ordered[2].id,
+		"#18 studio snapshot preserves P1-P3 simulation finishing order")
+	var source_ref: WeakRef = weakref(finale)
 	finale.queue_free()
+	await process_frame
+	var studio: Node3D = load(Studio.PATH).instantiate()
+	studio.setup_celebration(snapshot)
+	root.add_child(studio)
+	check(source_ref.get_ref() == null and studio.order.size() == 20
+		and studio.name_labels[0].text.contains(String(snapshot.order[0].driver_name).to_upper()),
+		"Studio renders the final results after the race world is freed")
+	studio.queue_free()
 	await process_frame
 
 

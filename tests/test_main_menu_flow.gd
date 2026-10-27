@@ -175,10 +175,16 @@ func _test_menu_scenes(config_script: Script) -> void:
 	check(not world.pre_grid_hold and world.race.player_team_id == 8 and world.race.laps == 10, "Animated launch reaches the selected team's configured live race")
 	check(world.race.get_car(16).compound == 3 and world.race.get_car(17).compound == 4, "Transition preserves independent tires into actual race actors")
 	var race_ref: WeakRef = weakref(world)
-	world.show_podium().exit_button.pressed.emit()
+	world.show_podium()
 	await scene_changed
 	await process_frame
-	check(race_ref.get_ref() == null and _button(current_scene, "EXHIBITION") != null and config_script.current == null, "Podium Exit to HQ frees the race and returns to a clean main menu")
+	check(race_ref.get_ref() == null and current_scene.scene_file_path == "res://scenes/ui/winning_scene.tscn",
+		"Dedicated winning scene owns the viewport after freeing the race world")
+	current_scene.exit_button.pressed.emit()
+	await scene_changed
+	await process_frame
+	check(_button(current_scene, "EXHIBITION") != null and config_script.current == null,
+		"Studio Exit to HQ returns to a clean main menu")
 	presentation.halftone = true
 	current_scene.queue_free()
 	await process_frame

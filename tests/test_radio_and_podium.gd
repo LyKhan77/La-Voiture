@@ -220,57 +220,20 @@ func _test_voice_casting() -> void:
 
 
 func _test_podium_standees() -> void:
-	var finale: Node3D = WorldScene.instantiate()
-	finale.total_laps = 2
-	root.add_child(finale)
-	finale.set_physics_process(false)
-	finale.race.incidents_enabled = false
-	finale.director._enter(DirectorScript.State.GREEN_RACING)
-	var ticks: int = 0
-	while not finale.race.is_finished() and ticks < 60000:
-		finale.race.step()
-		ticks += 1
-	var frames: int = 0
-	while finale.podium == null and frames < 600:
-		finale.step(FRAME)
-		frames += 1
-	var podium: PodiumScreen = finale.podium
-	check(podium != null, "#26 the podium comes up after the chequered flag")
-	check(podium.standees.size() == 3, "#27 three character standees stand above the steps (%d)" % podium.standees.size())
-	var order: Array[GtCar] = finale.race.standings()
-	var ok: bool = true
-	var detail: String = ""
-	var tiers: Array[String] = ["P1 WINNER // 25 PTS", "P2 RUNNER-UP // 18 PTS", "P3 PODIUM // 15 PTS"]
-	var colors: Array[Color] = [PodiumScreen.GOLD, PodiumScreen.SILVER, PodiumScreen.BRONZE]
+	var studio_script: Script = load("res://scripts/ui/winning_scene.gd")
+	var snapshot: Dictionary = studio_script.capture_results(world.race)
+	var studio: Node3D = load(studio_script.PATH).instantiate()
+	studio.setup_celebration(snapshot)
+	root.add_child(studio)
+	check(studio.standees.size() == 3, "#27 three kinetic character silhouettes stand on the 3D podium")
 	for place: int in range(3):
-		var portrait: TextureRect = podium.portraits[place]
-		var expected: Texture2D = load(GarageRoster.portrait_path(order[place].id)) as Texture2D
-		ok = ok and portrait.texture != null and portrait.texture == expected
-		ok = ok and podium.standees[place].size == PodiumScreen.STANDEE_SIZE
-		ok = ok and podium.ribbons[place].text == tiers[place]
-		ok = ok and podium.ribbon_fills[place].color == colors[place]
-		ok = ok and podium.name_labels[place].text == order[place].driver_name.to_upper()
-		if not ok and detail.is_empty():
-			detail = "place %d" % (place + 1)
-	check(ok, "#28 each standee has the finisher's portrait, a Gold/Silver/Bronze tier ribbon, name and 360 x 240 size %s" % detail)
-	# Staggered entrance: P3 first, then P2, then P1; the trophy and confetti wait for P1.
-	podium.step(0.0)
-	podium.set_elapsed(0.1)
-	var a3: float = podium.standees[2].modulate.a
-	var a2: float = podium.standees[1].modulate.a
-	var a1: float = podium.standees[0].modulate.a
-	check(a3 > 0.0 and a2 == 0.0 and a1 == 0.0, "#29 at 0.1 s only P3 has started (%.2f, %.2f, %.2f)" % [a3, a2, a1])
-	podium.set_elapsed(0.3)
-	check(podium.standees[1].modulate.a > 0.0 and podium.standees[0].modulate.a == 0.0, "#30 at 0.3 s P2 follows, P1 still waits")
-	podium.set_elapsed(0.55)
-	check(podium.standees[0].modulate.a > 0.0 and podium.trophy.modulate.a > 0.0 and podium.confetti_visible(),
-		"#31 at 0.55 s P1 is in and the trophy and confetti are out")
-	podium.set_elapsed(PodiumScreen.REVEAL_S)
-	var settled: bool = true
-	for place: int in range(3):
-		var rect: Rect2 = PodiumScreen.STEP_RECTS[place]
-		settled = settled and is_equal_approx(podium.standees[place].modulate.a, 1.0)
-		settled = settled and is_equal_approx(podium.standees[place].position.y, rect.position.y - PodiumScreen.CARD_H - PodiumScreen.CARD_GAP)
-	check(settled, "#32 once revealed every standee rests fully visible on its step")
-	finale.queue_free()
+		var standee: Node3D = studio.standees[place]
+		var entry: Dictionary = snapshot.order[place]
+		var texture: Texture2D = standee.material.get_shader_parameter("albedo_texture")
+		check(texture.resource_path == studio_script.standee_path(int(entry.id))
+			and studio.name_labels[place].text.contains(String(entry.driver_name).to_upper()),
+			"#28 P%d art and name belong to the actual finisher" % (place + 1))
+		check(standee.mesh_instance.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_ON,
+			"P%d character casts a studio silhouette shadow" % (place + 1))
+	studio.queue_free()
 	await process_frame

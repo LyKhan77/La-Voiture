@@ -3,7 +3,7 @@ extends SceneTree
 ## FASE 11 Langkah 4 native smoke test (GPU needed, not --headless). Runs the real 60 Hz game path at 1080p:
 ## a 3-lap, 20-car night-storm race at the HIGH preset, a real pit request for the followed team, a bounded
 ## 1x sample of the crew being active (frame times, memory, VRAM, draw calls), then fast-forward to the
-## podium and out through the podium's real exit_requested signal.
+## winning studio and out through the studio's real exit button.
 ##   godot --path . --fullscreen --resolution 1920x1080 --script res://scratch/smoke_pitcrew_visual.gd
 ##
 ## Honesty rules: the sim is never stepped by hand; everything runs through SceneTree.process_frame at 60 Hz.
@@ -11,6 +11,7 @@ extends SceneTree
 ## instead of claiming a locked 60 fps. A timeout or a wrong scene after the real exit fails with exit code 1.
 
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
+const WinningStudio := preload("res://scripts/ui/winning_scene.gd")
 const ConfigScript := preload("res://scripts/core/race_config_data.gd")
 const PS := preload("res://scripts/core/presentation_settings.gd")
 const PitLaneScript := preload("res://scripts/world/pit_lane_complex.gd")
@@ -21,7 +22,7 @@ const WARMUP_S: float = 10.0
 const SAMPLE_MAX_S: float = 30.0
 const FAST_SCALE: float = 8.0
 const TIMEOUT_WALL_S: float = 900.0
-const PODIUM_TIMEOUT_S: float = 300.0
+const STUDIO_TIMEOUT_S: float = 300.0
 const PIT_ENTRY_WINDOW_M: float = 330.0
 const OVER_18_MS: float = 18.5
 const OVER_33_MS: float = 33.4
@@ -195,50 +196,69 @@ func _run() -> void:
 
 	# Only now accelerate: the honest 1x measurement above is finished.
 	world.set_time_scale(FAST_SCALE)
-	var podium_start: int = Time.get_ticks_msec()
-	while world.podium == null:
-		await process_frame
-		if _timed_out():
-			_fail("timed out waiting for the podium")
-			return
-		if Time.get_ticks_msec() - podium_start > int(PODIUM_TIMEOUT_S * 1000.0):
-			_fail("the podium did not appear within %.0f s" % PODIUM_TIMEOUT_S)
-			return
-	var standings: Array[GtCar] = world.race.standings()
+	var studio_start: int = Time.get_ticks_msec()
+	var studio: WinningStudio = null
+	var race_time_s: float = 0.0
+	var car_count: int = 0
 	var finished_cars: int = 0
-	for entry: GtCar in standings:
-		if entry.finished_at >= 0.0:
-			finished_cars += 1
-	print("PODIUM: reached after %.1f s wall at %.0fx, race time %.0f s, %d of %d cars classified, winner #%d on lap %d" % [
-		float(Time.get_ticks_msec() - podium_start) / 1000.0, FAST_SCALE, world.race.time,
-		finished_cars, standings.size(), standings[0].number, standings[0].lap,
+	var winner_number: int = 0
+	var winner_lap: int = 0
+	while studio == null:
+		await process_frame
+		studio = _studio()
+		if studio == null and is_instance_valid(world) and not world.is_queued_for_deletion():
+			var live: Array = world.race.standings()
+			race_time_s = world.race.time
+			car_count = live.size()
+			finished_cars = 0
+			for entry: GtCar in live:
+				finished_cars += 1 if entry.finished_at >= 0.0 else 0
+			winner_number = live[0].number
+			winner_lap = live[0].lap
+		if studio != null:
+			break
+		if _timed_out():
+			_fail("timed out waiting for the winning studio")
+			return
+		if Time.get_ticks_msec() - studio_start > int(STUDIO_TIMEOUT_S * 1000.0):
+			_fail("the winning studio did not appear within %.0f s" % STUDIO_TIMEOUT_S)
+			return
+	print("STUDIO: reached after %.1f s wall at %.0fx, race time %.0f s, %d of %d cars classified, winner #%d on lap %d" % [
+		float(Time.get_ticks_msec() - studio_start) / 1000.0, FAST_SCALE, race_time_s,
+		finished_cars, car_count, winner_number, winner_lap,
 	])
-	if world.podium == null:
-		_fail("world.podium is null after the wait")
+	if studio == null:
+		_fail("the winning studio is missing after the wait")
 		return
 
-	# The real podium button path: the screen's own exit signal, wired by RaceWeekendWorld.
-	world.podium.exit_requested.emit()
+	# The real finale button path: exit_button drives the studio's own HQ transition.
+	studio.exit_button.pressed.emit()
 	var exit_guard: int = 0
 	while current_scene == null or current_scene.scene_file_path != HQ_SCENE:
 		await process_frame
 		exit_guard += 1
 		if _timed_out() or exit_guard > 1200:
-			_fail("the podium exit signal did not return to %s (current scene: %s)" % [
+			_fail("the winning studio exit button did not return to %s (current scene: %s)" % [
 				HQ_SCENE, current_scene.scene_file_path if current_scene != null else "<none>",
 			])
 			return
-	print("BACK AT: %s (real podium exit_requested signal)" % current_scene.scene_file_path)
+	print("BACK AT: %s (real winning studio exit button)" % current_scene.scene_file_path)
 	var menu: Node = current_scene
 	menu.queue_free()
 	for _i: int in range(20):
 		await process_frame
 	var remaining_orphans: int = _orphans()
-	print("ORPHAN NODES: baseline %d, after the race, podium and menu are freed %d" % [baseline_orphans, remaining_orphans])
+	print("ORPHAN NODES: baseline %d, after the race, winning studio and menu are freed %d" % [baseline_orphans, remaining_orphans])
 	quit(0 if baseline_orphans == 0 and remaining_orphans == 0 else 1)
 
 
 # --- live pit helpers ------------------------------------------------------
+
+func _studio() -> WinningStudio:
+	if is_instance_valid(current_scene) and current_scene.scene_file_path == WinningStudio.PATH:
+		return current_scene as WinningStudio
+	return null
+
 
 func _pit_u(car: GtCar) -> float:
 	return fposmod(car.s - PitLaneScript.ENTRY_S + 300.0, world.race.track.length) - 300.0

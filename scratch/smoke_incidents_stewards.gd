@@ -5,6 +5,7 @@ extends SceneTree
 ## frame time and orphan nodes through the exit to HQ.
 ## Run: Godot --path . -s res://scratch/smoke_incidents_stewards.gd -- --smoke
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
+const WinningStudio := preload("res://scripts/ui/winning_scene.gd")
 const Config := preload("res://scripts/core/race_config_data.gd")
 const Types := preload("res://scripts/gt/gt_types.gd")
 const PS := preload("res://scripts/core/presentation_settings.gd")
@@ -23,6 +24,12 @@ func check(ok: bool, message: String) -> void:
 	if not ok:
 		failures += 1
 	print("[%s] %s" % ["PASS" if ok else "FAIL", message])
+
+
+func _studio() -> WinningStudio:
+	if is_instance_valid(current_scene) and current_scene.scene_file_path == WinningStudio.PATH:
+		return current_scene as WinningStudio
+	return null
 
 
 func _save(file_name: String) -> void:
@@ -226,17 +233,22 @@ func _smoke() -> void:
 	check(race.stewards.cases.size() >= 1, "Native smoke: the staged rear-end hit reached the stewards (%d cases, %s)" % [race.stewards.cases.size(), verdicts])
 	world.set_time_scale(16.0)
 	start_ms = Time.get_ticks_msec()
-	while world.podium == null and Time.get_ticks_msec() - start_ms < 420000:
+	var studio: WinningStudio = null
+	var cars_seen: int = race.cars.size()
+	while studio == null and Time.get_ticks_msec() - start_ms < 420000:
 		await process_frame
-	check(race.cars.size() == 20, "Native smoke: race.cars still holds 20 cars")
-	check(world.podium != null, "Native smoke: three-lap race reaches podium")
+		studio = _studio()
+		if studio == null and is_instance_valid(world) and not world.is_queued_for_deletion():
+			cars_seen = race.cars.size()
+	check(cars_seen == 20, "Native smoke: race.cars still holds 20 cars")
+	check(studio != null, "Native smoke: three-lap race reaches winning studio")
 	print("STEWARD LOG: %s" % [verdicts])
-	if world.podium != null:
-		world.podium.exit_requested.emit()
+	if studio != null:
+		studio.exit_button.pressed.emit()
 		for _i: int in range(30):
 			await process_frame
-		check(current_scene != null and current_scene.scene_file_path == "res://scenes/main.tscn", "Podium returns through real HQ exit")
-	else:
+		check(current_scene != null and current_scene.scene_file_path == "res://scenes/main.tscn", "Winning studio returns through real HQ exit")
+	elif is_instance_valid(world) and not world.is_queued_for_deletion():
 		world.queue_free()
 	if current_scene != null:
 		current_scene.queue_free()

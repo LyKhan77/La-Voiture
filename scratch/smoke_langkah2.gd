@@ -1,10 +1,11 @@
 extends SceneTree
 ## Langkah 2 native smoke test (GPU needed, not --headless): the redesigned Team Garage under team switches and
-## tyre picks, then a 3-lap 20-car night storm race (40 s measured at 1x, the rest at 8x) to the podium, back to the
-## HQ main menu through the podium's real exit path, and the orphan node count after each scene is freed.
+## tyre picks, then a 3-lap 20-car night storm race (40 s measured at 1x, the rest at 8x) to the winning studio, back
+## to the HQ main menu through the studio's real exit path, and the orphan node count after each scene is freed.
 ##   godot --path . --resolution 1920x1080 --script res://scratch/smoke_langkah2.gd
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
 const GarageScene := preload("res://scenes/ui/garage_team_select.tscn")
+const WinningStudio := preload("res://scripts/ui/winning_scene.gd")
 const ConfigScript := preload("res://scripts/core/race_config_data.gd")
 const PS := preload("res://scripts/core/presentation_settings.gd")
 const GARAGE_MEASURE_S: float = 20.0
@@ -17,6 +18,10 @@ func _initialize() -> void:
 	call_deferred("_run")
 func _orphans() -> int:
 	return int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT))
+func _studio() -> WinningStudio:
+	if is_instance_valid(current_scene) and current_scene.scene_file_path == WinningStudio.PATH:
+		return current_scene as WinningStudio
+	return null
 func _report(label: String, frames: Array[float]) -> void:
 	var sorted: Array[float] = frames.duplicate()
 	sorted.sort()
@@ -95,18 +100,33 @@ func _run() -> void:
 	frames = []
 	last = Time.get_ticks_usec()
 	started = Time.get_ticks_msec()
-	while world.podium == null and float(Time.get_ticks_msec() - started) / 1000.0 < TIMEOUT_WALL_S:
+	var studio: WinningStudio = null
+	var race_time_s: float = 0.0
+	var car_count: int = 0
+	var finished_count: int = 0
+	var winner_number: int = 0
+	var winner_lap: int = 0
+	while studio == null and float(Time.get_ticks_msec() - started) / 1000.0 < TIMEOUT_WALL_S:
 		await process_frame
 		var now_fast: int = Time.get_ticks_usec()
 		frames.append(float(now_fast - last) / 1000.0)
 		last = now_fast
-	var finished: bool = world.podium != null
-	print("RACE %s after %.0f s at %.0fx, race time %.0f s" % ["REACHED THE PODIUM" if finished else "TIMED OUT", float(Time.get_ticks_msec() - started) / 1000.0, FAST_SCALE, world.race.time])
-	_report("RACE %.0fx to the podium" % FAST_SCALE, frames)
-	var standings: Array = world.race.standings()
-	print("FINISHED %d of %d, winner #%d lap %d" % [standings.filter(func(c: GtCar) -> bool: return c.finished_at >= 0.0).size(), standings.size(), standings[0].number, standings[0].lap])
+		studio = _studio()
+		if studio == null and is_instance_valid(world) and not world.is_queued_for_deletion():
+			var live: Array = world.race.standings()
+			race_time_s = world.race.time
+			car_count = live.size()
+			finished_count = 0
+			for entry: GtCar in live:
+				finished_count += 1 if entry.finished_at >= 0.0 else 0
+			winner_number = live[0].number
+			winner_lap = live[0].lap
+	var finished: bool = studio != null
+	print("RACE %s after %.0f s at %.0fx, race time %.0f s" % ["REACHED THE WINNING STUDIO" if finished else "TIMED OUT", float(Time.get_ticks_msec() - started) / 1000.0, FAST_SCALE, race_time_s])
+	_report("RACE %.0fx to the winning studio" % FAST_SCALE, frames)
+	print("FINISHED %d of %d, winner #%d lap %d" % [finished_count, car_count, winner_number, winner_lap])
 	if finished:
-		world.podium.exit_requested.emit()
+		studio.exit_button.pressed.emit()
 		for _i: int in range(60):
 			await process_frame
 		print("BACK AT: %s" % (current_scene.scene_file_path if current_scene != null else "<no scene>"))

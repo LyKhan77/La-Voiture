@@ -1,0 +1,36 @@
+{
+  "project_name": "Full body character concept sheet, orthographic turnaround multi-view. Subject: Stylized Japanese cel-shaded anime GT3 motorsport pit crew mechanic in T-pose, wearing racing fire suit overalls, aerodynamic pit racing helmet with dark tinted glossy visor, tactical mechanic utility harness, heavy-duty padded racing gloves, athletic pit boots. Art Style: Bold anime cel-shaded style, thick clean comic ink outlines, screentone shading, Redline and Akira anime aesthetic, Need for Speed Unbound neo-brutalism streetwear accents, clean neutral lighting, plain solid studio grey background, high contrast, crisp details.",
+  "folder": "20261025_113356_full-body-character-concept-sh_01a17156",
+  "root_task_id": "01a17156-2d9e-72bc-8fcc-fcb15898863e",
+  "created_at": "2026-10-25T04:33:56.275Z",
+  "updated_at": "2026-10-25T04:47:44.459Z",
+  "tasks": [
+    {
+      "task_id": "01a17156-2d9e-72bc-8fcc-fcb15898863e",
+      "task_type": "text-to-image",
+      "stage": "model",
+      "prompt": "Full body character concept sheet, orthographic turnaround multi-view. Subject: Stylized Japanese cel-shaded anime GT3 motorsport pit crew mechanic in T-pose, wearing racing fire suit overalls, aerodynamic pit racing helmet with dark tinted glossy visor, tactical mechanic utility harness, heavy-duty padded racing gloves, athletic pit boots. Art Style: Bold anime cel-shaded style, thick clean comic ink outlines, screentone shading, Redline and Akira anime aesthetic, Need for Speed Unbound neo-brutalism streetwear accents, clean neutral lighting, plain solid studio grey background, high contrast, crisp details.",
+      "status": "SUCCEEDED",
+      "files": [
+        "model_0.png",
+        "model_1.png",
+        "model_2.png"
+      ],
+      "created_at": "2026-10-25T04:34:27.888Z"
+    },
+    {
+      "task_id": "01a1715f-8eb4-71ee-a8eb-26db548cc2a9",
+      "task_type": "multi-image-to-3d",
+      "stage": "model",
+      "status": "SUCCEEDED",
+      "files": [
+        "model.glb",
+        "textures\\base_color.png",
+        "textures\\metallic.png",
+        "textures\\roughness.png",
+        "textures\\normal.png"
+      ],
+      "created_at": "2026-10-25T04:47:44.459Z"
+    }
+  ]
+}

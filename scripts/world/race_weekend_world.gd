@@ -26,7 +26,7 @@ const ChoreographerScript := preload("res://scripts/car/pitstop_choreographer.gd
 const CameraDirectorScript := preload("res://scripts/world/broadcast_camera_director.gd")
 const EnvironmentScript := preload("res://scripts/world/track_environment_builder.gd")
 const GantryScript := preload("res://scripts/world/start_gantry.gd")
-const PodiumScene := preload("res://scenes/ui/podium_screen.tscn")
+const WinningStudio := preload("res://scripts/ui/winning_scene.gd")
 const ConfigScript := preload("res://scripts/core/race_config_data.gd")
 const SettingsScript := preload("res://scripts/core/presentation_settings.gd")
 
@@ -35,11 +35,13 @@ const TIME_SCALES: Array[float] = [1.0, 2.0, 4.0, 8.0, 16.0]
 const AUDIBLE_MAX_TIME_SCALE: float = 2.0
 ## The podium comes up this long after the chequered flag falls, so the cars get over the line first.
 const PODIUM_REVEAL_S: float = 2.5
-const HQ_SCENE := "res://scenes/main.tscn"
 const MAX_TICKS_PER_FRAME: int = 40
 const ROAD_WIDTH_M: float = 14.0
 const SKY_TOP := Color(0.36, 0.58, 0.9)
 const SKY_HORIZON := Color(0.78, 0.86, 0.95)
+
+## Value-only restart handoff for directly launched races with no menu configuration.
+static var pending_restart: Dictionary = {}
 
 @export var total_laps: int = 50
 @export var director_seed: int = 0
@@ -53,7 +55,7 @@ var director: DirectorScript
 var actors: Array[ActorScript] = [] # same order as race.cars
 var followed_id: int = 0
 var time_scale: float = 1.0
-var podium: PodiumScreen
+var _celebration_requested: bool = false
 
 var race_config: ConfigScript
 var pre_grid_hold: bool = false
@@ -74,6 +76,12 @@ var _chequered_clock_s: float = -1.0 # seconds since the flag fell, -1 until it 
 
 
 func _ready() -> void:
+	if not pending_restart.is_empty():
+		total_laps = int(pending_restart.total_laps)
+		race_seed = int(pending_restart.race_seed)
+		director_seed = int(pending_restart.director_seed)
+		weather_archetype = int(pending_restart.weather_archetype)
+		pending_restart.clear()
 	if race_config == null:
 		race_config = ConfigScript.current
 	if race_config != null:
@@ -185,7 +193,7 @@ func step(delta: float) -> void:
 	_update_flag_panels()
 	var alpha: float = clampf(_tick_accumulator / Types.TICK_DT, 0.0, 1.0)
 	var spin_scale: float = minf(time_scale, 2.0)
-	var audible: bool = time_scale <= AUDIBLE_MAX_TIME_SCALE and podium == null
+	var audible: bool = time_scale <= AUDIBLE_MAX_TIME_SCALE and not _celebration_requested
 	for actor: ActorScript in actors:
 		actor.present(alpha, delta, spin_scale, audible)
 		_present_pit(actor)
@@ -272,33 +280,40 @@ func _on_director_state(state: int) -> void:
 		_chequered_clock_s = 0.0
 
 
-## Counts down from the chequered flag, then raises the podium once.
+## Counts down after the chequered flag, then transfers ownership to the isolated studio.
 func _update_podium(delta: float) -> void:
-	if _chequered_clock_s < 0.0 or podium != null:
+	if _chequered_clock_s < 0.0 or _celebration_requested:
 		return
 	_chequered_clock_s += delta
 	if _chequered_clock_s >= PODIUM_REVEAL_S:
 		show_podium()
 
 
-func show_podium() -> PodiumScreen:
-	if podium == null:
-		podium = PodiumScene.instantiate() as PodiumScreen
-		add_child(podium)
-		podium.restart_requested.connect(_on_restart_requested)
-		podium.exit_requested.connect(_on_exit_requested)
-	podium.present(race)
+func show_podium() -> void:
+	if _celebration_requested:
+		return
+	_celebration_requested = true
+	WinningStudio.pending_results = WinningStudio.capture_results(race)
+	WinningStudio.pending_results["restart"] = {
+		"standalone": race_config == null, "total_laps": total_laps,
+		"race_seed": race_seed, "director_seed": director_seed, "weather_archetype": weather_archetype,
+	}
+	set_physics_process(false)
 	hud.set_shown(false)
-	return podium
+	# SceneTree destroys the race only after its final physics callback has returned.
+	_open_winning_studio.call_deferred()
 
 
-func _on_restart_requested() -> void:
-	get_tree().reload_current_scene()
-
-
-func _on_exit_requested() -> void:
-	ConfigScript.current = null
-	get_tree().change_scene_to_file(HQ_SCENE)
+func _open_winning_studio() -> void:
+	var tree: SceneTree = get_tree()
+	var was_current: bool = tree.current_scene == self
+	WinningStudio.capture_departure(get_viewport())
+	var error: Error = tree.change_scene_to_file(WinningStudio.PATH)
+	if error != OK:
+		push_error("Cannot open winning studio: %s" % error_string(error))
+		return
+	if not was_current:
+		queue_free()
 
 
 # --- cameras -----------------------------------------------------------------------

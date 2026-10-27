@@ -40,6 +40,9 @@ const STREAMS: Dictionary = {
 	SQUELCH_OUT: preload("res://assets/audio/radio/squelch_out.wav"),
 }
 const MUSIC_STREAM := preload("res://assets/audio/music/streetwear_synth.ogg")
+const PODIUM_MUSIC_STREAM := preload("res://assets/audio/music/podium_rock_anthem.mp3")
+const TRACK_MENU := &"menu"
+const TRACK_PODIUM := &"podium"
 
 ## Each of the five start lights climbs a semitone-ish step, so the countdown reads as rising.
 const START_BEEP_PITCH_STEP: float = 0.09
@@ -51,6 +54,10 @@ static var _fallback: AudioManager
 var play_counts: Dictionary = {} # sound name -> times played
 var play_log: Array[StringName] = []
 var last_start_beep_pitch: float = 1.0
+## Which music the hub is set to play. Tracked apart from playback so headless tests can read it.
+var music_track: StringName = TRACK_MENU
+var podium_stream: AudioStreamMP3
+var _menu_stream: AudioStream
 
 var _ui_players: Array[AudioStreamPlayer] = []
 var _next_ui_voice: int = 0
@@ -101,6 +108,11 @@ static func ensure_buses() -> void:
 			return
 
 
+func _init() -> void:
+	podium_stream = PODIUM_MUSIC_STREAM.duplicate() as AudioStreamMP3
+	podium_stream.loop = true
+
+
 func _enter_tree() -> void:
 	ensure_buses()
 
@@ -110,9 +122,10 @@ func _ready() -> void:
 		_ui_players.append(_make_player(BUS_UI))
 	_radio_player = _make_player(BUS_RADIO)
 	_music_player = _make_player(BUS_MUSIC)
-	var music: AudioStream = MUSIC_STREAM.duplicate()
-	(music as AudioStreamOggVorbis).loop = true
-	_music_player.stream = music
+	_menu_stream = MUSIC_STREAM.duplicate()
+	(_menu_stream as AudioStreamOggVorbis).loop = true
+	# A track requested before the players existed (the fallback hub is added deferred) lands now.
+	_music_player.stream = podium_stream if music_track == TRACK_PODIUM else _menu_stream
 
 
 ## Quits leave no stream playing, so the resources are free at shutdown.
@@ -204,6 +217,27 @@ func count_of(sound: StringName) -> int:
 
 func start_music() -> void:
 	if _music_player != null and not _music_player.playing and is_inside_tree() and has_output():
+		_music_player.play()
+
+
+## Winning scene anthem. Replaces whatever music is running.
+func play_podium_music() -> void:
+	_set_track(TRACK_PODIUM)
+
+
+## Back to the menu loop. start_music() does not restart a track that is already playing, so every
+## exit from the podium must come through here or the anthem would carry on into the next race.
+func play_menu_music() -> void:
+	_set_track(TRACK_MENU)
+
+
+func _set_track(track: StringName) -> void:
+	music_track = track
+	if _music_player == null:
+		return
+	_music_player.stop()
+	_music_player.stream = podium_stream if track == TRACK_PODIUM else _menu_stream
+	if is_inside_tree() and has_output():
 		_music_player.play()
 
 
