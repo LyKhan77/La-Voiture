@@ -102,6 +102,13 @@ func _enter_tree() -> void:
 	_build_curve()
 
 
+func _ready() -> void:
+	# The ribbon's own _ready has already rebuilt the sample table; the pit lane reads it from here.
+	var pit = get_node_or_null("PitLane")
+	if pit != null:
+		pit.build(ribbon)
+
+
 ## The circuit's road, as the sim and the radar read it.
 func ribbon_node() -> RibbonScript:
 	return ribbon

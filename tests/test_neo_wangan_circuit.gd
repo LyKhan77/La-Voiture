@@ -11,6 +11,7 @@ const CircuitScene := preload("res://scenes/race_world/neo_wangan_circuit.tscn")
 const ApexScene := preload("res://scenes/race_world/track_circuit.tscn")
 const BuilderScript := preload("res://scripts/world/neo_wangan_circuit_builder.gd")
 const RibbonScript := preload("res://scripts/car/track_ribbon.gd")
+const PitScript := preload("res://scripts/world/neo_wangan_pit_complex.gd")
 
 const TARGET_LENGTH_M: float = 3150.0
 const LENGTH_TOLERANCE_M: float = 25.0
@@ -44,6 +45,7 @@ func _run() -> void:
 	_test_turns()
 	_test_elevation()
 	_test_road_surface()
+	_test_pit_connection()
 	_test_apex_preserved()
 	print("%d assertions, %d failure(s)" % [assertions, failures])
 	print("NEO-WANGAN CIRCUIT: %s" % ("PASS" if failures == 0 else "%d FAILURES" % failures))
@@ -131,6 +133,70 @@ func _test_road_surface() -> void:
 			and (material as ShaderMaterial).shader.resource_path.ends_with("road_asphalt.gdshader")
 	check(width_ok and surface_ok and road != null,
 		"#W8 the racing surface is %.1f m wide and wears the road_asphalt.gdshader (wet gloss and puddles)" % (ribbon.road_half_width_m * 2.0))
+
+
+## Task 3: the FIA pit connection — entry, fast lane, ten boxes, wall with an attenuator, and a
+## pit exit that runs behind a solid blend line past Turn 1.
+func _test_pit_connection() -> void:
+	var pit = circuit.get_node_or_null("PitLane")
+	if pit == null:
+		check(false, "#W10 the circuit carries a PitLane complex")
+		return
+	var entry: Area3D = pit.get_node_or_null("PitEntryTrigger")
+	var exit: Area3D = pit.get_node_or_null("PitExitTrigger")
+	var entry_s: float = float(entry.get_meta(&"arc_s", -1.0)) if entry != null else -1.0
+	var entry_lateral: float = float(entry.get_meta(&"lateral_m", 0.0)) if entry != null else 0.0
+	var exit_s: float = float(exit.get_meta(&"arc_s", -1.0)) if exit != null else -1.0
+	var lane_length: float = fposmod(exit_s - entry_s, ribbon.length_m)
+	check(entry != null and exit != null and absf(entry_s - (ribbon.length_m - 75.0)) <= 0.5 \
+			and absf(entry_lateral - 5.2) < 0.001 and absf(lane_length - PitScript.LANE_LENGTH_M) < 0.5,
+		"#W10 Pit Entry sits %.0f m before the line at +%.1f m on the right, and the lane runs %.1f m to Pit Exit" % [ribbon.length_m - entry_s, entry_lateral, lane_length])
+
+	var stalls: Node3D = pit.get_node_or_null("Stalls")
+	var pitches: Array[float] = []
+	var names_ok: bool = stalls != null and stalls.get_child_count() == 10
+	var lateral_ok: bool = stalls != null and stalls.get_child_count() == 10
+	for index: int in range(stalls.get_child_count() if stalls != null else 0):
+		var marker: Marker3D = stalls.get_child(index) as Marker3D
+		names_ok = names_ok and marker != null and marker.name == "Socket_PitStall_%d" % index
+		pitches.append(float(pit.stalls[index]["s"]))
+		lateral_ok = lateral_ok and absf(float(pit.stalls[index]["lateral"]) - PitScript.BOX_LATERAL_M) < 0.001
+	var pitch_ok: bool = true
+	for index: int in range(1, pitches.size()):
+		pitch_ok = pitch_ok and absf(fposmod(pitches[index] - pitches[index - 1], ribbon.length_m) - 12.0) < 0.01
+	check(names_ok and lateral_ok and pitch_ok,
+		"#W11 ten team boxes Socket_PitStall_0..9 stand 12 m apart outside the fast lane at +%.1f m" % PitScript.BOX_LATERAL_M)
+
+	var wall: MeshInstance3D = pit.get_node_or_null("PitWall")
+	var cushion: MeshInstance3D = pit.get_node_or_null("CrashCushion")
+	var cushion_color: Color = cushion.get_meta(&"attenuator_color", Color.BLACK) if cushion != null else Color.BLACK
+	var orange: bool = cushion_color.r > 0.8 and cushion_color.g > 0.2 and cushion_color.g < 0.6 and cushion_color.b < 0.1
+	check(wall != null and cushion != null and orange and bool(cushion.get_meta(&"fia_standard", false)) \
+			and is_equal_approx(PitScript.WALL_HEIGHT_M, 1.2) and is_equal_approx(PitScript.FAST_LANE_WIDTH_M, 4.5),
+		"#W12 a 1.2 m pit wall carries an orange FIA impact attenuator on its nose, and the fast lane is exactly 4.5 m")
+
+	# Clearance: the car path never comes within 1.0 m of the wall, and a passing car keeps 2.4 m
+	# (FIA racing room) from a car boxed at the stall lateral.
+	var tightest_wall: float = INF
+	var u: float = PitScript.WALL_START_U
+	while u <= PitScript.LANE_LENGTH_M:
+		var car: float = PitScript.lane_lateral_at(u)
+		tightest_wall = minf(tightest_wall, car - 1.0 - (PitScript.PIT_WALL_M + PitScript.WALL_HALF_THICKNESS_M))
+		u += 1.0
+	var box_gap: float = PitScript.BOX_LATERAL_M - 1.0 - (PitScript.FAST_LANE_M + 1.0)
+	check(tightest_wall >= 1.0 and box_gap >= 2.4,
+		"#W13 the pit wall leaves %.2f m to a car on the fast lane and a boxed car leaves %.2f m to one passing (2.4 m FIA racing room)" % [tightest_wall, box_gap])
+
+	var blend: MeshInstance3D = pit.get_node_or_null("BlendLine")
+	var ramp: Node3D = pit.get_node_or_null("BypassRamp")
+	var blend_m: float = float(blend.get_meta(&"blend_line_m", 0.0)) if blend != null else 0.0
+	var ramp_m: float = float(ramp.get_meta(&"length_m", 0.0)) if ramp != null else 0.0
+	var merge_s: float = float(ramp.get_meta(&"merge_s", 0.0)) if ramp != null else 0.0
+	var t1_apex: float = float(circuit.turns[0]["apex_s"][0])
+	check(blend != null and ramp != null and is_equal_approx(blend_m, 80.0) and is_equal_approx(ramp_m, 65.0) and merge_s > t1_apex,
+		"#W14 an 80 m solid blend line guards a 65 m bypass ramp that rejoins %.0f m past Turn 1's %.0f m apex" % [merge_s - t1_apex, t1_apex])
+	check(is_equal_approx(PitScript.SPEED_LIMIT_MPS, 80.0 / 3.6) and pit.sim_layout()["entry_s"] == PitScript.ENTRY_S,
+		"#W15 the lane is limited to 80 km/h and hands the sim its own entry, exit and lateral layout")
 
 
 ## The Apex Ring spline is a different scene and must be byte-for-byte where it was.
