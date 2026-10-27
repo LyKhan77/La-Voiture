@@ -47,6 +47,14 @@ var glass: MeshInstance3D
 var floor_count: int = 2
 
 
+@export var building_length_m: float = LENGTH_M
+@export_range(1, 20) var bay_count: int = PitLaneScript.TEAM_COUNT
+@export var bay_stride_m: float = PitLaneScript.STALL_PITCH_M
+@export var front_x: float = FRONT_X
+@export var garage_top_y: float = GARAGE_TOP_Y
+@export var accent_color: Color = CONCRETE_COLOR
+
+
 func _ready() -> void:
 	if structure == null:
 		build()
@@ -67,67 +75,67 @@ func build() -> void:
 
 ## One roll-up shutter drum and a half-lowered door per garage, striped in the team colour.
 func _build_shutters(batch: MeshBatchScript, cel: ShaderMaterial) -> void:
-	var door_x: float = FRONT_X - 0.1
-	for team: int in range(PitLaneScript.TEAM_COUNT):
-		var z: float = -(PitLaneScript.STALL_FIRST_S + PitLaneScript.STALL_PITCH_M * float(team) - CENTRE_S)
-		var drum := Transform3D(Basis(Vector3.RIGHT, PI * 0.5), Vector3(door_x, PitLaneScript.GARAGE_HEIGHT_M - 1.15, z - DOOR_WIDTH_M * 0.5))
+	var door_x: float = front_x - 0.1
+	for team: int in range(bay_count):
+		var z: float = -bay_stride_m * (float(team) - float(bay_count - 1) * 0.5)
+		var drum := Transform3D(Basis(Vector3.RIGHT, PI * 0.5), Vector3(door_x, (garage_top_y - 0.3) - 1.15, z - DOOR_WIDTH_M * 0.5))
 		batch.cylinder(cel, CONCRETE_DARK_COLOR, drum, 0.2, 0.2, DOOR_WIDTH_M, 10)
-		batch.box(cel, Liveries.color_for(team), Transform3D(Basis.IDENTITY, Vector3(door_x, PitLaneScript.GARAGE_HEIGHT_M - 1.45, z)), Vector3(0.08, 0.2, DOOR_WIDTH_M))
+		batch.box(cel, Liveries.color_for(team), Transform3D(Basis.IDENTITY, Vector3(door_x, (garage_top_y - 0.3) - 1.45, z)), Vector3(0.08, 0.2, DOOR_WIDTH_M))
 		for slat: int in range(SLAT_COUNT):
-			var y: float = PitLaneScript.GARAGE_HEIGHT_M - 1.7 - 0.14 * float(slat)
+			var y: float = (garage_top_y - 0.3) - 1.7 - 0.14 * float(slat)
 			batch.box(cel, SHUTTER_COLORS[slat % 2], Transform3D(Basis.IDENTITY, Vector3(door_x, y, z)), Vector3(0.06, 0.13, DOOR_WIDTH_M - 0.2))
 
 
 ## The lounge block, sill and header bands and the glass mullions.
 func _build_lounge(batch: MeshBatchScript, cel: ShaderMaterial) -> void:
-	var centre_x: float = FRONT_X + 0.5 + DEPTH_M * 0.5
-	var centre_y: float = GARAGE_TOP_Y + LOUNGE_HEIGHT_M * 0.5
-	batch.box(cel, INTERIOR_COLOR, Transform3D(Basis.IDENTITY, Vector3(centre_x, centre_y, 0.0)), Vector3(DEPTH_M, LOUNGE_HEIGHT_M, LENGTH_M))
-	var front_x: float = FRONT_X + 0.5
-	batch.box(cel, CONCRETE_COLOR, Transform3D(Basis.IDENTITY, Vector3(front_x - 0.1, GARAGE_TOP_Y + 0.35, 0.0)), Vector3(0.5, 0.7, LENGTH_M))
-	batch.box(cel, CONCRETE_COLOR, Transform3D(Basis.IDENTITY, Vector3(front_x - 0.1, GARAGE_TOP_Y + LOUNGE_HEIGHT_M - 0.3, 0.0)), Vector3(0.5, 0.6, LENGTH_M))
-	var mullions: int = roundi(LENGTH_M / MULLION_STEP_M)
+	var centre_x: float = front_x + 0.5 + DEPTH_M * 0.5
+	var centre_y: float = garage_top_y + LOUNGE_HEIGHT_M * 0.5
+	batch.box(cel, INTERIOR_COLOR, Transform3D(Basis.IDENTITY, Vector3(centre_x, centre_y, 0.0)), Vector3(DEPTH_M, LOUNGE_HEIGHT_M, building_length_m))
+	var front_x: float = front_x + 0.5
+	batch.box(cel, accent_color, Transform3D(Basis.IDENTITY, Vector3(front_x - 0.1, garage_top_y + 0.35, 0.0)), Vector3(0.5, 0.7, building_length_m))
+	batch.box(cel, accent_color, Transform3D(Basis.IDENTITY, Vector3(front_x - 0.1, garage_top_y + LOUNGE_HEIGHT_M - 0.3, 0.0)), Vector3(0.5, 0.6, building_length_m))
+	var mullions: int = roundi(building_length_m / MULLION_STEP_M)
 	for index: int in range(mullions + 1):
-		var z: float = -LENGTH_M * 0.5 + LENGTH_M * float(index) / float(mullions)
+		var z: float = -building_length_m * 0.5 + building_length_m * float(index) / float(mullions)
 		batch.box(cel, STEEL_COLOR, Transform3D(Basis.IDENTITY, Vector3(front_x - 0.15, centre_y, z)), Vector3(0.18, LOUNGE_HEIGHT_M - 1.2, 0.14))
 	# Lit office windows on the rear face, dim at night.
 	var windows: int = 14
 	for index: int in range(windows):
-		var z: float = -LENGTH_M * 0.5 + LENGTH_M * (float(index) + 0.5) / float(windows)
-		batch.box(cel, Color(1.0, 0.82, 0.5, WINDOW_GLOW_ALPHA), Transform3D(Basis.IDENTITY, Vector3(FRONT_X + 0.5 + DEPTH_M + 0.02, centre_y, z)), Vector3(0.05, 1.4, LENGTH_M / float(windows) - 1.6))
+		var z: float = -building_length_m * 0.5 + building_length_m * (float(index) + 0.5) / float(windows)
+		batch.box(cel, Color(1.0, 0.82, 0.5, WINDOW_GLOW_ALPHA), Transform3D(Basis.IDENTITY, Vector3(front_x + 0.5 + DEPTH_M + 0.02, centre_y, z)), Vector3(0.05, 1.4, building_length_m / float(windows) - 1.6))
 
 
 ## Observation terrace in front of the lounge, with a rail.
 func _build_terrace(batch: MeshBatchScript, cel: ShaderMaterial) -> void:
-	var width: float = FRONT_X + 0.5 - TERRACE_FRONT_X
-	batch.box(cel, CONCRETE_DARK_COLOR, Transform3D(Basis.IDENTITY, Vector3(TERRACE_FRONT_X + width * 0.5, GARAGE_TOP_Y + 0.06, 0.0)), Vector3(width, 0.12, LENGTH_M))
-	var rail_x: float = TERRACE_FRONT_X + 0.06
-	var posts: int = roundi(LENGTH_M / 2.8)
+	var width: float = front_x + 0.5 - (front_x - 1.1)
+	batch.box(cel, CONCRETE_DARK_COLOR, Transform3D(Basis.IDENTITY, Vector3((front_x - 1.1) + width * 0.5, garage_top_y + 0.06, 0.0)), Vector3(width, 0.12, building_length_m))
+	var rail_x: float = (front_x - 1.1) + 0.06
+	var posts: int = roundi(building_length_m / 2.8)
 	for index: int in range(posts + 1):
-		var z: float = -LENGTH_M * 0.5 + LENGTH_M * float(index) / float(posts)
-		batch.box(cel, STEEL_COLOR, Transform3D(Basis.IDENTITY, Vector3(rail_x, GARAGE_TOP_Y + 0.62, z)), Vector3(0.06, 1.0, 0.06))
-	batch.box(cel, STEEL_COLOR, Transform3D(Basis.IDENTITY, Vector3(rail_x, GARAGE_TOP_Y + 1.12, 0.0)), Vector3(0.07, 0.07, LENGTH_M))
+		var z: float = -building_length_m * 0.5 + building_length_m * float(index) / float(posts)
+		batch.box(cel, STEEL_COLOR, Transform3D(Basis.IDENTITY, Vector3(rail_x, garage_top_y + 0.62, z)), Vector3(0.06, 1.0, 0.06))
+	batch.box(cel, STEEL_COLOR, Transform3D(Basis.IDENTITY, Vector3(rail_x, garage_top_y + 1.12, 0.0)), Vector3(0.07, 0.07, building_length_m))
 
 
 ## Roof slab that doubles as the canopy over the terrace, held by slim columns.
 func _build_canopy(batch: MeshBatchScript, cel: ShaderMaterial) -> void:
-	var roof_y: float = GARAGE_TOP_Y + LOUNGE_HEIGHT_M + ROOF_THICKNESS_M * 0.5
-	var back_x: float = FRONT_X + 0.5 + DEPTH_M + 0.3
-	batch.box(cel, STEEL_COLOR, Transform3D(Basis.IDENTITY, Vector3((CANOPY_FRONT_X + back_x) * 0.5, roof_y, 0.0)), Vector3(back_x - CANOPY_FRONT_X, ROOF_THICKNESS_M, LENGTH_M + 1.0))
-	batch.box(cel, CONCRETE_COLOR, Transform3D(Basis.IDENTITY, Vector3(CANOPY_FRONT_X + 0.1, roof_y + 0.01, 0.0)), Vector3(0.22, ROOF_THICKNESS_M + 0.2, LENGTH_M + 1.0))
-	var columns: int = roundi(LENGTH_M / COLUMN_STEP_M)
+	var roof_y: float = garage_top_y + LOUNGE_HEIGHT_M + ROOF_THICKNESS_M * 0.5
+	var back_x: float = front_x + 0.5 + DEPTH_M + 0.3
+	batch.box(cel, STEEL_COLOR, Transform3D(Basis.IDENTITY, Vector3(((front_x - 2.0) + back_x) * 0.5, roof_y, 0.0)), Vector3(back_x - (front_x - 2.0), ROOF_THICKNESS_M, building_length_m + 1.0))
+	batch.box(cel, accent_color, Transform3D(Basis.IDENTITY, Vector3((front_x - 2.0) + 0.1, roof_y + 0.01, 0.0)), Vector3(0.22, ROOF_THICKNESS_M + 0.2, building_length_m + 1.0))
+	var columns: int = roundi(building_length_m / COLUMN_STEP_M)
 	for index: int in range(columns + 1):
-		var z: float = -LENGTH_M * 0.5 + LENGTH_M * float(index) / float(columns)
+		var z: float = -building_length_m * 0.5 + building_length_m * float(index) / float(columns)
 		var height: float = LOUNGE_HEIGHT_M
-		batch.box(cel, STEEL_COLOR, Transform3D(Basis.IDENTITY, Vector3(TERRACE_FRONT_X + 0.3, GARAGE_TOP_Y + height * 0.5, z)), Vector3(0.3, height, 0.3))
+		batch.box(cel, STEEL_COLOR, Transform3D(Basis.IDENTITY, Vector3((front_x - 1.1) + 0.3, garage_top_y + height * 0.5, z)), Vector3(0.3, height, 0.3))
 
 
 ## Flag poles with national colours, plus a few service units on the roof.
 func _build_roof_top(batch: MeshBatchScript, cel: ShaderMaterial) -> void:
-	var roof_top: float = GARAGE_TOP_Y + LOUNGE_HEIGHT_M + ROOF_THICKNESS_M
-	var pole_x: float = FRONT_X + DEPTH_M - 0.5
+	var roof_top: float = garage_top_y + LOUNGE_HEIGHT_M + ROOF_THICKNESS_M
+	var pole_x: float = front_x + DEPTH_M - 0.5
 	for index: int in range(FLAG_COUNT):
-		var z: float = -LENGTH_M * 0.4 + LENGTH_M * 0.8 * float(index) / float(FLAG_COUNT - 1)
+		var z: float = -building_length_m * 0.4 + building_length_m * 0.8 * float(index) / float(FLAG_COUNT - 1)
 		batch.cylinder(cel, STEEL_COLOR, Transform3D(Basis.IDENTITY, Vector3(pole_x, roof_top, z)), 0.07, 0.05, POLE_HEIGHT_M, 6)
 		var top: float = roof_top + POLE_HEIGHT_M
 		var tip := Vector3(pole_x, top - 0.1, z)
@@ -138,17 +146,17 @@ func _build_roof_top(batch: MeshBatchScript, cel: ShaderMaterial) -> void:
 		batch.quad(cel, FLAG_COLORS[index % FLAG_COLORS.size()], flag_a, flag_b, flag_c, flag_d, Vector3.LEFT)
 		batch.quad(cel, FLAG_COLORS[index % FLAG_COLORS.size()], flag_a, flag_b, flag_c, flag_d, Vector3.RIGHT)
 	for index: int in range(8):
-		var z: float = -LENGTH_M * 0.5 + LENGTH_M * (float(index) + 0.5) / 8.0
-		batch.box(cel, CONCRETE_DARK_COLOR, Transform3D(Basis.IDENTITY, Vector3(FRONT_X + 6.0, roof_top + 0.5, z)), Vector3(2.4, 1.0, 1.6))
+		var z: float = -building_length_m * 0.5 + building_length_m * (float(index) + 0.5) / 8.0
+		batch.box(cel, CONCRETE_DARK_COLOR, Transform3D(Basis.IDENTITY, Vector3(front_x + 6.0, roof_top + 0.5, z)), Vector3(2.4, 1.0, 1.6))
 
 
 ## One tinted pane the length of the lounge, in front of the interior.
 func _glass_mesh() -> ArrayMesh:
 	var batch := MeshBatchScript.new()
-	var x: float = FRONT_X + 0.5 - 0.05
-	var y0: float = GARAGE_TOP_Y + 0.7
-	var y1: float = GARAGE_TOP_Y + LOUNGE_HEIGHT_M - 0.6
-	var z: float = LENGTH_M * 0.5
+	var x: float = front_x + 0.5 - 0.05
+	var y0: float = garage_top_y + 0.7
+	var y1: float = garage_top_y + LOUNGE_HEIGHT_M - 0.6
+	var z: float = building_length_m * 0.5
 	batch.quad(ToonMaterials.glass(), Color.WHITE, Vector3(x, y0, -z), Vector3(x, y1, -z), Vector3(x, y1, z), Vector3(x, y0, z), Vector3.LEFT)
 	return batch.commit()
 

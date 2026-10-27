@@ -23,6 +23,10 @@ const MeshBatchScript := preload("res://scripts/world/mesh_batch.gd")
 const ApexPitScript := preload("res://scripts/world/pit_lane_complex.gd")
 const ToonMaterials := preload("res://scripts/world/toon_materials.gd")
 const RoadShader := preload("res://shaders/road_asphalt.gdshader")
+const PitBuildingKit := preload("res://scripts/world/paddock/pit_building.gd")
+const GrandstandKit := preload("res://scripts/world/paddock/main_grandstand.gd")
+const ControlTowerKit := preload("res://scripts/world/paddock/race_control_tower.gd")
+const Liveries := preload("res://scripts/car/team_liveries.gd")
 
 ## The circuit's homologated lap (see NeoWanganCircuitBuilder.LENGTH_M; repeated here so this
 ## script stays free of a circular preload with the builder).
@@ -128,6 +132,7 @@ func build(p_ribbon: TrackRibbonScript) -> void:
 	_build_pit_wall()
 	_build_crash_cushion()
 	_build_garages()
+	_build_shared_paddock()
 	_build_triggers()
 	_build_bypass_ramp()
 	# Garage glass and LED strips are glow-masked vertices: light them like the city around them.
@@ -362,9 +367,13 @@ func _build_garages() -> void:
 		var pose: Transform3D = get_pit_transform(u, GARAGE_FRONT_M + GARAGE_DEPTH_M * 0.5)
 		var basis: Basis = pose.basis
 		var centre: Vector3 = pose.origin + Vector3.UP * GARAGE_HEIGHT_M * 0.5
-		batch.box(shell, GARAGE_SHELL, Transform3D(basis, centre), Vector3(GARAGE_DEPTH_M, GARAGE_HEIGHT_M, GARAGE_WIDTH_M))
+		# Open garage mouth; side walls, rear wall and roof leave equipment visible.
+		for side: float in [-1.0, 1.0]:
+			batch.box(shell, GARAGE_SHELL, Transform3D(basis, centre + basis.z * side * GARAGE_WIDTH_M * 0.5), Vector3(GARAGE_DEPTH_M, GARAGE_HEIGHT_M, 0.22))
+		batch.box(shell, GARAGE_SHELL, Transform3D(basis, centre + basis.x * GARAGE_DEPTH_M * 0.5), Vector3(0.22, GARAGE_HEIGHT_M, GARAGE_WIDTH_M))
+		batch.box(shell, GARAGE_SHELL, Transform3D(basis, centre + Vector3.UP * GARAGE_HEIGHT_M * 0.5), Vector3(GARAGE_DEPTH_M, 0.2, GARAGE_WIDTH_M))
 		var front: Vector3 = get_pit_transform(u, GARAGE_FRONT_M - 0.06).origin + Vector3.UP * GARAGE_HEIGHT_M * 0.52
-		batch.box(shell, GARAGE_GLASS, Transform3D(basis, front), Vector3(0.12, GARAGE_HEIGHT_M * 0.42, GARAGE_WIDTH_M - 1.6))
+		batch.box(shell, GARAGE_GLASS, Transform3D(basis, front + Vector3.UP * 1.5), Vector3(0.12, 0.3, GARAGE_WIDTH_M - 1.6))
 		var led: Vector3 = get_pit_transform(u, GARAGE_FRONT_M - 0.14).origin + Vector3.UP * (GARAGE_HEIGHT_M - 0.5)
 		batch.box(shell, GARAGE_LED, Transform3D(basis, led), Vector3(0.1, 0.28, GARAGE_WIDTH_M - 2.0))
 		var garage := Node3D.new()
@@ -376,6 +385,66 @@ func _build_garages() -> void:
 	mesh.name = "PitGarages"
 	mesh.mesh = batch.commit()
 	add_child(mesh)
+
+
+func _build_shared_paddock() -> void:
+	var centre_u: float = STALL_FIRST_OFFSET_M + STALL_PITCH_M * float(STALL_COUNT - 1) * 0.5
+	var pose: Transform3D = get_pit_transform(centre_u, 0.0)
+	var building := PitBuildingKit.new()
+	building.name = "PitBuilding"
+	building.building_length_m = 124.0
+	building.bay_count = STALL_COUNT
+	building.bay_stride_m = STALL_PITCH_M
+	building.front_x = 15.5
+	building.garage_top_y = 4.7
+	building.accent_color = Color("#00f0ff")
+	building.transform = pose
+	add_child(building)
+	var stand := GrandstandKit.new()
+	stand.name = "MainGrandstand"
+	stand.stand_length_m = 140.0
+	stand.accent_color = building.accent_color
+	stand.transform = pose
+	# Shared stand front is local -19 m; shift to the street's opposite edge at -21.5 m.
+	stand.position -= pose.basis.x * 2.5
+	add_child(stand)
+	var tower := ControlTowerKit.new()
+	tower.name = "RaceControlTower"
+	tower.accent_color = building.accent_color
+	tower.transform = pose
+	tower.position += pose.basis.z * -76.0
+	add_child(tower)
+	var props_source := ApexPitScript.new()
+	var props := MeshBatchScript.new()
+	props_source._garage_props(props, ToonMaterials.vertex_colored(false), Liveries.color_for(0))
+	props_source.free()
+	var equipment := MultiMesh.new()
+	equipment.transform_format = MultiMesh.TRANSFORM_3D
+	equipment.mesh = props.commit()
+	equipment.instance_count = STALL_COUNT
+	for index: int in range(STALL_COUNT):
+		var garage_pose: Transform3D = garages[index].transform
+		garage_pose.basis = garage_pose.basis.scaled(Vector3(1.0, 1.0, 0.9))
+		equipment.set_instance_transform(index, garage_pose)
+	var gear := MultiMeshInstance3D.new()
+	gear.name = "GarageEquipment"
+	gear.multimesh = equipment
+	add_child(gear)
+	var fence := MeshBatchScript.new()
+	var material: Material = ToonMaterials.vertex_colored(false)
+	for side: float in [-1.0, 1.0]:
+		var previous := Vector3.ZERO
+		for index: int in range(49):
+			var at: Vector3 = get_pit_transform(-40.0 + float(index) * 5.0, side * 6.5).origin
+			fence.box(material, Color("#626c83"), Transform3D(Basis.IDENTITY, at + Vector3.UP * 2.0), Vector3(0.08, 4.0, 0.08))
+			if index > 0:
+				for height: float in [1.5, 2.3, 3.1, 4.0]:
+					fence.strut(material, Color("#626c83"), previous + Vector3.UP * height, at + Vector3.UP * height, 0.025)
+			previous = at
+	var catch_fence := MeshInstance3D.new()
+	catch_fence.name = "CatchFence"
+	catch_fence.mesh = fence.commit()
+	add_child(catch_fence)
 
 
 func _build_triggers() -> void:

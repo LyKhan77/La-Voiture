@@ -40,6 +40,9 @@ var glass: MeshInstance3D
 var floor_count: int = FLOOR_TOPS_M.size()
 
 
+@export var accent_color: Color = ACCENT_YELLOW
+
+
 func _ready() -> void:
 	if structure == null:
 		build()
@@ -81,7 +84,7 @@ func _timing_floor(batch: MeshBatchScript, cel: ShaderMaterial, x: float) -> voi
 	for index: int in range(5):
 		var z: float = -TIMING_SIZE.y * 0.5 + TIMING_SIZE.y * (float(index) + 0.5) / 5.0
 		batch.box(cel, SLIT_COLOR, Transform3D(Basis.IDENTITY, Vector3(track_face - 0.04, bottom + height * 0.55, z)), Vector3(0.12, 1.1, 2.2))
-	batch.box(cel, ACCENT_YELLOW, Transform3D(Basis.IDENTITY, Vector3(track_face - 0.06, bottom + 0.25, 0.0)), Vector3(0.14, 0.3, TIMING_SIZE.y))
+	batch.box(cel, accent_color, Transform3D(Basis.IDENTITY, Vector3(track_face - 0.06, bottom + 0.25, 0.0)), Vector3(0.14, 0.3, TIMING_SIZE.y))
 
 
 ## Third floor: glass on all four sides between concrete corner piers, under the roof slab.
@@ -140,7 +143,7 @@ func _add_sign(x: float) -> void:
 	label.text = "RACE CONTROL"
 	label.font_size = 96
 	label.pixel_size = 0.0075
-	label.modulate = Color("#ffd400")
+	label.modulate = accent_color
 	label.outline_size = 8
 	label.outline_modulate = Color("#14161c")
 	label.position = Vector3(x - TIMING_OVERHANG_M * 0.5 - TIMING_SIZE.x * 0.5 - 0.2, FLOOR_TOPS_M[0] + (FLOOR_TOPS_M[1] - FLOOR_TOPS_M[0]) * 0.18, 0.0)
