@@ -30,6 +30,8 @@ enum CircuitType { GRAND_PRIX, SPRINT }
 @export var preview_image_path: String = ""
 ## 0..1 chance of rain in this round's weekend weather, used by Career Mode.
 @export var rain_probability: float = 0.0
+## True for a street circuit run under floodlights: the setup screen defaults the time chip to night.
+@export var night_race: bool = false
 ## The round's fastest race lap in seconds; 0 until a lap has been set.
 @export var lap_record_s: float = 0.0
 ## One line of colour for the setup card and the career calendar.

@@ -103,6 +103,7 @@ func build(p_ribbon: RibbonScript, p_circuit) -> void:
 	circuit = p_circuit
 	_build_ground()
 	_build_barriers()
+	_build_kerbs()
 	_build_streetlights()
 	_build_gantry_signs()
 	_build_tunnel()
@@ -253,6 +254,34 @@ func _in_pit_gap(s: float) -> bool:
 	var from: float = 3050.0
 	var until: float = 150.0
 	return fposmod(s - from, ribbon.length_m) <= fposmod(until - from, ribbon.length_m)
+
+
+# --- kerbs -------------------------------------------------------------------------------------
+
+## Low street-circuit kerbs on the inside of every numbered turn: 1.2 m red/white blocks standing
+## 30 mm proud of the asphalt, one MultiMesh per colour for all twelve corners.
+func _build_kerbs() -> void:
+	var reds: Array[Transform3D] = []
+	var whites: Array[Transform3D] = []
+	if circuit == null or not ("turns" in circuit):
+		return
+	for turn: Dictionary in circuit.turns:
+		var direction: int = int(turn["direction"])
+		var lateral: float = -direction * (float(ribbon.road_half_width_m) - 0.65)
+		var half_span: float = float(turn["span_m"]) * 0.5
+		var apex: float = float(turn["apex_s"][0]) if not (turn["apex_s"] as Array).is_empty() else float(turn["s"])
+		var count: int = maxi(4, int(half_span * 2.0 / 2.4))
+		for index: int in range(count):
+			var at: float = fposmod(apex - half_span + 2.4 * float(index), ribbon.length_m)
+			var pose: Transform3D = RibbonGeometry.box_transform(ribbon, at, lateral, Vector3(1.25, 0.06, 2.2), 0.0)
+			if index % 2 == 0:
+				reds.append(pose)
+			else:
+				whites.append(pose)
+	var mesh := BoxMesh.new()
+	mesh.size = Vector3.ONE
+	_multimesh("KerbsRed", mesh, reds, ToonMaterials.make(Color("#d9232e")))
+	_multimesh("KerbsWhite", mesh, whites, ToonMaterials.make(Color("#f4f5f7")))
 
 
 # --- streetlights --------------------------------------------------------------------------------

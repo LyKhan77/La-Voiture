@@ -257,7 +257,7 @@ func _arrow(node_name: String, text: String, at: Vector2) -> Button:
 	StreetStyle.skin(button, 3, Vector2(4.0, 4.0), 22)
 	button.position = at
 	button.size = Vector2(54.0, 84.0)
-	button.focus_mode = Control.FOCUS_NONE
+	button.focus_mode = Control.FOCUS_ALL # the calendar is reachable from the keyboard too
 	stage.add_child(button)
 	return button
 
@@ -351,7 +351,10 @@ func _build_actions() -> void:
 
 
 func _focus_ring() -> void:
-	var chain: Array[Control] = [lap_select.first_chip(), weather_select.first_chip(), time_select.first_chip(), back_button, continue_button]
+	var chain: Array[Control] = [
+		track_prev_button, track_next_button,
+		lap_select.first_chip(), weather_select.first_chip(), time_select.first_chip(), back_button, continue_button,
+	]
 	for index: int in range(chain.size()):
 		chain[index].focus_next = chain[(index + 1) % chain.size()].get_path()
 		chain[index].focus_previous = chain[(index + chain.size() - 1) % chain.size()].get_path()
@@ -438,6 +441,9 @@ func _show_circuit(selected: CircuitDataScript) -> void:
 	circuit_length_label.text = selected.length_label()
 	circuit_turns_label.text = "%d TURNS" % selected.turns_count
 	map_tag.text = "CIRCUIT  //  %s" % selected.display_name.to_upper()
+	if selected.night_race and config.time_of_day != 2:
+		# A floodlit street round opens on the night chip; the player can still change it.
+		time_select.press(2)
 	radar.load_circuit(selected)
 	var stats: Dictionary = radar.stats()
 	stat_length.text = "%.2f KM" % (float(stats["length_m"]) / 1000.0)

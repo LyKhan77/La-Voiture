@@ -13,6 +13,8 @@ const BuilderScript := preload("res://scripts/world/neo_wangan_circuit_builder.g
 const RibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const PitScript := preload("res://scripts/world/neo_wangan_pit_complex.gd")
 const CircuitScript := preload("res://scripts/world/neo_wangan_circuit_builder.gd")
+const WorldScene := preload("res://scenes/race_weekend_world.tscn")
+const ConfigScript := preload("res://scripts/core/race_config_data.gd")
 
 const TARGET_LENGTH_M: float = 3150.0
 const LENGTH_TOLERANCE_M: float = 25.0
@@ -49,6 +51,7 @@ func _run() -> void:
 	_test_pit_connection()
 	_test_urban_set()
 	_test_apex_preserved()
+	await _test_race_weekend_integration()
 	print("%d assertions, %d failure(s)" % [assertions, failures])
 	print("NEO-WANGAN CIRCUIT: %s" % ("PASS" if failures == 0 else "%d FAILURES" % failures))
 	circuit.queue_free()
@@ -259,6 +262,74 @@ func _test_urban_set() -> void:
 		energy_after = (neon.material_override as StandardMaterial3D).emission_energy_multiplier
 	check(night and not is_equal_approx(energy_before, energy_after),
 		"#W20 the set carries a night sky and fog, and its neon breathes between frames (%.2f -> %.2f)" % [energy_before, energy_after])
+
+
+## Task 6: a race weekend on the street circuit. The world swaps its Apex nodes for Neo-Wangan's
+## own scene, keeps 20 cars, hands the sim the street pit layout and points the HUD radar at the
+## new ribbon.
+func _test_race_weekend_integration() -> void:
+	var config = ConfigScript.get_config()
+	config.selected_circuit_id = "neo_wangan"
+	config.total_laps = 3
+	var world = WorldScene.instantiate()
+	root.add_child(world)
+	world.set_physics_process(false)
+	var integrated: bool = world.active_circuit != null \
+		and world.active_circuit.circuit_id == "neo_wangan" \
+		and world.circuit_root != null \
+		and absf(world.ribbon.length_m - 3150.0) <= 25.0 \
+		and is_equal_approx(world.road_width_m, 11.5) \
+		and world.actors.size() == 20 \
+		and world.pit_lane.has_method("sim_layout") \
+		and is_equal_approx(float(world.race.pit_layout["entry_s"]), 3075.0) \
+		and is_equal_approx(float(world.race.pit_layout["stall_pitch_m"]), 12.0)
+	check(integrated,
+		"#W21 a Neo-Wangan race weekend loads the street scene: %.0f m ribbon, %.1f m wide, %d cars, and the sim pits on the street layout" % [world.ribbon.length_m, world.road_width_m, world.actors.size()])
+
+	var radar = world.hud.radar
+	var radar_ok: bool = radar.get("_ribbon") == world.ribbon and is_equal_approx(float(radar.get("_sim_length_m")), world.track.length)
+	var radar_points: PackedVector2Array = (radar.get_node("Track") as Line2D).points
+	check(radar_ok and radar_points.size() > 40,
+		"#W22 the HUD radar binds the active circuit's own ribbon and its %d-point 2D trace" % radar_points.size())
+
+	var ring: Vector3 = world.ribbon.get_point_at_offset(0.0, 0.0).origin
+	var grid_ok: bool = true
+	for actor in world.actors:
+		grid_ok = grid_ok and actor.global_position.distance_to(ring) < 400.0
+	check(grid_ok,
+		"#W23 all 20 GT3 cars line up on the street circuit's grid, around the start line")
+
+	for _frame: int in range(10):
+		world.step(1.0 / 60.0)
+	check(world.race.cars.size() == 20 and world.hud.radar != null,
+		"#W24 the weekend steps ten frames on the new circuit without losing a car or the radar")
+
+	# A full three-lap race with a box call: the street pit lane has to work for the AI too, not
+	# just for the geometry test. The sim runs every tick, so no frames are needed.
+	world.race.incidents_enabled = false
+	var target = world.race.cars[0]
+	var stops_before: int = target.stops
+	var requested: bool = world.request_pit(target.id)
+	var guard: int = 0
+	while not world.race.is_finished() and guard < 20000:
+		world.race.step()
+		guard += 1
+	var winner = world.race.standings()[0]
+	check(requested and world.race.is_finished() and target.stops > stops_before and target.finished_at >= 0.0 and winner.lap >= 3,
+		"#W25 a three-lap street race runs to the flag (%d cars finished, %d sim ticks), and a car that boxes is serviced in the 10-stall lane (%d stops)" % [
+			_count_finished(world.race), guard, target.stops - stops_before])
+
+	world.queue_free()
+	ConfigScript.reset()
+	await process_frame
+
+
+func _count_finished(race) -> int:
+	var finished: int = 0
+	for car in race.cars:
+		if car.finished_at >= 0.0:
+			finished += 1
+	return finished
 
 
 ## Draw calls and triangles of every visible mesh under `root`.

@@ -107,6 +107,9 @@ func _ready() -> void:
 	var pit = get_node_or_null("PitLane")
 	if pit != null:
 		pit.build(ribbon)
+	var environment = get_node_or_null("Environment")
+	if environment != null:
+		environment.build(ribbon, self)
 
 
 ## The circuit's road, as the sim and the radar read it.

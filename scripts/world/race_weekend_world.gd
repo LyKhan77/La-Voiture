@@ -29,6 +29,8 @@ const GantryScript := preload("res://scripts/world/start_gantry.gd")
 const WinningStudio := preload("res://scripts/ui/winning_scene.gd")
 const ConfigScript := preload("res://scripts/core/race_config_data.gd")
 const SettingsScript := preload("res://scripts/core/presentation_settings.gd")
+const CircuitRegistry := preload("res://scripts/core/circuit_calendar_registry.gd")
+const CircuitDataScript := preload("res://scripts/core/circuit_data.gd")
 
 const TIME_SCALES: Array[float] = [1.0, 2.0, 4.0, 8.0, 16.0]
 ## Engine and tyre voices stay on up to this time scale; faster than that they are just noise.
@@ -58,6 +60,11 @@ var time_scale: float = 1.0
 var _celebration_requested: bool = false
 
 var race_config: ConfigScript
+## The calendar round being raced, and the circuit scene that was swapped in for it (null on the
+## Apex Ring, whose track lives in this scene).
+var active_circuit: CircuitDataScript
+var circuit_root: Node3D
+var road_width_m: float = ROAD_WIDTH_M
 var pre_grid_hold: bool = false
 var grid_intro_progress: float = 0.0
 
@@ -65,9 +72,12 @@ var _tick_accumulator: float = 0.0
 var _chequered_clock_s: float = -1.0 # seconds since the flag fell, -1 until it does
 
 @onready var ribbon: RibbonScript = $TrackCircuit
-@onready var environment: EnvironmentScript = $Environment
+## The set and the pit lane are duck-typed: the Apex Ring ships its own (TrackEnvironmentBuilder,
+## PitLaneComplex) and a street circuit swaps in its own pair (NeoWanganEnvironment,
+## NeoWanganPitComplex). Both honour build/bind_world/update and the crew API.
+@onready var environment: Node = $Environment
 @onready var gantry: GantryScript = $StartGantry
-@onready var pit_lane: PitLaneScript = $PitLane
+@onready var pit_lane: Node = $PitLane
 @onready var choreographer: ChoreographerScript = $Choreographer
 @onready var camera_director: CameraDirectorScript = $CameraDirector
 @onready var vfx: RaceVfx = $Vfx
@@ -76,11 +86,13 @@ var _chequered_clock_s: float = -1.0 # seconds since the flag fell, -1 until it 
 
 
 func _ready() -> void:
+	var restart_circuit: String = ""
 	if not pending_restart.is_empty():
 		total_laps = int(pending_restart.total_laps)
 		race_seed = int(pending_restart.race_seed)
 		director_seed = int(pending_restart.director_seed)
 		weather_archetype = int(pending_restart.weather_archetype)
+		restart_circuit = String(pending_restart.get("circuit_id", ""))
 		pending_restart.clear()
 	if race_config == null:
 		race_config = ConfigScript.current
@@ -88,10 +100,12 @@ func _ready() -> void:
 		total_laps = race_config.total_laps
 		race_seed = race_config.race_seed
 		weather_archetype = race_config.weather_archetype(race_seed)
+	_install_circuit(restart_circuit)
 	$Sun.rotation_degrees = Vector3(-52.0, -35.0, 0.0)
-	_build_sky()
-	track = TrackScript.new(ribbon, ROAD_WIDTH_M)
-	race = RaceScript.new(track, total_laps, race_seed, weather_archetype)
+	if circuit_root == null:
+		_build_sky()
+	track = TrackScript.new(ribbon, road_width_m)
+	race = RaceScript.new(track, total_laps, race_seed, weather_archetype, 20, _pit_layout())
 	if race_config != null:
 		race_config.apply_to_race(race)
 	director = DirectorScript.new(director_seed)
@@ -99,8 +113,9 @@ func _ready() -> void:
 	director.light_lit.connect(_on_light_lit)
 	director.state_changed.connect(_on_director_state)
 	gantry.global_transform = ribbon.get_point_on_ribbon(0.0, 1)
-	pit_lane.build(ribbon, race.active_teams)
-	environment.build(ribbon, track.line)
+	if circuit_root == null:
+		pit_lane.build(ribbon, race.active_teams)
+		environment.build(ribbon, track.line)
 	environment.bind_world($WorldEnvironment, $Sun, camera)
 	choreographer.setup(pit_lane, ActorScript.WHEEL_SCENES)
 	for car: CarScript in race.cars:
@@ -145,6 +160,58 @@ func _update_grid_intro() -> void:
 	camera.global_position = above_grandstand.lerp(chase, progress)
 	camera.fov = lerpf(52.0, CameraDirectorScript.CHASE_FOV, progress)
 	camera.look_at(pose.origin - pose.basis.z * 6.0 + Vector3.UP * 0.9, Vector3.UP)
+
+## Loads the round's own circuit scene when it is not the Apex Ring, and points the world at its
+## ribbon, city set and pit lane. The Apex Ring keeps the nodes authored in race_weekend_world.tscn.
+func _install_circuit(override_id: String = "") -> void:
+	var id: String = override_id
+	if id == "" and race_config != null:
+		id = race_config.selected_circuit_id
+	if id == "":
+		id = CircuitRegistry.DEFAULT_CIRCUIT_ID
+	active_circuit = CircuitRegistry.get_circuit(id)
+	if active_circuit == null:
+		active_circuit = CircuitRegistry.get_circuit(CircuitRegistry.DEFAULT_CIRCUIT_ID)
+	if active_circuit == null or not active_circuit.is_playable() or active_circuit.circuit_id == CircuitRegistry.DEFAULT_CIRCUIT_ID:
+		road_width_m = ROAD_WIDTH_M
+		return
+	var packed := load(active_circuit.scene_path) as PackedScene
+	if packed == null:
+		push_warning("RaceWeekendWorld: cannot load %s, racing the Apex Ring" % active_circuit.scene_path)
+		return
+	var node := packed.instantiate() as Node3D
+	if node == null:
+		return
+	var street_ribbon := node.get_node_or_null("TrackRibbon") as RibbonScript
+	if street_ribbon == null:
+		node.queue_free()
+		return
+	var old_track: Node = $TrackCircuit
+	var old_environment: Node = $Environment
+	var old_pit: Node = $PitLane
+	add_child(node)
+	move_child(node, old_track.get_index())
+	ribbon = street_ribbon
+	road_width_m = ribbon.road_half_width_m * 2.0
+	var city_set: Node = node.get_node_or_null("Environment")
+	if city_set != null:
+		environment = city_set
+	var street_pit: Node = node.get_node_or_null("PitLane")
+	if street_pit != null:
+		pit_lane = street_pit
+	circuit_root = node
+	old_track.queue_free()
+	old_environment.queue_free()
+	old_pit.queue_free()
+
+
+## The pit lane layout this round is raced with (GtRace.default_pit_layout when the circuit does not
+## publish one, which is the Apex Ring's own 410 m lane).
+func _pit_layout() -> Dictionary:
+	if circuit_root != null and pit_lane != null and pit_lane.has_method("sim_layout"):
+		return pit_lane.call("sim_layout")
+	return RaceScript.default_pit_layout()
+
 
 func actor_of(car_id: int) -> ActorScript:
 	for actor: ActorScript in actors:
@@ -208,8 +275,9 @@ func step(delta: float) -> void:
 
 ## The trackside digital panels show the flag race control shows, on the sector it applies to.
 func _update_flag_panels() -> void:
-	if environment.furniture != null:
-		environment.furniture.apply_flag(int(race.race_control["flag"]), int(race.race_control["sector"]))
+	var furniture: Variant = environment.get("furniture")
+	if furniture != null:
+		furniture.apply_flag(int(race.race_control["flag"]), int(race.race_control["sector"]))
 
 
 ## Fixed 20 Hz ticks, so 1x and 16x run the same sequence.
@@ -237,7 +305,8 @@ func _update_pit_crews(delta: float) -> void:
 		if car.pit != null:
 			coming = car.pit.phase == Types.PitPhase.ENTRY or car.pit.phase == Types.PitPhase.IN or car.pit.phase == Types.PitPhase.BOX
 		elif car.pit_request >= 0 and car.finished_at < 0.0:
-			var u: float = fposmod(car.s - PitLaneScript.ENTRY_S + 300.0, ribbon.length_m) - 300.0
+			var entry_s: float = float(race.pit_layout["entry_s"])
+			var u: float = fposmod(car.s - entry_s + 300.0, ribbon.length_m) - 300.0
 			coming = u >= -300.0 and u < 0.0
 		if coming and not teams.has(car.team_id):
 			teams.append(car.team_id)
@@ -297,6 +366,7 @@ func show_podium() -> void:
 	WinningStudio.pending_results["restart"] = {
 		"standalone": race_config == null, "total_laps": total_laps,
 		"race_seed": race_seed, "director_seed": director_seed, "weather_archetype": weather_archetype,
+		"circuit_id": active_circuit.circuit_id if active_circuit != null else "apex_ring",
 	}
 	set_physics_process(false)
 	hud.set_shown(false)

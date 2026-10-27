@@ -70,10 +70,40 @@ var contacts: GtContacts
 var stewards: GtStewards
 
 var _driving: GtDriving
+## The pit lane this race is run with. The Apex Ring's lane is the default; the street circuits hand
+## their own entry/exit distances, fast lane lateral and stall pitch (see RaceWeekendWorld).
+var pit_layout: Dictionary = {}
+
+
+## The Apex Ring pit lane, exactly as PitLaneComplex builds it.
+static func default_pit_layout() -> Dictionary:
+	return {
+		"entry_s": PitLaneScript.ENTRY_S,
+		"exit_s": PitLaneScript.EXIT_S,
+		"stall_first_s": PitLaneScript.STALL_FIRST_S,
+		"stall_pitch_m": PitLaneScript.STALL_PITCH_M,
+		"stall_lane_m": PitLaneScript.STALL_LANE_M,
+		"fast_lane_m": PitLaneScript.FAST_LANE_M,
+		"edge_lateral_m": PitLaneScript.EDGE_LATERAL_M,
+		"queue_gap_m": PitLaneScript.QUEUE_GAP_M,
+		"lane_ramp_in_m": PitLaneScript.RAMP_IN_M,
+		"lane_ramp_out_m": PitLaneScript.RAMP_OUT_M,
+	}
+
+
+## Lateral of the pit path at `u` metres from Pit Entry: off the right edge, onto the fast lane, and
+## back. `length` is the lane's own length (Pit Exit minus Pit Entry).
+static func lane_lateral_at(u: float, length: float, layout: Dictionary) -> float:
+	var blend: float = minf(
+		smoothstep(0.0, float(layout["lane_ramp_in_m"]), u),
+		smoothstep(length, length - float(layout["lane_ramp_out_m"]), u)
+	)
+	return lerpf(float(layout["edge_lateral_m"]), float(layout["fast_lane_m"]), blend)
 
 
 ## `weather_override` < 0 lets the seed choose the weather.
-func _init(p_track: GtTrack, p_laps: int = 10, seed_value: int = 1, weather_override: int = -1, car_count: int = 20) -> void:
+func _init(p_track: GtTrack, p_laps: int = 10, seed_value: int = 1, weather_override: int = -1, car_count: int = 20, p_pit_layout: Dictionary = {}) -> void:
+	pit_layout = p_pit_layout.duplicate() if not p_pit_layout.is_empty() else default_pit_layout()
 	track = p_track
 	laps = maxi(1, p_laps)
 	race_seed = seed_value
@@ -336,15 +366,15 @@ func set_flag(flag: int, sector: int = 1, message: String = "", duration: float 
 				break
 		var leader_s: float = leader.s if leader != null else 0.0
 		var lap_base: float = floorf(leader_s / track.length) * track.length
-		var spawn_s: float = lap_base + PitLaneScript.EXIT_S - 60.0
+		var spawn_s: float = lap_base + float(pit_layout["exit_s"]) - 60.0
 		if spawn_s <= leader_s:
 			spawn_s += track.length
 		safety_car = {
 			"active": true, "phase": GtTypes.SafetyCarPhase.DEPLOYED, "s": spawn_s,
-			"prev_s": spawn_s, "prev_lateral": sc_pit_exit_lateral(fposmod(spawn_s, track.length)),
-			"v": 20.0, "lateral": sc_pit_exit_lateral(fposmod(spawn_s, track.length)),
+			"prev_s": spawn_s, "prev_lateral": sc_pit_exit_lateral_in(fposmod(spawn_s, track.length), pit_layout),
+			"v": 20.0, "lateral": sc_pit_exit_lateral_in(fposmod(spawn_s, track.length), pit_layout),
 			"lights_on": true, "just_deployed": true,
-			"exit_end_s": floorf(spawn_s / track.length) * track.length + PitLaneScript.EXIT_S + 70.0,
+			"exit_end_s": floorf(spawn_s / track.length) * track.length + float(pit_layout["exit_s"]) + 70.0,
 			"entry_start_s": -1.0, "restart_s": -1.0,
 			"picked_up": false, "leader_id": leader.id if leader != null else -1, "wave_by": false,
 			"finish_under_caution": leader != null and leader.s >= float(laps - 1) * track.length,
@@ -364,21 +394,33 @@ func set_flag(flag: int, sector: int = 1, message: String = "", duration: float 
 
 ## Zero lateral slope at both ends of each blend segment.
 static func sc_pit_exit_lateral(s_lap: float) -> float:
-	var s_rel: float = s_lap - PitLaneScript.EXIT_S
+	return sc_pit_exit_lateral_in(s_lap, default_pit_layout())
+
+
+static func sc_pit_exit_lateral_in(s_lap: float, layout: Dictionary) -> float:
+	var s_rel: float = s_lap - float(layout["exit_s"])
+	var fast: float = float(layout["fast_lane_m"])
+	var edge: float = float(layout["edge_lateral_m"])
 	if s_rel <= -60.0:
-		return PitLaneScript.FAST_LANE_M
+		return fast
 	if s_rel <= 0.0:
-		return lerpf(PitLaneScript.FAST_LANE_M, PitLaneScript.EDGE_LATERAL_M, smoothstep(-60.0, 0.0, s_rel))
-	return lerpf(PitLaneScript.EDGE_LATERAL_M, 0.0, smoothstep(0.0, 70.0, s_rel))
+		return lerpf(fast, edge, smoothstep(-60.0, 0.0, s_rel))
+	return lerpf(edge, 0.0, smoothstep(0.0, 70.0, s_rel))
 
 
 static func sc_pit_entry_lateral(s_lap: float) -> float:
-	var s_rel: float = s_lap - PitLaneScript.ENTRY_S
+	return sc_pit_entry_lateral_in(s_lap, default_pit_layout())
+
+
+static func sc_pit_entry_lateral_in(s_lap: float, layout: Dictionary) -> float:
+	var s_rel: float = s_lap - float(layout["entry_s"])
+	var fast: float = float(layout["fast_lane_m"])
+	var edge: float = float(layout["edge_lateral_m"])
 	if s_rel <= -80.0:
 		return 0.0
 	if s_rel <= 0.0:
-		return lerpf(0.0, PitLaneScript.EDGE_LATERAL_M, smoothstep(-80.0, 0.0, s_rel))
-	return lerpf(PitLaneScript.EDGE_LATERAL_M, PitLaneScript.FAST_LANE_M, smoothstep(0.0, 60.0, s_rel))
+		return lerpf(0.0, edge, smoothstep(-80.0, 0.0, s_rel))
+	return lerpf(edge, fast, smoothstep(0.0, 60.0, s_rel))
 
 
 func restart_pending(car: GtCar) -> bool:
@@ -514,7 +556,7 @@ func _update_race_control(dt: float) -> void:
 			safety_car["picked_up"] = true
 			safety_car["leader_id"] = leader.id
 			safety_car["wave_by"] = false
-		var entry_start: float = floorf(float(safety_car["s"]) / track.length) * track.length + PitLaneScript.ENTRY_S - 80.0
+		var entry_start: float = floorf(float(safety_car["s"]) / track.length) * track.length + float(pit_layout["entry_s"]) - 80.0
 		var complete_approach: bool = float(safety_car["s"]) <= entry_start - 30.0 and float(safety_car["s"]) > float(safety_car.get("exit_end_s", 0.0))
 		if int(race_control["sc_laps_remaining"]) <= 0 and float(race_control["timer"]) <= 0.0 and _sc_track_clear() and _sc_queue_ready(leader) and complete_approach and int(safety_car["phase"]) != GtTypes.SafetyCarPhase.IN_THIS_LAP:
 			safety_car["phase"] = GtTypes.SafetyCarPhase.IN_THIS_LAP
@@ -528,7 +570,7 @@ func _update_race_control(dt: float) -> void:
 			race_control["message"] = "SAFETY CAR IN THIS LAP - PREPARE FOR RESTART"
 			_start_wreck_evacuation()
 		var pit_start: float = float(safety_car.get("entry_start_s", -1.0))
-		var pit_exit: float = float(safety_car.get("restart_s", -1.0)) + PitLaneScript.EXIT_S - 60.0
+		var pit_exit: float = float(safety_car.get("restart_s", -1.0)) + float(pit_layout["exit_s"]) - 60.0
 		if int(safety_car["phase"]) == GtTypes.SafetyCarPhase.DEPLOYED and pit_start >= 0.0 and float(safety_car["s"]) >= pit_exit:
 			# Renewed caution after peel-off must finish the pit route before merging again.
 			safety_car["entry_start_s"] = -1.0
@@ -539,7 +581,7 @@ func _update_race_control(dt: float) -> void:
 		var target_v: float = 25.0 if gap_to_leader > 28.0 else 27.0
 		if not bool(safety_car.get("picked_up", false)):
 			target_v = 18.0
-		if peeling and float(safety_car["lateral"]) >= PitLaneScript.EDGE_LATERAL_M:
+		if peeling and float(safety_car["lateral"]) >= float(pit_layout["edge_lateral_m"]):
 			target_v = 80.0 / 3.6
 		safety_car["v"] = move_toward(float(safety_car["v"]), target_v, (3.0 if target_v > float(safety_car["v"]) else 4.5) * dt)
 		safety_car["s"] = float(safety_car["s"]) + float(safety_car["v"]) * dt
@@ -552,7 +594,7 @@ func _update_race_control(dt: float) -> void:
 		var exit_end: float = float(safety_car.get("exit_end_s", 0.0))
 		if entry_start >= 0.0 and sc_s >= entry_start:
 			# Unwrapped progress keeps the car inside the pit lane across start/finish.
-			safety_car["lateral"] = sc_pit_entry_lateral(PitLaneScript.ENTRY_S - 80.0 + sc_s - entry_start)
+			safety_car["lateral"] = sc_pit_entry_lateral_in(float(pit_layout["entry_s"]) - 80.0 + sc_s - entry_start, pit_layout)
 		elif sc_s <= exit_end:
 			safety_car["lateral"] = sc_pit_exit_lateral(fposmod(sc_s, track.length))
 		else:

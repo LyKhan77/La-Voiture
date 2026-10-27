@@ -81,6 +81,9 @@ func load_circuit(circuit: CircuitDataScript) -> void:
 
 func _load_track() -> void:
 	length_m = 0.0
+	min_elevation = 0.0
+	max_elevation = 0.0
+	_total_turn = 0.0
 	turns.clear()
 	official_turns.clear()
 	drs_zones.clear()

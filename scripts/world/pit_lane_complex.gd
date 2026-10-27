@@ -76,6 +76,10 @@ const CUSHION_RED := Color("#d9232e")
 const CUSHION_WHITE := Color("#f0f2f5")
 
 var ribbon: TrackRibbonScript
+## What a crew (and the choreographer) needs to know about this lane's geometry.
+var team_count: int = TEAM_COUNT
+var garage_front_m: float = GARAGE_FRONT_M
+var stall_lane_m: float = STALL_LANE_M
 ## Arc length of the pit lane in meters, from Pit Entry to Pit Exit.
 var length_m: float = NOMINAL_LENGTH_M
 var stalls: Array[Dictionary] = [] # per team: {team, s, u, lateral, pose}
@@ -195,6 +199,16 @@ func garage_for_team(team: int) -> Node3D:
 			if i < garages.size():
 				return garages[i]
 	return null
+
+
+## The crew standing in a box: 13 people, in the order they line up across the garage mouth.
+func crew_roles() -> Array:
+	return standby_roles()
+
+
+## Where crew member `slot` stands at the garage mouth (garage frame: +x away from the lane).
+func crew_spot(slot: int) -> Vector3:
+	return standby_spot(slot)
 
 
 func stall_index_for_team(team: int) -> int:

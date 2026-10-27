@@ -151,7 +151,7 @@ class Crew extends RefCounted:
 	var root: Node3D
 	var members: Array[Member] = []
 
-var pit_lane: PitLaneScript
+var pit_lane: Node
 var wheel_scenes: Array[PackedScene] = [] # index = tire compound
 var jobs: Array[Job] = []
 var finished_ids: Array[int] = []
@@ -172,7 +172,7 @@ var _bind_bones: Array[int] = []
 var _clips_prepared: bool = false
 
 
-func setup(p_pit_lane: PitLaneScript, p_wheel_scenes: Array[PackedScene]) -> void:
+func setup(p_pit_lane: Node, p_wheel_scenes: Array[PackedScene]) -> void:
 	pit_lane = p_pit_lane
 	wheel_scenes = p_wheel_scenes
 
@@ -192,10 +192,15 @@ func get_job(car_id: int) -> Job:
 
 ## The teams whose car is on the way to the box (or in it): their crew steps out and waits, every other
 ## crew is (or goes back) in its garage. Call every frame with the full list.
+## How many teams the pit lane in use has a box for.
+func _team_count() -> int:
+	return int(pit_lane.get("team_count")) if pit_lane != null else PitLaneScript.TEAM_COUNT
+
+
 func set_ready_teams(teams: Array) -> void:
 	_wanted.clear()
 	for team: Variant in teams:
-		_wanted[clampi(int(team), 0, PitLaneScript.TEAM_COUNT - 1)] = true
+		_wanted[clampi(int(team), 0, _team_count() - 1)] = true
 
 
 ## Walks the crews between their garages and the working lane; `delta` is game time.
@@ -264,7 +269,7 @@ func _begin_crew(team: int) -> Crew:
 	add_child(crew.root)
 	crew.root.global_transform = pit_lane.stall_transform(team)
 	var color: Color = Liveries.color_for(team)
-	var roles: Array = PitLaneScript.standby_roles()
+	var roles: Array = pit_lane.crew_roles() if pit_lane != null else PitLaneScript.standby_roles()
 	var counts: Dictionary = {}
 	for slot: int in range(roles.size()):
 		var role: int = roles[slot]
@@ -402,8 +407,11 @@ func _make_member(crew: Crew, role: int, index: int, slot: int, color: Color) ->
 	var spot: Vector3 = (READY_SPOTS[role_name] as Array)[index]
 	member.ready = spot
 	member.work = (WORK_SPOTS[role_name] as Array)[index]
-	var door_garage: Vector3 = PitLaneScript.standby_spot(slot)
-	var home := Vector3(door_garage.x + PitLaneScript.GARAGE_FRONT_M - PitLaneScript.STALL_LANE_M, 0.0, door_garage.z)
+	# The garage mouth is where the lane's own geometry puts it, so a street circuit's shallower
+	# working lane walks the crew out over its own apron, not the Apex Ring's.
+	var door_garage: Vector3 = pit_lane.crew_spot(slot) if pit_lane != null else PitLaneScript.standby_spot(slot)
+	var setback: float = (float(pit_lane.garage_front_m) - float(pit_lane.stall_lane_m)) if pit_lane != null else (PitLaneScript.GARAGE_FRONT_M - PitLaneScript.STALL_LANE_M)
+	var home := Vector3(door_garage.x + setback, 0.0, door_garage.z)
 	member.route = _route(home, spot, role)
 	for leg: int in range(member.route.size() - 1):
 		member.route_length += member.route[leg].distance_to(member.route[leg + 1])
@@ -629,7 +637,7 @@ func present(car_id: int, team: int, actor: Node3D, compound: int, in_service: b
 func _open_job(car_id: int, team: int, actor: Node3D, compound: int) -> Job:
 	var job := Job.new()
 	job.car_id = car_id
-	job.team = clampi(team, 0, PitLaneScript.TEAM_COUNT - 1)
+	job.team = clampi(team, 0, _team_count() - 1)
 	job.actor = actor
 	job.chassis = actor.get("chassis") as ModularCarAssembler
 	job.compound = clampi(compound, 0, wheel_scenes.size() - 1)

@@ -20,6 +20,7 @@ extends Node3D
 
 const TrackRibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const MeshBatchScript := preload("res://scripts/world/mesh_batch.gd")
+const ApexPitScript := preload("res://scripts/world/pit_lane_complex.gd")
 const ToonMaterials := preload("res://scripts/world/toon_materials.gd")
 const RoadShader := preload("res://shaders/road_asphalt.gdshader")
 
@@ -74,6 +75,10 @@ const GARAGE_GLASS := Color(0.0, 0.82, 1.0, 0.28)
 const GARAGE_LED := Color(1.0, 0.12, 0.48, 0.0)
 
 var ribbon: TrackRibbonScript
+## What a crew (and the choreographer) needs to know about this lane's geometry.
+var team_count: int = STALL_COUNT
+var garage_front_m: float = GARAGE_FRONT_M
+var stall_lane_m: float = BOX_LATERAL_M
 var stalls: Array[Dictionary] = [] # {index, s, u, lateral, pose, node}
 var garages: Array[Node3D] = []
 var built: bool = false
@@ -152,6 +157,17 @@ func stall_transform(team: int) -> Transform3D:
 	return stalls[clampi(team, 0, stalls.size() - 1)]["pose"] if not stalls.is_empty() else Transform3D.IDENTITY
 
 
+## The crew standing in a box: the Apex Ring's 13-person line-up, fitted to this lane's apron.
+func crew_roles() -> Array:
+	return ApexPitScript.standby_roles()
+
+
+## Where crew member `slot` stands at the garage mouth (garage frame: +x away from the lane).
+func crew_spot(slot: int) -> Vector3:
+	var count: int = crew_roles().size()
+	return Vector3(1.5, 0.0, (float(slot) - float(count - 1) * 0.5) * 0.88)
+
+
 func stall_index_for_team(team: int) -> int:
 	return clampi(team, 0, STALL_COUNT - 1)
 
@@ -161,16 +177,22 @@ func garage_for_team(team: int) -> Node3D:
 	return garages[index] if index >= 0 and index < garages.size() else null
 
 
-## The layout the GT sim needs to drive this pit lane: entry and exit arc distances, the fast lane
-## lateral and the box lateral. RaceWeekendWorld hands this to GtRace for a Neo-Wangan race.
+## The layout the GT sim drives this pit lane with (see GtRace.default_pit_layout for the Apex
+## version): entry at Pit Entry, exit at the merge past Turn 1, ten 12 m boxes, and a 20 m / 80 m
+## lateral blend. RaceWeekendWorld hands this to GtRace for a Neo-Wangan race.
 func sim_layout() -> Dictionary:
 	return {
 		"entry_s": ENTRY_S,
-		"exit_s": EXIT_S,
-		"lane_length_m": LANE_LENGTH_M,
+		"exit_s": BYPASS_MERGE_S,
+		"stall_first_s": s_from_u_local(STALL_FIRST_OFFSET_M),
+		"stall_pitch_m": STALL_PITCH_M,
+		"stall_lane_m": BOX_LATERAL_M,
 		"fast_lane_m": FAST_LANE_M,
-		"entry_lateral_m": ENTRY_LATERAL_M,
-		"box_lateral_m": BOX_LATERAL_M,
+		"edge_lateral_m": ENTRY_LATERAL_M,
+		"queue_gap_m": 8.0,
+		"lane_ramp_in_m": ENTRY_BLEND_M,
+		"lane_ramp_out_m": EXIT_BLEND_M,
+		"lane_length_m": LANE_LENGTH_M,
 		"speed_limit_mps": SPEED_LIMIT_MPS,
 		"blend_line_m": BLEND_LINE_M,
 		"merge_s": BYPASS_MERGE_S,

@@ -824,22 +824,22 @@ func _pedals_and_telemetry(car: GtCar, curv_now: float, is_braking: bool, a_long
 
 ## Distance along the pit lane from Pit Entry; negative on the approach.
 func pit_u(car_s: float) -> float:
-	return fposmod(car_s - PitLaneScript.ENTRY_S + 300.0, race.track.length) - 300.0
+	return fposmod(car_s - float(race.pit_layout["entry_s"]) + 300.0, race.track.length) - 300.0
 
 
 func pit_length() -> float:
-	return fposmod(PitLaneScript.EXIT_S - PitLaneScript.ENTRY_S, race.track.length)
+	return fposmod(float(race.pit_layout["exit_s"]) - float(race.pit_layout["entry_s"]), race.track.length)
 
 
 func stall_offset(team_id: int) -> float:
 	var stall_idx: int = race.stall_index_for_team(team_id) if race.has_method("stall_index_for_team") else team_id
-	return PitLaneScript.STALL_FIRST_S - PitLaneScript.ENTRY_S + PitLaneScript.STALL_PITCH_M * float(stall_idx)
+	return float(race.pit_layout["stall_first_s"]) - float(race.pit_layout["entry_s"]) + float(race.pit_layout["stall_pitch_m"]) * float(stall_idx)
 
 
 ## Lateral of the pit lane path at `u`: off the right half of the circuit, along the fast lane and back.
 ## The cars never aim at the racing line; the same curve shapes the pit lane asphalt.
 func fast_lane_at(u: float) -> float:
-	return PitLaneScript.lane_lateral_at(u, pit_length())
+	return GtRace.lane_lateral_at(u, pit_length(), race.pit_layout)
 
 
 func enter_pit_lane(car: GtCar, compound: int = -1) -> void:
@@ -879,7 +879,7 @@ func _pit_logic(car: GtCar, dt: float) -> void:
 		elif u >= -300.0 and u < -120.0:
 			car.pass_timer = 0.0
 			car.overtake_phase = GtTypes.Overtake.NONE
-			_target_lateral = PitLaneScript.EDGE_LATERAL_M
+			_target_lateral = float(race.pit_layout["edge_lateral_m"])
 			_target = minf(_target, 38.0)
 	var pit: GtPit = car.pit
 	if pit == null:
@@ -897,7 +897,7 @@ func _pit_logic(car: GtCar, dt: float) -> void:
 			# Limiter envelope down to 80 km/h at the line, then onto the lane.
 			var to_line: float = maxf(-rel - 1.5, 0.0)
 			_target = minf(_target, sqrt(GtTypes.PIT_SPEED * GtTypes.PIT_SPEED + 2.0 * GtTypes.BRAKE * to_line))
-			_target_lateral = PitLaneScript.EDGE_LATERAL_M
+			_target_lateral = float(race.pit_layout["edge_lateral_m"])
 			if rel >= 0.0:
 				pit.phase = GtTypes.PitPhase.IN
 		GtTypes.PitPhase.IN:
@@ -905,9 +905,9 @@ func _pit_logic(car: GtCar, dt: float) -> void:
 			_target_lateral = fast_lane_at(rel)
 			if _teammate_ahead != null:
 				# Double stack: hold 8 m behind the stall until the teammate is released.
-				var to_queue: float = minf(pit.box_s - PitLaneScript.QUEUE_GAP_M - car.s, _teammate_ahead.s - PitLaneScript.QUEUE_GAP_M - car.s)
+				var to_queue: float = minf(pit.box_s - float(race.pit_layout["queue_gap_m"]) - car.s, _teammate_ahead.s - float(race.pit_layout["queue_gap_m"]) - car.s)
 				if to_queue <= 24.0:
-					_target_lateral = PitLaneScript.STALL_LANE_M + 0.6
+					_target_lateral = float(race.pit_layout["stall_lane_m"]) + 0.6
 					if to_queue > 0.6:
 						_target = minf(GtTypes.PIT_SPEED, maxf(1.0, to_queue * 1.3))
 					else:
@@ -918,8 +918,8 @@ func _pit_logic(car: GtCar, dt: float) -> void:
 				pit.phase = GtTypes.PitPhase.BOX
 		GtTypes.PitPhase.BOX:
 			if _teammate_ahead != null:
-				var to_queue: float = minf(pit.box_s - PitLaneScript.QUEUE_GAP_M - car.s, _teammate_ahead.s - PitLaneScript.QUEUE_GAP_M - car.s)
-				_target_lateral = PitLaneScript.STALL_LANE_M + 0.6
+				var to_queue: float = minf(pit.box_s - float(race.pit_layout["queue_gap_m"]) - car.s, _teammate_ahead.s - float(race.pit_layout["queue_gap_m"]) - car.s)
+				_target_lateral = float(race.pit_layout["stall_lane_m"]) + 0.6
 				if to_queue > 0.6:
 					_target = minf(GtTypes.PIT_SPEED, maxf(1.0, to_queue * 1.3))
 				else:
@@ -928,7 +928,7 @@ func _pit_logic(car: GtCar, dt: float) -> void:
 					car.v_lat = 0.0
 			else:
 				var pull_in: float = 1.0 - clampf((dist_to_box - 1.5) / 16.5, 0.0, 1.0)
-				_target_lateral = lerpf(fast_lane_at(rel), PitLaneScript.STALL_LANE_M, pull_in)
+				_target_lateral = lerpf(fast_lane_at(rel), float(race.pit_layout["stall_lane_m"]), pull_in)
 				if dist_to_box > 0.4:
 					_target = minf(GtTypes.PIT_SPEED, maxf(0.9, dist_to_box * 1.6))
 				else:
@@ -938,7 +938,7 @@ func _pit_logic(car: GtCar, dt: float) -> void:
 		GtTypes.PitPhase.OUT:
 			_target = GtTypes.PIT_SPEED
 			var pull_out: float = clampf((car.s - pit.box_s) / 16.0, 0.0, 1.0)
-			_target_lateral = lerpf(PitLaneScript.STALL_LANE_M, fast_lane_at(rel), pull_out)
+			_target_lateral = lerpf(float(race.pit_layout["stall_lane_m"]), fast_lane_at(rel), pull_out)
 			if car.s - pit.box_s > 20.0:
 				pit.phase = GtTypes.PitPhase.EXIT
 		GtTypes.PitPhase.EXIT:
@@ -962,7 +962,7 @@ func _service_car(car: GtCar, pit: GtPit, dt: float) -> void:
 	car.v = 0.0
 	car.v_lat = 0.0
 	car.s = pit.box_s # parked exactly on the stall
-	car.lateral = PitLaneScript.STALL_LANE_M
+	car.lateral = float(race.pit_layout["stall_lane_m"])
 	if not pit.penalty_taken:
 		pit.penalty_taken = true
 		pit.penalty_hold_s = car.penalty_owed_s
