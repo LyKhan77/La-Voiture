@@ -133,20 +133,71 @@ def recolor_dark_to_white(img_path: str, out_path: str, target_hex: str = "F4F5F
     if not os.path.exists(img_path):
         return False
     im = Image.open(img_path).convert("RGBA")
-    arr = np.array(im, dtype=np.float32) / 255.0
-    rgb = arr[..., :3]
+    W, H = im.size
+    orig_arr = np.array(im, dtype=np.float32) / 255.0
+    rgb = orig_arr[..., :3]
+
+    data_file = os.path.join(os.path.dirname(__file__), "data", "lexus_classified_uvs.json")
+    if os.path.exists(data_file):
+        import json
+        from PIL import ImageDraw, ImageFilter
+        with open(data_file, "r") as f:
+            classified = json.load(f)
+
+        mask_body_img = Image.new("L", (W, H), 0)
+        draw_body = ImageDraw.Draw(mask_body_img)
+        mask_glass_img = Image.new("L", (W, H), 0)
+        draw_glass = ImageDraw.Draw(mask_glass_img)
+        mask_trim_img = Image.new("L", (W, H), 0)
+        draw_trim = ImageDraw.Draw(mask_trim_img)
+
+        for poly in classified.get("body", []):
+            pts = [(u * W, (1.0 - v) * H) for u, v in poly]
+            if len(pts) >= 3:
+                draw_body.polygon(pts, fill=255)
+
+        for poly in classified.get("glass", []):
+            pts = [(u * W, (1.0 - v) * H) for u, v in poly]
+            if len(pts) >= 3:
+                draw_glass.polygon(pts, fill=255)
+
+        for poly in classified.get("aero_trim", []):
+            pts = [(u * W, (1.0 - v) * H) for u, v in poly]
+            if len(pts) >= 3:
+                draw_trim.polygon(pts, fill=255)
+
+        mask_body_img = mask_body_img.filter(ImageFilter.MaxFilter(3))
+        body_arr = np.array(mask_body_img, dtype=np.float32) / 255.0
+        glass_arr = np.array(mask_glass_img, dtype=np.float32) / 255.0
+        trim_arr = np.array(mask_trim_img, dtype=np.float32) / 255.0
+
+        protect_arr = np.clip(glass_arr + trim_arr, 0.0, 1.0)
+        final_body_mask = np.clip(body_arr - protect_arr * 1.5, 0.0, 1.0)[..., np.newaxis]
+
+        tr, tg, tb = hex_to_rgb(target_hex)
+        v_orig = np.maximum(np.maximum(rgb[..., 0], rgb[..., 1]), rgb[..., 2])
+        panel_depth = np.clip(0.85 + (v_orig / 0.15) * 0.15, 0.70, 1.0)
+        white_paint = np.stack([tr * panel_depth, tg * panel_depth, tb * panel_depth], axis=-1)
+
+        blended_rgb = rgb * (1.0 - final_body_mask) + white_paint * final_body_mask
+        glass_mask_3d = glass_arr[..., np.newaxis]
+        smoke_glass = np.array([18.0 / 255.0, 20.0 / 255.0, 26.0 / 255.0])
+        blended_rgb = blended_rgb * (1.0 - glass_mask_3d) + smoke_glass * glass_mask_3d
+
+        blended_rgb = np.clip(blended_rgb * 255.0, 0.0, 255.0).astype(np.uint8)
+        out_img = Image.fromarray(blended_rgb, "RGB")
+        os.makedirs(os.path.dirname(out_path), exist_ok=True)
+        out_img.save(out_path, format="PNG")
+        return True
+
+    # Fallback if no UV classification file exists
     h, s, v = rgb_to_hsv_numpy(rgb)
     tr, tg, tb = hex_to_rgb(target_hex)
-
-    # For dark carbon (v between 0.04 and 0.45, s < 0.25): lift to clean white with inking
     mask = (v > 0.03) & (v < 0.48) & (s < 0.25)
     weight = np.clip((v - 0.03) / 0.05, 0.0, 1.0) * np.clip((0.48 - v) / 0.1, 0.0, 1.0) * mask
     weight = weight[..., np.newaxis]
-
-    # Map darkness to white shade
     lifted_v = np.clip(0.68 + v * 0.7, 0.0, 0.98)
     target_rgb = np.stack([lifted_v * tr, lifted_v * tg, lifted_v * tb], axis=-1)
-
     blended = rgb * (1.0 - weight) + target_rgb * weight
     blended = np.clip(blended * 255.0, 0.0, 255.0).astype(np.uint8)
     out_img = Image.fromarray(blended, "RGB")
