@@ -1,0 +1,14 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/neo_wangan_circuit_builder.gd" id="1_builder"]
+[ext_resource type="Script" path="res://scripts/car/track_ribbon.gd" id="2_ribbon"]
+
+[sub_resource type="Curve3D" id="Curve3D_centerline"]
+
+[node name="NeoWanganCircuit" type="Node3D"]
+script = ExtResource("1_builder")
+
+[node name="TrackRibbon" type="Path3D" parent="."]
+curve = SubResource("Curve3D_centerline")
+script = ExtResource("2_ribbon")
+road_half_width_m = 5.75

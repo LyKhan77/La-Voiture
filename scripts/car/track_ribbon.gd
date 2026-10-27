@@ -20,6 +20,8 @@ const EDGE_LINE_COLOR := Color("#F4F5F7")
 const START_LINE_COLOR := Color("#F4F5F7")
 
 @export var road_half_width_m: float = 6.0
+## Surface override for the road mesh; leave empty for the default vertex-coloured asphalt.
+@export var road_material: Material
 
 var length_m: float = 0.0
 
@@ -110,10 +112,13 @@ func _build_road_mesh() -> void:
 		# Only the white edge lines: a GT circuit is one open surface, the three lanes below are sim corridors, not paint.
 		_strip(st, side * edge - 0.1, side * edge + 0.1, 0.02, EDGE_LINE_COLOR, 0, _count, stride)
 	_strip(st, -road_half_width_m, road_half_width_m, 0.03, START_LINE_COLOR, -1, 1, 1)
-	var material := StandardMaterial3D.new()
-	material.vertex_color_use_as_albedo = true
-	material.roughness = 0.9
-	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	var material: Material = road_material
+	if material == null:
+		var fallback := StandardMaterial3D.new()
+		fallback.vertex_color_use_as_albedo = true
+		fallback.roughness = 0.9
+		fallback.cull_mode = BaseMaterial3D.CULL_DISABLED
+		material = fallback
 	var mesh: ArrayMesh = st.commit()
 	mesh.surface_set_material(0, material)
 	road.mesh = mesh
