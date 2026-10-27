@@ -3,6 +3,7 @@ extends SceneTree
 const World := preload("res://scenes/race_weekend_world.tscn")
 const Config := preload("res://scripts/core/race_config_data.gd")
 const Settings := preload("res://scripts/core/presentation_settings.gd")
+const FRAME_BUDGET_MS: float = 1000.0 / 60.0
 var world: Node3D
 var times: Array[float] = []
 
@@ -36,11 +37,15 @@ func _run() -> void:
 		times.append(float(now - last) / 1000.0)
 		last = now
 	var sum_ms: float = 0.0
+	var late_frames: int = 0
 	for ms: float in times:
 		sum_ms += ms
+		if ms > FRAME_BUDGET_MS:
+			late_frames += 1
 	times.sort()
 	var mean: float = sum_ms / float(times.size())
 	print("PHASE12_SMOKE frames=%d mean_ms=%.3f p95_ms=%.3f worst_ms=%.3f fps=%.2f draw_calls=%d tris=%d" % [times.size(), mean, times[int(times.size() * 0.95)], times.back(), 1000.0 / mean, int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)), int(Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME))])
+	print("PHASE12_SMOKE frame_budget_ms=%.6f late_frames=%d locked_60=%s" % [FRAME_BUDGET_MS, late_frames, late_frames == 0])
 	world.set_time_scale(16.0)
 	var guard: int = 0
 	while not world.race.is_finished() and guard < 12000:
@@ -74,5 +79,5 @@ func _run() -> void:
 	load("res://scripts/ui/manga/wheatpaste_poster.gd")._grain = null
 	for frame: int in range(3):
 		await process_frame
-	quit(0 if finished and error == OK and menu_loaded and orphans == 0 and mean <= 16.6667 else 1)
+	quit(0 if finished and error == OK and menu_loaded and orphans == 0 and late_frames == 0 else 1)
 

@@ -201,13 +201,7 @@ static func _hero_panel(canvas: CanvasItem, state: TelemetryState, accent: Color
 		_clipped_line(canvas, center + Vector2(cos(angle) * inner * 1.5, sin(angle) * inner), center + Vector2(cos(angle) * 300.0, sin(angle) * 200.0),
 			polygon, Color(accent, 0.04 + 0.1 * speed), 1.0)
 	if state.stress > 0.05:
-		for gx: int in range(9):
-			var radius: float = state.stress * 3.0 * (1.0 - float(gx) / 9.0)
-			if radius < 0.4:
-				continue
-			for gy: int in range(32):
-				canvas.draw_circle(Vector2(12.0 + float(gx) * 8.0, 374.0 - float(gy) * 8.0), radius, Color(CRIMSON, 0.22))
-				canvas.draw_circle(Vector2(300.0 - float(gx) * 8.0, 374.0 - float(gy) * 8.0), radius, Color(CRIMSON, 0.22))
+		_stress_dots(canvas, state.stress)
 	canvas.draw_set_transform(Vector2(156.0 + jitter, CAR_TOP), 0.0, Vector2.ONE)
 	_car(canvas, state, accent, clock, reduce_motion)
 	canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
@@ -415,3 +409,48 @@ static func _pops(canvas: CanvasItem, state: TelemetryState, clock: float, reduc
 		var tint: Color = spot[2]
 		_text_centered(canvas, MARKER, String(pop["text"]), Vector2.ZERO, 26, Color(tint, alpha), 7)
 		canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+## Keep the fixed dot grid instanced; update nine disks instead of rebuilding 576 circles.
+static func _stress_dots(canvas: CanvasItem, stress: float) -> void:
+	var batches: Array = canvas.get_meta(&"telemetry_stress_batches", [])
+	if batches.is_empty():
+		var vertices := PackedVector3Array([Vector3.ZERO])
+		var indices := PackedInt32Array()
+		for segment: int in range(32):
+			var angle: float = TAU * float(segment) / 32.0
+			vertices.append(Vector3(cos(angle), sin(angle), 0.0))
+			indices.append_array(PackedInt32Array([0, segment + 1, (segment + 1) % 32 + 1]))
+		for column: int in range(9):
+			var arrays: Array = []
+			arrays.resize(Mesh.ARRAY_MAX)
+			arrays[Mesh.ARRAY_VERTEX] = vertices
+			arrays[Mesh.ARRAY_INDEX] = indices
+			var mesh := ArrayMesh.new()
+			mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], {}, Mesh.ARRAY_FLAG_USE_DYNAMIC_UPDATE)
+			var batch := MultiMesh.new()
+			batch.transform_format = MultiMesh.TRANSFORM_2D
+			batch.use_colors = true
+			batch.mesh = mesh
+			batch.instance_count = 64
+			batch.custom_aabb = AABB(Vector3(0.0, 0.0, -1.0), Vector3(312.0, 496.0, 2.0))
+			for row: int in range(32):
+				for side: int in range(2):
+					var center := Vector2(12.0 + float(column) * 8.0 if side == 0 else 300.0 - float(column) * 8.0, 374.0 - float(row) * 8.0)
+					batch.set_instance_transform_2d(row * 2 + side, Transform2D(0.0, center))
+					batch.set_instance_color(row * 2 + side, Color(CRIMSON, 0.22))
+			batches.append({"batch": batch, "vertices": vertices, "radius": -1.0})
+		canvas.set_meta(&"telemetry_stress_batches", batches)
+	for column: int in range(9):
+		var radius: float = stress * 3.0 * (1.0 - float(column) / 9.0)
+		if radius < 0.4:
+			continue
+		var cached: Dictionary = batches[column]
+		var batch: MultiMesh = cached["batch"]
+		if not is_equal_approx(radius, float(cached["radius"])):
+			var scaled: PackedVector3Array = cached["vertices"].duplicate()
+			for vertex: int in range(scaled.size()):
+				scaled[vertex] *= radius
+			(batch.mesh as ArrayMesh).surface_update_vertex_region(0, 0, scaled.to_byte_array())
+			cached["radius"] = radius
+		canvas.draw_multimesh(batch, null)

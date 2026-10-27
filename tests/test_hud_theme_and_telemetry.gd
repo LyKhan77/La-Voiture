@@ -393,6 +393,18 @@ func _test_paint_rich_states() -> void:
 			probe.queue_redraw()
 			await process_frame
 			painted += 1
+	var batches: Array = probe.get_meta(&"telemetry_stress_batches", [])
+	var instanced: bool = batches.size() == 9
+	for entry: Dictionary in batches:
+		var batch: MultiMesh = entry["batch"]
+		instanced = instanced and batch.instance_count == 64 and batch.transform_format == MultiMesh.TRANSFORM_2D
+	check(instanced, "painter: stress halftone reuses nine instanced columns instead of rebuilding 576 circles per frame")
+	var first_batch: MultiMesh = batches[0]["batch"] if not batches.is_empty() else null
+	state.stress = 0.3
+	probe.queue_redraw()
+	await process_frame
+	var reused: Array = probe.get_meta(&"telemetry_stress_batches", [])
+	check(first_batch != null and not reused.is_empty() and reused[0]["batch"] == first_batch and is_equal_approx(float(reused[0]["radius"]), 0.9), "painter: changing stress keeps canvas-owned batches and updates the original radius formula")
 	probe.queue_free()
 	_calm(car)
 	car.damage = 0.0
