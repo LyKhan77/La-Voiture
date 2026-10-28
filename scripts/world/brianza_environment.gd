@@ -42,6 +42,30 @@ const SPONSORS: Array[Dictionary] = [
 	{"node": "Agip", "text": "AGIP", "ground": Color("#ffd400"), "band": Color("#14161c"), "ink": Color("#14161c")},
 	{"node": "MagnetiMarelli", "text": "MAGNETI MARELLI", "ground": Color("#2b5fb8"), "band": Color("#f0f2f5"), "ink": Color("#f0f2f5")},
 ]
+const HazeShader := preload("res://shaders/mountain_haze.gdshader")
+const VISTA_FAR_M: float = 6500.0
+const VISTA_BASE_Y: float = -40.0
+const SUN_SHADOW_BLUR: float = 1.6
+const FLOODLIGHT_GLOW: float = 4.0
+const STORM_GREY := Color("#4a5260")
+## Forest line, Montevecchia hills, Alpine foothills: radius, crest height range, ridge noise, colour, haze.
+const VISTA_LAYERS: Array[Dictionary] = [
+	{"radius": 4300.0, "height": Vector2(50.0, 120.0), "freq": 11.0, "segments": 360, "color": Color("#1f4a2e"), "haze": 0.10},
+	{"radius": 4420.0, "height": Vector2(220.0, 480.0), "freq": 2.6, "segments": 180, "color": Color("#55808c"), "haze": 0.30},
+	{"radius": 4550.0, "height": Vector2(500.0, 1050.0), "freq": 1.7, "segments": 180, "color": Color("#8ba7c6"), "haze": 0.55},
+]
+## Per time-of-day (DAY, SUNSET, NIGHT): sun, ambient, fog and sky colours; sun angles in degrees.
+const SKY_PROFILES: Array[Dictionary] = [
+	{"sun": Color("#fff3db"), "sun_energy": 1.15, "sun_pitch": 42.0, "sun_yaw": 215.0,
+		"ambient": Color("#a3c2f0"), "ambient_energy": 0.9, "fog": Color("#dce8f5"), "fog_density": 0.00018,
+		"sky_top": Color("#3f7fd0"), "sky_horizon": Color("#cfe3f5"), "ground": Color("#7fa06a")},
+	{"sun": Color("#ff9a5c"), "sun_energy": 0.85, "sun_pitch": 14.0, "sun_yaw": 235.0,
+		"ambient": Color("#b49ad0"), "ambient_energy": 0.75, "fog": Color("#e0a58f"), "fog_density": 0.00026,
+		"sky_top": Color("#4a3a78"), "sky_horizon": Color("#ff9a5c"), "ground": Color("#3a2f3f")},
+	{"sun": Color("#9db4ff"), "sun_energy": 0.35, "sun_pitch": 38.0, "sun_yaw": 215.0,
+		"ambient": Color("#3a4a80"), "ambient_energy": 0.6, "fog": Color("#1b2540"), "fog_density": 0.00034,
+		"sky_top": Color("#060a18"), "sky_horizon": Color("#1a2342"), "ground": Color("#05070d")},
+]
 const SOPRA_FOLIAGE_CLEAR_M: float = 24.0
 const SOPRA_PORTAL_THETAS: Array[float] = [-0.88, -0.30, 0.30, 0.88]
 
@@ -97,6 +121,16 @@ var catch_fence_poses: Array[Transform3D] = []
 
 var _foliage_keepouts: Array[Dictionary] = []
 var _sopra_blockers: PackedVector3Array = PackedVector3Array()
+var vista_ring: MeshInstance3D
+
+var _world_environment: WorldEnvironment
+var _sun: DirectionalLight3D
+var _camera: Camera3D
+var _runtime_environment: Environment
+var _sky_material: ProceduralSkyMaterial
+var _vista_materials: Array[ShaderMaterial] = []
+var _current_tod: Dictionary = {"mode": 0, "floodlights": 0.0, "stars_opacity": 0.0}
+var _current_gloom: float = 0.0
 var _ascari_screen: Jumbotron
 var _jumbotron_clock: float = 0.0
 
@@ -126,10 +160,21 @@ func build(p_ribbon: RibbonScript, p_builder: CircuitBuilderScript) -> void:
 	_build_layer3_corner_grandstands()
 	_build_layer4_dense_park_foliage()
 	_build_layer5_trackside_safety_and_sponsors()
+	_build_layer6_vista_ring()
 
 
-func bind_world(_world_env: WorldEnvironment, _sun: DirectionalLight3D, _camera: Camera3D) -> void:
-	pass
+## The race world hands its own sky, sun and camera to the set: golden Monza afternoon by default,
+## then DAY / SUNSET / NIGHT through apply_time_of_day().
+func bind_world(world_environment: WorldEnvironment, sun: DirectionalLight3D, camera: Camera3D) -> void:
+	_world_environment = world_environment
+	_sun = sun
+	_camera = camera
+	if camera != null:
+		camera.far = maxf(camera.far, VISTA_FAR_M)
+	if sun != null:
+		sun.shadow_enabled = true
+		sun.shadow_blur = SUN_SHADOW_BLUR
+	apply_time_of_day(_current_tod, _current_gloom)
 
 
 func update(delta: float, race) -> void:
@@ -144,7 +189,7 @@ func update(delta: float, race) -> void:
 			gloom = float(weather.gloom)
 		var tod = weather.time_of_day if "time_of_day" in weather else {}
 		if tod is Dictionary and not tod.is_empty():
-			shared_sky.apply_time_of_day(tod, gloom)
+			apply_time_of_day(tod, gloom)
 	_feed_jumbotrons(delta, race)
 
 
@@ -172,10 +217,104 @@ func _feed_jumbotrons(delta: float, race) -> void:
 
 
 func apply_time_of_day(tod, gloom: float = 0.0) -> void:
-	if shared_sky != null and shared_sky.has_method("apply_time_of_day"):
+	_current_tod = tod
+	_current_gloom = gloom
+	if shared_sky != null:
 		shared_sky.apply_time_of_day(tod, gloom)
-	if furniture != null and furniture.has_method("apply_time_of_day"):
-		furniture.call("apply_time_of_day", tod)
+	var mode: int = SharedSkyScript.mode_of(tod)
+	var night: float = clampf(float(tod.get("floodlights", 0.0)), 0.0, 1.0)
+	ToonMaterials.set_glow_energy(night * FLOODLIGHT_GLOW)
+	ToonMaterials.glass().emission_energy_multiplier = night * 1.1
+	for screen: Jumbotron in [_ascari_screen, get_parent().get_node_or_null("PitLane/MainGrandstand/Jumbotron") as Jumbotron if get_parent() != null else null]:
+		if screen != null:
+			screen.set_brightness(1.0 + 0.35 * night)
+	var profile: Dictionary = SKY_PROFILES[mode]
+	_apply_sky_and_sun(profile, gloom)
+	for material: ShaderMaterial in _vista_materials:
+		material.set_shader_parameter("haze_color", (profile["fog"] as Color).lerp(STORM_GREY, gloom * 0.5))
+		material.set_shader_parameter("ridge_light", profile["sun"])
+		material.set_shader_parameter("brightness", lerpf(1.0, 0.3, night) * lerpf(1.0, 0.7, gloom))
+		material.set_shader_parameter("haze_strength", lerpf(1.0, 0.8, night))
+
+
+## Sky, ambient, fog and sun for the mode. The shared Environment is duplicated once so the
+## runtime sky never leaks into the PackedScene resource.
+func _apply_sky_and_sun(profile: Dictionary, gloom: float) -> void:
+	if _world_environment == null or _world_environment.environment == null:
+		return
+	if _world_environment.environment != _runtime_environment:
+		_runtime_environment = _world_environment.environment.duplicate() as Environment
+		_sky_material = ProceduralSkyMaterial.new()
+		_sky_material.sun_angle_max = 0.0
+		var sky := Sky.new()
+		sky.sky_material = _sky_material
+		_runtime_environment.background_mode = Environment.BG_SKY
+		_runtime_environment.sky = sky
+		_runtime_environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+		_runtime_environment.tonemap_mode = Environment.TONE_MAPPER_ACES
+		_runtime_environment.glow_enabled = true
+		_runtime_environment.fog_enabled = true
+		_runtime_environment.fog_sky_affect = 0.15
+		_world_environment.environment = _runtime_environment
+	_sky_material.sky_top_color = (profile["sky_top"] as Color).lerp(STORM_GREY.darkened(0.3), gloom * 0.6)
+	_sky_material.sky_horizon_color = (profile["sky_horizon"] as Color).lerp(STORM_GREY, gloom * 0.6)
+	_sky_material.ground_horizon_color = _sky_material.sky_horizon_color
+	_sky_material.ground_bottom_color = profile["ground"]
+	_runtime_environment.ambient_light_color = profile["ambient"]
+	_runtime_environment.ambient_light_energy = profile["ambient_energy"]
+	_runtime_environment.fog_light_color = (profile["fog"] as Color).lerp(STORM_GREY, gloom * 0.5)
+	_runtime_environment.fog_density = float(profile["fog_density"]) * (1.0 + gloom)
+	if _sun != null:
+		_sun.rotation_degrees = Vector3(-float(profile["sun_pitch"]), float(profile["sun_yaw"]), 0.0)
+		_sun.light_color = profile["sun"]
+		_sun.light_energy = float(profile["sun_energy"]) * (1.0 - gloom * 0.4)
+
+
+## Layer 6: three silhouette layers (forest line, Montevecchia hills, Alps) 4.3 - 4.55 km out,
+## drawn with the Apex Ring's haze shader so they melt into the sky at every time of day.
+func _build_layer6_vista_ring() -> void:
+	var noise := FastNoiseLite.new()
+	noise.seed = 19220903
+	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	noise.fractal_octaves = 4
+	noise.frequency = 1.0
+	var centre := Vector3(_track_centre.x, 0.0, _track_centre.y)
+	var mesh := ArrayMesh.new()
+	for layer: int in range(VISTA_LAYERS.size()):
+		var spec: Dictionary = VISTA_LAYERS[layer]
+		var segments: int = int(spec["segments"])
+		var crest := PackedVector3Array()
+		var base := PackedVector3Array()
+		for i: int in range(segments):
+			var angle: float = TAU * float(i) / float(segments)
+			var dir := Vector3(cos(angle), 0.0, sin(angle))
+			var ridged: float = 1.0 - absf(noise.get_noise_2d(dir.x * float(spec["freq"]) + float(layer) * 17.0, dir.z * float(spec["freq"])))
+			var h_range: Vector2 = spec["height"]
+			var height: float = lerpf(h_range.x, h_range.y, pow(clampf(ridged, 0.0, 1.0), 1.5))
+			crest.append(centre + dir * float(spec["radius"]) + Vector3.UP * height)
+			base.append(centre + dir * (float(spec["radius"]) - height * 0.5) + Vector3.UP * VISTA_BASE_Y)
+		var st := SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_TRIANGLES)
+		for i: int in range(segments):
+			var next: int = (i + 1) % segments
+			var quad: Array[Vector3] = [base[i], base[next], crest[next], base[i], crest[next], crest[i]]
+			var alphas: Array[float] = [0.0, 0.0, 1.0, 0.0, 1.0, 1.0]
+			for k: int in range(6):
+				st.set_color(Color(1.0, 1.0, 1.0, alphas[k]))
+				st.set_normal(Vector3.UP)
+				st.add_vertex(quad[k])
+		st.commit(mesh)
+		var material := ShaderMaterial.new()
+		material.shader = HazeShader
+		material.set_shader_parameter("layer_color", spec["color"])
+		material.set_shader_parameter("layer_haze", spec["haze"])
+		mesh.surface_set_material(mesh.get_surface_count() - 1, material)
+		_vista_materials.append(material)
+	vista_ring = MeshInstance3D.new()
+	vista_ring.name = "BrianzaVistaRing"
+	vista_ring.mesh = mesh
+	vista_ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(vista_ring)
 
 
 func stats() -> Dictionary:

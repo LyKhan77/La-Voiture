@@ -10,6 +10,7 @@ const RegistryScript := preload("res://scripts/core/circuit_calendar_registry.gd
 const BuilderScript := preload("res://scripts/world/brianza_circuit_builder.gd")
 const PitScript := preload("res://scripts/world/brianza_pit_complex.gd")
 const EnvScript := preload("res://scripts/world/brianza_environment.gd")
+const ToonMaterials := preload("res://scripts/world/toon_materials.gd")
 
 var failures: int = 0
 var assertions: int = 0
@@ -115,6 +116,7 @@ func _run() -> void:
 		await _check_jumbotron_feed(env, instance)
 		_check_layer4_foliage(env)
 		_check_layer5_trackside(env)
+		_check_layer6_vista_and_light(env)
 
 	# Calendar Registry integration
 	var circuit_data = RegistryScript.get_circuit("brianza")
@@ -334,6 +336,42 @@ func _check_layer5_trackside(env: EnvScript) -> void:
 	check(labels.has("PIRELLI") and labels.has("BREMBO") and labels.has("AGIP") and labels.has("MAGNETI MARELLI"), "#L5.10 hero boards carry the brand names")
 	var marshals := root.get_node_or_null("MarshalPosts") as MeshInstance3D
 	check(marshals != null and int(marshals.get_meta("count", 0)) >= 8, "#L5.11 marshal posts at the corner apexes (>= 8)")
+
+
+## FASE 13.1 Layer 6: 4.5 km Alpine vista ring and a real bind_world() / time-of-day lighting rig.
+func _check_layer6_vista_and_light(env: EnvScript) -> void:
+	var ring := env.get_node_or_null("BrianzaVistaRing") as MeshInstance3D
+	check(ring != null and ring.mesh != null, "#L6.1 BrianzaVistaRing exists")
+	if ring != null and ring.mesh != null:
+		var box: AABB = ring.mesh.get_aabb()
+		check(box.size.x >= 8500.0 and box.size.z >= 8500.0, "#L6.2 ring spans ~4.5 km radius (got %.0f x %.0f m)" % [box.size.x, box.size.z])
+		check(box.size.y >= 300.0 and ring.mesh.get_surface_count() >= 3, "#L6.3 forest line + foothills + Alps layers, peaks >= 300 m (%d layers, %.0f m)" % [ring.mesh.get_surface_count(), box.size.y])
+	var world_env := WorldEnvironment.new()
+	world_env.environment = Environment.new()
+	var sun := DirectionalLight3D.new()
+	var cam := Camera3D.new()
+	cam.far = 3500.0
+	root.add_child(world_env)
+	root.add_child(sun)
+	root.add_child(cam)
+	env.bind_world(world_env, sun, cam)
+	var e: Environment = world_env.environment
+	check(sun.light_color.is_equal_approx(Color("#fff3db")), "#L6.4 DAY sun is warm gold #fff3db (got %s)" % sun.light_color.to_html(false))
+	check(is_equal_approx(sun.rotation_degrees.x, -42.0) and is_equal_approx(sun.rotation_degrees.y, 215.0), "#L6.5 sun pitch 42, yaw 215 (got %s)" % sun.rotation_degrees)
+	check(sun.shadow_enabled and sun.shadow_blur > 1.0, "#L6.6 sun casts soft shadows")
+	check(e.ambient_light_color.is_equal_approx(Color("#a3c2f0")) and e.fog_light_color.is_equal_approx(Color("#dce8f5")), "#L6.7 ambient #a3c2f0 and Mediterranean fog #dce8f5")
+	check(e.tonemap_mode == Environment.TONE_MAPPER_ACES and e.glow_enabled and e.fog_enabled, "#L6.8 ACES tonemap, glow and fog on")
+	check(cam.far >= 5000.0, "#L6.9 camera far plane reaches the vista ring (got %.0f)" % cam.far)
+	var glow := ToonMaterials.vertex_colored(false)
+	env.apply_time_of_day({"mode": 1, "floodlights": 0.4, "stars_opacity": 0.0}, 0.0)
+	check(sun.rotation_degrees.x > -25.0 and sun.light_color.r > sun.light_color.b + 0.3, "#L6.10 SUNSET sun drops low and turns orange")
+	check(float(glow.get_shader_parameter("glow_energy")) > 0.5, "#L6.11 SUNSET floodlights start to glow")
+	env.apply_time_of_day({"mode": 2, "floodlights": 1.0, "stars_opacity": 1.0}, 0.0)
+	check(world_env.environment.fog_light_color.get_luminance() < 0.25 and float(glow.get_shader_parameter("glow_energy")) >= 3.0, "#L6.12 NIGHT is dark with floodlights fully lit")
+	env.apply_time_of_day({"mode": 0, "floodlights": 0.0, "stars_opacity": 0.0}, 0.0)
+	check(sun.light_color.is_equal_approx(Color("#fff3db")) and float(glow.get_shader_parameter("glow_energy")) == 0.0, "#L6.13 back to DAY restores light and switches floodlights off")
+	for node: Node in [world_env, sun, cam]:
+		node.queue_free()
 
 
 func _finish() -> void:
