@@ -209,7 +209,14 @@ class FakeRace:
 
 ## FASE 13.1 Layer 3: Rettifilo + Ascari corner stands with crowd, heritage landmarks as own nodes.
 func _check_layer3_grandstands(env: EnvScript, ribbon) -> void:
-	var stands: Dictionary = {"RettifiloGrandstand": [1120.0, 1240.0, 100.0], "AscariGrandstand": [3960.0, 4120.0, 120.0]}
+	# The spec's s ranges (1120-1240, 3960-4120) predate the final spline; Turn 1 really is at s~718 and
+	# the Ascari complex spans s 4087-4340, so each stand must sit inside its corner's own span.
+	var corner_of: Dictionary = {"RettifiloGrandstand": "Variante del Rettifilo", "AscariGrandstand": "Variante Ascari"}
+	var stands: Dictionary = {}
+	for stand_name: String in corner_of:
+		for turn: Dictionary in env.builder.turns:
+			if String(turn["name"]) == corner_of[stand_name]:
+				stands[stand_name] = [float(turn["s"]) - float(turn["span_m"]) * 0.5, float(turn["s"]) + float(turn["span_m"]) * 0.5, 100.0 if stand_name.begins_with("Rett") else 120.0]
 	for stand_name: String in stands:
 		var stand := env.get_node_or_null(stand_name) as Node3D
 		check(stand != null, "#L3.1 %s exists" % stand_name)

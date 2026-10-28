@@ -42,17 +42,20 @@ const SPONSORS: Array[Dictionary] = [
 	{"node": "Agip", "text": "AGIP", "ground": Color("#ffd400"), "band": Color("#14161c"), "ink": Color("#14161c")},
 	{"node": "MagnetiMarelli", "text": "MAGNETI MARELLI", "ground": Color("#2b5fb8"), "band": Color("#f0f2f5"), "ink": Color("#f0f2f5")},
 ]
-const HazeShader := preload("res://shaders/mountain_haze.gdshader")
+const HazeShader := preload("res://shaders/brianza_vista_haze.gdshader")
 const VISTA_FAR_M: float = 6500.0
 const VISTA_BASE_Y: float = -40.0
+## A flank rises from this far inside the crest radius per metre of height; steep enough that the layers never overlap.
+const VISTA_FLANK_RUN: float = 0.12
+
 const SUN_SHADOW_BLUR: float = 1.6
 const FLOODLIGHT_GLOW: float = 4.0
 const STORM_GREY := Color("#4a5260")
 ## Forest line, Montevecchia hills, Alpine foothills: radius, crest height range, ridge noise, colour, haze.
 const VISTA_LAYERS: Array[Dictionary] = [
-	{"radius": 4300.0, "height": Vector2(50.0, 120.0), "freq": 11.0, "segments": 360, "color": Color("#1f4a2e"), "haze": 0.10},
-	{"radius": 4420.0, "height": Vector2(220.0, 480.0), "freq": 2.6, "segments": 180, "color": Color("#55808c"), "haze": 0.30},
-	{"radius": 4550.0, "height": Vector2(500.0, 1050.0), "freq": 1.7, "segments": 180, "color": Color("#8ba7c6"), "haze": 0.55},
+	{"radius": 4300.0, "height": Vector2(50.0, 120.0), "freq": 11.0, "segments": 360, "color": Color("#1d4a2c"), "haze": 0.06, "snow": 0.0},
+	{"radius": 4420.0, "height": Vector2(220.0, 480.0), "freq": 2.6, "segments": 180, "color": Color("#3f6f78"), "haze": 0.18, "snow": 0.0},
+	{"radius": 4550.0, "height": Vector2(500.0, 1050.0), "freq": 1.7, "segments": 180, "color": Color("#6f8fb8"), "haze": 0.34, "snow": 0.85},
 ]
 ## Per time-of-day (DAY, SUNSET, NIGHT): sun, ambient, fog and sky colours; sun angles in degrees.
 const SKY_PROFILES: Array[Dictionary] = [
@@ -66,6 +69,8 @@ const SKY_PROFILES: Array[Dictionary] = [
 		"ambient": Color("#3a4a80"), "ambient_energy": 0.6, "fog": Color("#1b2540"), "fog_density": 0.00034,
 		"sky_top": Color("#060a18"), "sky_horizon": Color("#1a2342"), "ground": Color("#05070d")},
 ]
+const PINE_MIN_DEPTH_M: float = 18.5
+const STAND_FOOTPRINT_DEPTH_M: float = 44.0
 const SOPRA_FOLIAGE_CLEAR_M: float = 24.0
 const SOPRA_PORTAL_THETAS: Array[float] = [-0.88, -0.30, 0.30, 0.88]
 
@@ -120,6 +125,7 @@ var foliage_poses: Dictionary = {}
 var catch_fence_poses: Array[Transform3D] = []
 
 var _foliage_keepouts: Array[Dictionary] = []
+var _stand_footprints: Array[Dictionary] = []
 var _sopra_blockers: PackedVector3Array = PackedVector3Array()
 var vista_ring: MeshInstance3D
 
@@ -292,7 +298,7 @@ func _build_layer6_vista_ring() -> void:
 			var h_range: Vector2 = spec["height"]
 			var height: float = lerpf(h_range.x, h_range.y, pow(clampf(ridged, 0.0, 1.0), 1.5))
 			crest.append(centre + dir * float(spec["radius"]) + Vector3.UP * height)
-			base.append(centre + dir * (float(spec["radius"]) - height * 0.5) + Vector3.UP * VISTA_BASE_Y)
+			base.append(centre + dir * (float(spec["radius"]) - height * VISTA_FLANK_RUN) + Vector3.UP * VISTA_BASE_Y)
 		var st := SurfaceTool.new()
 		st.begin(Mesh.PRIMITIVE_TRIANGLES)
 		for i: int in range(segments):
@@ -308,6 +314,7 @@ func _build_layer6_vista_ring() -> void:
 		material.shader = HazeShader
 		material.set_shader_parameter("layer_color", spec["color"])
 		material.set_shader_parameter("layer_haze", spec["haze"])
+		material.set_shader_parameter("snow_amount", spec["snow"])
 		mesh.surface_set_material(mesh.get_surface_count() - 1, material)
 		_vista_materials.append(material)
 	vista_ring = MeshInstance3D.new()
@@ -454,6 +461,16 @@ func _build_field() -> void:
 	for tone: int in range(GRASS_TONES.size()):
 		tools[tone].commit(mesh)
 		mesh.surface_set_material(tone, ToonMaterials.make(GRASS_TONES[tone]))
+	# Flat park floor under the field and out to the vista ring, so no sky gap shows between them.
+	var floor_mesh := PlaneMesh.new()
+	floor_mesh.size = Vector2(VISTA_LAYERS[2]["radius"] * 2.2, VISTA_LAYERS[2]["radius"] * 2.2)
+	floor_mesh.material = ToonMaterials.make(GRASS_TONES[1])
+	var outer_floor := MeshInstance3D.new()
+	outer_floor.name = "ParcoRealeOuterFloor"
+	outer_floor.mesh = floor_mesh
+	outer_floor.position = Vector3(_track_centre.x, -GROUND_DROP_M - 0.6, _track_centre.y)
+	outer_floor.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	ground_root.add_child(outer_floor)
 	var inst := MeshInstance3D.new()
 	inst.name = "ParcoRealeGroundMesh"
 	inst.mesh = mesh
@@ -770,12 +787,24 @@ func _sopra_portal(batch: MeshBatchScript, mat: Material, station: Dictionary, x
 func _build_layer3_corner_grandstands() -> void:
 	if ribbon == null:
 		return
-	_build_corner_stand("RettifiloGrandstand", 1180.0, 120.0, 3, RED, false)
-	_build_corner_stand("AscariGrandstand", 4040.0, 160.0, 4, Color("#e4e6ec"), true)
+	_build_corner_stand("RettifiloGrandstand", _turn_named("Variante del Rettifilo"), 120.0, 3, RED, false)
+	_build_corner_stand("AscariGrandstand", _turn_named("Variante Ascari"), 160.0, 4, Color("#e4e6ec"), true)
 
 
-func _build_corner_stand(stand_name: String, s_centre: float, length: float, tiers: int, canopy_color: Color, with_screen: bool) -> void:
-	var side: float = 1.0 if ribbon.get_curvature_at(s_centre) >= 0.0 else -1.0
+## The stands follow the spline's real corner positions (the design spec's s ranges predate the final layout).
+func _turn_named(turn_name: String) -> Dictionary:
+	for turn: Dictionary in builder.turns:
+		if String(turn["name"]) == turn_name:
+			return turn
+	return {}
+
+
+func _build_corner_stand(stand_name: String, turn: Dictionary, length: float, tiers: int, canopy_color: Color, with_screen: bool) -> void:
+	if turn.is_empty():
+		return
+	var s_centre: float = float(turn["s"])
+	# Outside of the corner's first bend.
+	var side: float = 1.0 if ribbon.get_curvature_at(float((turn["apex_s"] as Array)[0])) >= 0.0 else -1.0
 	var frame: Transform3D = ribbon.get_point_at_offset(s_centre, side * CORNER_STAND_LATERAL_M)
 	if side < 0.0:
 		frame.basis = frame.basis * Basis(Vector3.UP, PI)
@@ -788,6 +817,8 @@ func _build_corner_stand(stand_name: String, s_centre: float, length: float, tie
 	stand.set_meta("side", side)
 	add_child(stand)
 	_foliage_keepouts.append({"side": side, "s0": s_centre - length * 0.5 - 15.0, "s1": s_centre + length * 0.5 + 15.0, "depth": 100.0})
+	# The stand is a straight block but the corner bends away from it: keep plants off its real footprint too.
+	_stand_footprints.append({"inverse": frame.affine_inverse(), "half_length": length * 0.5 + 8.0})
 
 	var mat: Material = ToonMaterials.vertex_colored(false)
 	var concrete := Color("#b9bdc7")
@@ -985,6 +1016,8 @@ func _build_layer4_dense_park_foliage() -> void:
 				var yaw: float = rng.randf_range(0.0, TAU)
 				var scale_f: float = rng.randf_range(0.85, 1.25)
 				var is_pine: bool = rng.randf() < 0.65
+				if is_pine:
+					depth = maxf(depth, PINE_MIN_DEPTH_M) # umbrella canopy (up to ~6.5 m) must not overhang the road
 				if _foliage_blocked(s, side, depth):
 					continue
 				var pose: Transform3D = ribbon.get_point_at_offset(s, side * depth)
@@ -997,9 +1030,10 @@ func _build_layer4_dense_park_foliage() -> void:
 			# Shrubs fill the gap between the verge and the first trees (not on corner runoff).
 			for _bush: int in range(rng.randi_range(0, 2)):
 				var bush_depth: float = 14.0 + rng.randf_range(0.0, 34.0)
-				if _foliage_blocked(s + rng.randf_range(-6.0, 6.0), side, bush_depth) or (bush_depth < 40.0 and _near_corner(s)):
+				var bush_s: float = s + rng.randf_range(-6.0, 6.0)
+				if _foliage_blocked(bush_s, side, bush_depth) or (bush_depth < 40.0 and _near_corner(bush_s)):
 					continue
-				var bush: Transform3D = ribbon.get_point_at_offset(s + rng.randf_range(-6.0, 6.0), side * bush_depth)
+				var bush: Transform3D = ribbon.get_point_at_offset(bush_s, side * bush_depth)
 				bush.origin.y = ground_y_at(bush.origin)
 				bush.basis = Basis(Vector3.UP, rng.randf_range(0.0, TAU)).scaled(Vector3.ONE * rng.randf_range(0.8, 1.5))
 				bush_poses.append(bush)
@@ -1029,9 +1063,9 @@ func _stone_pine_mesh(mat: Material) -> ArrayMesh:
 		var dir: Vector3 = leans[i].normalized()
 		batch.cylinder(mat, trunk_col, Transform3D(Basis(Quaternion(Vector3.UP, dir)), at), radii[i], radii[i + 1], heights[i], 6, false)
 		at += dir * heights[i]
-	batch.cylinder(mat, Color("#2d5432"), Transform3D(Basis.IDENTITY, at + Vector3(0.0, 0.2, 0.0)), 6.0, 4.2, 1.6, 8)
-	batch.cylinder(mat, Color("#3f7345"), Transform3D(Basis.IDENTITY, at + Vector3(0.0, 1.5, 0.0)), 4.8, 3.2, 1.5, 8)
-	batch.cylinder(mat, Color("#528c5a"), Transform3D(Basis.IDENTITY, at + Vector3(0.0, 2.8, 0.0)), 3.2, 0.0, 1.8, 8, true, false)
+	batch.cylinder(mat, Color("#2d5432"), Transform3D(Basis.IDENTITY, at + Vector3(0.0, 0.2, 0.0)), 5.2, 3.8, 1.6, 8)
+	batch.cylinder(mat, Color("#3f7345"), Transform3D(Basis.IDENTITY, at + Vector3(0.0, 1.5, 0.0)), 4.2, 2.8, 1.5, 8)
+	batch.cylinder(mat, Color("#528c5a"), Transform3D(Basis.IDENTITY, at + Vector3(0.0, 2.8, 0.0)), 2.8, 0.0, 1.8, 8, true, false)
 	return batch.commit()
 
 
@@ -1059,6 +1093,10 @@ func _foliage_blocked(s: float, side: float, depth: float) -> bool:
 		if side == float(zone["side"]) and depth <= float(zone["depth"]) and s >= float(zone["s0"]) and s <= float(zone["s1"]):
 			return true
 	var at: Vector3 = ribbon.get_point_at_offset(s, side * depth).origin
+	for footprint: Dictionary in _stand_footprints:
+		var local: Vector3 = (footprint["inverse"] as Transform3D) * at
+		if local.x > -6.0 and local.x < STAND_FOOTPRINT_DEPTH_M and absf(local.z) < float(footprint["half_length"]):
+			return true
 	for blocker: Vector3 in _sopra_blockers:
 		if Vector2(at.x - blocker.x, at.z - blocker.z).length_squared() < SOPRA_FOLIAGE_CLEAR_M * SOPRA_FOLIAGE_CLEAR_M:
 			return true
