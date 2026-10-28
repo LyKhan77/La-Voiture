@@ -7,6 +7,7 @@ extends SceneTree
 
 const ConfigScript := preload("res://scripts/core/race_config_data.gd")
 const MenuScene := preload("res://scenes/ui/race_setup_menu.tscn")
+const GarageScene := preload("res://scenes/ui/garage_team_select.tscn")
 const TrackScene := preload("res://scenes/race_world/track_circuit.tscn")
 const TrackScript := preload("res://scripts/gt/gt_track.gd")
 const RaceScript := preload("res://scripts/gt/gt_race.gd")
@@ -118,6 +119,32 @@ func _run() -> void:
 	check(menu.find_child("dynamics_select", true, false) != null, "Race Dynamics selector (Opsi A) exists in Race Setup")
 
 	menu.queue_free()
+	await process_frame
+
+	# 6. The team garage reads the same draft: DYNAMIC weather and RANDOM time must not index past its label tables
+	cfg = ConfigScript.reset()
+	cfg.weather_preset = 4
+	cfg.time_of_day = 3
+	cfg.total_laps = 5
+	var dry_seed: int = 1
+	for candidate: int in range(1, 200):
+		cfg.race_seed = candidate
+		if cfg.make_weather().track_water_pct < 5.0:
+			dry_seed = candidate
+			break
+	cfg.race_seed = dry_seed
+	var garage: Node = GarageScene.instantiate()
+	root.add_child(garage)
+	await process_frame
+	var state := garage.find_child("ForecastState", true, false) as Label
+	var race_line := garage.find_child("RaceLine", true, false) as Label
+	var time_names: Array[String] = ["DAYLIGHT", "GOLDEN HOUR", "NIGHT CIRCUIT"]
+	var rolled: String = time_names[cfg.resolved_time_of_day()]
+	check(state != null and state.text == "DYNAMIC RADAR" and race_line != null and race_line.text.contains(rolled),
+		"garage forecast names DYNAMIC RADAR and the rolled RANDOM time (%s)" % rolled)
+	var hazard: Variant = garage.call("_hazard_for", 1) # MEDIUM slicks on a DYNAMIC start that is dry
+	check(hazard == "", "a dry DYNAMIC start does not flag slicks as SLICKS_ON_WET (got '%s')" % str(hazard))
+	garage.queue_free()
 	await process_frame
 	print("RACE SETUP OVERHAUL: %d assertions, %d failure(s)" % [assertions, failures])
 	quit(0 if failures == 0 else 1)

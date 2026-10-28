@@ -146,7 +146,7 @@ func _ready() -> void:
 	config.selected_team_id = selected_team
 	# Weather-adaptive auto-default for starting compounds
 	var optimal: int = get_optimal_compound()
-	if config.weather_preset >= 2:
+	if config.is_wet_preset():
 		if config.car1_starting_compound in [Types.Compound.SOFT, Types.Compound.MEDIUM, Types.Compound.HARD]:
 			config.car1_starting_compound = optimal
 		if config.car2_starting_compound in [Types.Compound.SOFT, Types.Compound.MEDIUM, Types.Compound.HARD]:
@@ -475,7 +475,7 @@ func _refresh_drivers(team: int) -> void:
 ## "SLICKS_ON_WET", "WETS_ON_DRY" or "" for a starting compound on this race's track.
 func _hazard_for(compound: int) -> String:
 	var water_known: bool = _forecast_weather != null
-	var is_wet_track: bool = (water_known and _forecast_weather.track_water_pct >= 35.0) or (config != null and config.weather_preset >= 2)
+	var is_wet_track: bool = (water_known and _forecast_weather.track_water_pct >= 35.0) or (config != null and config.is_wet_preset())
 	var is_dry_track: bool = (water_known and _forecast_weather.track_water_pct <= 12.0) and (config != null and config.weather_preset == 0)
 	if is_wet_track and compound in [Types.Compound.SOFT, Types.Compound.MEDIUM, Types.Compound.HARD]:
 		return "SLICKS_ON_WET"
@@ -555,10 +555,12 @@ func _inspect(compound: int, car_slot: int) -> void:
 	_inspect_meta.text = "CAR %d // %s // CORNER %s // BRAKE %s" % [car_slot + 1, driver, cornering, braking]
 	_inspect_box.queue_redraw()
 func _refresh_forecast() -> void:
-	var time_name: String = ["DAYLIGHT", "GOLDEN HOUR", "NIGHT CIRCUIT"][config.time_of_day]
-	_forecast_state.text = ["SUNNY DRY", "THREATENING RAIN", "DYNAMIC WET", "FULL MONSOON"][config.weather_preset]
+	# RANDOM time and DYNAMIC weather are settled by the seed, so show what this race will actually run.
+	var time_name: String = ["DAYLIGHT", "GOLDEN HOUR", "NIGHT CIRCUIT"][config.resolved_time_of_day()]
+	_forecast_state.text = ["SUNNY DRY", "THREATENING RAIN", "DYNAMIC WET", "FULL MONSOON", "DYNAMIC RADAR"][config.weather_preset]
 	_forecast_detail.text = "RAIN CHANCE %d%% // INITIAL WATER %d%%" % [
-		[0, 60, 100, 100][config.weather_preset], roundi(_forecast_weather.track_water_pct),
+		[0, 60, 100, 100, roundi(config.get_active_circuit().rain_probability * 100.0)][config.weather_preset],
+		roundi(_forecast_weather.track_water_pct),
 	]
 	var states: Array[int] = []
 	for index: int in range(mini(config.total_laps, 5)):

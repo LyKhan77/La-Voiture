@@ -44,6 +44,11 @@ func get_active_circuit() -> CircuitDataScript:
 		circuit = CircuitRegistry.get_circuit(CircuitRegistry.DEFAULT_CIRCUIT_ID)
 	return circuit
 
+## WET (2) and MONSOON (3) start on a flattened wet forecast; DYNAMIC (4) starts wherever its seed says.
+func is_wet_preset() -> bool:
+	return weather_preset == 2 or weather_preset == 3
+
+
 ## Rerolls the exhibition seed, so the DYNAMIC forecast and a RANDOM time of race change; returns it.
 func reroll_seed() -> int:
 	var next_seed: int = randi_range(1, 2147483647)
@@ -114,7 +119,7 @@ func make_weather() -> GtWeather:
 ## Shared by the garage forecast and actual grid, including the wet-start overrides.
 func apply_weather(weather: GtWeather) -> void:
 	# The wet presets flatten the forecast; DYNAMIC (4) keeps GtWeather's own lap-by-lap curve.
-	if weather_preset == 2 or weather_preset == 3:
+	if is_wet_preset():
 		for index: int in range(weather.forecast.size()):
 			var progress: float = minf(1.0, float(index) / maxf(1.0, float(total_laps - 1)))
 			var entry: Dictionary = weather.forecast[index]
