@@ -113,6 +113,7 @@ func _run() -> void:
 		_check_layer2_sopraelevata(env)
 		_check_layer3_grandstands(env, ribbon)
 		await _check_jumbotron_feed(env, instance)
+		_check_layer4_foliage(env)
 
 	# Calendar Registry integration
 	var circuit_data = RegistryScript.get_circuit("brianza")
@@ -241,6 +242,49 @@ func _check_jumbotron_feed(env: EnvScript, instance: Node3D) -> void:
 		race.order.append(car)
 	env.update(1.0, race)
 	check(ascari_screen.last_row_colors.size() == 3 and main_screen.last_row_colors.size() == 3, "#L3.9 both Jumbotrons show the live standings")
+
+
+## FASE 13.1 Layer 4: umbrella pines (3-tone canopy), cypresses, undergrowth; grounded, shadowless, clear of stands.
+func _check_layer4_foliage(env: EnvScript) -> void:
+	var root := env.get_node_or_null("ParcoRealeFoliage")
+	var minimums: Dictionary = {"StonePines": 450, "ItalianCypresses": 250, "UndergrowthBushes": 300}
+	var batches: Dictionary = {}
+	for batch_name: String in minimums:
+		var inst := root.get_node_or_null(batch_name) as MultiMeshInstance3D if root != null else null
+		batches[batch_name] = inst
+		var count: int = inst.multimesh.instance_count if inst != null else 0
+		check(count >= int(minimums[batch_name]), "#L4.1 %s has >= %d instances (got %d)" % [batch_name, minimums[batch_name], count])
+		check(inst != null and inst.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF, "#L4.2 %s casts no shadow" % batch_name)
+	var pines := batches["StonePines"] as MultiMeshInstance3D
+	if pines == null:
+		return
+	var colors: PackedColorArray = pines.multimesh.mesh.surface_get_arrays(0)[Mesh.ARRAY_COLOR]
+	var tones_found: int = 0
+	for tone: String in ["#2d5432", "#3f7345", "#528c5a"]:
+		var want: Color = Color(tone).srgb_to_linear()
+		for c: Color in colors:
+			# Mesh vertex colours are stored 8-bit, so match to one quantisation step.
+			if absf(c.r - want.r) < 0.01 and absf(c.g - want.g) < 0.01 and absf(c.b - want.b) < 0.01:
+				tones_found += 1
+				break
+	check(tones_found == 3, "#L4.3 pine umbrella canopy has 3 cel tones (found %d)" % tones_found)
+	var worst_gap: float = 0.0
+	var inside_stand: int = 0
+	var stands: Array[Node3D] = [env.get_node("RettifiloGrandstand") as Node3D, env.get_node("AscariGrandstand") as Node3D]
+	# Headless MultiMeshes keep no transforms, so read the poses the environment kept.
+	for batch_name: String in minimums:
+		var poses: Array = env.foliage_poses.get(batch_name, [])
+		var inst := batches[batch_name] as MultiMeshInstance3D
+		check(inst != null and poses.size() == inst.multimesh.instance_count, "#L4.6 %s kept every pose (%d)" % [batch_name, poses.size()])
+		for i: int in range(0, poses.size(), 7):
+			var origin: Vector3 = (poses[i] as Transform3D).origin
+			worst_gap = maxf(worst_gap, absf(origin.y - env.ground_y_at(origin)))
+			for stand: Node3D in stands:
+				var local: Vector3 = stand.to_local(origin)
+				if local.x > -4.0 and local.x < 40.0 and absf(local.z) < float(stand.get_meta("length_m")) * 0.5 + 6.0:
+					inside_stand += 1
+	check(worst_gap <= 0.6, "#L4.4 every sampled tree/bush stands on the ground (worst gap %.2f m)" % worst_gap)
+	check(inside_stand == 0, "#L4.5 no foliage inside the corner grandstands (%d found)" % inside_stand)
 
 
 func _finish() -> void:

@@ -32,6 +32,7 @@ const SOPRA_WIDTH_M: float = 14.0
 const SOPRA_THICKNESS_M: float = 1.8
 const SOPRA_CLEARANCE_M: float = 13.5
 ## Portal positions as a share of the half arc: two either side of the crossing.
+const SOPRA_FOLIAGE_CLEAR_M: float = 24.0
 const SOPRA_PORTAL_THETAS: Array[float] = [-0.88, -0.30, 0.30, 0.88]
 
 const CORNER_STAND_LATERAL_M: float = 50.0
@@ -79,6 +80,11 @@ var kerbs: Array[Dictionary] = []
 var runoff_plans: Array[Dictionary] = []
 var ground_root: Node3D
 
+## Instance poses of each foliage batch by node name (headless MultiMeshes keep none).
+var foliage_poses: Dictionary = {}
+
+var _foliage_keepouts: Array[Dictionary] = []
+var _sopra_blockers: PackedVector3Array = PackedVector3Array()
 var _ascari_screen: Jumbotron
 var _jumbotron_clock: float = 0.0
 
@@ -106,7 +112,7 @@ func build(p_ribbon: RibbonScript, p_builder: CircuitBuilderScript) -> void:
 	_build_layer2_sopraelevata_monumental()
 	_build_tier_b_landmarks()
 	_build_layer3_corner_grandstands()
-	_build_tier_b_royal_park_foliage()
+	_build_layer4_dense_park_foliage()
 
 
 func bind_world(_world_env: WorldEnvironment, _sun: DirectionalLight3D, _camera: Camera3D) -> void:
@@ -516,6 +522,7 @@ func _build_layer2_sopraelevata_monumental() -> void:
 	var rail := MeshBatchScript.new()
 	for i: int in range(segments + 1):
 		var st_a: Dictionary = _sopra_station(-half_arc + 2.0 * half_arc * float(i) / float(segments), y0, bank)
+		_sopra_blockers.append(xform * (st_a["pos"] as Vector3))
 		if i == 0 or i == segments:
 			var end_sign: float = -1.0 if i == 0 else 1.0
 			_sopra_cap(deck, mat, conc_col, st_a, half_w, end_sign)
@@ -597,6 +604,7 @@ func _sopra_portal(batch: MeshBatchScript, mat: Material, station: Dictionary, x
 		var base_world: float = ground_y_at(xform * Vector3(top.x, 0.0, top.z))
 		var base_y: float = base_world - xform.origin.y - 1.0
 		var height: float = top.y - base_y
+		_sopra_blockers.append(xform * top)
 		batch.box(mat, pier_col, Transform3D(basis.orthonormalized(), Vector3(top.x, base_y + height * 0.5, top.z)), Vector3(3.2, height, 4.4))
 		tops.append(top)
 	var beam_mid: Vector3 = (tops[0] + tops[1]) * 0.5
@@ -627,6 +635,7 @@ func _build_corner_stand(stand_name: String, s_centre: float, length: float, tie
 	stand.set_meta("length_m", length)
 	stand.set_meta("side", side)
 	add_child(stand)
+	_foliage_keepouts.append({"side": side, "s0": s_centre - length * 0.5 - 15.0, "s1": s_centre + length * 0.5 + 15.0, "depth": 100.0})
 
 	var mat: Material = ToonMaterials.vertex_colored(false)
 	var concrete := Color("#b9bdc7")
@@ -765,6 +774,7 @@ func _build_tier_b_landmarks() -> void:
 	# Torre Ascari (vintage timing & signal tower at s = 4150 m, entry to Ascari chicane)
 	var tower_pose: Transform3D = ribbon.get_point_at_offset(ASCARI_TOWER_S, 16.5)
 	tower_pose.origin.y = ground_y_at(tower_pose.origin)
+	_foliage_keepouts.append({"side": 1.0, "s0": ASCARI_TOWER_S - 25.0, "s1": ASCARI_TOWER_S + 25.0, "depth": 35.0})
 	var tower := MeshBatchScript.new()
 	var tower_col := Color("#4d5361")
 	var glass_col := Color("#2b4a66")
@@ -786,73 +796,128 @@ func _build_tier_b_landmarks() -> void:
 	landmarks.add_child(tower_inst)
 
 
-## Tier B Biome: Parco Reale di Monza (Stone Pines with broad umbrella canopies & Italian Cypresses)
-func _build_tier_b_royal_park_foliage() -> void:
+## Layer 4: Parco Reale di Monza. Umbrella stone pines (3 cel-toned canopy tiers), slender cypresses
+## and low undergrowth, on the ground, 16..85 m off the centre line, clear of stands and the viaduct.
+func _build_layer4_dense_park_foliage() -> void:
 	if ribbon == null or ribbon.curve == null:
 		return
-		
+
 	tree_multimeshes.clear()
+	foliage_poses.clear()
 	var foliage_root := Node3D.new()
 	foliage_root.name = "ParcoRealeFoliage"
 	add_child(foliage_root)
-	
+
 	var length_m: float = ribbon.curve.get_baked_length()
 	var pine_poses: Array[Transform3D] = []
 	var cypress_poses: Array[Transform3D] = []
-	
+	var bush_poses: Array[Transform3D] = []
+
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 19220903 # Monza opening date: September 3, 1922
-	
+
 	var step_m: float = 14.0
 	var count: int = ceili(length_m / step_m)
-	
+
 	for i: int in range(count):
 		var s: float = float(i) * step_m
-		
+
 		# Skip pit building frontage zone
 		if s > 5450.0 or s < 250.0:
 			continue
-			
+
 		for side: float in [-1.0, 1.0]:
 			var num_layers: int = rng.randi_range(1, 3)
 			for layer: int in range(num_layers):
 				var depth: float = 16.0 + float(layer) * 14.0 + rng.randf_range(-3.0, 5.0)
-				var pose: Transform3D = ribbon.get_point_at_offset(s, side * depth)
-				pose.origin.y = maxf(pose.origin.y, -7.0)
-				
 				var yaw: float = rng.randf_range(0.0, TAU)
 				var scale_f: float = rng.randf_range(0.85, 1.25)
+				var is_pine: bool = rng.randf() < 0.65
+				if _foliage_blocked(s, side, depth):
+					continue
+				var pose: Transform3D = ribbon.get_point_at_offset(s, side * depth)
+				pose.origin.y = ground_y_at(pose.origin)
 				pose.basis = Basis(Vector3.UP, yaw).scaled(Vector3.ONE * scale_f)
-				
-				if rng.randf() < 0.65:
+				if is_pine:
 					pine_poses.append(pose)
 				else:
 					cypress_poses.append(pose)
-					
-	# Create Pine Tree Mesh (Trunk + Umbrella Canopy)
-	var pine_batch := MeshBatchScript.new()
-	var mat_trunk: Material = ToonMaterials.vertex_colored(false)
+			# Shrubs fill the gap between the verge and the first trees (not on corner runoff).
+			for _bush: int in range(rng.randi_range(0, 2)):
+				var bush_depth: float = 14.0 + rng.randf_range(0.0, 34.0)
+				if _foliage_blocked(s + rng.randf_range(-6.0, 6.0), side, bush_depth) or (bush_depth < 40.0 and _near_corner(s)):
+					continue
+				var bush: Transform3D = ribbon.get_point_at_offset(s + rng.randf_range(-6.0, 6.0), side * bush_depth)
+				bush.origin.y = ground_y_at(bush.origin)
+				bush.basis = Basis(Vector3.UP, rng.randf_range(0.0, TAU)).scaled(Vector3.ONE * rng.randf_range(0.8, 1.5))
+				bush_poses.append(bush)
+
+	var mat: Material = ToonMaterials.vertex_colored(false)
+	foliage_root.add_child(_foliage_batch("StonePines", _stone_pine_mesh(mat), pine_poses))
+	foliage_root.add_child(_foliage_batch("ItalianCypresses", _cypress_mesh(mat), cypress_poses))
+	foliage_root.add_child(_foliage_batch("UndergrowthBushes", _undergrowth_mesh(mat), bush_poses))
+
+
+func _foliage_batch(node_name: String, mesh: Mesh, poses: Array[Transform3D]) -> MultiMeshInstance3D:
+	var inst := _create_multimesh_instance(node_name, mesh, poses)
+	tree_multimeshes.append(inst)
+	foliage_poses[node_name] = poses
+	return inst
+
+
+## Stone pine: leaning trunk in three tilted sections under three stacked umbrella tiers.
+func _stone_pine_mesh(mat: Material) -> ArrayMesh:
+	var batch := MeshBatchScript.new()
 	var trunk_col := Color("#4a3728")
-	var pine_leaf_col := Color("#355e3b")
-	pine_batch.cylinder(mat_trunk, trunk_col, Transform3D(Basis.IDENTITY, Vector3(0.0, 4.0, 0.0)), 0.35, 0.30, 8.0, 8)
-	pine_batch.cylinder(mat_trunk, pine_leaf_col, Transform3D(Basis.IDENTITY, Vector3(0.0, 8.5, 0.0)), 5.2, 4.2, 2.5, 10)
-	pine_batch.cylinder(mat_trunk, pine_leaf_col * 0.9, Transform3D(Basis.IDENTITY, Vector3(0.0, 10.5, 0.0)), 4.0, 0.0, 2.0, 10)
-	var pine_mesh: ArrayMesh = pine_batch.commit()
-	
-	var pine_inst := _create_multimesh_instance("StonePines", pine_mesh, pine_poses)
-	foliage_root.add_child(pine_inst)
-	tree_multimeshes.append(pine_inst)
-	
-	# Create Cypress Tree Mesh (Slender tall green column)
-	var cyp_batch := MeshBatchScript.new()
-	var cyp_leaf_col := Color("#1e3f20")
-	cyp_batch.cylinder(mat_trunk, trunk_col, Transform3D(Basis.IDENTITY, Vector3(0.0, 1.5, 0.0)), 0.2, 0.2, 3.0, 6)
-	cyp_batch.cylinder(mat_trunk, cyp_leaf_col, Transform3D(Basis.IDENTITY, Vector3(0.0, 7.0, 0.0)), 1.4, 0.0, 9.0, 8)
-	var cyp_mesh: ArrayMesh = cyp_batch.commit()
-	
-	var cyp_inst := _create_multimesh_instance("ItalianCypresses", cyp_mesh, cypress_poses)
-	foliage_root.add_child(cyp_inst)
-	tree_multimeshes.append(cyp_inst)
+	var leans: Array[Vector3] = [Vector3(0.08, 1.0, 0.0), Vector3(-0.10, 1.0, 0.05), Vector3(0.06, 1.0, -0.06)]
+	var heights: Array[float] = [3.0, 3.0, 2.6]
+	var radii: Array[float] = [0.40, 0.34, 0.28, 0.22]
+	var at := Vector3.ZERO
+	for i: int in range(leans.size()):
+		var dir: Vector3 = leans[i].normalized()
+		batch.cylinder(mat, trunk_col, Transform3D(Basis(Quaternion(Vector3.UP, dir)), at), radii[i], radii[i + 1], heights[i], 6, false)
+		at += dir * heights[i]
+	batch.cylinder(mat, Color("#2d5432"), Transform3D(Basis.IDENTITY, at + Vector3(0.0, 0.2, 0.0)), 6.0, 4.2, 1.6, 8)
+	batch.cylinder(mat, Color("#3f7345"), Transform3D(Basis.IDENTITY, at + Vector3(0.0, 1.5, 0.0)), 4.8, 3.2, 1.5, 8)
+	batch.cylinder(mat, Color("#528c5a"), Transform3D(Basis.IDENTITY, at + Vector3(0.0, 2.8, 0.0)), 3.2, 0.0, 1.8, 8, true, false)
+	return batch.commit()
+
+
+## Italian cypress: dark column of two stacked tall cones on a short trunk.
+func _cypress_mesh(mat: Material) -> ArrayMesh:
+	var batch := MeshBatchScript.new()
+	batch.cylinder(mat, Color("#4a3728"), Transform3D(Basis.IDENTITY, Vector3.ZERO), 0.22, 0.2, 2.0, 5, false)
+	batch.cylinder(mat, Color("#1c3822"), Transform3D(Basis.IDENTITY, Vector3(0.0, 1.5, 0.0)), 1.5, 0.0, 11.0, 7, true, false)
+	batch.cylinder(mat, Color("#234a2c"), Transform3D(Basis(Vector3.UP, 0.5), Vector3(0.0, 1.0, 0.0)), 1.1, 0.0, 8.0, 7, true, false)
+	return batch.commit()
+
+
+## Undergrowth: a cluster of three low shrub mounds, dark and light green.
+func _undergrowth_mesh(mat: Material) -> ArrayMesh:
+	var batch := MeshBatchScript.new()
+	batch.cylinder(mat, Color("#2f6b3a"), Transform3D(Basis.IDENTITY, Vector3.ZERO), 1.3, 0.6, 0.9, 7, true, false)
+	batch.cylinder(mat, Color("#3f8a47"), Transform3D(Basis.IDENTITY, Vector3(1.0, 0.0, 0.4)), 0.9, 0.4, 0.7, 7, true, false)
+	batch.cylinder(mat, Color("#2a5f33"), Transform3D(Basis.IDENTITY, Vector3(-0.8, 0.0, -0.5)), 1.0, 0.5, 0.8, 7, true, false)
+	return batch.commit()
+
+
+## True when a plant at (s, side, depth) would sit inside a stand, the tower or under the viaduct.
+func _foliage_blocked(s: float, side: float, depth: float) -> bool:
+	for zone: Dictionary in _foliage_keepouts:
+		if side == float(zone["side"]) and depth <= float(zone["depth"]) and s >= float(zone["s0"]) and s <= float(zone["s1"]):
+			return true
+	var at: Vector3 = ribbon.get_point_at_offset(s, side * depth).origin
+	for blocker: Vector3 in _sopra_blockers:
+		if Vector2(at.x - blocker.x, at.z - blocker.z).length_squared() < SOPRA_FOLIAGE_CLEAR_M * SOPRA_FOLIAGE_CLEAR_M:
+			return true
+	return false
+
+
+func _near_corner(s: float) -> bool:
+	for run: Dictionary in kerbs:
+		if s >= float(run["s0"]) - 40.0 and s <= float(run["s1"]) + 40.0:
+			return true
+	return false
 
 
 func _create_multimesh_instance(node_name: String, mesh: Mesh, poses: Array[Transform3D]) -> MultiMeshInstance3D:
