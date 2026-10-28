@@ -110,6 +110,7 @@ func _run() -> void:
 		check(heritage != null, "#B20 HeroLandmarks_MonzaHeritage exists (Villa Reale & Torre Ascari)")
 		
 		_check_layer1_ground(env, ribbon)
+		_check_layer2_sopraelevata(env)
 
 	# Calendar Registry integration
 	var circuit_data = RegistryScript.get_circuit("brianza")
@@ -153,6 +154,37 @@ func _check_layer1_ground(env: EnvScript, ribbon) -> void:
 			best_gap = minf(best_gap, gap)
 		s += 50.0
 	check(best_gap >= 0.05 and worst_gap <= 3.0, "#L1.8 road is supported: ground 0.05..3.0 m below every sample (got %.2f..%.2f)" % [best_gap, worst_gap])
+
+
+## FASE 13.1 Layer 2: curved 480 m banked oval deck on four dual-pier portals, rusty rail.
+func _check_layer2_sopraelevata(env: EnvScript) -> void:
+	var sopra := env.get_node_or_null("HeroLandmark_Sopraelevata") as Node3D
+	var deck := sopra.get_node_or_null("SopraelevataViaductMesh") as MeshInstance3D if sopra != null else null
+	check(deck != null, "#L2.1 Sopraelevata deck mesh exists")
+	if deck == null:
+		return
+	var span: Vector3 = deck.mesh.get_aabb().size
+	check(maxf(span.x, span.z) >= 400.0, "#L2.2 deck chord spans >= 400 m (got %.0f m)" % maxf(span.x, span.z))
+	check(float(sopra.get_meta("arc_length_m", 0.0)) >= 400.0 and is_equal_approx(float(sopra.get_meta("bank_deg", 0.0)), 28.0),
+		"#L2.3 deck arc >= 400 m banked 28 deg")
+	check(span.y >= 6.0, "#L2.4 banked deck rises >= 6 m edge to edge (got %.1f m)" % span.y)
+	var arrays: Array = deck.mesh.surface_get_arrays(0)
+	var min_over_track: float = INF
+	for v: Vector3 in arrays[Mesh.ARRAY_VERTEX]:
+		if absf(v.x) <= 7.0 and absf(v.z) <= 30.0:
+			min_over_track = minf(min_over_track, v.y)
+	check(min_over_track < INF and min_over_track >= 12.0,"#L2.5 deck clears the straight by >= 12 m (got %.1f m)" % min_over_track)
+	var portals: Array[Node] = []
+	var portal_root := sopra.get_node_or_null("SopraelevataPortals")
+	if portal_root != null:
+		portals = portal_root.get_children()
+	check(portals.size() >= 4, "#L2.6 at least 4 dual-pier portals (got %d)" % portals.size())
+	var tall: bool = not portals.is_empty()
+	for portal: Node in portals:
+		tall = tall and portal is MeshInstance3D and (portal as MeshInstance3D).mesh.get_aabb().size.y >= 12.0
+	check(tall, "#L2.7 every portal stands >= 12 m")
+	var rail := sopra.get_node_or_null("SopraelevataGuardrail") as MeshInstance3D
+	check(rail != null and rail.mesh != null and rail.mesh.get_aabb().size.y >= 2.0, "#L2.8 rusty guardrail runs along the upper lip")
 
 
 func _finish() -> void:

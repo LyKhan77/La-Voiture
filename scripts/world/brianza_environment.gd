@@ -22,6 +22,16 @@ const SERRAGLIO_OVERPASS_S: float = 3450.0
 const ASCARI_TOWER_S: float = 4150.0
 const VILLA_GATE_S: float = 5600.0
 
+const SOPRA_ARC_M: float = 480.0
+const SOPRA_RADIUS_M: float = 320.0
+const SOPRA_BANK_DEG: float = 28.0
+const SOPRA_YAW_DEG: float = 25.0
+const SOPRA_WIDTH_M: float = 14.0
+const SOPRA_THICKNESS_M: float = 1.8
+const SOPRA_CLEARANCE_M: float = 13.5
+## Portal positions as a share of the half arc: two either side of the crossing.
+const SOPRA_PORTAL_THETAS: Array[float] = [-0.88, -0.30, 0.30, 0.88]
+
 const KERB_CURVATURE: float = 0.006
 const KERB_MIN_LENGTH_M: float = 14.0
 const KERB_SCAN_STEP_M: float = 2.0
@@ -80,7 +90,7 @@ func build(p_ribbon: RibbonScript, p_builder: CircuitBuilderScript) -> void:
 	_build_tier_a_surface()
 	_build_tier_a_furniture()
 	_build_tier_a_sky()
-	_build_tier_b_sopraelevata()
+	_build_layer2_sopraelevata_monumental()
 	_build_tier_b_landmarks()
 	_build_tier_b_royal_park_foliage()
 
@@ -436,50 +446,126 @@ func _build_tier_a_sky() -> void:
 	shared_sky.build(self, ribbon)
 
 
-## Hero Landmark 1: La Sopraelevata di Monza (1950s High-Banked Oval Concrete Overpass Viaduct)
-func _build_tier_b_sopraelevata() -> void:
+## Layer 2, Hero Landmark 1: La Sopraelevata di Monza. A 480 m arc of banked concrete deck (R 320 m)
+## swung diagonally over the Serraglio straight on four dual-pier portals. Station frame: T along the
+## deck, N horizontal toward the arc centre, deck plane tilted BANK_DEG with the inner edge low.
+func _build_layer2_sopraelevata_monumental() -> void:
 	sopraelevata = Node3D.new()
 	sopraelevata.name = "HeroLandmark_Sopraelevata"
 	add_child(sopraelevata)
-	
+
 	if ribbon == null:
 		return
-		
+
 	var xform: Transform3D = ribbon.get_point_at_offset(SERRAGLIO_OVERPASS_S, 0.0)
 	sopraelevata.transform = xform
-	
-	var batch := MeshBatchScript.new()
+	sopraelevata.set_meta("arc_length_m", SOPRA_ARC_M)
+	sopraelevata.set_meta("bank_deg", SOPRA_BANK_DEG)
+	sopraelevata.set_meta("clearance_m", SOPRA_CLEARANCE_M)
+
 	var mat: Material = ToonMaterials.vertex_colored(false)
 	var conc_col := Color("#8a8f9c")
 	var dark_conc := Color("#555966")
 	var rust_col := Color("#733d26")
-	
-	# Massive support piers on both sides of the 14 m GP track
-	for side: float in [-1.0, 1.0]:
-		var pier_x: float = side * 14.5
-		# Concrete pillar base
-		batch.box(mat, dark_conc, Transform3D(Basis.IDENTITY, Vector3(pier_x, 6.0, 0.0)), Vector3(4.5, 12.0, 5.0))
-		# Concrete arch bracket
-		batch.box(mat, conc_col, Transform3D(Basis.IDENTITY, Vector3(pier_x * 0.85, 11.5, 0.0)), Vector3(3.0, 2.5, 5.2))
-		
-	# High-banked oval deck crossing overhead (inclined 28 degrees)
-	var deck_rot := Basis(Vector3.FORWARD, deg_to_rad(28.0))
-	var deck_pose := Transform3D(deck_rot, Vector3(0.0, 13.5, 0.0))
-	# Main banked roadbed
-	batch.box(mat, conc_col, deck_pose, Vector3(42.0, 1.8, 14.0))
-	# Historic safety crash rail on outer upper lip of the banking
-	var rail_pose := deck_pose
-	rail_pose.origin += deck_pose.basis.x * 20.0 + deck_pose.basis.y * 1.5
-	batch.box(mat, rust_col, rail_pose, Vector3(1.2, 2.2, 14.2))
-	# Inner lower lip
-	var lip_pose := deck_pose
-	lip_pose.origin -= deck_pose.basis.x * 20.0 - deck_pose.basis.y * 0.5
-	batch.box(mat, dark_conc, lip_pose, Vector3(1.2, 1.2, 14.2))
-	
+	var half_arc: float = SOPRA_ARC_M * 0.5 / SOPRA_RADIUS_M
+	var segments: int = int(SOPRA_ARC_M / 12.0)
+	var bank: float = deg_to_rad(SOPRA_BANK_DEG)
+	var half_w: float = SOPRA_WIDTH_M * 0.5
+	# Underside of the inner (low) edge is the clearance line over the track.
+	var y0: float = SOPRA_CLEARANCE_M + half_w * sin(bank) + SOPRA_THICKNESS_M * cos(bank)
+
+	var deck := MeshBatchScript.new()
+	var rail := MeshBatchScript.new()
+	for i: int in range(segments + 1):
+		var st_a: Dictionary = _sopra_station(-half_arc + 2.0 * half_arc * float(i) / float(segments), y0, bank)
+		if i == 0 or i == segments:
+			var end_sign: float = -1.0 if i == 0 else 1.0
+			_sopra_cap(deck, mat, conc_col, st_a, half_w, end_sign)
+		if i == segments:
+			break
+		var st_b: Dictionary = _sopra_station(-half_arc + 2.0 * half_arc * float(i + 1) / float(segments), y0, bank)
+		var tone: Color = conc_col.lerp(dark_conc, 0.28 * fmod(float(i) * 0.618, 1.0))
+		var tl_a: Vector3 = _sopra_edge(st_a, -half_w, 0.0)
+		var tr_a: Vector3 = _sopra_edge(st_a, half_w, 0.0)
+		var tl_b: Vector3 = _sopra_edge(st_b, -half_w, 0.0)
+		var tr_b: Vector3 = _sopra_edge(st_b, half_w, 0.0)
+		var bl_a: Vector3 = _sopra_edge(st_a, -half_w, -SOPRA_THICKNESS_M)
+		var br_a: Vector3 = _sopra_edge(st_a, half_w, -SOPRA_THICKNESS_M)
+		var bl_b: Vector3 = _sopra_edge(st_b, -half_w, -SOPRA_THICKNESS_M)
+		var br_b: Vector3 = _sopra_edge(st_b, half_w, -SOPRA_THICKNESS_M)
+		var nrm: Vector3 = st_a["nrm"]
+		var dir_u: Vector3 = st_a["dir_u"]
+		deck.quad(mat, tone, tl_a, tr_a, tr_b, tl_b, nrm)
+		deck.quad(mat, dark_conc, bl_a, br_a, br_b, bl_b, -nrm)
+		deck.quad(mat, tone * 0.85, tl_a, bl_a, bl_b, tl_b, -dir_u)
+		deck.quad(mat, tone * 0.85, tr_a, br_a, br_b, tr_b, dir_u)
+		# Rusty crash rail on the outer upper lip, a low concrete lip on the inner edge.
+		var pose_basis := Basis(dir_u, nrm, st_a["tan"])
+		var mid: Vector3 = (st_a["pos"] as Vector3).lerp(st_b["pos"], 0.5)
+		rail.box(mat, rust_col, Transform3D(pose_basis, mid + dir_u * (-half_w - 0.1) + nrm * 1.1), Vector3(0.5, 2.2, 12.4))
+		deck.box(mat, dark_conc, Transform3D(pose_basis, mid + dir_u * (half_w + 0.3) + nrm * 0.4), Vector3(0.6, 1.0, 12.4))
+
 	var inst := MeshInstance3D.new()
 	inst.name = "SopraelevataViaductMesh"
-	inst.mesh = batch.commit()
+	inst.mesh = deck.commit()
 	sopraelevata.add_child(inst)
+	var rail_inst := MeshInstance3D.new()
+	rail_inst.name = "SopraelevataGuardrail"
+	rail_inst.mesh = rail.commit()
+	sopraelevata.add_child(rail_inst)
+
+	var portal_root := Node3D.new()
+	portal_root.name = "SopraelevataPortals"
+	sopraelevata.add_child(portal_root)
+	for k: int in range(SOPRA_PORTAL_THETAS.size()):
+		var station: Dictionary = _sopra_station(SOPRA_PORTAL_THETAS[k] * half_arc, y0, bank)
+		var portal := MeshBatchScript.new()
+		_sopra_portal(portal, mat, station, xform, half_w, dark_conc, conc_col)
+		var portal_inst := MeshInstance3D.new()
+		portal_inst.name = "SopraPortal_%d" % k
+		portal_inst.mesh = portal.commit()
+		portal_root.add_child(portal_inst)
+
+
+## Frame of the deck centre line at arc angle `theta`, in the landmark's local space.
+func _sopra_station(theta: float, y0: float, bank: float) -> Dictionary:
+	var yaw := Basis(Vector3.UP, deg_to_rad(SOPRA_YAW_DEG))
+	var tangent: Vector3 = yaw * Vector3(cos(theta), 0.0, -sin(theta))
+	var inward: Vector3 = yaw * Vector3(-sin(theta), 0.0, -cos(theta))
+	var pos: Vector3 = yaw * Vector3(SOPRA_RADIUS_M * sin(theta), 0.0, -SOPRA_RADIUS_M * (1.0 - cos(theta))) + Vector3(0.0, y0, 0.0)
+	return {
+		"pos": pos, "tan": tangent, "inward": inward,
+		"dir_u": inward * cos(bank) - Vector3.UP * sin(bank),
+		"nrm": Vector3.UP * cos(bank) + inward * sin(bank),
+	}
+
+
+## Point `u` across the deck (+ = inner, low edge) and `v` along the deck normal.
+func _sopra_edge(station: Dictionary, u: float, v: float) -> Vector3:
+	return (station["pos"] as Vector3) + (station["dir_u"] as Vector3) * u + (station["nrm"] as Vector3) * v
+
+
+func _sopra_cap(batch: MeshBatchScript, mat: Material, color: Color, station: Dictionary, half_w: float, end_sign: float) -> void:
+	batch.quad(mat, color * 0.8, _sopra_edge(station, -half_w, 0.0), _sopra_edge(station, half_w, 0.0),
+		_sopra_edge(station, half_w, -SOPRA_THICKNESS_M), _sopra_edge(station, -half_w, -SOPRA_THICKNESS_M), (station["tan"] as Vector3) * end_sign)
+
+
+## Two concrete piers down to the ground, a cap beam under the deck and two arch braces between them.
+func _sopra_portal(batch: MeshBatchScript, mat: Material, station: Dictionary, xform: Transform3D, half_w: float, pier_col: Color, beam_col: Color) -> void:
+	var basis := Basis(station["dir_u"], station["nrm"], station["tan"])
+	var tops: Array[Vector3] = []
+	for u: float in [-half_w * 0.65, half_w * 0.65]:
+		var top: Vector3 = _sopra_edge(station, u, -SOPRA_THICKNESS_M - 0.3)
+		var base_world: float = ground_y_at(xform * Vector3(top.x, 0.0, top.z))
+		var base_y: float = base_world - xform.origin.y - 1.0
+		var height: float = top.y - base_y
+		batch.box(mat, pier_col, Transform3D(basis.orthonormalized(), Vector3(top.x, base_y + height * 0.5, top.z)), Vector3(3.2, height, 4.4))
+		tops.append(top)
+	var beam_mid: Vector3 = (tops[0] + tops[1]) * 0.5
+	batch.box(mat, beam_col, Transform3D(basis, beam_mid + (station["nrm"] as Vector3) * 0.4), Vector3(SOPRA_WIDTH_M, 1.2, 4.8))
+	for top: Vector3 in tops:
+		var brace_foot: Vector3 = top - Vector3.UP * 5.5
+		batch.strut(mat, beam_col, brace_foot, beam_mid - (station["nrm"] as Vector3) * 0.2, 1.1)
 
 
 ## Hero Landmark 2 & 3: Villa Reale Gateway Arch and Torre Ascari
