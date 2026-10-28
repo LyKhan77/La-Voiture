@@ -101,16 +101,30 @@ func _test_neo_wangan_round() -> void:
 
 
 func _test_reserved_rounds_and_wrap() -> void:
+	# Step 1: Round 03, Autodromo di Brianza is now PLAYABLE!
 	_press("TrackNextButton")
 	await process_frame
 	var radar: TrackMapView = _radar()
 	var continue_button := menu.get("continue_button") as Button
-	var reserved_ok: bool = _label("CircuitNameLabel") == "Autodromo di Brianza" \
+	var brianza_ok: bool = _label("CircuitNameLabel") == "Autodromo di Brianza" \
 		and _label("CircuitTypeLabel") == "GRAND PRIX" \
-		and float(radar.stats()["length_m"]) == 0.0 and radar.circuit_id == "brianza" \
+		and absf(float(radar.stats()["length_m"]) - 5790.0) <= 25.0 and radar.circuit_id == "brianza" \
+		and not continue_button.disabled
+	check(brianza_ok,
+		"#S4 Round 03, Autodromo di Brianza is now fully built and playable (GP, 5.79 km, Continue enabled)")
+
+	# Step 2: Round 04, Monte Azure Marina is a reserved round that is not built yet.
+	_press("TrackNextButton")
+	await process_frame
+	var reserved_ok: bool = _label("CircuitNameLabel") == "Monte Azure Marina" \
+		and _label("CircuitTypeLabel") == "SPRINT" \
+		and float(radar.stats()["length_m"]) == 0.0 and radar.circuit_id == "monte_azure" \
 		and continue_button.disabled and continue_button.text.contains("IN PREPARATION")
 	check(reserved_ok,
-		"#S4 a round whose layout is not built yet (Round 03, Brianza) says so: the map is empty and Continue is disabled instead of racing the wrong track")
+		"#S4b a round whose layout is not built yet (Round 04, Monte Azure) says so: the map is empty and Continue is disabled")
+
+	# Return to Apex Ring
+	_press("TrackPrevButton")
 	_press("TrackPrevButton")
 	_press("TrackPrevButton")
 	await process_frame

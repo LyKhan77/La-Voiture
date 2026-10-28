@@ -588,9 +588,10 @@ func _test_race_setup_hero_map() -> void:
 	var apex := setup.find_child("CarouselCard0", true, false) as Button
 	var neo := setup.find_child("CarouselCard1", true, false) as Button
 	var brianza := setup.find_child("CarouselCard2", true, false) as Button
-	check(apex != null and neo != null and brianza != null and apex.text.contains("APEX RING") and neo.text.contains("NEO-WANGAN")
-		and brianza.text.contains("IN PREPARATION") and not apex.disabled and not brianza.disabled,
-		"race setup C: the carousel opens on Round 01 Apex Ring with Neo-Wangan next and unbuilt rounds marked in preparation")
+	var unbuilt := setup.find_child("CarouselCard3", true, false) as Button
+	check(apex != null and neo != null and brianza != null and unbuilt != null and apex.text.contains("APEX RING") and neo.text.contains("NEO-WANGAN")
+		and brianza.text.contains("BRIANZA") and unbuilt.text.contains("IN PREPARATION") and not apex.disabled and not unbuilt.disabled,
+		"race setup C: the carousel opens on Round 01 Apex Ring with Neo-Wangan and Brianza playable and unbuilt rounds marked in preparation")
 	var next := setup.get("continue_button") as Button
 	check(next != null and next.text.contains("CONTINUE") and _skew_of(next, "normal") > 0.1, "race setup C: the continue button is a skewed street plate")
 	setup.queue_free()
