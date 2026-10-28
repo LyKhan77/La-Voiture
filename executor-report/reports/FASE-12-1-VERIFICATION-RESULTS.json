@@ -1,13 +1,13 @@
 {
   "engine": "Godot 4.7.2 stable",
   "renderer": "Forward+ Vulkan / Safe",
-  "code_commit": "03ec1b9",
+  "code_commit": "3f3c0e4",
   "gpu": "NVIDIA GeForce RTX 3050 Laptop GPU",
   "full_regression": {
     "suites": 48,
     "passed": 48,
     "failed": 0,
-    "assertions": 1494,
+    "assertions": 1502,
     "warnings": 0,
     "errors": 0,
     "nested_legacy_deduplicated": true,
@@ -17,7 +17,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 18,
-        "seconds": 0.88,
+        "seconds": 0.77,
         "warnings": 0,
         "errors": 0
       },
@@ -26,7 +26,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 17,
-        "seconds": 4.91,
+        "seconds": 4.59,
         "warnings": 0,
         "errors": 0
       },
@@ -35,7 +35,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 35,
-        "seconds": 85.84,
+        "seconds": 87.0,
         "warnings": 0,
         "errors": 0
       },
@@ -44,7 +44,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 18,
-        "seconds": 0.77,
+        "seconds": 0.66,
         "warnings": 0,
         "errors": 0
       },
@@ -62,7 +62,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 18,
-        "seconds": 0.95,
+        "seconds": 0.78,
         "warnings": 0,
         "errors": 0
       },
@@ -89,7 +89,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 33,
-        "seconds": 5.16,
+        "seconds": 5.05,
         "warnings": 0,
         "errors": 0
       },
@@ -98,7 +98,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 27,
-        "seconds": 0.77,
+        "seconds": 0.86,
         "warnings": 0,
         "errors": 0
       },
@@ -107,7 +107,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 27,
-        "seconds": 1.12,
+        "seconds": 0.78,
         "warnings": 0,
         "errors": 0
       },
@@ -116,7 +116,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 39,
-        "seconds": 52.45,
+        "seconds": 53.77,
         "warnings": 0,
         "errors": 0
       },
@@ -125,7 +125,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 16,
-        "seconds": 0.59,
+        "seconds": 0.48,
         "warnings": 0,
         "errors": 0
       },
@@ -134,7 +134,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 43,
-        "seconds": 51.14,
+        "seconds": 51.86,
         "warnings": 0,
         "errors": 0
       },
@@ -143,7 +143,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 18,
-        "seconds": 0.84,
+        "seconds": 0.77,
         "warnings": 0,
         "errors": 0
       },
@@ -152,7 +152,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 32,
-        "seconds": 5.42,
+        "seconds": 5.48,
         "warnings": 0,
         "errors": 0
       },
@@ -161,7 +161,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 18,
-        "seconds": 0.67,
+        "seconds": 0.66,
         "warnings": 0,
         "errors": 0
       },
@@ -170,7 +170,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 18,
-        "seconds": 0.84,
+        "seconds": 0.75,
         "warnings": 0,
         "errors": 0
       },
@@ -179,7 +179,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 75,
-        "seconds": 8.28,
+        "seconds": 8.45,
         "warnings": 0,
         "errors": 0
       },
@@ -188,7 +188,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 18,
-        "seconds": 0.77,
+        "seconds": 0.75,
         "warnings": 0,
         "errors": 0
       },
@@ -214,8 +214,8 @@
         "test": "test_neo_wangan_circuit.gd",
         "status": "PASS",
         "exit_code": 0,
-        "assertions": 40,
-        "seconds": 14.73,
+        "assertions": 48,
+        "seconds": 15.33,
         "warnings": 0,
         "errors": 0
       },
@@ -224,7 +224,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 33,
-        "seconds": 0.58,
+        "seconds": 0.47,
         "warnings": 0,
         "errors": 0
       },
@@ -233,7 +233,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 18,
-        "seconds": 0.77,
+        "seconds": 0.75,
         "warnings": 0,
         "errors": 0
       },
@@ -242,7 +242,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 34,
-        "seconds": 5.75,
+        "seconds": 5.77,
         "warnings": 0,
         "errors": 0
       },
@@ -251,7 +251,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 19,
-        "seconds": 9.25,
+        "seconds": 9.23,
         "warnings": 0,
         "errors": 0
       },
@@ -269,7 +269,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 32,
-        "seconds": 5.98,
+        "seconds": 5.78,
         "warnings": 0,
         "errors": 0
       },
@@ -287,7 +287,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 31,
-        "seconds": 5.14,
+        "seconds": 4.86,
         "warnings": 0,
         "errors": 0
       },
@@ -296,7 +296,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 30,
-        "seconds": 40.72,
+        "seconds": 40.58,
         "warnings": 0,
         "errors": 0
       },
@@ -305,7 +305,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 65,
-        "seconds": 78.41,
+        "seconds": 78.73,
         "warnings": 0,
         "errors": 0
       },
@@ -314,7 +314,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 35,
-        "seconds": 5.03,
+        "seconds": 5.12,
         "warnings": 0,
         "errors": 0
       },
@@ -323,7 +323,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 28,
-        "seconds": 7.06,
+        "seconds": 7.33,
         "warnings": 0,
         "errors": 0
       },
@@ -332,7 +332,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 108,
-        "seconds": 5.75,
+        "seconds": 5.94,
         "warnings": 0,
         "errors": 0
       },
@@ -341,7 +341,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 10,
-        "seconds": 1.33,
+        "seconds": 1.22,
         "warnings": 0,
         "errors": 0
       },
@@ -350,7 +350,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 43,
-        "seconds": 3.98,
+        "seconds": 3.91,
         "warnings": 0,
         "errors": 0
       },
@@ -359,7 +359,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 27,
-        "seconds": 0.67,
+        "seconds": 0.66,
         "warnings": 0,
         "errors": 0
       },
@@ -368,7 +368,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 40,
-        "seconds": 6.19,
+        "seconds": 5.88,
         "warnings": 0,
         "errors": 0
       },
@@ -377,7 +377,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 40,
-        "seconds": 6.47,
+        "seconds": 6.0,
         "warnings": 0,
         "errors": 0
       },
@@ -386,7 +386,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 55,
-        "seconds": 26.97,
+        "seconds": 26.81,
         "warnings": 0,
         "errors": 0
       },
@@ -395,7 +395,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 7,
-        "seconds": 3.36,
+        "seconds": 3.34,
         "warnings": 0,
         "errors": 0
       },
@@ -404,7 +404,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 37,
-        "seconds": 5.59,
+        "seconds": 5.67,
         "warnings": 0,
         "errors": 0
       },
@@ -413,7 +413,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 43,
-        "seconds": 20.88,
+        "seconds": 20.41,
         "warnings": 0,
         "errors": 0
       },
@@ -422,7 +422,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 23,
-        "seconds": 4.44,
+        "seconds": 4.36,
         "warnings": 0,
         "errors": 0
       },
@@ -431,7 +431,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 15,
-        "seconds": 0.47,
+        "seconds": 0.38,
         "warnings": 0,
         "errors": 0
       },
@@ -440,7 +440,7 @@
         "status": "PASS",
         "exit_code": 0,
         "assertions": 98,
-        "seconds": 15.84,
+        "seconds": 15.77,
         "warnings": 0,
         "errors": 0
       }
@@ -448,7 +448,7 @@
   },
   "focused_after_graphics_fixes": {
     "test_neo_wangan_circuit.gd": {
-      "assertions": 40,
+      "assertions": 48,
       "failures": 0
     },
     "test_neo_wangan_glb_assets.gd": {
@@ -461,61 +461,61 @@
     }
   },
   "static_circuit_including_outline": {
-    "draw_calls": 121,
-    "triangles": 229328
+    "draw_calls": 127,
+    "triangles": 231854
   },
   "cameras": [
     {
       "gate": "cam1-start-paddock",
-      "visible_3d_draw_calls": 54,
-      "visible_3d_triangles": 164440,
-      "shadow_draw_calls": 89,
+      "visible_3d_draw_calls": 58,
+      "visible_3d_triangles": 166834,
+      "shadow_draw_calls": 90,
       "canvas_draw_calls": 0
     },
     {
       "gate": "cam2-shuto-bridge",
       "visible_3d_draw_calls": 48,
-      "visible_3d_triangles": 109076,
+      "visible_3d_triangles": 108712,
       "shadow_draw_calls": 43,
       "canvas_draw_calls": 0
     },
     {
       "gate": "cam3-tunnel-chicane",
-      "visible_3d_draw_calls": 104,
-      "visible_3d_triangles": 180374,
+      "visible_3d_draw_calls": 112,
+      "visible_3d_triangles": 182928,
       "shadow_draw_calls": 60,
       "canvas_draw_calls": 0
     },
     {
       "gate": "cam4-harbor-hairpin",
       "visible_3d_draw_calls": 55,
-      "visible_3d_triangles": 99602,
+      "visible_3d_triangles": 99238,
       "shadow_draw_calls": 51,
       "canvas_draw_calls": 0
     },
     {
       "gate": "cam5-aerial-overview",
-      "visible_3d_draw_calls": 124,
-      "visible_3d_triangles": 186926,
+      "visible_3d_draw_calls": 132,
+      "visible_3d_triangles": 189480,
       "shadow_draw_calls": 0,
       "canvas_draw_calls": 0
     },
     {
       "gate": "cam6-chase-cam-action",
-      "visible_3d_draw_calls": 35,
-      "visible_3d_triangles": 92910,
+      "visible_3d_draw_calls": 41,
+      "visible_3d_triangles": 94670,
       "shadow_draw_calls": 44,
       "canvas_draw_calls": 153
     }
   ],
   "latest_clean_native_smoke": {
     "frames": 600,
-    "mean_ms": 16.755,
-    "p95_ms": 21.715,
-    "worst_ms": 76.837,
-    "mean_fps": 59.68,
+    "mean_ms": 16.666,
+    "p95_ms": 20.437,
+    "worst_ms": 26.898,
+    "mean_fps": 60.0,
     "frame_budget_ms": 16.666667,
-    "late_frames": 210,
+    "late_frames": 388,
     "fps_gate_passed": false,
     "finished": true,
     "finishers": 20,
@@ -527,7 +527,10 @@
     "orphans_after_menu": 0,
     "exit_code": 1,
     "texture_rid_shutdown_warning": 7,
-    "warning_upstream_issue": "https://github.com/godotengine/godot/issues/122498"
+    "warning_upstream_issue": "https://github.com/godotengine/godot/issues/122498",
+    "first_stall_car": 0,
+    "pit_requested": true,
+    "first_stall_service_stops": 1
   },
   "telemetry_optimization": {
     "hero_painter_before_ms": 2.580415,
@@ -547,10 +550,11 @@
       1.0
     ],
     "instrumented_uncapped_probe_fps": 101.98,
-    "instrumented_uncapped_probe_p95_ms": 15.357
+    "instrumented_uncapped_probe_p95_ms": 15.357,
+    "code_commit": "03ec1b9"
   },
   "acceptance": "OPEN: native locked 60 FPS and shutdown Texture RID warning unresolved",
-  "camera_code_commit": "80035e1",
+  "camera_code_commit": "3f3c0e4",
   "diagnostic_pacing_modes": [
     {
       "mode": "vsync_disabled_cap_60",
@@ -561,7 +565,8 @@
       "fps": 59.69,
       "late_frames": 283,
       "locked_60": false,
-      "adopted_in_production": false
+      "adopted_in_production": false,
+      "code_commit": "03ec1b9"
     },
     {
       "mode": "mailbox_cap_60",
@@ -572,7 +577,8 @@
       "fps": 60.0,
       "late_frames": 387,
       "locked_60": false,
-      "adopted_in_production": false
+      "adopted_in_production": false,
+      "code_commit": "03ec1b9"
     },
     {
       "mode": "exclusive_fullscreen_mailbox_cap_60",
@@ -583,7 +589,48 @@
       "fps": 59.98,
       "late_frames": 276,
       "locked_60": false,
-      "adopted_in_production": false
+      "adopted_in_production": false,
+      "code_commit": "03ec1b9"
     }
-  ]
+  ],
+  "pit_polish": {
+    "date": "2026-10-28",
+    "acceptance": "PASS: lit pit service, extended entry, eight inspected native images and full headless regression",
+    "entry_s": 3015,
+    "lane_length_m": 200,
+    "first_stall_offset_m": 68,
+    "first_stall_s": 3083,
+    "entry_blend_m": 20,
+    "straight_before_box_pull_in_m": 30,
+    "box_pull_in_m": 18,
+    "wall_visible_height_m": 1.2,
+    "physical_garages_preserved": true,
+    "exit_s": 65,
+    "merge_s": 145,
+    "garage_fill_lights": 5,
+    "apron_task_lights": 10,
+    "entry_spot_lights": 2,
+    "shadow_casting_pit_lights": 0,
+    "ceiling_led_instances": 20,
+    "apron_led_instances": 10,
+    "garage_floor_instances": 10,
+    "extra_views": [
+      {
+        "gate": "pit-entry-runup",
+        "visible_3d_draw_calls": 64,
+        "visible_3d_triangles": 167442,
+        "shadow_draw_calls": 78,
+        "canvas_draw_calls": 0
+      },
+      {
+        "gate": "pit-garage-lighting",
+        "visible_3d_draw_calls": 60,
+        "visible_3d_triangles": 167730,
+        "shadow_draw_calls": 85,
+        "canvas_draw_calls": 0
+      }
+    ],
+    "first_stall_service_verified_in_capture": true,
+    "deferred_minor": "Unit coverage does not assert spotlight cone direction/range; native lighting and service render inspected."
+  }
 }

@@ -74,24 +74,24 @@ Semua gambar dibuka dan diperiksa setelah render. Gate menggunakan weekend 20 mo
 
 Counter `VIEWPORT_RENDER_INFO_TYPE_VISIBLE` dipisahkan dari shadow pass dan Canvas HUD. `Performance.RENDER_TOTAL_*` untuk seluruh game mencakup mobil, shadow, HUD dan viewport tambahan; tidak dipakai untuk mengklaim budget environment.
 
-**Anggaran statik penuh sirkuit: 121 draw call, 229.328 tris, termasuk outline pass.** Enam gate native final menunjukkan maksimum **124 visible 3D draw call / 186.926 visible 3D tris**, dalam budget 160 / 320.000.
+**Anggaran statik penuh sirkuit: 127 draw call, 231.854 tris, termasuk outline pass.** Enam gate native final menunjukkan maksimum **132 visible 3D draw call / 189.480 visible 3D tris**, dalam budget 160 / 320.000.
 
 | Gate | Visible 3D draw | Visible 3D tris | Shadow draw | Canvas draw saat isolasi |
 |---|---:|---:|---:|---:|
-| Cam 1 | 54 | 164.440 | 89 | 0 |
-| Cam 2 | 48 | 109.076 | 43 | 0 |
-| Cam 3 | 104 | 180.374 | 60 | 0 |
-| Cam 4 | 55 | 99.602 | 51 | 0 |
-| Cam 5 | 124 | 186.926 | 0 | 0 |
-| Cam 6 | 35 | 92.910 | 44 | 153 |
+| Cam 1 | 58 | 166.834 | 90 | 0 |
+| Cam 2 | 48 | 108.712 | 43 | 0 |
+| Cam 3 | 112 | 182.928 | 60 | 0 |
+| Cam 4 | 55 | 99.238 | 51 | 0 |
+| Cam 5 | 132 | 189.480 | 0 | 0 |
+| Cam 6 | 41 | 94.670 | 44 | 153 |
 
 Canvas Cam 6 berasal dari overlay radio yang merupakan CanvasLayer tersendiri; pemisahan counter memastikan overlay itu tidak disamarkan sebagai geometri lingkungan.
 
 ## Regresi lengkap dan native smoke
 
-**Regresi final sesudah batching telemetry: 48/48 PASS, 0 FAIL, 1.494 asersi, 0 script error, 0 warning headless.** Putaran pertama menjalankan nested legacy juga dan menangkap satu kegagalan tersembunyi Safety Car. Sesudah seluruh perbaikan, semua 48 script dijalankan lagi; dua wrapper memakai `--skip-legacy` untuk menghindari pengulangan pemanggilan, karena masing-masing script legacy juga dijadwalkan langsung dalam run yang sama. Tidak ada suite legacy yang dihilangkan.
+**Regresi final sesudah polish pitstop: 48/48 PASS, 0 FAIL, 1.502 asersi, 0 script error, 0 warning headless.** Putaran pertama menjalankan nested legacy juga dan menangkap satu kegagalan tersembunyi Safety Car. Sesudah seluruh perbaikan, semua 48 script dijalankan lagi; dua wrapper memakai `--skip-legacy` untuk menghindari pengulangan pemanggilan, karena masing-masing script legacy juga dijadwalkan langsung dalam run yang sama. Tidak ada suite legacy yang dihilangkan.
 
-Regresi final mencakup `test_neo_wangan_circuit.gd` **40/40**, `test_neo_wangan_glb_assets.gd` **33/33**, shared kit **10/10**, telemetry **32/32**; gate Apex asli dan upgrade masing-masing **40/40**. Bukti machine-readable lengkap tersedia pada [FASE-12-1-VERIFICATION-RESULTS.json](FASE-12-1-VERIFICATION-RESULTS.json). Log penuh tetap di `temp/phase12-1-regression-batched/`; log RED/GREEN telemetry di `temp/phase12-telemetry-batch-red-engine.log` dan `temp/phase12-telemetry-batch-green-engine.log`; perbandingan piksel native di `temp/phase12-dot-compare-green.log`.
+Regresi final mencakup `test_neo_wangan_circuit.gd` **48/48**, `test_neo_wangan_glb_assets.gd` **33/33**, shared kit **10/10**, telemetry **32/32**; gate Apex asli dan upgrade masing-masing **40/40**. Bukti machine-readable lengkap tersedia pada [FASE-12-1-VERIFICATION-RESULTS.json](FASE-12-1-VERIFICATION-RESULTS.json). Log penuh tetap di `temp/phase12-1-regression-pit-polish/`; log RED/GREEN telemetry di `temp/phase12-telemetry-batch-red-engine.log` dan `temp/phase12-telemetry-batch-green-engine.log`; perbandingan piksel native di `temp/phase12-dot-compare-green.log`.
 
 Smoke menjalankan 3 lap / 20 mobil / Neo-Wangan / malam / cuaca kering / High / 1080p pada **NVIDIA GeForce RTX 3050 Laptop GPU**, renderer Safe. Sampling 600 frame dilakukan pada 1× setelah start dan 300 frame warm-up; penyelesaian ke bendera memakai 16×, lalu kembali ke menu utama.
 
@@ -100,15 +100,15 @@ Smoke menjalankan 3 lap / 20 mobil / Neo-Wangan / malam / cuaca kering / High / 
 | Mobil / lap / finis | 20 mobil, 3 lap, 20 finis | PASS |
 | Menu HQ | Termuat, error 0 | PASS |
 | Orphan saat balapan / setelah HQ | 0 / 0 | PASS |
-| Frame mean / p95 / worst | **16,755 / 21,715 / 76,837 ms** | Masih ada frame di atas 16,6667 ms |
-| FPS rata-rata | **59,68 FPS** | **FAIL untuk 60 FPS locked** |
-| Frame di atas 16,6667 ms | **210 / 600** | FAIL untuk frame budget ketat |
+| Frame mean / p95 / worst | **16,666 / 20,437 / 26,898 ms** | Masih ada frame di atas 16,6667 ms |
+| FPS rata-rata | **60,00 FPS** | **FAIL untuk 60 FPS locked** |
+| Frame di atas 16,6667 ms | **388 / 600** | FAIL untuk frame budget ketat |
 | Exit smoke | **1**, karena gate FPS | FAIL yang disengaja, tidak disembunyikan |
 | Shutdown renderer | Warning **7 Texture RID** tertahan | OPEN; atlas refleksi internal Godot, terpicu ReflectionProbe garasi HQ |
 
 Hasil bersih ini memakai timer wall-clock saja. Harness keluar 1 bila satu pun frame sampel melewati 16,6667 ms; rata-rata cepat tidak cukup untuk lulus. Angka dari probe yang memanggil waktu CPU/GPU viewport per frame tidak digunakan sebagai gate: API itu dapat memaksa sinkronisasi rendering. Mode render thread `separate` juga tidak diterapkan ke proyek karena engine menandainya eksperimental dan probe menghasilkan error texture update. Setting renderer proyek tetap Safe. Pengukuran yang overlap dengan test/proses native lain tidak dijadikan hasil penerimaan.
 
-Monitor native melaporkan 144,003 Hz. Pengujian pacing tambahan mempertahankan High, 20 mobil, viewport 1920×1080 dan cap 60; hasil berikut hanya diagnostik, tanpa perubahan pengaturan produksi:
+Monitor native melaporkan 144,003 Hz. Pengujian pacing tambahan pada commit `03ec1b9` mempertahankan High, 20 mobil, viewport 1920×1080 dan cap 60; hasil berikut hanya diagnostik, tanpa perubahan pengaturan produksi:
 
 | Presentasi | FPS rata-rata | p95 / worst ms | Interval >16,6667 ms |
 |---|---:|---:|---:|
@@ -122,12 +122,30 @@ Profil diagnostik memberi indikasi bahwa GPU 3D memiliki ruang. Probe gameplay t
 
 Warning RID berhasil diisolasi dengan tiga probe native: SceneTree kosong bersih, balapan tanpa menu bersih, menu HQ sendiri memunculkan tepat tujuh Texture RID. Menghilangkan `ReflectionProbe` hanya pada probe menu menghilangkan warning. Hasil lokal ini konsisten dengan [Godot issue #122498: reflection atlas leaks seven texture RIDs](https://github.com/godotengine/godot/issues/122498), yang menjelaskan color buffer dan enam face views tidak dibebaskan pada renderer RD. Issue ditutup menuju milestone 4.8 melalui perbaikan upstream; engine proyek tetap 4.7.2. Ini atribusi berdasarkan reproduksi lokal dan laporan upstream, bukan bukti engine proyek sudah diperbaiki. Efek refleksi produksi tidak dinonaktifkan dan binary engine tidak diganti. Peringatan RID tetap dilaporkan terpisah dari orphan node; keberhasilan 0 orphan bukan bukti nol kebocoran GPU.
 
+## Polish pitstop tambahan — 28 Oktober 2026
+
+Atas permintaan pengguna, entry dipindah **60 m lebih awal**, dari s=3075 ke **s=3015** (135 m sebelum garis start). Fast lane bertambah dari 140 menjadi **200 m**; stall pertama sekarang **68 m sesudah entry**. Urutannya 20 m blend masuk, **30 m fast lane lurus**, kemudian 18 m pendekatan box. Garasi tetap pada koordinat s=3083 + 12 m per stall; exit s=65 dan merge s=145 dipertahankan. Spline kedua sirkuit dan shared kit Apex tidak diubah.
+
+Apron aspal kini melebar sampai lateral 16 m sebelum box pertama, mendukung seluruh lebar mobil di sepuluh box, lalu menyempit bertahap setelah box terakhir. Dua panah run-up, outline sepuluh box, papan `PIT // 80`, pit wall/catch fence serta bukaan barrier dan lampu jalan mengikuti entry baru. Pijakan dan end cap pit wall juga dikoreksi: sebelumnya berpusat pada permukaan sehingga setengahnya tertanam; kini tinggi konkret penuh 1,2 m berada di atas permukaan. Gate vertex mengukur terhadap elevasi jalan setempat, termasuk bagian yang miring. Mobil tim pertama dibuktikan melewati segmen lurus sebelum berbelok, tetap di atas aspal dan menyelesaikan servis.
+
+Pencahayaan akhir memakai **5 OmniLight interior**, **10 SpotLight task apron**, dan **2 SpotLight entry**, seluruhnya tanpa shadow dan dilindungi metadata `no_shadow` dari override preset. Ada **20 strip LED plafon**, **10 strip LED apron** di bawah bibir kanopi, serta sepuluh lantai garasi; semua elemen repetitif di-instance. Render awal menunjukkan interior fill saja masih meninggalkan mobil dan kru terlalu gelap; task lights diarahkan ke box tanpa menaikkan ambient atau sun seluruh kota.
+
+- [Entry dan run-up 68 m](../screenshots/phases/phase-12-1-pit-entry-runup.png).
+- [Pencahayaan box dan pitstop tim pertama](../screenshots/phases/phase-12-1-pit-garage-lighting.png).
+
+Kedua gambar tambahan berasal dari weekend aktual. Foto servis diambil setelah `request_pit` berhasil dan mobil stall fisik 0 berhenti dengan timer servis aktif; mobil/kru tidak diposisikan sebagai pose palsu. Overlay 2D disembunyikan khusus dua foto pit agar lighting dan jalur terbaca. Enam gate utama juga dirender ulang; **seluruh delapan PNG 1920×1080 dibuka dan diperiksa**. Tambahan dua view masing-masing mencatat 64/167.442 dan 60/167.730 visible 3D draw/tris, tetap di bawah anggaran.
+
+TDD: gate entry/apron/lighting awal RED (46 asersi, 8 gagal) → GREEN; gate task-light apron tambahan RED → GREEN. Gate pijakan wall relatif terhadap jalan juga RED (-0,6 hingga +0,6 m) → GREEN (0 hingga +1,2 m). Gate Neo final **48/48**, termasuk 1.008 ray check daratan dan trace mobil tim pertama. Smoke native tambahan mewajibkan servis tim stall pertama; permintaan berhasil, **1 pitstop**, 20/20 finis dalam 3 lap, kembali HQ dengan **0 orphan**. Counter frame ketat tetap gagal dan warning tujuh Texture RID tetap dilaporkan; polish tidak mengubah status global Fase 12.1 menjadi selesai penuh.
+
+Review statik independen terhadap diff polish tidak menemukan Critical/Important. Minor yang ditunda: uji unit belum mengasersi arah/range cone spotlight; posisi/energi/shadow diuji dan hasil pencahayaan diverifikasi lewat render native. Penilaian brightness/screenshots dilakukan langsung oleh pelaksana; performa dan warning GPU tetap mengikuti hasil smoke, bukan dianggap lulus oleh review statik.
+
 ## Checklist penerimaan
 
 - [x] Shared FIA kit terparameterisasi; geometri default Apex identik.
 - [x] Enam model Blender lokal dan gate asset.
 - [x] Ground massing, landmark, koridor, billboard, papan rem dan pool bounds.
 - [x] Enam gambar 1920 × 1080 dirender, dibuka dan diinspeksi.
+- [x] Polish lighting pit dan entry; dua gambar tambahan serta servis stall pertama terverifikasi.
 - [x] Anggaran lingkungan dan semua 48 suite headless PASS.
 - [x] Tiga lap / 20 mobil / kembali HQ / 0 orphan node.
 - [ ] **60 FPS locked pada native High.**
@@ -143,5 +161,6 @@ Task 12.1.4 dan Fase 12.1 tetap terbuka di ROADMAP. Pekerjaan lanjutan harus men
 - `25cd8ef`: perbaikan grid ganjil yang membuka seluruh asersi Safety Car.
 - `80035e1`: presentasi final, emission mask GLB, isolasi Environment, serta harness kamera dan smoke.
 - `03ec1b9`: batching telemetry yang identik secara visual dan gate smoke berbasis setiap frame.
+- `3f3c0e4`: polish entry dan pencahayaan pitstop, gate serta bukti visual baru.
 
 Tidak ada push atau publikasi.
