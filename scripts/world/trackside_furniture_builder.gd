@@ -9,7 +9,7 @@ extends Node3D
 
 const TrackRibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const AdaptiveLineScript := preload("res://scripts/car/adaptive_racing_line.gd")
-const PitLaneScript := preload("res://scripts/world/pit_lane_complex.gd")
+const PitZoneScript := preload("res://scripts/world/pit_zone.gd")
 const ToonMaterials := preload("res://scripts/world/toon_materials.gd")
 const SurfaceGeometry := preload("res://scripts/world/enhanced_track_geometry.gd")
 const MeshBatchScript := preload("res://scripts/world/mesh_batch.gd")
@@ -37,8 +37,6 @@ const RAIL_RIBS: int = 3
 const RAIL_LENGTH_M: float = 4.06
 const POST_HEIGHT_M: float = 0.95
 const POST_SETBACK_M: float = 0.13
-const PIT_OPEN_LEAD_M: float = 20.0
-const PIT_OPEN_TRAIL_M: float = 40.0
 const RAIL_COLOR := Color("#9aa1ae")
 const POST_COLOR := Color("#4a505c")
 
@@ -137,6 +135,7 @@ var armco_runs: Array[Dictionary] = []
 var _centre_samples: Dictionary = {}
 var _plans: Array[Dictionary] = []
 var _hero_zones: Array[Dictionary] = []
+var _pit_zone: Dictionary = {}
 var _extent_left: PackedFloat32Array = PackedFloat32Array()
 var _extent_right: PackedFloat32Array = PackedFloat32Array()
 var _extent_step: float = 4.0
@@ -144,11 +143,12 @@ var _extent_step: float = 4.0
 
 ## `kerbs` are the sharp-corner runs, `plans` the runoff plans (the armco stands behind the traps).
 ## `hero_zones` push the floodlights back behind landmarks: {side, s0, s1, lateral}.
-func build(p_ribbon: TrackRibbonScript, p_line: AdaptiveLineScript, kerbs: Array[Dictionary], plans: Array[Dictionary], hero_zones: Array[Dictionary]) -> void:
+func build(p_ribbon: TrackRibbonScript, p_line: AdaptiveLineScript, kerbs: Array[Dictionary], plans: Array[Dictionary], hero_zones: Array[Dictionary], pit_zone: Dictionary = {}) -> void:
 	ribbon = p_ribbon
 	line = p_line
 	_plans = plans
 	_hero_zones = hero_zones
+	_pit_zone = pit_zone
 	_centre_samples = SurfaceGeometry.hash_samples(ribbon)
 	_build_extent_tables()
 	_build_armco()
@@ -196,11 +196,7 @@ func armco_ranges_for(side: float) -> Array[Vector2]:
 	var length: float = ribbon.length_m
 	if side < 0.0:
 		return [Vector2(0.0, length)]
-	var open_start: float = fposmod(PitLaneScript.ENTRY_S - PIT_OPEN_LEAD_M, length)
-	var open_end: float = open_start + PitLaneScript.NOMINAL_LENGTH_M + PIT_OPEN_LEAD_M + PIT_OPEN_TRAIL_M
-	if open_end <= length:
-		return [Vector2(0.0, open_start), Vector2(open_end, length)]
-	return [Vector2(open_end - length, open_start)]
+	return PitZoneScript.outside_ranges(_pit_zone, length)
 
 
 # --- armco ---------------------------------------------------------------------------

@@ -11,6 +11,7 @@ extends Node3D
 const TrackRibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const AdaptiveLineScript := preload("res://scripts/car/adaptive_racing_line.gd")
 const PitLaneScript := preload("res://scripts/world/pit_lane_complex.gd")
+const PitZoneScript := preload("res://scripts/world/pit_zone.gd")
 const ToonMaterials := preload("res://scripts/world/toon_materials.gd")
 const RibbonGeometry := preload("res://scripts/world/ribbon_geometry.gd")
 const SurfaceGeometry := preload("res://scripts/world/enhanced_track_geometry.gd")
@@ -158,9 +159,8 @@ func _build_kerbs() -> void:
 
 ## Tarmac runoff, its blue/white warning edge and the gravel trap on the outside of every sharp corner.
 func _build_runoff() -> void:
-	var pit_start: float = fposmod(PitLaneScript.ENTRY_S - PIT_RUNOFF_LEAD_M, ribbon.length_m)
-	var pit_length: float = PitLaneScript.NOMINAL_LENGTH_M + PIT_RUNOFF_LEAD_M + PIT_RUNOFF_TRAIL_M
-	runoff_plans = SurfaceGeometry.plan_runoffs(ribbon, kerbs, pit_start, pit_length)
+	var pit_zone: Dictionary = _pit_zone()
+	runoff_plans = SurfaceGeometry.plan_runoffs(ribbon, kerbs, float(pit_zone["start_s"]), float(pit_zone["length_m"]))
 	var runoff: ArrayMesh = SurfaceGeometry.runoff_mesh(ribbon, runoff_plans)
 	runoff.surface_set_material(0, ToonMaterials.make(SurfaceGeometry.RUNOFF_COLOR))
 	runoff.surface_set_material(1, ToonMaterials.make(SurfaceGeometry.WARNING_BLUE))
@@ -196,17 +196,22 @@ func _add_mesh(node_name: String, mesh: Mesh) -> MeshInstance3D:
 
 ## Armco, Tecpro, braking boards and floodlights; the guardrail stands behind every gravel trap.
 func _build_furniture() -> void:
-	var pit_zone_end: float = PitLaneScript.ENTRY_S + PitLaneScript.NOMINAL_LENGTH_M + PIT_RUNOFF_TRAIL_M
+	var pit_zone: Dictionary = _pit_zone()
+	var pit_zone_end: float = float(pit_zone["start_s"]) + float(pit_zone["length_m"])
 	var hero_zones: Array[Dictionary] = [
-		{"side": 1.0, "s0": PitLaneScript.ENTRY_S - PIT_RUNOFF_LEAD_M, "s1": pit_zone_end, "lateral": PIT_TOWER_LATERAL_M},
+		{"side": 1.0, "s0": float(pit_zone["start_s"]), "s1": pit_zone_end, "lateral": PIT_TOWER_LATERAL_M},
 		{"side": -1.0, "s0": GrandstandScript.CENTRE_S - GrandstandScript.LENGTH_M * 0.5, "s1": GrandstandScript.CENTRE_S + GrandstandScript.LENGTH_M * 0.5, "lateral": GRANDSTAND_TOWER_LATERAL_M},
 		{"side": 1.0, "s0": ControlTowerScript.CENTRE_S - CONTROL_TOWER_CLEAR_S_M, "s1": ControlTowerScript.CENTRE_S + CONTROL_TOWER_CLEAR_S_M, "lateral": CONTROL_TOWER_TOWER_LATERAL_M},
 	]
 	furniture = FurnitureScript.new()
 	furniture.name = "Furniture"
 	add_child(furniture)
-	furniture.build(ribbon, line, kerbs, runoff_plans, hero_zones)
+	furniture.build(ribbon, line, kerbs, runoff_plans, hero_zones, pit_zone)
 	armco_post_count = furniture.armco_post_count
+
+
+func _pit_zone() -> Dictionary:
+	return PitZoneScript.from_layout({"entry_s": PitLaneScript.ENTRY_S, "exit_s": PitLaneScript.EXIT_S, "lane_length_m": PitLaneScript.NOMINAL_LENGTH_M}, ribbon.length_m, PIT_RUNOFF_LEAD_M, PIT_RUNOFF_TRAIL_M)
 
 
 ## The three landmark buildings, each its own scene placed on the centreline at its anchor.

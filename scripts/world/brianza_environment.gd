@@ -12,6 +12,7 @@ const RibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const AdaptiveLineScript := preload("res://scripts/car/adaptive_racing_line.gd")
 const CircuitBuilderScript := preload("res://scripts/world/brianza_circuit_builder.gd")
 const FurnitureScript := preload("res://scripts/world/trackside_furniture_builder.gd")
+const PitZoneScript := preload("res://scripts/world/pit_zone.gd")
 const SurfaceGeometry := preload("res://scripts/world/enhanced_track_geometry.gd")
 const SharedSkyScript := preload("res://scripts/world/shared_cel_sky_controller.gd")
 const ToonMaterials := preload("res://scripts/world/toon_materials.gd")
@@ -118,6 +119,7 @@ var built: bool = false
 var kerbs: Array[Dictionary] = []
 var runoff_plans: Array[Dictionary] = []
 var ground_root: Node3D
+var _pit_zone: Dictionary = {}
 
 ## Instance poses of each foliage batch by node name (headless MultiMeshes keep none).
 var foliage_poses: Dictionary = {}
@@ -156,6 +158,7 @@ func build(p_ribbon: RibbonScript, p_builder: CircuitBuilderScript) -> void:
 	built = true
 	ribbon = p_ribbon
 	builder = p_builder
+	_pit_zone = PitZoneScript.from_layout(p_builder.get_node("PitLane").call("sim_layout"), ribbon.length_m)
 	line = AdaptiveLineScript.new(ribbon)
 	
 	_build_layer1_ground_massing()
@@ -611,10 +614,8 @@ func _build_tier_a_surface() -> void:
 		kerb_inst.mesh = kerb_m
 		surface_root.add_child(kerb_inst)
 		
-	var pit_lead: float = 20.0
-	var pit_trail: float = 40.0
-	var pit_start: float = fposmod(5530.0 - pit_lead, ribbon.length_m)
-	var pit_len: float = 410.0 + pit_lead + pit_trail
+	var pit_start: float = float(_pit_zone["start_s"])
+	var pit_len: float = float(_pit_zone["length_m"])
 	runoff_plans = SurfaceGeometry.plan_runoffs(ribbon, kerbs, pit_start, pit_len)
 	
 	var runoff_m: ArrayMesh = SurfaceGeometry.runoff_mesh(ribbon, runoff_plans)
@@ -651,14 +652,16 @@ func _build_tier_a_surface() -> void:
 
 
 func _build_tier_a_furniture() -> void:
-	var hero_zones: Array[Dictionary] = [
-		{"side": 1.0, "s0": 5510.0, "s1": 5790.0, "lateral": 36.0},
-		{"side": 1.0, "s0": 0.0, "s1": 190.0, "lateral": 36.0},
-	]
+	var hero_zones: Array[Dictionary] = []
+	var start: float = float(_pit_zone["start_s"])
+	var end: float = start + float(_pit_zone["length_m"])
+	hero_zones.append({"side": 1.0, "s0": start, "s1": minf(end, ribbon.length_m), "lateral": 36.0})
+	if end > ribbon.length_m:
+		hero_zones.append({"side": 1.0, "s0": 0.0, "s1": end - ribbon.length_m, "lateral": 36.0})
 	furniture = FurnitureScript.new()
 	furniture.name = "TracksideFurniture"
 	add_child(furniture)
-	furniture.build(ribbon, line, kerbs, runoff_plans, hero_zones)
+	furniture.build(ribbon, line, kerbs, runoff_plans, hero_zones, _pit_zone)
 
 
 func _build_tier_a_sky() -> void:

@@ -9,7 +9,7 @@ enum Mode { CHASE, COCKPIT, HELI, TRACKSIDE_TV, PITSTOP, SAFETY_CAR }
 const MODE_NAMES: Array[String] = ["CHASE CAM", "COCKPIT CAM", "HELI CAM", "TRACKSIDE TV", "PIT CLOSE-UP", "SAFETY CAR CAM"]
 const SC_CAM_FOV: float = 65.0
 const TrackRibbonScript := preload("res://scripts/car/track_ribbon.gd")
-const PitLaneScript := preload("res://scripts/world/pit_lane_complex.gd")
+const PitZoneScript := preload("res://scripts/world/pit_zone.gd")
 
 ## Normal C cycle; active Safety Car follows TRACKSIDE_TV. PITSTOP is automatic.
 const CYCLE: Array[int] = [Mode.CHASE, Mode.COCKPIT, Mode.HELI, Mode.TRACKSIDE_TV]
@@ -42,6 +42,7 @@ var mode: int = Mode.CHASE
 var camera: Camera3D
 var target: Node3D
 var ribbon: TrackRibbonScript
+var _pit_zone: Dictionary = {}
 var auto_pit_camera: bool = true
 var safety_car_actor: Node3D = null
 var safety_car_cut_s: float = 0.0
@@ -61,9 +62,10 @@ var _manual_mode: int = Mode.CHASE
 var _snap: bool = true # next update jumps instead of easing, after a cut
 
 
-func setup(p_camera: Camera3D, p_ribbon: TrackRibbonScript) -> void:
+func setup(p_camera: Camera3D, p_ribbon: TrackRibbonScript, pit_zone: Dictionary = {}) -> void:
 	camera = p_camera
 	ribbon = p_ribbon
+	_pit_zone = pit_zone
 	_build_tv_stations()
 	set_mode(Mode.CHASE)
 
@@ -243,7 +245,7 @@ func _build_tv_stations() -> void:
 	for index: int in range(count):
 		var s: float = ribbon.length_m * float(index) / float(count)
 		# The garages stand where a camera on the right-hand side would go.
-		if fposmod(s - (PitLaneScript.ENTRY_S - 30.0), ribbon.length_m) < PitLaneScript.NOMINAL_LENGTH_M + 60.0:
+		if PitZoneScript.contains(_pit_zone, s, ribbon.length_m):
 			continue
 		# Outside of a corner so the camera never sits in the way of a line.
 		# Ribbon curvature is + for a left turn, whose outside is the right (+) side.

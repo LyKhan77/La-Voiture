@@ -22,6 +22,7 @@ const ActorScript := preload("res://scripts/car/gt_car_actor.gd")
 const RibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const DirectorScript := preload("res://scripts/world/race_weekend_director.gd")
 const PitLaneScript := preload("res://scripts/world/pit_lane_complex.gd")
+const PitZoneScript := preload("res://scripts/world/pit_zone.gd")
 const ChoreographerScript := preload("res://scripts/car/pitstop_choreographer.gd")
 const CameraDirectorScript := preload("res://scripts/world/broadcast_camera_director.gd")
 const EnvironmentScript := preload("res://scripts/world/track_environment_builder.gd")
@@ -128,7 +129,7 @@ func _ready() -> void:
 	followed_id = race.cars[0].id
 	if race_config != null:
 		followed_id = race_config.selected_team_id * 2
-	camera_director.setup(camera, ribbon)
+	camera_director.setup(camera, ribbon, _camera_pit_zone(ribbon.length_m))
 	camera_director.set_target(actor_of(followed_id))
 	vfx.setup(self)
 	vfx.update(0.0)
@@ -218,6 +219,13 @@ func _pit_layout() -> Dictionary:
 	if circuit_root != null and pit_lane != null and pit_lane.has_method("sim_layout"):
 		return pit_lane.call("sim_layout")
 	return RaceScript.default_pit_layout()
+
+
+func _camera_pit_zone(lap_length_m: float) -> Dictionary:
+	var layout: Dictionary = _pit_layout()
+	if circuit_root == null:
+		layout["lane_length_m"] = PitLaneScript.NOMINAL_LENGTH_M
+	return PitZoneScript.from_layout(layout, lap_length_m, 30.0, 30.0)
 
 
 func actor_of(car_id: int) -> ActorScript:
