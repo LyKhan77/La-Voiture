@@ -193,6 +193,11 @@ func _install_circuit(override_id: String = "") -> void:
 	move_child(node, old_track.get_index())
 	ribbon = street_ribbon
 	road_width_m = ribbon.road_half_width_m * 2.0
+	# The circuit scene ships its own night WorldEnvironment for standalone use. Sitting earlier in the
+	# tree it would win over this world's, freezing the sky on night whatever the time of day.
+	var circuit_sky: Node = node.get_node_or_null("WorldEnvironment")
+	if circuit_sky != null:
+		circuit_sky.queue_free()
 	var city_set: Node = node.get_node_or_null("Environment")
 	if city_set != null:
 		environment = city_set

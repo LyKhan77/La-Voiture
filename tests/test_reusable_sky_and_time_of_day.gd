@@ -89,6 +89,32 @@ func _run() -> void:
 	circuit.queue_free()
 	await process_frame
 
+	# 1b. Inside the race world the circuit's own night WorldEnvironment must not shadow the world's sky
+	var config := ConfigScript.get_config()
+	config.selected_circuit_id = "neo_wangan"
+	config.time_of_day = 0
+	config.weather_preset = 0
+	var wangan_world: Node3D = WorldScene.instantiate()
+	root.add_child(wangan_world)
+	wangan_world.set_physics_process(false)
+	wangan_world.set_process(false)
+	await process_frame
+	for _i: int in range(3):
+		wangan_world.environment.update(0.25, wangan_world.race)
+	await process_frame
+	var skies: Array[Node] = wangan_world.find_children("*", "WorldEnvironment", true, false)
+	check(skies.size() == 1, "Neo-Wangan race world keeps a single WorldEnvironment (got %d)" % skies.size())
+	var day_sky: ProceduralSkyMaterial = null
+	if not skies.is_empty():
+		var day_env: Environment = (skies[0] as WorldEnvironment).environment
+		day_sky = day_env.sky.sky_material as ProceduralSkyMaterial if day_env != null and day_env.sky != null else null
+	check(day_sky != null and day_sky.sky_top_color.b > 0.6 and day_sky.sky_top_color.r < 0.4,
+		"Neo-Wangan DAY race world renders a blue day sky (top %s)" % (day_sky.sky_top_color if day_sky != null else Color.BLACK))
+	wangan_world.race.dispose()
+	wangan_world.queue_free()
+	for _i: int in range(3):
+		await process_frame
+
 	# 2. Apex Ring (TrackEnvironmentBuilder) shares SkyAmbienceRoot via SharedCelSkyController
 	ConfigScript.current = null
 	var world: Node3D = WorldScene.instantiate()
