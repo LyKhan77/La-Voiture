@@ -18,6 +18,13 @@ const RibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const CircuitScript := preload("res://scripts/world/neo_wangan_circuit_builder.gd")
 const SkylineShader := preload("res://shaders/neo_wangan_skyline.gdshader")
 const PoolShader := preload("res://shaders/neo_wangan_light_pool.gdshader")
+const SkylineOutlineShader := preload("res://shaders/neo_wangan_skyline_outline.gdshader")
+const WaterShader := preload("res://shaders/neo_wangan_water.gdshader")
+const BillboardShader := preload("res://shaders/neo_wangan_billboard.gdshader")
+const CloudShader := preload("res://shaders/neo_wangan_clouds.gdshader")
+const WindBannerShader := preload("res://shaders/neo_wangan_wind_banner.gdshader")
+const MoonShader := preload("res://shaders/neo_wangan_moon.gdshader")
+const StarShader := preload("res://shaders/neo_wangan_stars.gdshader")
 const Liveries := preload("res://scripts/car/team_liveries.gd")
 const TracksideKit := preload("res://scripts/world/trackside_furniture_builder.gd")
 const PitKit := preload("res://scripts/world/neo_wangan_pit_complex.gd")
@@ -61,6 +68,32 @@ const SKYLINE_MAX_RADIUS_M: float = 660.0
 const SKYLINE_TRACK_CLEARANCE_M: float = 70.0
 const SKYLINE_SEED: int = 20260227
 
+## Skyline ink hull width in the world (see neo_wangan_skyline_outline.gdshader).
+const SKYLINE_OUTLINE_M: float = 0.9
+
+## Sky ambience (FASE 12.2): everything hangs off SkyAmbienceRoot, centred on the circuit.
+const MOON_OFFSET := Vector3(-650.0, 780.0, -1100.0)
+const MOON_QUAD_M: float = 285.0
+const STAR_COUNT: int = 900
+const STAR_DOME_RADIUS_M: float = 2400.0
+const STAR_MIN_ELEVATION_DEG: float = 5.0
+const STAR_MAX_ELEVATION_DEG: float = 88.0
+const STAR_QUAD_M: float = 9.0
+const CLOUD_COUNT: int = 28
+const CLOUD_MIN_RADIUS_M: float = 450.0
+const CLOUD_MAX_RADIUS_M: float = 1200.0
+const CLOUD_MIN_HEIGHT_M: float = 260.0
+const CLOUD_MAX_HEIGHT_M: float = 420.0
+## Ring spin in rad/s: a base drift plus a share per km/h of wind, so a gale visibly shoves the clouds.
+const CLOUD_BASE_RATE: float = 0.004
+const CLOUD_WIND_RATE: float = 0.00035
+const BANNER_COUNT: int = 24
+const BANNER_SIZE := Vector3(0.9, 2.4, 0.04)
+const BANNER_HEIGHT_M: float = 6.2
+const BANNER_COLORS: Array[Color] = [Color("#00f0ff"), Color("#ff2d78"), Color("#ccff00")]
+const DEFAULT_WIND_KPH: float = 14.0
+const DEFAULT_WIND_DIR_RAD: float = 0.6
+
 const NIGHT_TOP := Color("#060a18")
 const NIGHT_HORIZON := Color("#2a1a3e")
 const NEON_CYAN := Color("#00f0ff")
@@ -85,6 +118,11 @@ var streetlight_instance: MultiMeshInstance3D
 var skyline_instance: MultiMeshInstance3D
 var container_instances: Array[MultiMeshInstance3D] = []
 var tunnel_neon_instance: MultiMeshInstance3D
+var sky_ambience_root: Node3D
+var moon_instance: MeshInstance3D
+var star_instance: MultiMeshInstance3D
+var cloud_instance: MultiMeshInstance3D
+var wind_banner_instance: MultiMeshInstance3D
 var skyline_buildings: Array[Dictionary] = [] # {position, size}
 var barrier_count: int = 0
 var streetlight_count: int = 0
@@ -97,6 +135,12 @@ var _camera: Camera3D
 var _neon_material: StandardMaterial3D
 var _lamp_material: StandardMaterial3D
 var _window_material: ShaderMaterial
+var _water_shader_mat: ShaderMaterial
+var _banner_shader_mat: ShaderMaterial
+var _cloud_base_poses: Array[Transform3D] = []
+var _cloud_angle: float = 0.0
+## Live wind from race.weather, in km/h; the ambience (clouds, water, banners) follows it.
+var current_wind_kph: float = 12.0
 var _clock_s: float = 0.0
 var _leaderboard_clock: float = 0.0
 var _jumbotron: Jumbotron
@@ -118,6 +162,7 @@ func build(p_ribbon: RibbonScript, p_circuit) -> void:
 	urban_island_root = _layer("UrbanIslandRoot")
 	hero_landmarks_root = _layer("HeroLandmarksRoot")
 	midground_corridor_root = _layer("MidgroundCorridorRoot")
+	sky_ambience_root = _layer("SkyAmbienceRoot")
 	_build_ground()
 	_build_urban_island()
 	_build_barriers()
@@ -131,6 +176,8 @@ func build(p_ribbon: RibbonScript, p_circuit) -> void:
 	_build_skyline()
 	_build_hero_landmarks()
 	_build_street_corridor()
+	_build_sky_ambience()
+	_build_wind_banners()
 	_apply_night_sky()
 	measure()
 
@@ -153,6 +200,12 @@ func update(delta: float, race) -> void:
 		_lamp_material.emission_energy_multiplier = 2.6
 	if _window_material != null:
 		_window_material.set_shader_parameter("window_energy", 1.8 * pulse)
+	var wind_kph: float = DEFAULT_WIND_KPH
+	var wind_dir: float = DEFAULT_WIND_DIR_RAD
+	if race != null and race.get("weather") != null:
+		wind_kph = float(race.weather.wind_speed)
+		wind_dir = float(race.weather.wind_direction)
+	apply_wind_ambience(delta, wind_kph, wind_dir)
 	_leaderboard_clock += delta
 	if race != null and _jumbotron != null and _leaderboard_clock >= 0.5:
 		_leaderboard_clock = 0.0
@@ -163,6 +216,23 @@ func update(delta: float, race) -> void:
 			colors.append(Liveries.color_for(order[row].team_id))
 			values.append(1.0 - 0.08 * float(row))
 		_jumbotron.set_leaderboard(colors, values)
+
+
+## Wind drives the whole ambience: bay ripples and banner flutter read the uniforms, the cloud ring
+## spins faster the harder it blows. Called every frame from update() with race.weather's wind.
+func apply_wind_ambience(delta: float, wind_kph: float, wind_dir: float) -> void:
+	current_wind_kph = wind_kph
+	if _water_shader_mat != null:
+		_water_shader_mat.set_shader_parameter("time_s", _clock_s)
+		_water_shader_mat.set_shader_parameter("wind_speed_kph", wind_kph)
+		_water_shader_mat.set_shader_parameter("wind_dir", Vector2(cos(wind_dir), sin(wind_dir)))
+	if _banner_shader_mat != null:
+		_banner_shader_mat.set_shader_parameter("time_s", _clock_s)
+		_banner_shader_mat.set_shader_parameter("wind_speed_kph", wind_kph)
+	# Integrate the angle so a changing wind speeds the clouds up smoothly instead of teleporting them.
+	_cloud_angle = fposmod(_cloud_angle + delta * (CLOUD_BASE_RATE + wind_kph * CLOUD_WIND_RATE), TAU)
+	if cloud_instance != null:
+		cloud_instance.rotation.y = _cloud_angle
 
 
 func stats() -> Dictionary:
@@ -255,15 +325,12 @@ func _base_plane(node_name: String, y: float, size: float, material: Material) -
 	return plane
 
 
-func _water_material() -> StandardMaterial3D:
-	var material := StandardMaterial3D.new()
-	material.albedo_color = WATER_COLOR
-	material.metallic = 0.75
-	material.roughness = 0.2
-	material.emission_enabled = true
-	material.emission = Color(0.0, 0.35, 0.5)
-	material.emission_energy_multiplier = 0.18
-	return material
+## Stepped toon bay water; wind uniforms are pushed every frame by apply_wind_ambience().
+func _water_material() -> ShaderMaterial:
+	_water_shader_mat = ShaderMaterial.new()
+	_water_shader_mat.shader = WaterShader
+	_water_shader_mat.set_shader_parameter("wind_speed_kph", current_wind_kph)
+	return _water_shader_mat
 
 
 # --- barriers ------------------------------------------------------------------------------------
@@ -622,9 +689,146 @@ func _build_skyline() -> void:
 	towers.size = Vector3.ONE
 	_window_material = ShaderMaterial.new()
 	_window_material.shader = SkylineShader
+	var ink := ShaderMaterial.new()
+	ink.shader = SkylineOutlineShader
+	ink.render_priority = 1
+	ink.set_shader_parameter("outline_width_m", SKYLINE_OUTLINE_M)
+	_window_material.next_pass = ink
 	skyline_instance = _multimesh("Skyline", towers, transforms, _window_material)
 	skyline_instance.set_meta(&"towers", skyline_buildings.size())
 	skyline_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+
+
+# --- sky ambience --------------------------------------------------------------------------------
+
+## Moon, 900 twinkling stars and a ring of 28 cel clouds, centred over the circuit. All unshaded
+## and shadow-free, one draw call each.
+func _build_sky_ambience() -> void:
+	var centre := Vector3.ZERO
+	var samples: int = 0
+	var s: float = 0.0
+	while s < ribbon.length_m:
+		centre += ribbon.get_point_at_offset(s, 0.0).origin
+		samples += 1
+		s += 100.0
+	centre /= float(maxi(samples, 1))
+	centre.y = 0.0
+	sky_ambience_root.position = centre
+	var rng := RandomNumberGenerator.new()
+	rng.seed = SKYLINE_SEED + 13
+	_build_moon()
+	_build_stars(rng)
+	_build_clouds(rng)
+
+
+func _build_moon() -> void:
+	var quad := QuadMesh.new()
+	quad.size = Vector2(MOON_QUAD_M, MOON_QUAD_M)
+	var material := ShaderMaterial.new()
+	material.shader = MoonShader
+	moon_instance = MeshInstance3D.new()
+	moon_instance.name = "AnimeMoon"
+	moon_instance.mesh = quad
+	moon_instance.material_override = material
+	moon_instance.position = MOON_OFFSET
+	moon_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# The shader turns the flat quad to face the camera, so its AABB must not cull it edge-on.
+	moon_instance.extra_cull_margin = MOON_QUAD_M
+	sky_ambience_root.add_child(moon_instance)
+
+
+func _build_stars(rng: RandomNumberGenerator) -> void:
+	var quad := QuadMesh.new()
+	quad.size = Vector2(STAR_QUAD_M, STAR_QUAD_M)
+	var material := ShaderMaterial.new()
+	material.shader = StarShader
+	var low: float = sin(deg_to_rad(STAR_MIN_ELEVATION_DEG))
+	var high: float = sin(deg_to_rad(STAR_MAX_ELEVATION_DEG))
+	var poses: Array[Transform3D] = []
+	for index: int in range(STAR_COUNT):
+		# Uniform in sin(elevation) spreads the stars evenly over the dome instead of piling them at the zenith.
+		var up: float = rng.randf_range(low, high)
+		var ring: float = sqrt(1.0 - up * up)
+		var azimuth: float = rng.randf_range(0.0, TAU)
+		var at := Vector3(cos(azimuth) * ring, up, sin(azimuth) * ring) * STAR_DOME_RADIUS_M
+		var size_scale: float = rng.randf_range(0.6, 1.5)
+		poses.append(Transform3D(Basis.from_scale(Vector3.ONE * size_scale), at))
+	star_instance = _multimesh("NightStars", quad, poses, material, [], true)
+	var tints: Array[Color] = [Color.WHITE, Color("#bfe6ff"), Color("#ffe2c4")]
+	for index: int in range(poses.size()):
+		star_instance.multimesh.set_instance_color(index, tints[index % tints.size()])
+	star_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	star_instance.reparent(sky_ambience_root, false)
+
+
+func _build_clouds(rng: RandomNumberGenerator) -> void:
+	var poses: Array[Transform3D] = []
+	for index: int in range(CLOUD_COUNT):
+		var azimuth: float = (float(index) + rng.randf_range(-0.3, 0.3)) / float(CLOUD_COUNT) * TAU
+		var radius: float = rng.randf_range(CLOUD_MIN_RADIUS_M, CLOUD_MAX_RADIUS_M)
+		var at := Vector3(cos(azimuth) * radius, rng.randf_range(CLOUD_MIN_HEIGHT_M, CLOUD_MAX_HEIGHT_M), sin(azimuth) * radius)
+		var orientation := Basis(Vector3.UP, rng.randf_range(0.0, TAU)).scaled(Vector3.ONE * rng.randf_range(0.8, 1.7))
+		poses.append(Transform3D(orientation, at))
+	_cloud_base_poses = poses
+	var material := ShaderMaterial.new()
+	material.shader = CloudShader
+	cloud_instance = _multimesh("AnimeNightClouds", _cloud_mesh(), poses, material)
+	cloud_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	cloud_instance.reparent(sky_ambience_root, false)
+
+
+## One cloud = three overlapping flattened puffs merged into a single surface: a wide body with a
+## hump on each side. Low segment counts keep 28 of them near 8 000 triangles.
+func _cloud_mesh() -> ArrayMesh:
+	var puff := SphereMesh.new()
+	puff.radius = 1.0
+	puff.height = 2.0
+	puff.radial_segments = 10
+	puff.rings = 5
+	var puffs: Array[Transform3D] = [
+		Transform3D(Basis.from_scale(Vector3(62.0, 20.0, 34.0)), Vector3.ZERO),
+		Transform3D(Basis.from_scale(Vector3(36.0, 17.0, 26.0)), Vector3(-44.0, 5.0, 4.0)),
+		Transform3D(Basis.from_scale(Vector3(30.0, 14.0, 22.0)), Vector3(48.0, 2.0, -6.0)),
+	]
+	var tool := SurfaceTool.new()
+	tool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for pose: Transform3D in puffs:
+		tool.append_from(puff, 0, pose)
+	return tool.commit()
+
+
+## Twenty-four vertical banners on the bridge and harbor lamp poles, spread evenly over both
+## sides; their flutter comes entirely from neo_wangan_wind_banner.gdshader.
+func _build_wind_banners() -> void:
+	var stations: Array[Vector2] = [] # x = arc length of a lamp pole, y = its side
+	var s: float = 14.0
+	while s < ribbon.length_m:
+		var on_bridge: bool = s >= CircuitScript.BRIDGE_START_M and s <= CircuitScript.BRIDGE_END_M
+		var in_harbor: bool = s >= CircuitScript.TUNNEL_END_M and s <= CircuitScript.HARBOR_HAIRPIN_S + 300.0
+		if on_bridge or in_harbor:
+			for side: float in [-1.0, 1.0]:
+				stations.append(Vector2(s, side))
+		s += LAMP_PITCH_M
+	if stations.is_empty():
+		return
+	var poses: Array[Transform3D] = []
+	for index: int in range(BANNER_COUNT):
+		var station: Vector2 = stations[index * stations.size() / BANNER_COUNT]
+		var pole: Transform3D = ribbon.get_point_at_offset(station.x, station.y * LAMP_LATERAL_M)
+		var outward: Vector3 = Vector3(pole.basis.x.x, 0.0, pole.basis.x.z).normalized() * station.y
+		# The pennant hangs outboard of the pole with its left edge pinned to it.
+		var at: Vector3 = pole.origin + outward * (BANNER_SIZE.x * 0.5 + 0.2) + Vector3.UP * BANNER_HEIGHT_M
+		poses.append(Transform3D(Basis(outward, Vector3.UP, outward.cross(Vector3.UP)), at))
+	var mesh := BoxMesh.new()
+	mesh.size = BANNER_SIZE
+	_banner_shader_mat = ShaderMaterial.new()
+	_banner_shader_mat.shader = WindBannerShader
+	_banner_shader_mat.set_shader_parameter("wind_speed_kph", current_wind_kph)
+	wind_banner_instance = _multimesh("WindBannersMM", mesh, poses, _banner_shader_mat, [], true)
+	for index: int in range(poses.size()):
+		wind_banner_instance.multimesh.set_instance_color(index, BANNER_COLORS[index % BANNER_COLORS.size()])
+	wind_banner_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	wind_banner_instance.reparent(hero_landmarks_root, false)
 
 
 # --- shared --------------------------------------------------------------------------------------
@@ -854,15 +1058,12 @@ func _build_street_corridor() -> void:
 			var poses: Array[Transform3D] = []
 			poses.assign(districts[district])
 			_instanced_model("skyscraper_tower_" + ["a", "b", "c"][variant], "CorridorTower%d_%d_%d" % [variant, district.x, district.y], poses, midground_corridor_root)
-	var panels := MeshBatchScript.new()
-	var material: Material = ToonMaterials.vertex_colored(false)
-	panels.box(material, Color("#101827"), Transform3D.IDENTITY, Vector3(10.0, 5.5, 0.45))
-	for side: float in [-1.0, 1.0]:
-		panels.box(material, Color(1.0, 1.0, 1.0, 0.0), Transform3D(Basis.IDENTITY, Vector3(0.0, 0.0, side * 0.26)), Vector3(9.4, 4.9, 0.06))
-	for row: int in range(3):
-		for side: float in [-1.0, 1.0]:
-			panels.box(material, Color("#192c40"), Transform3D(Basis.IDENTITY, Vector3(0.0, 1.4 - float(row) * 1.2, side * 0.31)), Vector3(6.3 - float(row), 0.22, 0.06))
-	var billboard_mm: MultiMeshInstance3D = _multimesh("StreetBillboardMM", panels.commit(), billboards, null, [], true)
+	# One box per sign; neo_wangan_billboard.gdshader paints the halftone, Kanji blocks and frame.
+	var panel := BoxMesh.new()
+	panel.size = Vector3(10.0, 5.5, 0.45)
+	var sign_material := ShaderMaterial.new()
+	sign_material.shader = BillboardShader
+	var billboard_mm: MultiMeshInstance3D = _multimesh("StreetBillboardMM", panel, billboards, sign_material, [], true)
 	var colors: Array[Color] = [Color("#00f0ff"), Color("#ff1e56"), Color("#ccff00")]
 	for index: int in range(billboards.size()):
 		billboard_mm.multimesh.set_instance_color(index, colors[index % 3])
