@@ -26,6 +26,7 @@ const FoliageScript := preload("res://scripts/world/foliage_scatter.gd")
 const VistaScript := preload("res://scripts/world/mountain_vista.gd")
 const VistaScene := preload("res://scenes/race_world/mountain_vista.tscn")
 const LightingScript := preload("res://scripts/world/circuit_lighting_controller.gd")
+const SharedSkyScript := preload("res://scripts/world/shared_cel_sky_controller.gd")
 
 ## |kappa| above this (radius under 125 m) counts as a sharp corner.
 const KERB_CURVATURE: float = 0.008
@@ -88,6 +89,9 @@ var grandstand: GrandstandScript
 var vista: VistaScript
 var foliage: FoliageScript
 var lighting: LightingScript
+## Cel Sun/Moon disc and wind-driven clouds shared with every circuit; the vista keeps the only starfield.
+var sky_controller: SharedSkyScript
+var sky_ambience_root: Node3D
 
 var _leaderboard_clock: float = LEADERBOARD_REFRESH_S
 
@@ -104,6 +108,8 @@ func build(p_ribbon: TrackRibbonScript, p_line: AdaptiveLineScript) -> void:
 	_build_paddock()
 	_build_catch_fence()
 	_build_vista()
+	sky_controller = SharedSkyScript.new()
+	sky_ambience_root = sky_controller.build(self, ribbon, 20260240, false)
 	_build_foliage()
 
 
@@ -224,10 +230,13 @@ func _build_paddock() -> void:
 ## Per-frame upkeep: the Jumbotron leaderboard and the time-of-day lighting follow the race.
 func update(delta: float, race: GtRace) -> void:
 	_update_leaderboard(delta, race)
+	var weather: GtWeather = race.weather
+	var gloom: float = maxf(clampf(sqrt(weather.rain_intensity), 0.0, 1.0), weather.track_water_pct / 100.0)
 	if lighting != null:
-		var weather: GtWeather = race.weather
-		var gloom: float = maxf(clampf(sqrt(weather.rain_intensity), 0.0, 1.0), weather.track_water_pct / 100.0)
 		lighting.apply(weather.time_of_day, gloom, weather.wind_speed, delta)
+	if sky_controller != null:
+		sky_controller.apply_wind(delta, weather.wind_speed)
+		sky_controller.apply_time_of_day(weather.time_of_day, gloom)
 
 
 ## Repaints the Jumbotron from the live standings a couple of times a second.

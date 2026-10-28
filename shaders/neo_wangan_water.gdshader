@@ -16,6 +16,8 @@ uniform float time_s = 0.0;
 uniform float band_length_m : hint_range(2.0, 40.0) = 9.0;
 uniform float crest_share : hint_range(0.01, 0.3) = 0.07;
 uniform float crest_dash_gap : hint_range(0.0, 0.9) = 0.38;
+uniform float band_emission : hint_range(0.0, 1.0) = 0.25;
+uniform float crest_emission : hint_range(0.0, 2.0) = 0.70;
 
 varying vec3 world_pos;
 
@@ -38,7 +40,7 @@ void fragment() {
 	float neon_pick = step(0.0, sin(world_pos.x * 0.03 + world_pos.z * 0.02));
 	vec3 crest_col = mix(neon_ripple_cyan, neon_ripple_magenta, neon_pick);
 	ALBEDO = mix(deep_color, band_color, band);
-	EMISSION = band_color * 0.25 + crest_col * crest_line * dash * 0.7;
+	EMISSION = band_color * band_emission + crest_col * crest_line * dash * crest_emission;
 	ROUGHNESS = 0.9;
 	METALLIC = 0.0;
 }

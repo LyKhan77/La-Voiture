@@ -12,6 +12,7 @@ uniform vec3 window_cool = vec3(0.0, 0.94, 1.0);
 uniform vec3 window_warm = vec3(1.0, 0.62, 0.22);
 uniform vec3 roof_neon_color = vec3(1.0, 0.12, 0.46);
 uniform float window_energy : hint_range(0.0, 8.0) = 1.9;
+uniform float roof_neon_energy : hint_range(0.0, 4.0) = 2.2;
 uniform vec2 window_cell = vec2(4.6, 3.2);
 uniform float lit_fraction : hint_range(0.0, 1.0) = 0.32;
 
@@ -46,7 +47,7 @@ void fragment() {
 	float warm = step(0.76, hash21(cell + 17.0));
 	float roof_band = step(0.965, local_y) * wall;
 	vec3 win_col = mix(window_cool, window_warm, warm) * (0.7 + 0.3 * halftone);
-	vec3 glow = win_col * window_energy * lit * pane * wall + roof_neon_color * roof_band * 2.2;
+	vec3 glow = win_col * window_energy * lit * pane * wall + roof_neon_color * roof_band * roof_neon_energy;
 	ALBEDO = mix(building_color, building_top_tint, clamp(local_y, 0.0, 1.0));
 	EMISSION = glow;
 	ROUGHNESS = 0.85;

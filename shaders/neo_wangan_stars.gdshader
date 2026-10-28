@@ -7,6 +7,7 @@ render_mode blend_add, unshaded, fog_disabled, depth_draw_never, cull_disabled;
 
 uniform float twinkle_speed : hint_range(0.0, 8.0) = 1.6;
 uniform float min_brightness : hint_range(0.0, 1.0) = 0.25;
+uniform float star_opacity : hint_range(0.0, 1.0) = 1.0;
 
 varying float phase;
 
@@ -31,5 +32,5 @@ void fragment() {
 	// Three cel steps: dim, mid, full.
 	float level = min_brightness + (1.0 - min_brightness) * floor(wave * 3.0) / 2.0;
 	ALBEDO = COLOR.rgb * level;
-	ALPHA = shape;
+	ALPHA = shape * star_opacity;
 }

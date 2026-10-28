@@ -21,10 +21,9 @@ const PoolShader := preload("res://shaders/neo_wangan_light_pool.gdshader")
 const SkylineOutlineShader := preload("res://shaders/neo_wangan_skyline_outline.gdshader")
 const WaterShader := preload("res://shaders/neo_wangan_water.gdshader")
 const BillboardShader := preload("res://shaders/neo_wangan_billboard.gdshader")
-const CloudShader := preload("res://shaders/neo_wangan_clouds.gdshader")
 const WindBannerShader := preload("res://shaders/neo_wangan_wind_banner.gdshader")
-const MoonShader := preload("res://shaders/neo_wangan_moon.gdshader")
-const StarShader := preload("res://shaders/neo_wangan_stars.gdshader")
+const SharedSkyScript := preload("res://scripts/world/shared_cel_sky_controller.gd")
+const WeatherScript := preload("res://scripts/gt/gt_weather.gd")
 const Liveries := preload("res://scripts/car/team_liveries.gd")
 const TracksideKit := preload("res://scripts/world/trackside_furniture_builder.gd")
 const PitKit := preload("res://scripts/world/neo_wangan_pit_complex.gd")
@@ -71,22 +70,7 @@ const SKYLINE_SEED: int = 20260227
 ## Skyline ink hull width in the world (see neo_wangan_skyline_outline.gdshader).
 const SKYLINE_OUTLINE_M: float = 0.9
 
-## Sky ambience (FASE 12.2): everything hangs off SkyAmbienceRoot, centred on the circuit.
-const MOON_OFFSET := Vector3(-650.0, 780.0, -1100.0)
-const MOON_QUAD_M: float = 285.0
-const STAR_COUNT: int = 900
-const STAR_DOME_RADIUS_M: float = 2400.0
-const STAR_MIN_ELEVATION_DEG: float = 5.0
-const STAR_MAX_ELEVATION_DEG: float = 88.0
-const STAR_QUAD_M: float = 9.0
-const CLOUD_COUNT: int = 28
-const CLOUD_MIN_RADIUS_M: float = 450.0
-const CLOUD_MAX_RADIUS_M: float = 1200.0
-const CLOUD_MIN_HEIGHT_M: float = 260.0
-const CLOUD_MAX_HEIGHT_M: float = 420.0
-## Ring spin in rad/s: a base drift plus a share per km/h of wind, so a gale visibly shoves the clouds.
-const CLOUD_BASE_RATE: float = 0.004
-const CLOUD_WIND_RATE: float = 0.00035
+## Sky ambience (FASE 12.2, shared since FASE 12.3): SharedCelSkyController owns SkyAmbienceRoot.
 const BANNER_COUNT: int = 24
 const BANNER_SIZE := Vector3(0.9, 2.4, 0.04)
 const BANNER_HEIGHT_M: float = 6.2
@@ -94,8 +78,6 @@ const BANNER_COLORS: Array[Color] = [Color("#00f0ff"), Color("#ff2d78"), Color("
 const DEFAULT_WIND_KPH: float = 14.0
 const DEFAULT_WIND_DIR_RAD: float = 0.6
 
-const NIGHT_TOP := Color("#060a18")
-const NIGHT_HORIZON := Color("#2a1a3e")
 const NEON_CYAN := Color("#00f0ff")
 const NEON_MAGENTA := Color("#ff2d78")
 const ASPHALT_DARK := Color("#1a1c22")
@@ -122,6 +104,8 @@ var sky_ambience_root: Node3D
 var moon_instance: MeshInstance3D
 var star_instance: MultiMeshInstance3D
 var cloud_instance: MultiMeshInstance3D
+var sky_controller: SharedSkyScript
+var streetlight_pools_instance: MultiMeshInstance3D
 var wind_banner_instance: MultiMeshInstance3D
 var skyline_buildings: Array[Dictionary] = [] # {position, size}
 var barrier_count: int = 0
@@ -137,8 +121,11 @@ var _lamp_material: StandardMaterial3D
 var _window_material: ShaderMaterial
 var _water_shader_mat: ShaderMaterial
 var _banner_shader_mat: ShaderMaterial
-var _cloud_base_poses: Array[Transform3D] = []
-var _cloud_angle: float = 0.0
+var _street_pool_material: ShaderMaterial
+var _runtime_environment: Environment
+var _sky_material: ProceduralSkyMaterial
+var _current_tod: Dictionary = {}
+var _current_gloom: float = 0.0
 ## Live wind from race.weather, in km/h; the ambience (clouds, water, banners) follows it.
 var current_wind_kph: float = 12.0
 var _clock_s: float = 0.0
@@ -162,7 +149,6 @@ func build(p_ribbon: RibbonScript, p_circuit) -> void:
 	urban_island_root = _layer("UrbanIslandRoot")
 	hero_landmarks_root = _layer("HeroLandmarksRoot")
 	midground_corridor_root = _layer("MidgroundCorridorRoot")
-	sky_ambience_root = _layer("SkyAmbienceRoot")
 	_build_ground()
 	_build_urban_island()
 	_build_barriers()
@@ -178,7 +164,7 @@ func build(p_ribbon: RibbonScript, p_circuit) -> void:
 	_build_street_corridor()
 	_build_sky_ambience()
 	_build_wind_banners()
-	_apply_night_sky()
+	apply_time_of_day(_current_tod, _current_gloom)
 	measure()
 
 
@@ -187,24 +173,27 @@ func bind_world(world_environment: WorldEnvironment, sun: DirectionalLight3D, ca
 	_world_environment = world_environment
 	_sun = sun
 	_camera = camera
-	_apply_night_sky()
+	apply_time_of_day(_current_tod, _current_gloom)
 
 
-## Neon and window glow breathe a little, like a city that never quite settles.
+## Tunnel neon, DAY/SUNSET/NIGHT palette and window glow breathe a little, like a city that never quite settles.
 func update(delta: float, race) -> void:
 	_clock_s += delta
 	var pulse: float = 0.86 + 0.14 * sin(_clock_s * 2.1)
 	if _neon_material != null:
 		_neon_material.emission_energy_multiplier = 2.2 * pulse
-	if _lamp_material != null:
-		_lamp_material.emission_energy_multiplier = 2.6
-	if _window_material != null:
-		_window_material.set_shader_parameter("window_energy", 1.8 * pulse)
 	var wind_kph: float = DEFAULT_WIND_KPH
 	var wind_dir: float = DEFAULT_WIND_DIR_RAD
+	var tod: Dictionary = _current_tod
+	var gloom: float = _current_gloom
 	if race != null and race.get("weather") != null:
-		wind_kph = float(race.weather.wind_speed)
-		wind_dir = float(race.weather.wind_direction)
+		var weather: GtWeather = race.weather
+		wind_kph = float(weather.wind_speed)
+		wind_dir = float(weather.wind_direction)
+		if not weather.time_of_day.is_empty():
+			tod = weather.time_of_day
+		gloom = maxf(clampf(sqrt(weather.rain_intensity), 0.0, 1.0), weather.track_water_pct / 100.0)
+	apply_time_of_day(tod, gloom)
 	apply_wind_ambience(delta, wind_kph, wind_dir)
 	_leaderboard_clock += delta
 	if race != null and _jumbotron != null and _leaderboard_clock >= 0.5:
@@ -229,10 +218,8 @@ func apply_wind_ambience(delta: float, wind_kph: float, wind_dir: float) -> void
 	if _banner_shader_mat != null:
 		_banner_shader_mat.set_shader_parameter("time_s", _clock_s)
 		_banner_shader_mat.set_shader_parameter("wind_speed_kph", wind_kph)
-	# Integrate the angle so a changing wind speeds the clouds up smoothly instead of teleporting them.
-	_cloud_angle = fposmod(_cloud_angle + delta * (CLOUD_BASE_RATE + wind_kph * CLOUD_WIND_RATE), TAU)
-	if cloud_instance != null:
-		cloud_instance.rotation.y = _cloud_angle
+	if sky_controller != null:
+		sky_controller.apply_wind(delta, wind_kph)
 
 
 func stats() -> Dictionary:
@@ -445,7 +432,8 @@ func _build_light_pools(lamp_transforms: Array[Transform3D]) -> void:
 	var material: ShaderMaterial = _pool_material(Color("#ffcf8a"), 0.5)
 	material.set_shader_parameter("clip_to_road", true)
 	light_pool_poses = pools
-	_multimesh("StreetlightPools", quad, pools, material, laterals)
+	_street_pool_material = material
+	streetlight_pools_instance = _multimesh("StreetlightPools", quad, pools, material, laterals)
 
 
 func _pool_material(color: Color, intensity: float) -> ShaderMaterial:
@@ -701,100 +689,16 @@ func _build_skyline() -> void:
 
 # --- sky ambience --------------------------------------------------------------------------------
 
-## Moon, 900 twinkling stars and a ring of 28 cel clouds, centred over the circuit. All unshaded
-## and shadow-free, one draw call each.
+## Moon/Sun disc, 900 twinkling stars and a ring of 28 cel clouds, centred over the circuit, built and
+## driven by the shared controller (see SharedCelSkyController). All unshaded and shadow-free.
 func _build_sky_ambience() -> void:
-	var centre := Vector3.ZERO
-	var samples: int = 0
-	var s: float = 0.0
-	while s < ribbon.length_m:
-		centre += ribbon.get_point_at_offset(s, 0.0).origin
-		samples += 1
-		s += 100.0
-	centre /= float(maxi(samples, 1))
-	centre.y = 0.0
-	sky_ambience_root.position = centre
-	var rng := RandomNumberGenerator.new()
-	rng.seed = SKYLINE_SEED + 13
-	_build_moon()
-	_build_stars(rng)
-	_build_clouds(rng)
-
-
-func _build_moon() -> void:
-	var quad := QuadMesh.new()
-	quad.size = Vector2(MOON_QUAD_M, MOON_QUAD_M)
-	var material := ShaderMaterial.new()
-	material.shader = MoonShader
-	moon_instance = MeshInstance3D.new()
-	moon_instance.name = "AnimeMoon"
-	moon_instance.mesh = quad
-	moon_instance.material_override = material
-	moon_instance.position = MOON_OFFSET
-	moon_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	# The shader turns the flat quad to face the camera, so its AABB must not cull it edge-on.
-	moon_instance.extra_cull_margin = MOON_QUAD_M
-	sky_ambience_root.add_child(moon_instance)
-
-
-func _build_stars(rng: RandomNumberGenerator) -> void:
-	var quad := QuadMesh.new()
-	quad.size = Vector2(STAR_QUAD_M, STAR_QUAD_M)
-	var material := ShaderMaterial.new()
-	material.shader = StarShader
-	var low: float = sin(deg_to_rad(STAR_MIN_ELEVATION_DEG))
-	var high: float = sin(deg_to_rad(STAR_MAX_ELEVATION_DEG))
-	var poses: Array[Transform3D] = []
-	for index: int in range(STAR_COUNT):
-		# Uniform in sin(elevation) spreads the stars evenly over the dome instead of piling them at the zenith.
-		var up: float = rng.randf_range(low, high)
-		var ring: float = sqrt(1.0 - up * up)
-		var azimuth: float = rng.randf_range(0.0, TAU)
-		var at := Vector3(cos(azimuth) * ring, up, sin(azimuth) * ring) * STAR_DOME_RADIUS_M
-		var size_scale: float = rng.randf_range(0.6, 1.5)
-		poses.append(Transform3D(Basis.from_scale(Vector3.ONE * size_scale), at))
-	star_instance = _multimesh("NightStars", quad, poses, material, [], true)
-	var tints: Array[Color] = [Color.WHITE, Color("#bfe6ff"), Color("#ffe2c4")]
-	for index: int in range(poses.size()):
-		star_instance.multimesh.set_instance_color(index, tints[index % tints.size()])
-	star_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	star_instance.reparent(sky_ambience_root, false)
-
-
-func _build_clouds(rng: RandomNumberGenerator) -> void:
-	var poses: Array[Transform3D] = []
-	for index: int in range(CLOUD_COUNT):
-		var azimuth: float = (float(index) + rng.randf_range(-0.3, 0.3)) / float(CLOUD_COUNT) * TAU
-		var radius: float = rng.randf_range(CLOUD_MIN_RADIUS_M, CLOUD_MAX_RADIUS_M)
-		var at := Vector3(cos(azimuth) * radius, rng.randf_range(CLOUD_MIN_HEIGHT_M, CLOUD_MAX_HEIGHT_M), sin(azimuth) * radius)
-		var orientation := Basis(Vector3.UP, rng.randf_range(0.0, TAU)).scaled(Vector3.ONE * rng.randf_range(0.8, 1.7))
-		poses.append(Transform3D(orientation, at))
-	_cloud_base_poses = poses
-	var material := ShaderMaterial.new()
-	material.shader = CloudShader
-	cloud_instance = _multimesh("AnimeNightClouds", _cloud_mesh(), poses, material)
-	cloud_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	cloud_instance.reparent(sky_ambience_root, false)
-
-
-## One cloud = three overlapping flattened puffs merged into a single surface: a wide body with a
-## hump on each side. Low segment counts keep 28 of them near 8 000 triangles.
-func _cloud_mesh() -> ArrayMesh:
-	var puff := SphereMesh.new()
-	puff.radius = 1.0
-	puff.height = 2.0
-	puff.radial_segments = 10
-	puff.rings = 5
-	var puffs: Array[Transform3D] = [
-		Transform3D(Basis.from_scale(Vector3(62.0, 20.0, 34.0)), Vector3.ZERO),
-		Transform3D(Basis.from_scale(Vector3(36.0, 17.0, 26.0)), Vector3(-44.0, 5.0, 4.0)),
-		Transform3D(Basis.from_scale(Vector3(30.0, 14.0, 22.0)), Vector3(48.0, 2.0, -6.0)),
-	]
-	var tool := SurfaceTool.new()
-	tool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for pose: Transform3D in puffs:
-		tool.append_from(puff, 0, pose)
-	return tool.commit()
+	sky_controller = SharedSkyScript.new()
+	sky_ambience_root = sky_controller.build(self, ribbon, SKYLINE_SEED + 13, true)
+	moon_instance = sky_controller.moon_instance
+	star_instance = sky_controller.star_instance
+	cloud_instance = sky_controller.cloud_instance
+	# A set with no race behind it keeps the floodlit night it always had.
+	_current_tod = WeatherScript.compute_time_of_day(WeatherScript.TimeOfDay.NIGHT, 0.0)
 
 
 ## Twenty-four vertical banners on the bridge and harbor lamp poles, spread evenly over both
@@ -1089,7 +993,74 @@ func _multimesh(node_name: String, mesh: Mesh, transforms: Array, material: Mate
 	return instance
 
 
-func _apply_night_sky() -> void:
+## DAY / SUNSET / NIGHT palette for the whole city (FASE 12.3). `tod` is GtWeather.time_of_day; `gloom`
+## (0..1) is the rain and wetness gloom. Streetlights go dark in clear daylight but the underpass neon
+## never does: it sits under the plaza roof.
+func apply_time_of_day(tod: Dictionary, gloom: float = 0.0) -> void:
+	_current_tod = tod
+	_current_gloom = gloom
+	if sky_controller != null:
+		sky_controller.apply_time_of_day(tod, gloom)
+	var night_factor: float = clampf(float(tod.get("floodlights", 1.0)), 0.0, 1.0)
+	var mode: int = SharedSkyScript.mode_of(tod)
+	var pulse: float = 0.86 + 0.14 * sin(_clock_s * 2.1)
+
+	if _window_material != null:
+		match mode:
+			0:
+				_set_params(_window_material, {
+					"building_color": Color("#4a5a75"), "building_top_tint": Color("#788cab"),
+					"window_cool": Color("#8cb8d9"), "window_warm": Color("#b0d4eb"),
+					"window_energy": 0.0, "roof_neon_energy": 0.0})
+			1:
+				_set_params(_window_material, {
+					"building_color": Color("#28233d"), "building_top_tint": Color("#6e4263"),
+					"window_cool": Color("#ffaa44"), "window_warm": Color("#ff5577"),
+					"window_energy": 0.95 * pulse, "roof_neon_energy": 1.2})
+			_:
+				_set_params(_window_material, {
+					"building_color": Color("#0b0e16"), "building_top_tint": Color("#171f33"),
+					"window_cool": Color("#00f0ff"), "window_warm": Color("#ff9e38"),
+					"window_energy": 1.8 * pulse, "roof_neon_energy": 2.2})
+
+	if _water_shader_mat != null:
+		match mode:
+			0:
+				_set_params(_water_shader_mat, {
+					"deep_color": Color("#124878"), "band_color": Color("#2474b5"),
+					"neon_ripple_cyan": Color("#d9f7ff"), "neon_ripple_magenta": Color("#8ce3ff"),
+					"band_emission": 0.08, "crest_emission": 0.25})
+			1:
+				_set_params(_water_shader_mat, {
+					"deep_color": Color("#26193b"), "band_color": Color("#6b3252"),
+					"neon_ripple_cyan": Color("#ffaa3b"), "neon_ripple_magenta": Color("#ff2e6e"),
+					"band_emission": 0.18, "crest_emission": 0.55})
+			_:
+				_set_params(_water_shader_mat, {
+					"deep_color": Color("#061020"), "band_color": Color("#0d2947"),
+					"neon_ripple_cyan": Color("#00e6ff"), "neon_ripple_magenta": Color("#ff2e75"),
+					"band_emission": 0.25, "crest_emission": 0.70})
+
+	# Off in clear daylight; on at dusk, at night, or under a heavy storm gloom.
+	var lamp_level: float = maxf(night_factor, gloom * 0.7 if gloom > 0.55 else 0.0)
+	if _lamp_material != null:
+		_lamp_material.emission_energy_multiplier = 2.6 * lamp_level
+	if streetlight_pools_instance != null:
+		streetlight_pools_instance.visible = lamp_level > 0.05
+	if _street_pool_material != null:
+		_street_pool_material.set_shader_parameter("intensity", 0.5 * lamp_level)
+
+	_apply_sky_for_tod(mode, gloom)
+
+
+static func _set_params(material: ShaderMaterial, values: Dictionary) -> void:
+	for key: String in values:
+		material.set_shader_parameter(key, values[key])
+
+
+## The WorldEnvironment's sky, fog and sun follow the time of day. The Environment is duplicated once
+## (runtime sky/lighting stay out of the shared PackedScene resource) and then only its values change.
+func _apply_sky_for_tod(mode: int, gloom: float) -> void:
 	var owner_environment: WorldEnvironment = null
 	if _world_environment != null and _world_environment.environment != null:
 		owner_environment = _world_environment
@@ -1097,26 +1068,61 @@ func _apply_night_sky() -> void:
 		owner_environment = get_parent().get_node("WorldEnvironment") as WorldEnvironment
 	if owner_environment == null or owner_environment.environment == null:
 		return
-	# Like Apex's _build_sky(), keep runtime sky/lighting out of the shared PackedScene resource.
-	var environment: Environment = owner_environment.environment.duplicate() as Environment
-	var sky_material := ProceduralSkyMaterial.new()
-	sky_material.sky_top_color = NIGHT_TOP
-	sky_material.sky_horizon_color = NIGHT_HORIZON
-	sky_material.ground_horizon_color = NIGHT_HORIZON
-	sky_material.ground_bottom_color = Color("#05070d")
-	sky_material.sun_angle_max = 0.0
-	var sky := Sky.new()
-	sky.sky_material = sky_material
-	environment.background_mode = Environment.BG_SKY
-	environment.sky = sky
-	# The city itself is the light source at night: a cool ambient wash plus a low moon, enough to
-	# read the asphalt and the barriers without a light per street lamp.
-	environment.ambient_light_energy = 0.85
-	environment.fog_enabled = true
-	environment.glow_enabled = true
-	environment.fog_light_color = Color("#232c4a")
-	environment.fog_density = 0.00055
-	owner_environment.environment = environment
+	if owner_environment.environment != _runtime_environment:
+		_runtime_environment = owner_environment.environment.duplicate() as Environment
+		_sky_material = ProceduralSkyMaterial.new()
+		_sky_material.sun_angle_max = 0.0
+		var sky := Sky.new()
+		sky.sky_material = _sky_material
+		_runtime_environment.background_mode = Environment.BG_SKY
+		_runtime_environment.sky = sky
+		_runtime_environment.fog_enabled = true
+		_runtime_environment.glow_enabled = true
+		owner_environment.environment = _runtime_environment
+	var storm_grey := Color("#4a5260")
+	var top: Color
+	var horizon: Color
+	var ground: Color
+	var fog_light: Color
+	var fog_density: float
+	var ambient: float
+	var sun_energy: float
+	var sun_color: Color
+	match mode:
+		0:
+			top = Color("#2673d6")
+			horizon = Color("#99d6ff")
+			ground = Color("#6f8aa6")
+			fog_light = Color("#a9d2f5")
+			fog_density = 0.00022
+			ambient = 1.0
+			sun_energy = 1.1
+			sun_color = Color("#fff4dc")
+		1:
+			top = Color("#2d1b4e")
+			horizon = Color("#ff6b3d")
+			ground = Color("#3a2236")
+			fog_light = Color("#7a4a6e")
+			fog_density = 0.00032
+			ambient = 0.9
+			sun_energy = 0.8
+			sun_color = Color("#ff9a5c")
+		_:
+			top = Color("#060a18")
+			horizon = Color("#2a1a3e")
+			ground = Color("#05070d")
+			fog_light = Color("#232c4a")
+			fog_density = 0.00055
+			ambient = 0.85
+			sun_energy = 0.5
+			sun_color = Color("#9db4ff")
+	_sky_material.sky_top_color = top.lerp(storm_grey.darkened(0.3), gloom * 0.6)
+	_sky_material.sky_horizon_color = horizon.lerp(storm_grey, gloom * 0.6)
+	_sky_material.ground_horizon_color = _sky_material.sky_horizon_color
+	_sky_material.ground_bottom_color = ground
+	_runtime_environment.ambient_light_energy = ambient
+	_runtime_environment.fog_light_color = fog_light.lerp(storm_grey, gloom * 0.5)
+	_runtime_environment.fog_density = fog_density * (1.0 + gloom)
 	if _sun != null:
-		_sun.light_energy = 0.5
-		_sun.light_color = Color("#9db4ff")
+		_sun.light_energy = sun_energy * (1.0 - gloom * 0.4)
+		_sun.light_color = sun_color
