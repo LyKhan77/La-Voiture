@@ -117,6 +117,8 @@ func _run() -> void:
 		_check_layer4_foliage(env)
 		_check_layer5_trackside(env)
 		_check_layer6_vista_and_light(env)
+		var budget: Vector2i = _render_budget(env)
+		check(budget.x <= 160 and budget.y <= 320000, "#P1 environment budget: %d draw calls (<= 160), %d triangles (<= 320000)" % [budget.x, budget.y])
 
 	# Calendar Registry integration
 	var circuit_data = RegistryScript.get_circuit("brianza")
@@ -127,6 +129,31 @@ func _run() -> void:
 		
 	instance.queue_free()
 	_finish()
+
+
+## Static render cost of a subtree: one draw call per surface of every mesh / multimesh, triangles x instances
+## (shadow passes and outline next-passes not counted; the same method the earlier phase reports use).
+func _render_budget(node: Node) -> Vector2i:
+	var total := Vector2i.ZERO
+	var mesh: Mesh = null
+	var instances: int = 1
+	if node is MeshInstance3D and (node as MeshInstance3D).visible:
+		mesh = (node as MeshInstance3D).mesh
+	elif node is MultiMeshInstance3D and (node as MultiMeshInstance3D).multimesh != null:
+		mesh = (node as MultiMeshInstance3D).multimesh.mesh
+		instances = (node as MultiMeshInstance3D).multimesh.instance_count
+	elif node is Label3D:
+		total += Vector2i(1, 2)
+	if mesh != null:
+		var tris: int = 0
+		for surface: int in range(mesh.get_surface_count()):
+			var arrays: Array = mesh.surface_get_arrays(surface)
+			var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX] if arrays[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
+			tris += (indices.size() if indices.size() > 0 else (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()) / 3
+		total += Vector2i(mesh.get_surface_count(), tris * instances)
+	for child: Node in node.get_children():
+		total += _render_budget(child)
+	return total
 
 
 ## FASE 13.1 Layer 1: solid park ground under every road, grass tone, historic park wall.

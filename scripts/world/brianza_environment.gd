@@ -97,7 +97,7 @@ const GROUND_DROP_M: float = 2.4
 const GROUND_FADE_NEAR_M: float = 80.0
 const GROUND_FADE_FAR_M: float = 500.0
 const GROUND_SAMPLE_STEP_M: float = 20.0
-const VERGE_STEP_M: float = 6.0
+const VERGE_STEP_M: float = 8.0
 const VERGE_LATERAL_M: Array[float] = [7.3, 12.0, 40.0, 80.0]
 const VERGE_DROP_M: Array[float] = [-0.10, -0.30, -1.20, -2.40]
 const GRASS_TONES: Array[Color] = [Color("#3c7a38"), Color("#33692f"), Color("#478743")]
@@ -138,6 +138,7 @@ var _vista_materials: Array[ShaderMaterial] = []
 var _current_tod: Dictionary = {"mode": 0, "floodlights": 0.0, "stars_opacity": 0.0}
 var _current_gloom: float = 0.0
 var _ascari_screen: Jumbotron
+var _main_screen: Jumbotron
 var _jumbotron_clock: float = 0.0
 
 var _track_pos: PackedVector3Array = PackedVector3Array()
@@ -199,17 +200,24 @@ func update(delta: float, race) -> void:
 	_feed_jumbotrons(delta, race)
 
 
+## The Ascari screen plus the pit complex's main-stand screen (looked up once, then cached).
+func _screens() -> Array[Jumbotron]:
+	if _main_screen == null and get_parent() != null:
+		_main_screen = get_parent().get_node_or_null("PitLane/MainGrandstand/Jumbotron") as Jumbotron
+	var screens: Array[Jumbotron] = []
+	for screen: Jumbotron in [_main_screen, _ascari_screen]:
+		if screen != null:
+			screens.append(screen)
+	return screens
+
+
 ## Both screens (main stand + Ascari) show the live order, leader first.
 func _feed_jumbotrons(delta: float, race) -> void:
 	_jumbotron_clock += delta
 	if race == null or _jumbotron_clock < JUMBOTRON_PERIOD_S:
 		return
 	_jumbotron_clock = 0.0
-	var screens: Array[Jumbotron] = []
-	var main_screen := get_parent().get_node_or_null("PitLane/MainGrandstand/Jumbotron") as Jumbotron if get_parent() != null else null
-	for screen: Jumbotron in [main_screen, _ascari_screen]:
-		if screen != null:
-			screens.append(screen)
+	var screens: Array[Jumbotron] = _screens()
 	if screens.is_empty():
 		return
 	var colors: Array[Color] = []
@@ -231,9 +239,8 @@ func apply_time_of_day(tod, gloom: float = 0.0) -> void:
 	var night: float = clampf(float(tod.get("floodlights", 0.0)), 0.0, 1.0)
 	ToonMaterials.set_glow_energy(night * FLOODLIGHT_GLOW)
 	ToonMaterials.glass().emission_energy_multiplier = night * 1.1
-	for screen: Jumbotron in [_ascari_screen, get_parent().get_node_or_null("PitLane/MainGrandstand/Jumbotron") as Jumbotron if get_parent() != null else null]:
-		if screen != null:
-			screen.set_brightness(1.0 + 0.35 * night)
+	for screen: Jumbotron in _screens():
+		screen.set_brightness(1.0 + 0.35 * night)
 	var profile: Dictionary = SKY_PROFILES[mode]
 	_apply_sky_and_sun(profile, gloom)
 	for material: ShaderMaterial in _vista_materials:
@@ -887,7 +894,7 @@ func _build_stand_crowd(stand: Node3D, length: float, tiers: int, tops: Array[fl
 		for row: int in range(3):
 			var x: float = tier_depth * (float(tier) + 0.25 + 0.25 * float(row))
 			for column: int in range(columns):
-				if rng.randf() > 0.72:
+				if rng.randf() > 0.5:
 					continue
 				var z: float = -length * 0.5 + CORNER_CROWD_STEP_M * (float(column) + 0.5) + rng.randf_range(-0.3, 0.3)
 				var scale_f: float = rng.randf_range(0.9, 1.15)
@@ -1015,7 +1022,7 @@ func _build_layer4_dense_park_foliage() -> void:
 				var depth: float = 16.0 + float(layer) * 14.0 + rng.randf_range(-3.0, 5.0)
 				var yaw: float = rng.randf_range(0.0, TAU)
 				var scale_f: float = rng.randf_range(0.85, 1.25)
-				var is_pine: bool = rng.randf() < 0.65
+				var is_pine: bool = rng.randf() < 0.45
 				if is_pine:
 					depth = maxf(depth, PINE_MIN_DEPTH_M) # umbrella canopy (up to ~6.5 m) must not overhang the road
 				if _foliage_blocked(s, side, depth):
@@ -1061,11 +1068,12 @@ func _stone_pine_mesh(mat: Material) -> ArrayMesh:
 	var at := Vector3.ZERO
 	for i: int in range(leans.size()):
 		var dir: Vector3 = leans[i].normalized()
-		batch.cylinder(mat, trunk_col, Transform3D(Basis(Quaternion(Vector3.UP, dir)), at), radii[i], radii[i + 1], heights[i], 6, false)
+		batch.cylinder(mat, trunk_col, Transform3D(Basis(Quaternion(Vector3.UP, dir)), at), radii[i], radii[i + 1], heights[i], 5, false)
 		at += dir * heights[i]
-	batch.cylinder(mat, Color("#2d5432"), Transform3D(Basis.IDENTITY, at + Vector3(0.0, 0.2, 0.0)), 5.2, 3.8, 1.6, 8)
-	batch.cylinder(mat, Color("#3f7345"), Transform3D(Basis.IDENTITY, at + Vector3(0.0, 1.5, 0.0)), 4.2, 2.8, 1.5, 8)
-	batch.cylinder(mat, Color("#528c5a"), Transform3D(Basis.IDENTITY, at + Vector3(0.0, 2.8, 0.0)), 2.8, 0.0, 1.8, 8, true, false)
+	# 7-sided tiers; only the lowest keeps its caps (the upper tiers' caps are hidden by the tier above), ~80 tris a tree.
+	batch.cylinder(mat, Color("#2d5432"), Transform3D(Basis.IDENTITY, at + Vector3(0.0, 0.2, 0.0)), 5.2, 3.8, 1.6, 7)
+	batch.cylinder(mat, Color("#3f7345"), Transform3D(Basis.IDENTITY, at + Vector3(0.0, 1.5, 0.0)), 4.2, 2.8, 1.5, 7, false)
+	batch.cylinder(mat, Color("#528c5a"), Transform3D(Basis.IDENTITY, at + Vector3(0.0, 2.8, 0.0)), 2.8, 0.0, 1.8, 7, false)
 	return batch.commit()
 
 
@@ -1078,12 +1086,11 @@ func _cypress_mesh(mat: Material) -> ArrayMesh:
 	return batch.commit()
 
 
-## Undergrowth: a cluster of three low shrub mounds, dark and light green.
+## Undergrowth: a pair of low shrub mounds, dark and light green.
 func _undergrowth_mesh(mat: Material) -> ArrayMesh:
 	var batch := MeshBatchScript.new()
-	batch.cylinder(mat, Color("#2f6b3a"), Transform3D(Basis.IDENTITY, Vector3.ZERO), 1.3, 0.6, 0.9, 7, true, false)
-	batch.cylinder(mat, Color("#3f8a47"), Transform3D(Basis.IDENTITY, Vector3(1.0, 0.0, 0.4)), 0.9, 0.4, 0.7, 7, true, false)
-	batch.cylinder(mat, Color("#2a5f33"), Transform3D(Basis.IDENTITY, Vector3(-0.8, 0.0, -0.5)), 1.0, 0.5, 0.8, 7, true, false)
+	batch.cylinder(mat, Color("#2f6b3a"), Transform3D(Basis.IDENTITY, Vector3.ZERO), 1.3, 0.6, 0.9, 6, true, false)
+	batch.cylinder(mat, Color("#3f8a47"), Transform3D(Basis.IDENTITY, Vector3(1.0, 0.0, 0.4)), 0.9, 0.4, 0.7, 6, true, false)
 	return batch.commit()
 
 
