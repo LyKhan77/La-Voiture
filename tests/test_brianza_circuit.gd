@@ -114,6 +114,7 @@ func _run() -> void:
 		_check_layer3_grandstands(env, ribbon)
 		await _check_jumbotron_feed(env, instance)
 		_check_layer4_foliage(env)
+		_check_layer5_trackside(env)
 
 	# Calendar Registry integration
 	var circuit_data = RegistryScript.get_circuit("brianza")
@@ -285,6 +286,54 @@ func _check_layer4_foliage(env: EnvScript) -> void:
 					inside_stand += 1
 	check(worst_gap <= 0.6, "#L4.4 every sampled tree/bush stands on the ground (worst gap %.2f m)" % worst_gap)
 	check(inside_stand == 0, "#L4.5 no foliage inside the corner grandstands (%d found)" % inside_stand)
+
+
+## FASE 13.1 Layer 5: catch fence over the armco, overhead brake gantries, retro sponsors, marshal posts.
+func _check_layer5_trackside(env: EnvScript) -> void:
+	var root := env.get_node_or_null("TracksideSafetyRoot")
+	check(root != null, "#L5.1 TracksideSafetyRoot exists")
+	if root == null:
+		return
+	var fence := root.get_node_or_null("CatchFence") as MultiMeshInstance3D
+	check(fence != null and fence.multimesh.instance_count >= 150, "#L5.2 CatchFence is instanced (>= 150 panels, got %d)" % (fence.multimesh.instance_count if fence != null else 0))
+	if fence != null:
+		check(fence.multimesh.mesh.get_aabb().size.y >= 2.8, "#L5.3 catch fence stands >= 2.8 m")
+		var wire := fence.multimesh.mesh.surface_get_material(1) as StandardMaterial3D
+		check(wire != null and is_equal_approx(wire.albedo_color.a, 0.35), "#L5.4 fence mesh is semi-transparent wire (alpha 0.35)")
+		check(fence.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF, "#L5.5 catch fence casts no shadow")
+		var near_stand: int = 0
+		var stand := env.get_node("RettifiloGrandstand") as Node3D
+		for pose: Transform3D in env.catch_fence_poses:
+			if stand.to_local(pose.origin).length() < 100.0:
+				near_stand += 1
+		check(near_stand >= 10, "#L5.6 fence runs along the Rettifilo stand (%d panels)" % near_stand)
+	var gantries: Array[Node] = []
+	var gantry_root := root.get_node_or_null("BrakingGantries")
+	if gantry_root != null:
+		gantries = gantry_root.get_children().filter(func(n: Node) -> bool: return n.has_meta("meters"))
+	var meters: Dictionary = {}
+	var corners: Dictionary = {}
+	for g: Node in gantries:
+		meters[int(g.get_meta("meters"))] = true
+		corners[String(g.get_meta("corner"))] = true
+	check(gantries.size() == 12 and meters.size() == 4 and meters.has(200) and meters.has(50) and corners.size() == 3,
+		"#L5.7 12 overhead brake boards: 200/150/100/50 m at 3 corners (got %d boards, %d distances, %d corners)" % [gantries.size(), meters.size(), corners.size()])
+	check(gantry_root != null and gantry_root.get_node_or_null("GantryFrames") is MeshInstance3D, "#L5.8 gantry frames are one merged mesh")
+	var sponsors := root.get_node_or_null("SponsorBoards")
+	var brands: Array[String] = ["Pirelli", "Brembo", "Agip", "MagnetiMarelli"]
+	var brands_ok: bool = sponsors != null
+	for brand: String in brands:
+		var boards := sponsors.get_node_or_null(brand) as MultiMeshInstance3D if sponsors != null else null
+		brands_ok = brands_ok and boards != null and boards.multimesh.instance_count >= 8
+	check(brands_ok, "#L5.9 Pirelli, Brembo, Agip and Magneti Marelli boards (>= 8 each)")
+	var labels: Array[String] = []
+	if sponsors != null:
+		for l: Node in sponsors.get_children():
+			if l is Label3D:
+				labels.append((l as Label3D).text)
+	check(labels.has("PIRELLI") and labels.has("BREMBO") and labels.has("AGIP") and labels.has("MAGNETI MARELLI"), "#L5.10 hero boards carry the brand names")
+	var marshals := root.get_node_or_null("MarshalPosts") as MeshInstance3D
+	check(marshals != null and int(marshals.get_meta("count", 0)) >= 8, "#L5.11 marshal posts at the corner apexes (>= 8)")
 
 
 func _finish() -> void:

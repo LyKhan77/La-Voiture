@@ -32,6 +32,16 @@ const SOPRA_WIDTH_M: float = 14.0
 const SOPRA_THICKNESS_M: float = 1.8
 const SOPRA_CLEARANCE_M: float = 13.5
 ## Portal positions as a share of the half arc: two either side of the crossing.
+const BoardFont := preload("res://assets/fonts/BarlowCondensed.ttf")
+const BRAKE_CORNERS: Array[String] = ["Variante del Rettifilo", "Variante della Roggia", "Variante Ascari"]
+const BRAKE_DISTANCES_M: Array[int] = [200, 150, 100, 50]
+const SPONSOR_STEP_M: float = 110.0
+const SPONSORS: Array[Dictionary] = [
+	{"node": "Pirelli", "text": "PIRELLI", "ground": Color("#ffd400"), "band": Color("#d9232e"), "ink": Color("#14161c")},
+	{"node": "Brembo", "text": "BREMBO", "ground": Color("#d9232e"), "band": Color("#f0f2f5"), "ink": Color("#f0f2f5")},
+	{"node": "Agip", "text": "AGIP", "ground": Color("#ffd400"), "band": Color("#14161c"), "ink": Color("#14161c")},
+	{"node": "MagnetiMarelli", "text": "MAGNETI MARELLI", "ground": Color("#2b5fb8"), "band": Color("#f0f2f5"), "ink": Color("#f0f2f5")},
+]
 const SOPRA_FOLIAGE_CLEAR_M: float = 24.0
 const SOPRA_PORTAL_THETAS: Array[float] = [-0.88, -0.30, 0.30, 0.88]
 
@@ -82,6 +92,8 @@ var ground_root: Node3D
 
 ## Instance poses of each foliage batch by node name (headless MultiMeshes keep none).
 var foliage_poses: Dictionary = {}
+## Catch fence panel poses (kept for tests; headless MultiMeshes keep none).
+var catch_fence_poses: Array[Transform3D] = []
 
 var _foliage_keepouts: Array[Dictionary] = []
 var _sopra_blockers: PackedVector3Array = PackedVector3Array()
@@ -113,6 +125,7 @@ func build(p_ribbon: RibbonScript, p_builder: CircuitBuilderScript) -> void:
 	_build_tier_b_landmarks()
 	_build_layer3_corner_grandstands()
 	_build_layer4_dense_park_foliage()
+	_build_layer5_trackside_safety_and_sponsors()
 
 
 func bind_world(_world_env: WorldEnvironment, _sun: DirectionalLight3D, _camera: Camera3D) -> void:
@@ -918,6 +931,182 @@ func _near_corner(s: float) -> bool:
 		if s >= float(run["s0"]) - 40.0 and s <= float(run["s1"]) + 40.0:
 			return true
 	return false
+
+
+## Layer 5: FIA catch fence over the armco, overhead brake gantries, retro Italian sponsor boards and
+## marshal posts at the corner apexes.
+func _build_layer5_trackside_safety_and_sponsors() -> void:
+	if ribbon == null or furniture == null:
+		return
+	var safety := Node3D.new()
+	safety.name = "TracksideSafetyRoot"
+	add_child(safety)
+	var heavy_brake: Array[Dictionary] = []
+	for turn: Dictionary in builder.turns:
+		if String(turn["name"]) in BRAKE_CORNERS:
+			heavy_brake.append(turn)
+	_build_catch_fence(safety, heavy_brake)
+	_build_brake_gantries(safety, heavy_brake)
+	_build_sponsor_boards(safety)
+	_build_marshal_posts(safety)
+
+
+## Fence panels ride the armco posts along both stands and the 200 m approach to each heavy-braking corner.
+func _build_catch_fence(safety: Node3D, heavy_brake: Array[Dictionary]) -> void:
+	var zones: Array[Dictionary] = []
+	for stand_name: String in ["RettifiloGrandstand", "AscariGrandstand"]:
+		var stand := get_node_or_null(stand_name) as Node3D
+		if stand != null:
+			var half: float = float(stand.get_meta("length_m")) * 0.5 + 30.0
+			zones.append({"side": float(stand.get_meta("side")), "s0": float(stand.get_meta("s_centre")) - half, "s1": float(stand.get_meta("s_centre")) + half})
+	for turn: Dictionary in heavy_brake:
+		var enter_s: float = float(turn["s"]) - float(turn["span_m"]) * 0.5
+		zones.append({"side": 0.0, "s0": enter_s - 220.0, "s1": enter_s + 40.0})
+	catch_fence_poses.clear()
+	for run: Dictionary in furniture.armco_runs:
+		var side: float = float(run["side"])
+		for index: int in range(int(run["first"]), int(run["first"]) + int(run["count"])):
+			var s: float = furniture.armco_arcs[index]
+			for zone: Dictionary in zones:
+				if (float(zone["side"]) == 0.0 or float(zone["side"]) == side) and s >= float(zone["s0"]) and s <= float(zone["s1"]):
+					catch_fence_poses.append(furniture.armco_transforms[index])
+					break
+	var fence := _create_multimesh_instance("CatchFence", _catch_fence_mesh(), catch_fence_poses)
+	safety.add_child(fence)
+
+
+## Steel post with a 45 degree inward arm, hung with a 35 % opaque wire panel (2.8 m up).
+func _catch_fence_mesh() -> ArrayMesh:
+	var batch := MeshBatchScript.new()
+	var steel_mat: Material = ToonMaterials.vertex_colored(false)
+	var steel := Color("#3a404c")
+	batch.box(steel_mat, steel, Transform3D(Basis.IDENTITY, Vector3(0.35, 1.2, 0.0)), Vector3(0.1, 2.4, 0.1))
+	batch.strut(steel_mat, steel, Vector3(0.35, 2.4, 0.0), Vector3(-0.1, 2.85, 0.0), 0.1)
+	var wire := StandardMaterial3D.new()
+	wire.albedo_color = Color(0.118, 0.137, 0.176, 0.35)
+	wire.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	wire.cull_mode = BaseMaterial3D.CULL_DISABLED
+	wire.roughness = 1.0
+	for facing: float in [-1.0, 1.0]:
+		batch.quad(wire, Color.WHITE, Vector3(0.3, 0.9, -2.0), Vector3(0.3, 0.9, 2.0), Vector3(0.3, 2.8, 2.0), Vector3(0.3, 2.8, -2.0), Vector3(facing, 0.0, 0.0))
+	return batch.commit()
+
+
+## 200/150/100/50 m boards on a truss gantry across the road, facing the cars braking for the corner.
+func _build_brake_gantries(safety: Node3D, heavy_brake: Array[Dictionary]) -> void:
+	var gantries := Node3D.new()
+	gantries.name = "BrakingGantries"
+	safety.add_child(gantries)
+	var mat: Material = ToonMaterials.vertex_colored(false)
+	var frames := MeshBatchScript.new()
+	var steel := Color("#3a404c")
+	var span: float = ribbon.road_half_width_m + 3.5
+	for turn: Dictionary in heavy_brake:
+		var enter_s: float = float(turn["s"]) - float(turn["span_m"]) * 0.5
+		for distance: int in BRAKE_DISTANCES_M:
+			var pose: Transform3D = ribbon.get_point_at_offset(enter_s - float(distance), 0.0)
+			for side: float in [-1.0, 1.0]:
+				frames.box(mat, steel, pose * Transform3D(Basis.IDENTITY, Vector3(side * span, 3.2, 0.0)), Vector3(0.5, 7.4, 0.5))
+			frames.truss(mat, steel, pose * Vector3(-span, 6.4, 0.0), pose * Vector3(span, 6.4, 0.0), Vector3.UP, 0.9, 8, 0.16)
+			frames.box(mat, Color("#14161c"), pose * Transform3D(Basis.IDENTITY, Vector3(0.0, 6.4, 0.2)), Vector3(3.6, 1.7, 0.2))
+			frames.box(mat, Color("#ffd400"), pose * Transform3D(Basis.IDENTITY, Vector3(0.0, 5.5, 0.2)), Vector3(3.6, 0.12, 0.22))
+			var label := Label3D.new()
+			label.name = "Board_%d_%d" % [int(turn["number"]), distance]
+			label.text = str(distance)
+			label.font = BoardFont
+			label.font_size = 96
+			label.pixel_size = 0.014
+			label.modulate = Color("#ffd400")
+			label.outline_size = 0
+			label.transform = pose * Transform3D(Basis.IDENTITY, Vector3(0.0, 6.4, 0.32))
+			label.set_meta("meters", distance)
+			label.set_meta("corner", String(turn["name"]))
+			gantries.add_child(label)
+	var frame_inst := MeshInstance3D.new()
+	frame_inst.name = "GantryFrames"
+	frame_inst.mesh = frames.commit()
+	gantries.add_child(frame_inst)
+
+
+## Retro boards behind the armco, one MultiMesh per brand; a few carry the name in real type.
+func _build_sponsor_boards(safety: Node3D) -> void:
+	var sponsors := Node3D.new()
+	sponsors.name = "SponsorBoards"
+	safety.add_child(sponsors)
+	var poses: Array = []
+	for _brand: int in range(SPONSORS.size()):
+		poses.append([] as Array[Transform3D])
+	var index: int = 0
+	var s: float = 300.0
+	while s < ribbon.length_m - 300.0:
+		for side: float in [-1.0, 1.0]:
+			if not furniture.has_armco_at(side, s) or _in_stand_zone(s, side):
+				continue
+			var pose: Transform3D = ribbon.get_point_at_offset(s, furniture.armco_lateral(side, s) + side * 1.4)
+			if side < 0.0:
+				pose.basis = pose.basis.rotated(pose.basis.y, PI)
+			pose.origin.y = ground_y_at(pose.origin)
+			(poses[index % SPONSORS.size()] as Array[Transform3D]).append(pose)
+			index += 1
+		s += SPONSOR_STEP_M
+	for brand: int in range(SPONSORS.size()):
+		var spec: Dictionary = SPONSORS[brand]
+		var brand_poses: Array[Transform3D] = poses[brand]
+		sponsors.add_child(_create_multimesh_instance(String(spec["node"]), _sponsor_mesh(spec), brand_poses))
+		if not brand_poses.is_empty():
+			var hero: Transform3D = brand_poses[0]
+			var label := Label3D.new()
+			label.name = "Label_%s" % spec["node"]
+			label.text = String(spec["text"])
+			label.font = BoardFont
+			label.font_size = 72
+			label.pixel_size = 0.016
+			label.modulate = spec["ink"]
+			label.outline_size = 0
+			label.transform = hero * Transform3D(Basis(Vector3.UP, -PI * 0.5), Vector3(-0.12, 1.65, 0.0))
+			sponsors.add_child(label)
+
+
+func _sponsor_mesh(spec: Dictionary) -> ArrayMesh:
+	var batch := MeshBatchScript.new()
+	var mat: Material = ToonMaterials.vertex_colored(false)
+	batch.box(mat, spec["ground"], Transform3D(Basis.IDENTITY, Vector3(0.0, 1.65, 0.0)), Vector3(0.12, 1.5, 6.0))
+	for band: float in [-0.52, 0.52]:
+		batch.box(mat, spec["band"], Transform3D(Basis.IDENTITY, Vector3(-0.03, 1.65 + band, 0.0)), Vector3(0.14, 0.3, 6.0))
+	for z: float in [-2.6, 2.6]:
+		batch.box(mat, Color("#3a404c"), Transform3D(Basis.IDENTITY, Vector3(0.1, 0.55, z)), Vector3(0.12, 1.1, 0.12))
+	return batch.commit()
+
+
+func _in_stand_zone(s: float, side: float) -> bool:
+	for zone: Dictionary in _foliage_keepouts:
+		if side == float(zone["side"]) and s >= float(zone["s0"]) and s <= float(zone["s1"]):
+			return true
+	return false
+
+
+## A small marshal booth with a hazard-orange roof behind the armco at the outside of every turn.
+func _build_marshal_posts(safety: Node3D) -> void:
+	var batch := MeshBatchScript.new()
+	var mat: Material = ToonMaterials.vertex_colored(false)
+	var count: int = 0
+	for turn: Dictionary in builder.turns:
+		var apex_s: float = float((turn["apex_s"] as Array)[0])
+		var side: float = 1.0 if ribbon.get_curvature_at(apex_s) >= 0.0 else -1.0
+		var pose: Transform3D = ribbon.get_point_at_offset(apex_s, furniture.armco_lateral(side, apex_s) + side * 3.2)
+		if side < 0.0:
+			pose.basis = pose.basis.rotated(pose.basis.y, PI)
+		pose.origin.y = ground_y_at(pose.origin)
+		batch.box(mat, WHITE, pose * Transform3D(Basis.IDENTITY, Vector3(0.0, 1.3, 0.0)), Vector3(2.0, 2.6, 2.4))
+		batch.box(mat, Color("#2b4a66"), pose * Transform3D(Basis.IDENTITY, Vector3(-1.02, 1.6, 0.0)), Vector3(0.05, 1.0, 1.6))
+		batch.box(mat, Color("#ff6a00"), pose * Transform3D(Basis.IDENTITY, Vector3(-0.2, 2.75, 0.0)), Vector3(3.0, 0.22, 3.0))
+		batch.strut(mat, Color("#3a404c"), pose.origin + Vector3(0.0, 2.8, 0.0), pose.origin + Vector3(0.0, 4.6, 0.0), 0.08)
+		count += 1
+	var inst := MeshInstance3D.new()
+	inst.name = "MarshalPosts"
+	inst.mesh = batch.commit()
+	inst.set_meta("count", count)
+	safety.add_child(inst)
 
 
 func _create_multimesh_instance(node_name: String, mesh: Mesh, poses: Array[Transform3D]) -> MultiMeshInstance3D:
