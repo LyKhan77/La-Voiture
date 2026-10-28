@@ -23,6 +23,13 @@
 - Seluruh 56 `tests/test_*.gd` dijalankan ulang headless (`test_race_world.gd` dengan `--fixed-fps 60`): 56/56 exit 0, 0 `[FAIL]`. Termasuk `test_shared_paddock_kit.gd` (hash Apex tidak berubah), `test_track_environment.gd`, `test_pit_lane.gd`, `test_neo_wangan_circuit.gd`, dan empat suite baru Fase 13.3.
 - Smoke native Brianza (sesi Codex sebelumnya): balapan selesai, 20 mobil finis, podium tampil, orphan setelah free = 0. Frame time rata-rata 16,69 ms, p95 22,36 ms, terburuk 26,20 ms, 259 frame, 59,9 FPS rata-rata.
 
+## Perbaikan tim–box pit (commit e20b6db)
+
+- Bug: setiap balapan hanya 10 dari 13 tim yang berlomba (`GtRace.active_teams`). Choreographer memotong id tim ke 0–9, sehingga tim 10–12 dilayani kru tim 9 (berdiri hingga 112 m dari mobil). Neo Wangan memetakan box dengan `clamp(team)` dan mengabaikan urutan stall sim. Warna shutter `PitBuilding` selalu tim 0–9.
+- Perbaikan: kru dan job memakai id tim asli, tim tanpa box tidak mendapat kru; semua kompleks pit memetakan lewat `stall_index_for_team`; Wangan mendapat `assign_teams()`; `RaceWeekendWorld` memasang `active_teams` ke semua sirkuit dan shutter.
+- Verifikasi: `tests/test_pit_team_assignment_contract.gd` (3 sirkuit × pemain tim 4/11/12, 54 assertion) gagal sebelum perbaikan dan lulus sesudahnya; seluruh 57 suite lulus. Probe 9 balapan dengan permintaan pit acak: hold pit terlama 51 dtk, tidak ada mobil macet permanen. Laporan "mobil macet" belum bisa direproduksi; dugaan: antrean rekan satu tim 8 m di belakang box (disengaja).
+- Belum ditangani: garasi Neo Wangan netral (tanpa warna tim atau kru standby).
+
 ## Gate terbuka
 
 - Draw call environment pada smoke: 167, 170, 169, 166, 70 per sampel. Satu sampel (170) melewati batas plan <= 169 dan semuanya di atas target <= 160, tetapi masih di bawah batas AGENTS.md (< 180). Tidak dioptimalkan pada fase ini.
