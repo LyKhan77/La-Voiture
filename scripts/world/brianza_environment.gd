@@ -120,6 +120,8 @@ var kerbs: Array[Dictionary] = []
 var runoff_plans: Array[Dictionary] = []
 var ground_root: Node3D
 var _pit_zone: Dictionary = {}
+var _ground_platforms: Array[Dictionary] = []
+var _ground_samples: Dictionary = {}
 
 ## Instance poses of each foliage batch by node name (headless MultiMeshes keep none).
 var foliage_poses: Dictionary = {}
@@ -159,6 +161,7 @@ func build(p_ribbon: RibbonScript, p_builder: CircuitBuilderScript) -> void:
 	ribbon = p_ribbon
 	builder = p_builder
 	_pit_zone = PitZoneScript.from_layout(p_builder.get_node("PitLane").call("sim_layout"), ribbon.length_m)
+	_ground_platforms = p_builder.get_node("PitLane").call("ground_platforms")
 	line = AdaptiveLineScript.new(ribbon)
 	
 	_build_layer1_ground_massing()
@@ -356,6 +359,22 @@ func ground_y_at(pos: Vector3) -> float:
 			best = i
 	if best < 0:
 		return 0.0
+	var sample_s: float = float(best) * GROUND_SAMPLE_STEP_M
+	var sample_pose: Transform3D = ribbon.get_point_at_offset(sample_s, 0.0)
+	var along: float = (pos - sample_pose.origin).dot(-sample_pose.basis.z)
+	var s: float = sample_s + along
+	var pose: Transform3D = ribbon.get_point_at_offset(s, 0.0)
+	var signed_lateral: float = (pos - pose.origin).dot(pose.basis.x)
+	for platform: Dictionary in _ground_platforms:
+		if _platform_contains(platform, s, signed_lateral):
+			return pose.origin.y + float(platform["y_offset"])
+		var depth: float = signed_lateral * float(platform["side"])
+		var outer: float = float(platform["lateral_to"])
+		var skirt: float = float(platform["skirt_m"])
+		var start: float = float(platform["s0"])
+		if fposmod(s - start, ribbon.length_m) <= float(platform["s1"]) - start and depth > outer and depth < outer + skirt:
+			var blend: float = inverse_lerp(outer, outer + skirt, depth)
+			return pose.origin.y + lerpf(float(platform["y_offset"]), _verge_drop(outer + skirt), blend)
 	var lateral: float = sqrt(best_d)
 	if lateral > VERGE_LATERAL_M[VERGE_LATERAL_M.size() - 1]:
 		return _field_height(pos.x, pos.z)
@@ -404,8 +423,10 @@ func _build_layer1_ground_massing() -> void:
 	ground_root.name = "ParcoRealeGroundRoot"
 	add_child(ground_root)
 	_sample_track()
+	_ground_samples = SurfaceGeometry.hash_samples(ribbon)
 	_build_field()
 	_build_verge()
+	_build_ground_platforms()
 	_build_park_wall()
 
 
@@ -459,7 +480,7 @@ func _build_field() -> void:
 		tools.append(st)
 	for r: int in range(_field_rows - 1):
 		for c: int in range(_field_cols - 1):
-			var st: SurfaceTool = tools[posmod(c * 7 + r * 13 + (c * r) % 5, GRASS_TONES.size())]
+			var st: SurfaceTool = tools[field_tone_index(c, r)]
 			var v00 := _field_vertex(c, r)
 			var v01 := _field_vertex(c + 1, r)
 			var v10 := _field_vertex(c, r + 1)
@@ -478,7 +499,7 @@ func _build_field() -> void:
 	var outer_floor := MeshInstance3D.new()
 	outer_floor.name = "ParcoRealeOuterFloor"
 	outer_floor.mesh = floor_mesh
-	outer_floor.position = Vector3(_track_centre.x, -GROUND_DROP_M - 0.6, _track_centre.y)
+	outer_floor.position = Vector3(_track_centre.x, builder.min_elevation_m - GROUND_DROP_M - 1.0, _track_centre.y)
 	outer_floor.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	ground_root.add_child(outer_floor)
 	var inst := MeshInstance3D.new()
@@ -486,6 +507,11 @@ func _build_field() -> void:
 	inst.mesh = mesh
 	inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	ground_root.add_child(inst)
+
+
+func field_tone_index(c: int, r: int) -> int:
+	var value: float = sin(float(c) * 0.19 + float(r) * 0.13) + sin(float(c) * 0.11 - float(r) * 0.17)
+	return 0 if value < -0.5 else (2 if value > 0.5 else 1)
 
 
 func _field_vertex(c: int, r: int) -> Vector3:
@@ -528,11 +554,48 @@ func _build_verge() -> void:
 	ground_root.add_child(verge_inst)
 
 
-func _verge_point(s: float, lateral: float, band_edge: int) -> Vector3:
-	var p: Vector3 = ribbon.get_point_at_offset(s, lateral).origin
+func _verge_point(s: float, lateral: float, _band_edge: int) -> Vector3:
+	var side: float = signf(lateral)
+	var extent: float = SurfaceGeometry.max_extent(_ground_samples, ribbon, s, side, maxf(0.0, absf(lateral) - ribbon.road_half_width_m))
+	var clipped: float = minf(absf(lateral), ribbon.road_half_width_m + extent)
+	var p: Vector3 = ribbon.get_point_at_offset(s, side * clipped).origin
 	var road_y: float = ribbon.get_point_at_offset(s, 0.0).origin.y
-	p.y = road_y + VERGE_DROP_M[band_edge]
+	p.y = road_y + _verge_drop(clipped)
 	return p
+
+
+func _platform_contains(platform: Dictionary, s: float, lateral: float) -> bool:
+	var start: float = float(platform["s0"])
+	var length: float = float(platform["s1"]) - start
+	var depth: float = lateral * float(platform["side"])
+	return fposmod(s - start, ribbon.length_m) <= length and depth >= float(platform["lateral_from"]) and depth <= float(platform["lateral_to"])
+
+
+func _build_ground_platforms() -> void:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for platform: Dictionary in _ground_platforms:
+		var start: float = float(platform["s0"])
+		var end: float = float(platform["s1"])
+		var count: int = ceili((end - start) / VERGE_STEP_M)
+		for i: int in range(count):
+			var s0: float = lerpf(start, end, float(i) / float(count))
+			var s1: float = lerpf(start, end, float(i + 1) / float(count))
+			var corners: Array[Vector3] = []
+			var outer: float = float(platform["lateral_to"])
+			var skirt_edge: float = outer + float(platform["skirt_m"])
+			for pair: Vector2 in [Vector2(s0, float(platform["lateral_from"])), Vector2(s1, float(platform["lateral_from"])), Vector2(s1, outer), Vector2(s0, outer), Vector2(s1, skirt_edge), Vector2(s0, skirt_edge)]:
+				var p: Vector3 = ribbon.get_point_at_offset(pair.x, pair.y * float(platform["side"])).origin
+				p.y += _verge_drop(pair.y) if pair.y > outer else float(platform["y_offset"])
+				corners.append(p)
+			for index: int in [0, 1, 2, 0, 2, 3, 3, 2, 4, 3, 4, 5]:
+				st.set_normal(Vector3.UP)
+				st.add_vertex(corners[index])
+	var inst := MeshInstance3D.new()
+	inst.name = "PitGroundPlatform"
+	inst.mesh = _commit_surface(st, GRASS_TONES[0])
+	inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	ground_root.add_child(inst)
 
 
 func _commit_surface(st: SurfaceTool, color: Color) -> ArrayMesh:
@@ -1100,6 +1163,9 @@ func _undergrowth_mesh(mat: Material) -> ArrayMesh:
 
 ## True when a plant at (s, side, depth) would sit inside a stand, the tower or under the viaduct.
 func _foliage_blocked(s: float, side: float, depth: float) -> bool:
+	for platform: Dictionary in _ground_platforms:
+		if _platform_contains(platform, s, side * depth):
+			return true
 	for zone: Dictionary in _foliage_keepouts:
 		if side == float(zone["side"]) and depth <= float(zone["depth"]) and s >= float(zone["s0"]) and s <= float(zone["s1"]):
 			return true

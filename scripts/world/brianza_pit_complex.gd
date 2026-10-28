@@ -112,6 +112,10 @@ func sim_layout() -> Dictionary:
 	}
 
 
+func ground_platforms() -> Array[Dictionary]:
+	return [{"s0": STALL_FIRST_S - 30.0, "s1": STALL_FIRST_S + (STALL_COUNT - 1) * STALL_PITCH_M + 30.0, "side": 1.0, "lateral_from": 7.3, "lateral_to": 31.0, "y_offset": -0.03, "skirt_m": 6.0}]
+
+
 func get_pit_transform(u: float, lateral: float) -> Transform3D:
 	if ribbon == null:
 		return Transform3D(Basis.IDENTITY, Vector3(lateral, 0.0, u))
