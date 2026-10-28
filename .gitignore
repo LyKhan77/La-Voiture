@@ -35,3 +35,14 @@ desktop.ini
 # Local execution logs & transient scratch dumps
 scratch/logs/
 scratch/audio_raw/
+.studio/
+node_modules
+.git.studio-backup
+dist/
+output/
+.playwright-cli/
+
+# Local tool config and nested studio projects (machine-specific, never shared)
+.ai-memory.toml
+studio.json
+Untitled game/
