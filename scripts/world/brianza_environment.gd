@@ -17,6 +17,8 @@ const SharedSkyScript := preload("res://scripts/world/shared_cel_sky_controller.
 const ToonMaterials := preload("res://scripts/world/toon_materials.gd")
 const MeshBatchScript := preload("res://scripts/world/mesh_batch.gd")
 const WeatherScript := preload("res://scripts/gt/gt_weather.gd")
+const JumbotronScript := preload("res://scripts/world/paddock/jumbotron.gd")
+const Liveries := preload("res://scripts/car/team_liveries.gd")
 
 const SERRAGLIO_OVERPASS_S: float = 3450.0
 const ASCARI_TOWER_S: float = 4150.0
@@ -31,6 +33,14 @@ const SOPRA_THICKNESS_M: float = 1.8
 const SOPRA_CLEARANCE_M: float = 13.5
 ## Portal positions as a share of the half arc: two either side of the crossing.
 const SOPRA_PORTAL_THETAS: Array[float] = [-0.88, -0.30, 0.30, 0.88]
+
+const CORNER_STAND_LATERAL_M: float = 50.0
+const CORNER_TIER_DEPTH_M: float = 4.2
+const CORNER_TIER_RISE_M: float = 2.4
+const CORNER_CROWD_STEP_M: float = 1.8
+const CROWD_SHIRTS: Array[Color] = [Color("#d9232e"), Color("#f0f2f5"), Color("#2f8f46"), Color("#ffd400"), Color("#2b5fb8"), Color("#22262e")]
+## The Jumbotrons repaint from the live standings this often (seconds).
+const JUMBOTRON_PERIOD_S: float = 0.5
 
 const KERB_CURVATURE: float = 0.006
 const KERB_MIN_LENGTH_M: float = 14.0
@@ -69,6 +79,9 @@ var kerbs: Array[Dictionary] = []
 var runoff_plans: Array[Dictionary] = []
 var ground_root: Node3D
 
+var _ascari_screen: Jumbotron
+var _jumbotron_clock: float = 0.0
+
 var _track_pos: PackedVector3Array = PackedVector3Array()
 var _track_centre: Vector2 = Vector2.ZERO
 var _track_half: Vector2 = Vector2.ZERO
@@ -92,6 +105,7 @@ func build(p_ribbon: RibbonScript, p_builder: CircuitBuilderScript) -> void:
 	_build_tier_a_sky()
 	_build_layer2_sopraelevata_monumental()
 	_build_tier_b_landmarks()
+	_build_layer3_corner_grandstands()
 	_build_tier_b_royal_park_foliage()
 
 
@@ -112,6 +126,30 @@ func update(delta: float, race) -> void:
 		var tod = weather.time_of_day if "time_of_day" in weather else {}
 		if tod is Dictionary and not tod.is_empty():
 			shared_sky.apply_time_of_day(tod, gloom)
+	_feed_jumbotrons(delta, race)
+
+
+## Both screens (main stand + Ascari) show the live order, leader first.
+func _feed_jumbotrons(delta: float, race) -> void:
+	_jumbotron_clock += delta
+	if race == null or _jumbotron_clock < JUMBOTRON_PERIOD_S:
+		return
+	_jumbotron_clock = 0.0
+	var screens: Array[Jumbotron] = []
+	var main_screen := get_parent().get_node_or_null("PitLane/MainGrandstand/Jumbotron") as Jumbotron if get_parent() != null else null
+	for screen: Jumbotron in [main_screen, _ascari_screen]:
+		if screen != null:
+			screens.append(screen)
+	if screens.is_empty():
+		return
+	var colors: Array[Color] = []
+	var values: Array[float] = []
+	var order: Array = race.standings()
+	for row: int in range(mini(order.size(), Jumbotron.ROWS)):
+		colors.append(Liveries.color_for(order[row].team_id))
+		values.append(1.0 - 0.08 * float(row))
+	for screen: Jumbotron in screens:
+		screen.set_leaderboard(colors, values)
 
 
 func apply_time_of_day(tod, gloom: float = 0.0) -> void:
@@ -568,41 +606,184 @@ func _sopra_portal(batch: MeshBatchScript, mat: Material, station: Dictionary, x
 		batch.strut(mat, beam_col, brace_foot, beam_mid - (station["nrm"] as Vector3) * 0.2, 1.1)
 
 
-## Hero Landmark 2 & 3: Villa Reale Gateway Arch and Torre Ascari
+## Layer 3: Rettifilo (T1-T2, red canopy) and Ascari (T9-T11, stadium + Jumbotron) corner stands.
+func _build_layer3_corner_grandstands() -> void:
+	if ribbon == null:
+		return
+	_build_corner_stand("RettifiloGrandstand", 1180.0, 120.0, 3, RED, false)
+	_build_corner_stand("AscariGrandstand", 4040.0, 160.0, 4, Color("#e4e6ec"), true)
+
+
+func _build_corner_stand(stand_name: String, s_centre: float, length: float, tiers: int, canopy_color: Color, with_screen: bool) -> void:
+	var side: float = 1.0 if ribbon.get_curvature_at(s_centre) >= 0.0 else -1.0
+	var frame: Transform3D = ribbon.get_point_at_offset(s_centre, side * CORNER_STAND_LATERAL_M)
+	if side < 0.0:
+		frame.basis = frame.basis * Basis(Vector3.UP, PI)
+	frame.origin.y = ground_y_at(frame.origin)
+	var stand := Node3D.new()
+	stand.name = stand_name
+	stand.transform = frame
+	stand.set_meta("s_centre", s_centre)
+	stand.set_meta("length_m", length)
+	stand.set_meta("side", side)
+	add_child(stand)
+
+	var mat: Material = ToonMaterials.vertex_colored(false)
+	var concrete := Color("#b9bdc7")
+	var seat_tones: Array[Color] = [RED, WHITE, Color("#2f8f46")]
+	var structure := MeshBatchScript.new()
+	var canopy := MeshBatchScript.new()
+	var tier_depth: float = CORNER_TIER_DEPTH_M
+	var tops: Array[float] = []
+	for i: int in range(tiers):
+		var top: float = 1.0 + CORNER_TIER_RISE_M * float(i + 1)
+		tops.append(top)
+		var x: float = tier_depth * (float(i) + 0.5)
+		structure.box(mat, concrete, Transform3D(Basis.IDENTITY, Vector3(x, (top - 1.5) * 0.5, 0.0)), Vector3(tier_depth, top + 1.5, length))
+		var sections: int = int(length / 20.0)
+		for k: int in range(sections):
+			var z: float = -length * 0.5 + 20.0 * (float(k) + 0.5)
+			structure.box(mat, seat_tones[(k + i) % seat_tones.size()], Transform3D(Basis.IDENTITY, Vector3(x, top + 0.08, z)), Vector3(tier_depth - 0.6, 0.16, 19.0))
+	var depth: float = tier_depth * float(tiers)
+	structure.box(mat, canopy_color, Transform3D(Basis.IDENTITY, Vector3(-0.15, 0.7, 0.0)), Vector3(0.3, 1.6, length))
+	# Cantilever roof rising toward the back, carried by posts every 20 m.
+	var front_y: float = tops[tiers - 1] + 3.6
+	var back_y: float = front_y + 2.6
+	var roof_len: float = sqrt(pow(depth + 3.0, 2.0) + pow(back_y - front_y, 2.0))
+	var roof_tilt := Basis(Vector3(0.0, 0.0, 1.0), atan2(back_y - front_y, depth + 3.0))
+	canopy.box(mat, canopy_color, Transform3D(roof_tilt, Vector3((depth + 3.0) * 0.5 - 0.5, (front_y + back_y) * 0.5, 0.0)), Vector3(roof_len, 0.5, length))
+	canopy.box(mat, WHITE, Transform3D(roof_tilt, Vector3(-0.5, front_y + 0.2, 0.0)), Vector3(0.4, 0.9, length))
+	var posts: int = int(length / 20.0) + 1
+	for k: int in range(posts):
+		var z: float = -length * 0.5 + 20.0 * float(k)
+		structure.box(mat, Color("#555966"), Transform3D(Basis.IDENTITY, Vector3(depth + 1.0, (back_y - 1.5) * 0.5, z)), Vector3(0.7, back_y + 1.5, 0.7))
+
+	var structure_inst := MeshInstance3D.new()
+	structure_inst.name = "Structure"
+	structure_inst.mesh = structure.commit()
+	stand.add_child(structure_inst)
+	var canopy_inst := MeshInstance3D.new()
+	canopy_inst.name = "Canopy"
+	canopy_inst.mesh = canopy.commit()
+	stand.add_child(canopy_inst)
+	_build_stand_crowd(stand, length, tiers, tops, tier_depth, stand_name.hash())
+
+	if with_screen:
+		var screen := JumbotronScript.new()
+		screen.name = "Jumbotron"
+		screen.build(Vector2(16.0, 6.0))
+		# The quad faces +Z; turn it toward the track (-X) and lift it clear of the roof.
+		screen.transform = Transform3D(Basis(Vector3.UP, -PI * 0.5), Vector3(0.0, front_y + 5.2, 0.0))
+		stand.add_child(screen)
+		var legs := MeshBatchScript.new()
+		for z: float in [-6.0, 6.0]:
+			legs.box(mat, Color("#555966"), Transform3D(Basis.IDENTITY, Vector3(0.0, front_y + 1.5, z)), Vector3(0.6, 4.0, 0.6))
+		var legs_inst := MeshInstance3D.new()
+		legs_inst.name = "JumbotronLegs"
+		legs_inst.mesh = legs.commit()
+		stand.add_child(legs_inst)
+		_ascari_screen = screen
+
+
+func _build_stand_crowd(stand: Node3D, length: float, tiers: int, tops: Array[float], tier_depth: float, seed_value: int) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value
+	var poses: Array[Transform3D] = []
+	var colors: Array[Color] = []
+	var columns: int = int(length / CORNER_CROWD_STEP_M)
+	for tier: int in range(tiers):
+		for row: int in range(3):
+			var x: float = tier_depth * (float(tier) + 0.25 + 0.25 * float(row))
+			for column: int in range(columns):
+				if rng.randf() > 0.72:
+					continue
+				var z: float = -length * 0.5 + CORNER_CROWD_STEP_M * (float(column) + 0.5) + rng.randf_range(-0.3, 0.3)
+				var scale_f: float = rng.randf_range(0.9, 1.15)
+				poses.append(Transform3D(Basis(Vector3.UP, -PI * 0.5).scaled(Vector3.ONE * scale_f), Vector3(x, tops[tier] + 0.16, z)))
+				colors.append(CROWD_SHIRTS[rng.randi() % CROWD_SHIRTS.size()])
+	var multimesh := MultiMesh.new()
+	multimesh.transform_format = MultiMesh.TRANSFORM_3D
+	multimesh.use_colors = true # must be set while the instance count is still 0
+	multimesh.mesh = _spectator_mesh()
+	multimesh.instance_count = poses.size()
+	for index: int in range(poses.size()):
+		multimesh.set_instance_transform(index, poses[index])
+		multimesh.set_instance_color(index, colors[index])
+	var crowd := MultiMeshInstance3D.new()
+	crowd.name = "Crowd"
+	crowd.multimesh = multimesh
+	crowd.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	stand.add_child(crowd)
+
+
+## A seated spectator: body block and head block; the instance colour tints the shirt.
+func _spectator_mesh() -> ArrayMesh:
+	var material := StandardMaterial3D.new()
+	material.vertex_color_use_as_albedo = true
+	material.roughness = 0.9
+	var batch := MeshBatchScript.new()
+	batch.box(material, Color.WHITE, Transform3D(Basis.IDENTITY, Vector3(0.0, 0.32, 0.0)), Vector3(0.28, 0.62, 0.42))
+	batch.box(material, Color("#f2cfae"), Transform3D(Basis.IDENTITY, Vector3(0.0, 0.8, 0.0)), Vector3(0.24, 0.26, 0.24))
+	return batch.commit()
+
+
+## Hero Landmark 2 & 3: Villa Reale neoclassical gatehouse and Torre Ascari, one node each.
 func _build_tier_b_landmarks() -> void:
 	if ribbon == null:
 		return
-		
+
 	var landmarks := Node3D.new()
 	landmarks.name = "HeroLandmarks_MonzaHeritage"
 	add_child(landmarks)
-	
-	var batch := MeshBatchScript.new()
+
 	var mat: Material = ToonMaterials.vertex_colored(false)
-	
-	# Villa Reale Brick Gateway Arch (s = 5600 m, behind the main grandstand at lateral -36 m)
-	var gate_pose: Transform3D = ribbon.get_point_at_offset(VILLA_GATE_S, -36.0)
-	
 	var brick_col := Color("#a3483b")
 	var stone_col := Color("#d4d0c7")
-	batch.box(mat, brick_col, gate_pose * Transform3D(Basis.IDENTITY, Vector3(-6.0, 5.0, 0.0)), Vector3(3.2, 10.0, 3.2))
-	batch.box(mat, brick_col, gate_pose * Transform3D(Basis.IDENTITY, Vector3(6.0, 5.0, 0.0)), Vector3(3.2, 10.0, 3.2))
-	batch.box(mat, stone_col, gate_pose * Transform3D(Basis.IDENTITY, Vector3(0.0, 9.8, 0.0)), Vector3(16.0, 2.2, 4.0))
-	batch.box(mat, stone_col, gate_pose * Transform3D(Basis.IDENTITY, Vector3(0.0, 11.8, 0.0)), Vector3(10.0, 1.8, 2.5))
-	
-	# Torre Ascari (Vintage timing & signal tower at s = 4150 m, entry to Ascari chicane)
+	var marble := Color("#f2efe6")
+
+	# Villa Reale gatehouse (s = 5600 m, behind the main grandstand at lateral -36 m)
+	var gate_pose: Transform3D = ribbon.get_point_at_offset(VILLA_GATE_S, -36.0)
+	gate_pose.origin.y = ground_y_at(gate_pose.origin)
+	var gate := MeshBatchScript.new()
+	gate.box(mat, stone_col, Transform3D(Basis.IDENTITY, Vector3(0.0, 0.3, 0.0)), Vector3(24.0, 0.6, 5.0))
+	for side: float in [-1.0, 1.0]:
+		gate.box(mat, brick_col, Transform3D(Basis.IDENTITY, Vector3(side * 6.0, 5.4, 0.0)), Vector3(3.4, 10.0, 3.4))
+		gate.box(mat, stone_col, Transform3D(Basis.IDENTITY, Vector3(side * 6.0, 10.7, 0.0)), Vector3(4.2, 0.7, 4.2))
+		gate.cylinder(mat, marble, Transform3D(Basis.IDENTITY, Vector3(side * 3.2, 0.6, 1.4)), 0.55, 0.45, 9.4, 10)
+		gate.box(mat, brick_col, Transform3D(Basis.IDENTITY, Vector3(side * 13.6, 2.6, 0.0)), Vector3(11.0, 4.6, 1.6))
+		gate.box(mat, stone_col, Transform3D(Basis.IDENTITY, Vector3(side * 13.6, 5.0, 0.0)), Vector3(11.4, 0.4, 2.0))
+		gate.box(mat, Color("#22262e"), Transform3D(Basis.IDENTITY, Vector3(side * 1.9, 2.4, 0.0)), Vector3(3.2, 4.2, 0.2))
+	gate.box(mat, stone_col, Transform3D(Basis.IDENTITY, Vector3(0.0, 11.4, 0.0)), Vector3(17.0, 1.4, 4.0))
+	var pediment := PackedVector2Array([Vector2(-7.5, 0.0), Vector2(7.5, 0.0), Vector2(0.0, 3.4)])
+	gate.extrude(mat, marble, Transform3D(Basis.IDENTITY, Vector3(0.0, 12.1, 0.0)), pediment, 3.6, true)
+	var gate_inst := MeshInstance3D.new()
+	gate_inst.name = "VillaRealeGatehouse"
+	gate_inst.mesh = gate.commit()
+	gate_inst.transform = gate_pose
+	landmarks.add_child(gate_inst)
+
+	# Torre Ascari (vintage timing & signal tower at s = 4150 m, entry to Ascari chicane)
 	var tower_pose: Transform3D = ribbon.get_point_at_offset(ASCARI_TOWER_S, 16.5)
-	
+	tower_pose.origin.y = ground_y_at(tower_pose.origin)
+	var tower := MeshBatchScript.new()
 	var tower_col := Color("#4d5361")
-	var banner_col := Color("#ffd400") # Retro Agip yellow
-	batch.box(mat, tower_col, tower_pose * Transform3D(Basis.IDENTITY, Vector3(0.0, 8.0, 0.0)), Vector3(3.8, 16.0, 3.8))
-	batch.box(mat, Color(0.2, 0.8, 1.0, 0.4), tower_pose * Transform3D(Basis.IDENTITY, Vector3(0.0, 14.5, 0.0)), Vector3(4.8, 3.2, 4.8))
-	batch.box(mat, banner_col, tower_pose * Transform3D(Basis.IDENTITY, Vector3(0.0, 8.5, -2.1)), Vector3(3.6, 6.0, 0.3))
-	
-	var mi := MeshInstance3D.new()
-	mi.name = "MonzaHeritageMeshes"
-	mi.mesh = batch.commit()
-	landmarks.add_child(mi)
+	var glass_col := Color("#2b4a66")
+	for floor_i: int in range(4):
+		var y: float = 2.2 + 4.0 * float(floor_i)
+		tower.box(mat, tower_col, Transform3D(Basis.IDENTITY, Vector3(0.0, y, 0.0)), Vector3(3.8, 4.0, 3.8))
+		tower.box(mat, stone_col, Transform3D(Basis.IDENTITY, Vector3(0.0, y + 2.0, 0.0)), Vector3(4.3, 0.4, 4.3))
+		for face: float in [-1.0, 1.0]:
+			tower.box(mat, glass_col, Transform3D(Basis.IDENTITY, Vector3(0.0, y, face * 1.92)), Vector3(1.4, 1.8, 0.1))
+			tower.box(mat, glass_col, Transform3D(Basis.IDENTITY, Vector3(face * 1.92, y, 0.0)), Vector3(0.1, 1.8, 1.4))
+	tower.box(mat, Color("#8cb8d9"), Transform3D(Basis.IDENTITY, Vector3(0.0, 17.8, 0.0)), Vector3(5.0, 3.0, 5.0))
+	tower.cylinder(mat, Color("#a3483b"), Transform3D(Basis(Vector3.UP, PI * 0.25), Vector3(0.0, 19.3, 0.0)), 4.2, 0.0, 3.2, 4)
+	tower.strut(mat, Color("#22262e"), Vector3(0.0, 22.4, 0.0), Vector3(0.0, 26.0, 0.0), 0.2)
+	tower.box(mat, Color("#ffd400"), Transform3D(Basis.IDENTITY, Vector3(0.0, 8.5, -2.1)), Vector3(3.6, 6.0, 0.3))
+	var tower_inst := MeshInstance3D.new()
+	tower_inst.name = "TorreAscari"
+	tower_inst.mesh = tower.commit()
+	tower_inst.transform = tower_pose
+	landmarks.add_child(tower_inst)
 
 
 ## Tier B Biome: Parco Reale di Monza (Stone Pines with broad umbrella canopies & Italian Cypresses)

@@ -111,6 +111,8 @@ func _run() -> void:
 		
 		_check_layer1_ground(env, ribbon)
 		_check_layer2_sopraelevata(env)
+		_check_layer3_grandstands(env, ribbon)
+		await _check_jumbotron_feed(env, instance)
 
 	# Calendar Registry integration
 	var circuit_data = RegistryScript.get_circuit("brianza")
@@ -185,6 +187,60 @@ func _check_layer2_sopraelevata(env: EnvScript) -> void:
 	check(tall, "#L2.7 every portal stands >= 12 m")
 	var rail := sopra.get_node_or_null("SopraelevataGuardrail") as MeshInstance3D
 	check(rail != null and rail.mesh != null and rail.mesh.get_aabb().size.y >= 2.0, "#L2.8 rusty guardrail runs along the upper lip")
+
+
+class FakeCar:
+	extends RefCounted
+	var team_id: int = 0
+
+
+class FakeRace:
+	extends RefCounted
+	var weather = null
+	var order: Array = []
+
+	func standings() -> Array:
+		return order
+
+
+## FASE 13.1 Layer 3: Rettifilo + Ascari corner stands with crowd, heritage landmarks as own nodes.
+func _check_layer3_grandstands(env: EnvScript, ribbon) -> void:
+	var stands: Dictionary = {"RettifiloGrandstand": [1120.0, 1240.0, 100.0], "AscariGrandstand": [3960.0, 4120.0, 120.0]}
+	for stand_name: String in stands:
+		var stand := env.get_node_or_null(stand_name) as Node3D
+		check(stand != null, "#L3.1 %s exists" % stand_name)
+		if stand == null:
+			continue
+		var range_info: Array = stands[stand_name]
+		var s_centre: float = float(stand.get_meta("s_centre", -1.0))
+		check(s_centre >= range_info[0] and s_centre <= range_info[1], "#L3.2 %s sits in its corner (s=%.0f)" % [stand_name, s_centre])
+		check(float(stand.get_meta("length_m", 0.0)) >= range_info[2], "#L3.3 %s is >= %.0f m long" % [stand_name, range_info[2]])
+		var crowd := stand.get_node_or_null("Crowd") as MultiMeshInstance3D
+		check(crowd != null and crowd.multimesh.instance_count >= 200, "#L3.4 %s has an instanced crowd (>= 200 spectators)" % stand_name)
+		check(stand.get_node_or_null("Canopy") is MeshInstance3D, "#L3.5 %s has a roof canopy" % stand_name)
+		var ground_gap: float = INF
+		var base: Vector3 = (stand.get_node("Structure") as MeshInstance3D).global_position
+		ground_gap = absf(base.y - env.ground_y_at(base))
+		check(ground_gap < 6.0, "#L3.6 %s stands on the ground (gap %.1f m)" % [stand_name, ground_gap])
+	var heritage := env.get_node_or_null("HeroLandmarks_MonzaHeritage")
+	check(heritage != null and heritage.get_node_or_null("TorreAscari") != null and heritage.get_node_or_null("VillaRealeGatehouse") != null,
+		"#L3.7 TorreAscari and VillaRealeGatehouse are separate landmark nodes")
+
+
+## The two Jumbotrons (main stand + Ascari) repaint from live standings.
+func _check_jumbotron_feed(env: EnvScript, instance: Node3D) -> void:
+	var ascari_screen := env.get_node_or_null("AscariGrandstand/Jumbotron") as Jumbotron
+	var main_screen := instance.get_node_or_null("PitLane/MainGrandstand/Jumbotron") as Jumbotron
+	check(ascari_screen != null and main_screen != null, "#L3.8 Ascari and main-stand Jumbotrons exist")
+	if ascari_screen == null or main_screen == null:
+		return
+	var race := FakeRace.new()
+	for team: int in range(3):
+		var car := FakeCar.new()
+		car.team_id = team
+		race.order.append(car)
+	env.update(1.0, race)
+	check(ascari_screen.last_row_colors.size() == 3 and main_screen.last_row_colors.size() == 3, "#L3.9 both Jumbotrons show the live standings")
 
 
 func _finish() -> void:
