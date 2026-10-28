@@ -116,6 +116,8 @@ func _ready() -> void:
 	if circuit_root == null:
 		pit_lane.build(ribbon, race.active_teams)
 		environment.build(ribbon, track.line)
+	elif pit_lane is BrianzaPitComplex:
+		pit_lane.build(ribbon, race.active_teams)
 	environment.bind_world($WorldEnvironment, $Sun, camera)
 	choreographer.setup(pit_lane, ActorScript.WHEEL_SCENES)
 	for car: CarScript in race.cars:

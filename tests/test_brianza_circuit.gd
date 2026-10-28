@@ -81,6 +81,17 @@ func _run() -> void:
 	check(pit != null, "#B11 PitLane complex node exists")
 	if pit != null:
 		var layout: Dictionary = pit.sim_layout()
+		for key: String in ["stall_lane_m", "fast_lane_m", "edge_lateral_m", "queue_gap_m", "lane_ramp_in_m", "lane_ramp_out_m"]:
+			check(layout.has(key), "#B13 layout contains %s" % key)
+		for method: String in ["stall_transform", "garage_for_team", "crew_roles", "crew_spot", "stall_index_for_team", "lane_lateral"]:
+			check(pit.has_method(method), "#B13 pit implements %s" % method)
+		if pit.has_method("stall_transform") and pit.has_method("garage_for_team"):
+			for team: int in range(10):
+				check(pit.stall_transform(team).is_equal_approx(pit.stalls[team]["pose"]) and pit.garage_for_team(team) == pit.garages[team], "#B13 team %d maps to its stall and garage" % team)
+			var reordered: Array[int] = [4, 2, 0, 1, 3, 5, 6, 7, 8, 9]
+			pit.build(ribbon, reordered)
+			check(pit.stall_index_for_team(4) == 0 and pit.stall_index_for_team(2) == 1 and pit.garage_for_team(4) == pit.garages[0], "#B13 existing pit remaps active teams")
+			check(pit.garages[0].get_node_or_null("StandbyCrew") != null, "#B13 garage contains standby crew")
 		check(layout["entry_s"] == 5530.0 and layout["exit_s"] == 150.0 and layout["lane_length_m"] == 410.0,
 			"#B12 sim_layout() defines 410 m GP lane (entry=5530m, exit=150m)")
 		check(layout["stalls"] == 10 and layout["stall_pitch_m"] == 14.0, "#B13 10 stalls at 14.0 m pitch")
@@ -113,6 +124,7 @@ func _run() -> void:
 		_check_layer1_ground(env, ribbon)
 		_check_layer2_sopraelevata(env)
 		_check_layer3_grandstands(env, ribbon)
+		await _check_track_clearance(pit, env, ribbon)
 		await _check_jumbotron_feed(env, instance)
 		_check_layer4_foliage(env)
 		_check_layer5_trackside(env)
@@ -129,6 +141,55 @@ func _run() -> void:
 		
 	instance.queue_free()
 	_finish()
+
+
+## Probe the car-height corridor against stand structures and pit wall, using their actual triangles.
+func _check_track_clearance(pit: Node3D, env: Node3D, ribbon: Node) -> void:
+	var body := StaticBody3D.new()
+	root.add_child(body)
+	var main_shape: CollisionShape3D
+	for mesh_node: MeshInstance3D in [pit.get_node("MainGrandstand/Structure"), pit.get_node("PitWall"), env.get_node("RettifiloGrandstand/Structure"), env.get_node("AscariGrandstand/Structure")]:
+		var shape := CollisionShape3D.new()
+		shape.shape = mesh_node.mesh.create_trimesh_shape()
+		shape.transform = mesh_node.global_transform
+		body.add_child(shape)
+		if main_shape == null:
+			main_shape = shape
+	await physics_frame
+	var space := root.world_3d.direct_space_state
+	var hits: int = 0
+	var crowd_hits: int = 0
+	var main_stand := pit.get_node("MainGrandstand") as Node3D
+	var rettifilo := env.get_node("RettifiloGrandstand") as Node3D
+	var ascari := env.get_node("AscariGrandstand") as Node3D
+	for s: int in range(0, 5791, 2):
+		for lateral: int in range(-7, 8):
+			var point: Vector3 = ribbon.get_point_at_offset(float(s), float(lateral)).origin
+			var main_local: Vector3 = main_stand.to_local(point)
+			if main_local.x >= -58.0 and main_local.x <= -18.0 and absf(main_local.z) <= 81.0:
+				crowd_hits += 1
+			for stand: Node3D in [rettifilo, ascari]:
+				var local: Vector3 = stand.to_local(point)
+				var depth: float = 12.6 if stand == rettifilo else 16.8
+				if local.x >= -1.0 and local.x <= depth + 1.0 and absf(local.z) <= float(stand.get_meta("length_m")) * 0.5 + 1.0:
+					crowd_hits += 1
+			var query := PhysicsRayQueryParameters3D.create(point + Vector3.UP * 0.05, point + Vector3.UP * 3.0)
+			if not space.intersect_ray(query).is_empty():
+				hits += 1
+	check(hits == 0, "#B24 car-height track corridor clear of stand structures and pit wall (%d hits)" % hits)
+	check(crowd_hits == 0, "#B24 track corridor clears conservative crowd footprints (%d hits)" % crowd_hits)
+	var moved_pose: Transform3D = main_shape.transform
+	main_shape.transform = ribbon.get_point_at_offset(5625.0, -19.0)
+	await physics_frame
+	var old_hits: int = 0
+	for s: int in range(4700, 4801, 2):
+		for lateral: int in range(-7, 8):
+			var point: Vector3 = ribbon.get_point_at_offset(float(s), float(lateral)).origin
+			if not space.intersect_ray(PhysicsRayQueryParameters3D.create(point + Vector3.UP * 0.05, point + Vector3.UP * 3.0)).is_empty():
+				old_hits += 1
+	check(old_hits > 0, "#B24 probe detects original back-straight obstruction (%d hits)" % old_hits)
+	main_shape.transform = moved_pose
+	body.queue_free()
 
 
 ## Static render cost of a subtree: one draw call per surface of every mesh / multimesh, triangles x instances

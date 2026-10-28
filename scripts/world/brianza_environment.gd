@@ -812,7 +812,8 @@ func _build_corner_stand(stand_name: String, turn: Dictionary, length: float, ti
 	var s_centre: float = float(turn["s"])
 	# Outside of the corner's first bend.
 	var side: float = 1.0 if ribbon.get_curvature_at(float((turn["apex_s"] as Array)[0])) >= 0.0 else -1.0
-	var frame: Transform3D = ribbon.get_point_at_offset(s_centre, side * CORNER_STAND_LATERAL_M)
+	var setback: float = 6.0 if stand_name == "RettifiloGrandstand" else 0.0
+	var frame: Transform3D = ribbon.get_point_at_offset(s_centre, side * (CORNER_STAND_LATERAL_M + setback))
 	if side < 0.0:
 		frame.basis = frame.basis * Basis(Vector3.UP, PI)
 	frame.origin.y = ground_y_at(frame.origin)

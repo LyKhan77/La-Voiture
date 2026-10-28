@@ -12,6 +12,7 @@ extends Node3D
 const TrackRibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const MeshBatchScript := preload("res://scripts/world/mesh_batch.gd")
 const ApexPitScript := preload("res://scripts/world/pit_lane_complex.gd")
+const FigureScript := preload("res://scripts/car/pit_crew_figure.gd")
 const ToonMaterials := preload("res://scripts/world/toon_materials.gd")
 const RoadShader := preload("res://shaders/road_asphalt.gdshader")
 const PitBuildingKit := preload("res://scripts/world/paddock/pit_building.gd")
@@ -100,6 +101,12 @@ func sim_layout() -> Dictionary:
 		"box_lateral": BOX_LATERAL_M,
 		"stall_first_s": STALL_FIRST_S,
 		"stall_pitch_m": STALL_PITCH_M,
+		"stall_lane_m": BOX_LATERAL_M,
+		"fast_lane_m": FAST_LANE_M,
+		"edge_lateral_m": ENTRY_LATERAL_M,
+		"queue_gap_m": 8.0,
+		"lane_ramp_in_m": ENTRY_BLEND_M,
+		"lane_ramp_out_m": EXIT_BLEND_M,
 		"stalls": STALL_COUNT,
 		"speed_limit_mps": SPEED_LIMIT_MPS,
 	}
@@ -111,12 +118,15 @@ func get_pit_transform(u: float, lateral: float) -> Transform3D:
 	return ribbon.get_point_at_offset(s_from_u_local(u), lateral)
 
 
-func build(p_ribbon: TrackRibbonScript) -> void:
+func build(p_ribbon: TrackRibbonScript, team_ids: Array[int] = []) -> void:
 	if built:
+		if not team_ids.is_empty():
+			for i: int in range(stalls.size()):
+				stalls[i]["team"] = team_ids[i] if i < team_ids.size() else -1
 		return
 	built = true
 	ribbon = p_ribbon
-	_build_stalls()
+	_build_stalls(team_ids)
 	_build_asphalt()
 	_build_markings()
 	_build_pit_wall()
@@ -127,7 +137,36 @@ func build(p_ribbon: TrackRibbonScript) -> void:
 	_build_triggers()
 
 
-func _build_stalls() -> void:
+func lane_lateral(u: float) -> float:
+	return lane_lateral_at(u)
+
+
+func stall_index_for_team(team: int) -> int:
+	for i: int in range(stalls.size()):
+		if int(stalls[i]["team"]) == team:
+			return i
+	return -1
+
+
+func stall_transform(team: int) -> Transform3D:
+	var index: int = stall_index_for_team(team)
+	return stalls[index]["pose"] if index >= 0 else Transform3D.IDENTITY
+
+
+func garage_for_team(team: int) -> Node3D:
+	var index: int = stall_index_for_team(team)
+	return garages[index] if index >= 0 and index < garages.size() else null
+
+
+func crew_roles() -> Array:
+	return ApexPitScript.standby_roles()
+
+
+func crew_spot(slot: int) -> Vector3:
+	return ApexPitScript.standby_spot(slot)
+
+
+func _build_stalls(team_ids: Array[int] = []) -> void:
 	stalls.clear()
 	for index: int in range(STALL_COUNT):
 		var s: float = STALL_FIRST_S + float(index) * STALL_PITCH_M
@@ -143,6 +182,7 @@ func _build_stalls() -> void:
 		add_child(socket)
 		stalls.append({
 			"index": index,
+			"team": index if team_ids.is_empty() else (team_ids[index] if index < team_ids.size() else -1),
 			"s": s,
 			"u": u,
 			"lateral": BOX_LATERAL_M,
@@ -235,22 +275,33 @@ func _build_garages() -> void:
 	for index: int in range(STALL_COUNT):
 		var stall: Dictionary = stalls[index]
 		var u: float = float(stall["u"])
-		var g_pose: Transform3D = get_pit_transform(u, GARAGE_FRONT_M + GARAGE_DEPTH_M * 0.5)
+		var g_pose: Transform3D = get_pit_transform(u, GARAGE_FRONT_M)
 		var garage_node := Node3D.new()
 		garage_node.name = "Garage_%d" % index
 		garage_node.transform = g_pose
 		
 		var batch := MeshBatchScript.new()
 		var mat: Material = ToonMaterials.vertex_colored(false)
-		# Garage box shell
-		batch.box(mat, GARAGE_SHELL, Transform3D(Basis.IDENTITY, Vector3(0.0, GARAGE_HEIGHT_M * 0.5, 0.0)), Vector3(GARAGE_DEPTH_M, GARAGE_HEIGHT_M, GARAGE_WIDTH_M))
+		# Open front leaves the crew visible and able to walk onto the apron.
+		batch.box(mat, GARAGE_SHELL, Transform3D(Basis.IDENTITY, Vector3(GARAGE_DEPTH_M - 0.2, GARAGE_HEIGHT_M * 0.5, 0.0)), Vector3(0.4, GARAGE_HEIGHT_M, GARAGE_WIDTH_M))
+		for side: float in [-1.0, 1.0]:
+			batch.box(mat, GARAGE_SHELL, Transform3D(Basis.IDENTITY, Vector3(GARAGE_DEPTH_M * 0.5, GARAGE_HEIGHT_M * 0.5, side * GARAGE_WIDTH_M * 0.5)), Vector3(GARAGE_DEPTH_M, GARAGE_HEIGHT_M, 0.3))
+		batch.box(mat, GARAGE_SHELL, Transform3D(Basis.IDENTITY, Vector3(GARAGE_DEPTH_M * 0.5, GARAGE_HEIGHT_M, 0.0)), Vector3(GARAGE_DEPTH_M, 0.3, GARAGE_WIDTH_M))
 		# Fascia header with team color
 		var team_col: Color = Liveries.color_for(index)
-		batch.box(mat, team_col, Transform3D(Basis.IDENTITY, Vector3(-GARAGE_DEPTH_M * 0.5, GARAGE_HEIGHT_M - 0.4, 0.0)), Vector3(0.3, 0.8, GARAGE_WIDTH_M))
+		batch.box(mat, team_col, Transform3D(Basis.IDENTITY, Vector3(0.0, GARAGE_HEIGHT_M - 0.4, 0.0)), Vector3(0.3, 0.8, GARAGE_WIDTH_M))
 		
 		var mi := MeshInstance3D.new()
 		mi.mesh = batch.commit()
 		garage_node.add_child(mi)
+		var standby := MeshBatchScript.new()
+		var roles: Array = crew_roles()
+		for slot: int in range(roles.size()):
+			FigureScript.add(standby, mat, Transform3D(Basis(Vector3.UP, PI * 0.5), crew_spot(slot)), int(roles[slot]), team_col)
+		var crew := MeshInstance3D.new()
+		crew.name = "StandbyCrew"
+		crew.mesh = standby.commit()
+		garage_node.add_child(crew)
 		add_child(garage_node)
 		garages.append(garage_node)
 
@@ -276,8 +327,7 @@ func _build_shared_paddock() -> void:
 	stand.name = "MainGrandstand"
 	stand.stand_length_m = 160.0
 	stand.accent_color = MONZA_RED
-	stand.transform = pose
-	stand.position -= pose.basis.x * (ROAD_EDGE_M + 12.0)
+	stand.transform = ribbon.get_point_at_offset(160.0, -(ROAD_EDGE_M + 12.0))
 	add_child(stand)
 	
 	# RaceControlTower
