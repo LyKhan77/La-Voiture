@@ -11,6 +11,7 @@ render_mode diffuse_toon, specular_toon;
 
 group_uniforms look;
 uniform vec4 tint : source_color = vec4(1.0);
+uniform vec3 albedo_floor = vec3(0.0);
 uniform vec4 shadow_tint : source_color = vec4(0.14, 0.16, 0.24, 1.0);
 uniform float shadow_threshold : hint_range(0.0, 1.0) = 0.45;
 uniform float shadow_smoothness : hint_range(0.001, 0.1) = 0.015;
@@ -29,7 +30,7 @@ const float SPECULAR_VALUE = 0.15;
 const float SHADOW_ALBEDO_MIX = 0.25;
 
 void fragment() {
-	ALBEDO = COLOR.rgb * tint.rgb;
+	ALBEDO = max(COLOR.rgb * tint.rgb, albedo_floor);
 	EMISSION = ALBEDO * (1.0 - COLOR.a) * glow_energy;
 	ROUGHNESS = ROUGHNESS_VALUE;
 	SPECULAR = SPECULAR_VALUE;

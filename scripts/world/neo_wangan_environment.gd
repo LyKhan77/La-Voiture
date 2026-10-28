@@ -119,6 +119,8 @@ var _camera: Camera3D
 var _neon_material: StandardMaterial3D
 var _lamp_material: StandardMaterial3D
 var _window_material: ShaderMaterial
+var _corridor_shell_material: ShaderMaterial
+var _corridor_detail_material: ShaderMaterial
 var _water_shader_mat: ShaderMaterial
 var _banner_shader_mat: ShaderMaterial
 var _street_pool_material: ShaderMaterial
@@ -821,13 +823,18 @@ func _model_parts(filename: String) -> Array[Dictionary]:
 	var scene: PackedScene = load(MODEL_DIR + filename + ".glb") as PackedScene
 	var model: Node3D = scene.instantiate() as Node3D
 	var parts: Array[Dictionary] = []
+	var is_tower: bool = filename.begins_with("skyscraper_tower_")
+	if is_tower and _corridor_shell_material == null:
+		_corridor_shell_material = ToonMaterials.vertex_colored(true).duplicate() as ShaderMaterial
+		_corridor_detail_material = ToonMaterials.vertex_colored(false).duplicate() as ShaderMaterial
 	for child: Node in model.find_children("*", "MeshInstance3D", true, false):
 		var instance := child as MeshInstance3D
 		# Godot's GLB import keeps COLOR_0 but disables its albedo flag; use our shared cel shader.
 		var shell: bool = not instance.name.begins_with("WindowsMat")
 		instance.mesh = instance.mesh.duplicate() as Mesh
+		var mat: ShaderMaterial = (_corridor_shell_material if shell else _corridor_detail_material) if is_tower else ToonMaterials.vertex_colored(shell)
 		for surface: int in range(instance.mesh.get_surface_count()):
-			instance.mesh.surface_set_material(surface, ToonMaterials.vertex_colored(shell))
+			instance.mesh.surface_set_material(surface, mat)
 		parts.append({"mesh": instance.mesh, "pose": instance.transform, "casts_shadow": shell})
 	model.free()
 	return parts
@@ -1022,6 +1029,18 @@ func apply_time_of_day(tod: Dictionary, gloom: float = 0.0) -> void:
 					"building_color": Color("#0b0e16"), "building_top_tint": Color("#171f33"),
 					"window_cool": Color("#00f0ff"), "window_warm": Color("#ff9e38"),
 					"window_energy": 1.8 * pulse, "roof_neon_energy": 2.2})
+
+	if _corridor_shell_material != null and _corridor_detail_material != null:
+		match mode:
+			0:
+				_set_params(_corridor_shell_material, {"albedo_floor": Vector3(0.35, 0.42, 0.54), "tint": Color("#b8cce0"), "glow_energy": 0.0})
+				_set_params(_corridor_detail_material, {"albedo_floor": Vector3(0.48, 0.65, 0.80), "tint": Color("#8cb8d9"), "glow_energy": 0.0})
+			1:
+				_set_params(_corridor_shell_material, {"albedo_floor": Vector3(0.22, 0.16, 0.28), "tint": Color("#e0a8b8"), "glow_energy": 0.8 * pulse})
+				_set_params(_corridor_detail_material, {"albedo_floor": Vector3(0.35, 0.22, 0.30), "tint": Color("#ffaa66"), "glow_energy": 1.1 * pulse})
+			_:
+				_set_params(_corridor_shell_material, {"albedo_floor": Vector3.ZERO, "tint": Color.WHITE, "glow_energy": 2.4 * pulse})
+				_set_params(_corridor_detail_material, {"albedo_floor": Vector3.ZERO, "tint": Color.WHITE, "glow_energy": 2.4 * pulse})
 
 	if _water_shader_mat != null:
 		match mode:

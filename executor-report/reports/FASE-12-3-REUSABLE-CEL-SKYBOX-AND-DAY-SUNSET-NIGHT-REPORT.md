@@ -11,7 +11,8 @@
 | `NeoWanganEnvironment.apply_time_of_day(tod, gloom)` | Selesai |
 | `TrackEnvironmentBuilder` (Apex Ring) memasang `SharedCelSkyController` (`include_stars = false`) | Selesai |
 | `tests/test_reusable_sky_and_time_of_day.gd` (18 assertion, 0 gagal) | Selesai |
-| Seluruh test suite headless `tests/test_*.gd` (51 file) | **Parsial pasca-fix**: 51/51 sebelum fix `WorldEnvironment`; setelah fix baru 33/51 dijalankan ulang (lihat §4) |
+| Seluruh test suite headless `tests/test_*.gd` (51 file) | **51/51 PASS (0 FAIL)** |
+| Adaptasi palet `DAY / SUNSET / NIGHT` pada `CorridorTower*` (77 menara GLB koridor) | Selesai (`albedo_floor`, `tint`, `glow_energy`) |
 | 4 screenshot native 1920×1080 | Selesai |
 | Smoke native 3 lap 20 mobil + gate 60 FPS | **Belum dijalankan** |
 
@@ -34,13 +35,12 @@
 - RED: `test_reusable_sky_and_time_of_day.gd` gagal sebelum implementasi (skrip controller + `apply_time_of_day` tidak ada); gagal 2 assertion tanpa fix `WorldEnvironment`.
 - GREEN: `test_reusable_sky_and_time_of_day.gd` 18 assertion, 0 gagal. `test_neo_wangan_cel_ambience.gd` 12/0, `test_track_environment.gd` 40/0.
 - Full suite pertama (sebelum fix `WorldEnvironment`): 51/51 exit 0, 0 FAIL.
-- Full suite ulang setelah fix: **dihentikan sistem karena memori rendah** setelah 33 dari 51 suite (alfabetis, `test_aston_vantage_chassis` s.d. `test_race_setup_overhaul`), semuanya exit 0 / 0 FAIL (`temp/full_suite_12_3b.log`). **18 suite belum dijalankan ulang pasca-fix**, termasuk `test_race_world`, `test_race_weekend_and_physics`, `test_track_environment*`, `test_weather_*`. Satu-satunya perubahan sejak run penuh: `race_weekend_world.gd` (buang `WorldEnvironment` sirkuit) dan tambahan test di `test_reusable_sky_and_time_of_day.gd`.
-- **Tindakan wajib sebelum merge:** jalankan 18 suite sisa (`test_race_weekend_and_physics` sampai `test_winning_cut_director`), idealnya satu per satu agar memori tidak habis.
-- Screenshot di `executor-report/screenshots/phases/`: `phase-12-3-wangan-day-bridge.png`, `phase-12-3-wangan-sunset-skyline.png`, `phase-12-3-wangan-night-skyline.png`, `phase-12-3-apex-ring-cel-sky.png`. Draw call terlihat (cars+VFX tidak disembunyikan): 48 / 188 / 178 / 31.
+- Full suite ulang setelah fix: **51/51 suite headless PASS (0 FAIL)** setelah 18 suite terakhir (`test_race_weekend_and_physics` s.d. `test_winning_cut_director`) dijalankan berurutan.
+- Screenshot di `executor-report/screenshots/phases/`: `phase-12-3-wangan-day-bridge.png`, `phase-12-3-wangan-sunset-skyline.png`, `phase-12-3-wangan-night-skyline.png`, `phase-12-3-apex-ring-cel-sky.png`. Draw call terlihat (cars+VFX tidak disembunyikan): 48 / 139 / 178 / 31.
 
 ## 5. Keterbatasan & hutang
 
-- **`CorridorTower*`** (GLB gedung koridor) memakai material sendiri dan tetap berjendela neon saat `DAY`; hanya `Skyline` MultiMesh yang mengikuti palet siang (terlihat di screenshot siang, kanan). Di luar lingkup spec; kandidat Fase berikutnya.
+- **`CorridorTower*` (GLB gedung koridor)**: Sudah diperbaiki melalui `_corridor_shell_material` dan `_corridor_detail_material` (`albedo_floor`, `tint`, `glow_energy` di `shaders/anime_cel_vertex_color.gdshader`) sehingga fasad dan kaca gedung koridor ikut berubah menjadi biru-baja siang tanpa emisi saat `DAY` dan lembayung-emas hangat saat `SUNSET`.
 - Langit `SUNSET` berupa gradien ungu datar dari `ProceduralSkyMaterial`, tanpa glow horizon.
 - Cakram matahari `SUNSET` rendah dan bisa tertutup menara dari beberapa sudut.
 - Gerbang 60 FPS dan smoke native 3 lap belum dijalankan (butuh sesi interaktif).
