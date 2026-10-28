@@ -29,6 +29,24 @@ const KERB_SCAN_STEP_M: float = 2.0
 const RED := Color("#d9232e")
 const WHITE := Color("#f0f2f5")
 
+# Layer 1: park ground. Verge strips follow the road down to the field, which sits GROUND_DROP_M
+# below the nearest road and fades to the park floor (y = 0) away from the circuit.
+const GROUND_SIZE_M := Vector2(4200.0, 3600.0)
+const GROUND_CELL_M: float = 48.0
+const GROUND_DROP_M: float = 2.4
+const GROUND_FADE_NEAR_M: float = 80.0
+const GROUND_FADE_FAR_M: float = 500.0
+const GROUND_SAMPLE_STEP_M: float = 20.0
+const VERGE_STEP_M: float = 6.0
+const VERGE_LATERAL_M: Array[float] = [7.3, 12.0, 40.0, 80.0]
+const VERGE_DROP_M: Array[float] = [-0.10, -0.30, -1.20, -2.40]
+const GRASS_TONES: Array[Color] = [Color("#3c7a38"), Color("#33692f"), Color("#478743")]
+const GRAVEL_PATH := Color("#8c7e63")
+const PARK_WALL_BRICK := Color("#a3483b")
+const PARK_WALL_CAP := Color("#d4d0c7")
+const PARK_WALL_HEIGHT_M: float = 3.2
+const PARK_WALL_MARGIN_M: float = 380.0
+
 var ribbon: RibbonScript
 var builder: CircuitBuilderScript
 var line: AdaptiveLineScript
@@ -39,6 +57,15 @@ var tree_multimeshes: Array[MultiMeshInstance3D] = []
 var built: bool = false
 var kerbs: Array[Dictionary] = []
 var runoff_plans: Array[Dictionary] = []
+var ground_root: Node3D
+
+var _track_pos: PackedVector3Array = PackedVector3Array()
+var _track_centre: Vector2 = Vector2.ZERO
+var _track_half: Vector2 = Vector2.ZERO
+var _field_origin: Vector2 = Vector2.ZERO
+var _field_cols: int = 0
+var _field_rows: int = 0
+var _field_y: PackedFloat32Array = PackedFloat32Array()
 
 
 func build(p_ribbon: RibbonScript, p_builder: CircuitBuilderScript) -> void:
@@ -49,6 +76,7 @@ func build(p_ribbon: RibbonScript, p_builder: CircuitBuilderScript) -> void:
 	builder = p_builder
 	line = AdaptiveLineScript.new(ribbon)
 	
+	_build_layer1_ground_massing()
 	_build_tier_a_surface()
 	_build_tier_a_furniture()
 	_build_tier_a_sky()
@@ -91,6 +119,226 @@ func stats() -> Dictionary:
 		"sopraelevata_active": sopraelevata != null,
 		"tree_batches": tree_multimeshes.size(),
 	}
+
+
+## Top of the solid ground under a world point: the verge profile next to the road, the park field
+## further out. Trees, piers and fences stand on this, so nothing floats.
+func ground_y_at(pos: Vector3) -> float:
+	var best: int = -1
+	var best_d: float = INF
+	for i: int in range(_track_pos.size()):
+		var d: float = Vector2(_track_pos[i].x - pos.x, _track_pos[i].z - pos.z).length_squared()
+		if d < best_d:
+			best_d = d
+			best = i
+	if best < 0:
+		return 0.0
+	var lateral: float = sqrt(best_d)
+	if lateral > VERGE_LATERAL_M[VERGE_LATERAL_M.size() - 1]:
+		return _field_height(pos.x, pos.z)
+	# Interpolate road height along the closer of the two segments touching the nearest sample.
+	var road_y: float = _track_pos[best].y
+	var p := Vector2(pos.x, pos.z)
+	var here := Vector2(_track_pos[best].x, _track_pos[best].z)
+	var count: int = _track_pos.size()
+	for other: int in [posmod(best - 1, count), posmod(best + 1, count)]:
+		var q := Vector2(_track_pos[other].x, _track_pos[other].z)
+		var seg: Vector2 = q - here
+		var t: float = clampf((p - here).dot(seg) / maxf(seg.length_squared(), 0.0001), 0.0, 1.0)
+		if (p - here).dot(seg) > 0.0:
+			road_y = lerpf(_track_pos[best].y, _track_pos[other].y, t)
+			lateral = (p - (here + seg * t)).length()
+			break
+	return road_y + _verge_drop(lateral)
+
+
+func _verge_drop(lateral: float) -> float:
+	var last: int = VERGE_LATERAL_M.size() - 1
+	if lateral <= VERGE_LATERAL_M[0]:
+		return VERGE_DROP_M[0]
+	for i: int in range(last):
+		if lateral <= VERGE_LATERAL_M[i + 1]:
+			var t: float = (lateral - VERGE_LATERAL_M[i]) / (VERGE_LATERAL_M[i + 1] - VERGE_LATERAL_M[i])
+			return lerpf(VERGE_DROP_M[i], VERGE_DROP_M[i + 1], t)
+	return VERGE_DROP_M[last]
+
+
+func _field_height(x: float, z: float) -> float:
+	var fx: float = clampf((x - _field_origin.x) / GROUND_CELL_M, 0.0, float(_field_cols - 1) - 0.001)
+	var fz: float = clampf((_field_origin.y - z) / GROUND_CELL_M, 0.0, float(_field_rows - 1) - 0.001)
+	var c: int = int(fx)
+	var r: int = int(fz)
+	var tx: float = fx - float(c)
+	var tz: float = fz - float(r)
+	var a: float = lerpf(_field_y[r * _field_cols + c], _field_y[r * _field_cols + c + 1], tx)
+	var b: float = lerpf(_field_y[(r + 1) * _field_cols + c], _field_y[(r + 1) * _field_cols + c + 1], tx)
+	return lerpf(a, b, tz)
+
+
+## Layer 1: field + verge strips + gravel apron + historic park wall (0 floating roads).
+func _build_layer1_ground_massing() -> void:
+	ground_root = Node3D.new()
+	ground_root.name = "ParcoRealeGroundRoot"
+	add_child(ground_root)
+	_sample_track()
+	_build_field()
+	_build_verge()
+	_build_park_wall()
+
+
+func _sample_track() -> void:
+	_track_pos.clear()
+	var lo := Vector2(INF, INF)
+	var hi := Vector2(-INF, -INF)
+	var s: float = 0.0
+	while s < ribbon.length_m:
+		var p: Vector3 = ribbon.get_point_at_offset(s, 0.0).origin
+		_track_pos.append(p)
+		lo = Vector2(minf(lo.x, p.x), minf(lo.y, p.z))
+		hi = Vector2(maxf(hi.x, p.x), maxf(hi.y, p.z))
+		s += GROUND_SAMPLE_STEP_M
+	_track_centre = (lo + hi) * 0.5
+	_track_half = (hi - lo) * 0.5
+
+
+func _build_field() -> void:
+	_field_cols = int(GROUND_SIZE_M.x / GROUND_CELL_M) + 1
+	_field_rows = int(GROUND_SIZE_M.y / GROUND_CELL_M) + 1
+	_field_origin = Vector2(_track_centre.x - GROUND_SIZE_M.x * 0.5, _track_centre.y + GROUND_SIZE_M.y * 0.5)
+	var nearest_d := PackedFloat32Array()
+	var nearest_y := PackedFloat32Array()
+	nearest_d.resize(_field_cols * _field_rows)
+	nearest_d.fill(INF)
+	nearest_y.resize(_field_cols * _field_rows)
+	var reach: int = ceili(GROUND_FADE_FAR_M / GROUND_CELL_M)
+	for p: Vector3 in _track_pos:
+		var c0: int = roundi((p.x - _field_origin.x) / GROUND_CELL_M)
+		var r0: int = roundi((_field_origin.y - p.z) / GROUND_CELL_M)
+		for r: int in range(maxi(r0 - reach, 0), mini(r0 + reach + 1, _field_rows)):
+			for c: int in range(maxi(c0 - reach, 0), mini(c0 + reach + 1, _field_cols)):
+				var vx: float = _field_origin.x + float(c) * GROUND_CELL_M
+				var vz: float = _field_origin.y - float(r) * GROUND_CELL_M
+				var d: float = Vector2(vx - p.x, vz - p.z).length()
+				var i: int = r * _field_cols + c
+				if d < nearest_d[i]:
+					nearest_d[i] = d
+					nearest_y[i] = p.y
+	_field_y.resize(_field_cols * _field_rows)
+	for i: int in range(_field_y.size()):
+		var near_y: float = nearest_y[i] if nearest_d[i] < INF else 0.0
+		var fade: float = smoothstep(GROUND_FADE_NEAR_M, GROUND_FADE_FAR_M, nearest_d[i])
+		_field_y[i] = lerpf(near_y, 0.0, fade) - GROUND_DROP_M
+	var tools: Array[SurfaceTool] = []
+	for tone: int in range(GRASS_TONES.size()):
+		var st := SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_TRIANGLES)
+		st.set_normal(Vector3.UP)
+		tools.append(st)
+	for r: int in range(_field_rows - 1):
+		for c: int in range(_field_cols - 1):
+			var st: SurfaceTool = tools[posmod(c * 7 + r * 13 + (c * r) % 5, GRASS_TONES.size())]
+			var v00 := _field_vertex(c, r)
+			var v01 := _field_vertex(c + 1, r)
+			var v10 := _field_vertex(c, r + 1)
+			var v11 := _field_vertex(c + 1, r + 1)
+			for v: Vector3 in [v00, v10, v11, v00, v11, v01]:
+				st.set_normal(Vector3.UP)
+				st.add_vertex(v)
+	var mesh := ArrayMesh.new()
+	for tone: int in range(GRASS_TONES.size()):
+		tools[tone].commit(mesh)
+		mesh.surface_set_material(tone, ToonMaterials.make(GRASS_TONES[tone]))
+	var inst := MeshInstance3D.new()
+	inst.name = "ParcoRealeGroundMesh"
+	inst.mesh = mesh
+	inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	ground_root.add_child(inst)
+
+
+func _field_vertex(c: int, r: int) -> Vector3:
+	return Vector3(_field_origin.x + float(c) * GROUND_CELL_M, _field_y[r * _field_cols + c], _field_origin.y - float(r) * GROUND_CELL_M)
+
+
+## Grass verge to 80 m either side plus a gravel apron right behind the kerbs.
+func _build_verge() -> void:
+	var gravel := SurfaceTool.new()
+	var grass := SurfaceTool.new()
+	for st: SurfaceTool in [gravel, grass]:
+		st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var rows: int = ceili(ribbon.length_m / VERGE_STEP_M)
+	for side: float in [-1.0, 1.0]:
+		for i: int in range(rows):
+			var s0: float = float(i) * VERGE_STEP_M
+			var s1: float = minf(float(i + 1) * VERGE_STEP_M, ribbon.length_m)
+			for band: int in range(VERGE_LATERAL_M.size() - 1):
+				var st: SurfaceTool = gravel if band == 0 else grass
+				var l0: float = side * VERGE_LATERAL_M[band]
+				var l1: float = side * VERGE_LATERAL_M[band + 1]
+				var a: Vector3 = _verge_point(s0, l0, band)
+				var b: Vector3 = _verge_point(s1, l0, band)
+				var c: Vector3 = _verge_point(s1, l1, band + 1)
+				var d: Vector3 = _verge_point(s0, l1, band + 1)
+				# Left (-1) side is wound the other way round so both face up.
+				var quad: Array = [a, b, c, a, c, d] if side > 0.0 else [a, c, b, a, d, c]
+				for v: Vector3 in quad:
+					st.set_normal(Vector3.UP)
+					st.add_vertex(v)
+	var apron_inst := MeshInstance3D.new()
+	apron_inst.name = "ParkPathways"
+	apron_inst.mesh = _commit_surface(gravel, GRAVEL_PATH)
+	apron_inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	ground_root.add_child(apron_inst)
+	var verge_inst := MeshInstance3D.new()
+	verge_inst.name = "ParcoRealeVerge"
+	verge_inst.mesh = _commit_surface(grass, GRASS_TONES[0])
+	verge_inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	ground_root.add_child(verge_inst)
+
+
+func _verge_point(s: float, lateral: float, band_edge: int) -> Vector3:
+	var p: Vector3 = ribbon.get_point_at_offset(s, lateral).origin
+	var road_y: float = ribbon.get_point_at_offset(s, 0.0).origin.y
+	p.y = road_y + VERGE_DROP_M[band_edge]
+	return p
+
+
+func _commit_surface(st: SurfaceTool, color: Color) -> ArrayMesh:
+	var mesh := ArrayMesh.new()
+	st.commit(mesh)
+	mesh.surface_set_material(0, ToonMaterials.make(color))
+	return mesh
+
+
+## Mura del Parco di Monza: terracotta brick with a limestone cap, a rectangle around the circuit.
+func _build_park_wall() -> void:
+	var half := Vector2(
+		minf(_track_half.x + PARK_WALL_MARGIN_M, GROUND_SIZE_M.x * 0.5 - 60.0),
+		minf(_track_half.y + PARK_WALL_MARGIN_M, GROUND_SIZE_M.y * 0.5 - 60.0))
+	var batch := MeshBatchScript.new()
+	var mat: Material = ToonMaterials.vertex_colored(false)
+	var step: float = 60.0
+	for side: float in [-1.0, 1.0]:
+		var x: float = _track_centre.x - half.x
+		while x < _track_centre.x + half.x:
+			var z: float = _track_centre.y + side * half.y
+			_wall_segment(batch, mat, Vector3(x + step * 0.5, 0.0, z), step, 0.0)
+			x += step
+		var z2: float = _track_centre.y - half.y
+		while z2 < _track_centre.y + half.y:
+			var xx: float = _track_centre.x + side * half.x
+			_wall_segment(batch, mat, Vector3(xx, 0.0, z2 + step * 0.5), step, PI * 0.5)
+			z2 += step
+	var inst := MeshInstance3D.new()
+	inst.name = "MuraDelParco"
+	inst.mesh = batch.commit()
+	add_child(inst)
+
+
+func _wall_segment(batch: MeshBatchScript, mat: Material, centre: Vector3, length: float, yaw: float) -> void:
+	var base_y: float = _field_height(centre.x, centre.z)
+	var basis := Basis(Vector3.UP, yaw)
+	batch.box(mat, PARK_WALL_BRICK, Transform3D(basis, Vector3(centre.x, base_y + PARK_WALL_HEIGHT_M * 0.5, centre.z)), Vector3(length, PARK_WALL_HEIGHT_M, 1.0))
+	batch.box(mat, PARK_WALL_CAP, Transform3D(basis, Vector3(centre.x, base_y + PARK_WALL_HEIGHT_M + 0.15, centre.z)), Vector3(length, 0.3, 1.5))
 
 
 func _find_sharp_corners() -> Array[Dictionary]:

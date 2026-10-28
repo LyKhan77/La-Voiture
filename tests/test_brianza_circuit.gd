@@ -109,6 +109,8 @@ func _run() -> void:
 		var heritage = env.get_node_or_null("HeroLandmarks_MonzaHeritage")
 		check(heritage != null, "#B20 HeroLandmarks_MonzaHeritage exists (Villa Reale & Torre Ascari)")
 		
+		_check_layer1_ground(env, ribbon)
+
 	# Calendar Registry integration
 	var circuit_data = RegistryScript.get_circuit("brianza")
 	check(circuit_data != null, "#B21 CircuitData for 'brianza' exists in registry")
@@ -118,6 +120,39 @@ func _run() -> void:
 		
 	instance.queue_free()
 	_finish()
+
+
+## FASE 13.1 Layer 1: solid park ground under every road, grass tone, historic park wall.
+func _check_layer1_ground(env: EnvScript, ribbon) -> void:
+	var ground_root: Node3D = env.get_node_or_null("ParcoRealeGroundRoot") as Node3D
+	check(ground_root != null, "#L1.1 ParcoRealeGroundRoot exists")
+	if ground_root == null:
+		return
+	var ground := ground_root.get_node_or_null("ParcoRealeGroundMesh") as MeshInstance3D
+	check(ground != null and ground.mesh != null, "#L1.2 ParcoRealeGroundMesh exists with a mesh")
+	if ground != null and ground.mesh != null:
+		var size: Vector3 = ground.mesh.get_aabb().size
+		check(size.x >= 3500.0 and size.z >= 3000.0, "#L1.3 ground covers >= 3500 x 3000 m (got %.0f x %.0f)" % [size.x, size.z])
+		var mat := ground.mesh.surface_get_material(0) as ShaderMaterial
+		var tone: Color = mat.get_shader_parameter("base_color") if mat != null else Color.BLACK
+		check(tone.is_equal_approx(Color("#3c7a38")), "#L1.4 first grass tone is #3c7a38 (got %s)" % tone.to_html(false))
+		check(ground.mesh.get_surface_count() == 3, "#L1.5 stepped cel grass uses 3 tones (got %d surfaces)" % ground.mesh.get_surface_count())
+	var paths := ground_root.get_node_or_null("ParkPathways") as MeshInstance3D
+	check(paths != null and paths.mesh != null, "#L1.6 ParkPathways gravel apron exists")
+	var wall := env.get_node_or_null("MuraDelParco") as MeshInstance3D
+	check(wall != null and wall.mesh != null and wall.mesh.get_aabb().size.y >= 3.0, "#L1.7 MuraDelParco wall is >= 3.0 m tall")
+	# 0 floating roads: ground sits 0.05..3.0 m under every road sample (and exists under both edges).
+	var worst_gap: float = 0.0
+	var best_gap: float = 99.0
+	var s: float = 0.0
+	while s < ribbon.length_m:
+		for lateral: float in [-6.5, 0.0, 6.5]:
+			var road: Vector3 = ribbon.get_point_at_offset(s, lateral).origin
+			var gap: float = road.y - env.ground_y_at(road)
+			worst_gap = maxf(worst_gap, gap)
+			best_gap = minf(best_gap, gap)
+		s += 50.0
+	check(best_gap >= 0.05 and worst_gap <= 3.0, "#L1.8 road is supported: ground 0.05..3.0 m below every sample (got %.2f..%.2f)" % [best_gap, worst_gap])
 
 
 func _finish() -> void:
