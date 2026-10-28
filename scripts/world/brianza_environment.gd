@@ -98,7 +98,7 @@ const GROUND_DROP_M: float = 2.4
 const GROUND_FADE_NEAR_M: float = 80.0
 const GROUND_FADE_FAR_M: float = 500.0
 const GROUND_SAMPLE_STEP_M: float = 20.0
-const VERGE_STEP_M: float = 8.0
+const VERGE_STEP_M: float = 10.0
 const VERGE_LATERAL_M: Array[float] = [7.3, 12.0, 40.0, 80.0]
 const VERGE_DROP_M: Array[float] = [-0.10, -0.30, -1.20, -2.40]
 const GRASS_TONES: Array[Color] = [Color("#3c7a38"), Color("#33692f"), Color("#478743")]
@@ -368,6 +368,7 @@ func ground_y_at(pos: Vector3) -> float:
 	for platform: Dictionary in _ground_platforms:
 		if _platform_contains(platform, s, signed_lateral):
 			return pose.origin.y + float(platform["y_offset"])
+	for platform: Dictionary in _ground_platforms:
 		var depth: float = signed_lateral * float(platform["side"])
 		var outer: float = float(platform["lateral_to"])
 		var skirt: float = float(platform["skirt_m"])
@@ -1164,7 +1165,11 @@ func _undergrowth_mesh(mat: Material) -> ArrayMesh:
 ## True when a plant at (s, side, depth) would sit inside a stand, the tower or under the viaduct.
 func _foliage_blocked(s: float, side: float, depth: float) -> bool:
 	for platform: Dictionary in _ground_platforms:
-		if _platform_contains(platform, s, side * depth):
+		var margin: float = 6.0
+		var start: float = float(platform["s0"]) - margin
+		var length: float = float(platform["s1"]) - start + margin
+		var signed_depth: float = side * depth * float(platform["side"])
+		if fposmod(s - start, ribbon.length_m) <= length and signed_depth >= float(platform["lateral_from"]) - margin and signed_depth <= float(platform["lateral_to"]) + margin:
 			return true
 	for zone: Dictionary in _foliage_keepouts:
 		if side == float(zone["side"]) and depth <= float(zone["depth"]) and s >= float(zone["s0"]) and s <= float(zone["s1"]):

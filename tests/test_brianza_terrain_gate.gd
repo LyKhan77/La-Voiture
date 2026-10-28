@@ -127,9 +127,11 @@ func _run() -> void:
 		var middle: float = (float(platform.s0) + float(platform.s1)) * 0.5
 		var inside: Vector3 = circuit.ribbon.get_point_at_offset(middle, 14.0).origin
 		platform_ok = absf(env.ground_y_at(inside) - (inside.y + float(platform.y_offset))) <= 0.01
-		var skirt: Vector3 = circuit.ribbon.get_point_at_offset(middle, 34.0).origin
+		var outer_platform: Dictionary = pit.ground_platforms()[-1]
+		var skirt_depth: float = float(outer_platform.lateral_to) + float(outer_platform.skirt_m) * 0.5
+		var skirt: Vector3 = circuit.ribbon.get_point_at_offset(middle, skirt_depth).origin
 		var skirt_y: float = env.ground_y_at(skirt) - skirt.y
-		platform_ok = platform_ok and skirt_y < float(platform.y_offset) and skirt_y > env._verge_drop(37.0)
+		platform_ok = platform_ok and skirt_y < float(platform.y_offset) and skirt_y > env._verge_drop(float(outer_platform.lateral_to) + float(outer_platform.skirt_m))
 	print("[%s] pit ground supports the platform" % ("PASS" if platform_ok else "FAIL"))
 	ok = ok and platform_ok
 	circuit.free()

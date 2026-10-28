@@ -20,6 +20,7 @@ const GrandstandKit := preload("res://scripts/world/paddock/main_grandstand.gd")
 const ControlTowerKit := preload("res://scripts/world/paddock/race_control_tower.gd")
 const Liveries := preload("res://scripts/car/team_liveries.gd")
 const PitDressing := preload("res://scripts/world/brianza_pit_dressing.gd")
+const PaddockScript := preload("res://scripts/world/brianza_paddock.gd")
 
 const LAP_LENGTH_M: float = 5790.0
 const ENTRY_S: float = 5530.0 # 260 m before start/finish
@@ -67,6 +68,7 @@ var garage_front_m: float = GARAGE_FRONT_M
 var stall_lane_m: float = BOX_LATERAL_M
 var stalls: Array[Dictionary] = []
 var garages: Array[Node3D] = []
+var paddock: PaddockScript
 var garage_equipment: Array[Dictionary] = []
 var stall_markings: Array[Dictionary] = []
 var speed_limit_lines_u: Array[float] = []
@@ -122,7 +124,10 @@ func sim_layout() -> Dictionary:
 
 
 func ground_platforms() -> Array[Dictionary]:
-	return [{"s0": STALL_FIRST_S - 30.0, "s1": STALL_FIRST_S + (STALL_COUNT - 1) * STALL_PITCH_M + 30.0, "side": 1.0, "lateral_from": 7.3, "lateral_to": 31.0, "y_offset": -0.03, "skirt_m": 6.0}]
+	var result: Array[Dictionary] = [{"s0": STALL_FIRST_S - 30.0, "s1": STALL_FIRST_S + (STALL_COUNT - 1) * STALL_PITCH_M + 30.0, "side": 1.0, "lateral_from": 7.3, "lateral_to": 31.0, "y_offset": -0.03, "skirt_m": 6.0}]
+	if paddock != null and not paddock.platform.is_empty():
+		result.append(paddock.platform)
+	return result
 
 
 func get_pit_transform(u: float, lateral: float) -> Transform3D:
@@ -136,6 +141,8 @@ func build(p_ribbon: TrackRibbonScript, team_ids: Array[int] = []) -> void:
 		if not team_ids.is_empty():
 			for i: int in range(stalls.size()):
 				stalls[i]["team"] = team_ids[i] if i < team_ids.size() else -1
+			if paddock != null:
+				paddock.build(p_ribbon, self, team_ids)
 		return
 	built = true
 	ribbon = p_ribbon
@@ -151,6 +158,10 @@ func build(p_ribbon: TrackRibbonScript, team_ids: Array[int] = []) -> void:
 	_build_garages()
 	_build_garage_equipment()
 	_build_shared_paddock()
+	paddock = PaddockScript.new()
+	paddock.name = "BrianzaPaddock"
+	add_child(paddock)
+	paddock.build(ribbon, self, team_ids)
 	_build_entry_sign()
 	_build_triggers()
 
