@@ -1,84 +1,95 @@
-# Panduan Resmi Arsitektur & Komponen Sirkuit 3D (Circuit-Environment-Component-Guide)
+# Panduan Resmi Arsitektur & Alur Kerja Sirkuit 3D (`Circuit-Environment-Component-Guide` v2.0)
 
 > **Dokumen Pendamping:** [`Full-Car-Component-Guide.md`](file:///D:/Occupation/Porto/genex/La_Voiture/Full-Car-Component-Guide.md) · [`DESIGN.md`](file:///D:/Occupation/Porto/genex/La_Voiture/DESIGN.md) · [`ROADMAP.md`](file:///D:/Occupation/Porto/genex/La_Voiture/ROADMAP.md)
 
-Dokumen ini adalah standar baku (*Single Source of Truth*) untuk perancangan, pemodelan aset 3D, perakitan scene, dan verifikasi visual seluruh **12 Sirkuit Kejuaraan Resmi** di *La Voiture*. Setiap sirkuit baru maupun perombakan sirkuit wajib mematuhi arsitektur **6-Layer** dan **6-Camera Visual Gate** di bawah ini.
+Dokumen ini adalah standar baku (*Single Source of Truth*) untuk perancangan, pemodelan aset 3D, perakitan scene, gaya visual **Cel-Shaded / Toon Anime**, dan verifikasi visual seluruh **12 Sirkuit Kejuaraan Resmi** di *La Voiture*.
 
 ---
 
-## 1. Prinsip Utama: Mengapa Dilarang Menggunakan *Whitebox / Floating Primitives*
+## 1. Filosofi Utama: Arsitektur 2-Tier (**Reusable Core Kit** vs **Improvised Biome Decorator**)
 
-Sebuah sirkuit balap di *La Voiture* **bukan** sekadar pita jalan yang melayang di ruang kosong dengan kotak-kotak `BoxMesh` di kejauhan. Setiap sirkuit wajib memenuhi 3 hukum realisme spasial:
-
-1. **Hukum Kontinuitas Sipil (*No Floating Ribbon*):**
-   - Setiap meter jalan wajib memiliki penopang sipil yang logis: daratan pulau/plaza beton dengan dinding dermaga (*seawall*), struktur jembatan gantung lengkap dengan pylon dan kabel, atau terowongan yang benar-benar menembus massa bukit/overpass plaza gedung di atasnya.
-2. **Hukum Kepadatan Koridor Kamera (*Near-Track Enclosure*):**
-   - Kamera utama pemain adalah **Chase Cam** dan **Trackside TV Cam**. Jika objek terdekat berada di radius 200+ meter, layar akan terlihat kosong. Oleh karena itu, **koridor dekat (lateral 8 m – 45 m dari sumbu jalan)** wajib terisi oleh infrastruktur lintasan, tribun, pagar pengaman (*catch fence*), dinding akustik/retaining wall, fasad bangunan dekat, dan jembatan gantry.
-3. **Hukum Konsistensi Gaya Visual (*Cel-Shaded Anime × Streetwear Brutalism*):**
-   - Seluruh aset menggunakan material cel-shaded (`ToonMaterials` / shader khusus) dengan siluet arsitektur tegas, marka jalan kontras, dan aksen pencahayaan neon/emissive yang bersih.
-
----
-
-## 2. Arsitektur Standar 6-Layer Sirkuit (Godot 4 + Blender 5.2)
+Agar pembangunan 12 sirkuit berjalan cepat, konsisten, dan bebas duplikasi kode ribuan baris, setiap map sirkuit dibagi secara tegas menjadi **2 Tier**:
 
 ```mermaid
 flowchart TD
-    L1["Layer 1: Track Spine & Surface<br/>(Curve3D, road_asphalt.gdshader, Groove, Kerbs 3D)"]
-    L2["Layer 2: Ground Massing & Civil Envelope<br/>(City Island Slabs, Seawalls, Bridge Deck, Tunnel Overpass Mass)"]
-    L3["Layer 3: Tier-1 Universal FIA Motorsport Kit<br/>(Reusable PitBuilding 2F, MainGrandstand, ControlTower, StartGantry, CatchFence)"]
-    L4["Layer 4: Near-Track Corridor (8m - 45m)<br/>(Trackside Buildings, Sound Walls, Neon Billboards, Highway Gantries)"]
-    L5["Layer 5: Tier-2 City Hero Landmarks (Blender 5.2 .glb)<br/>(Suspension Bridge Pylons, Tunnel Portals, Harbor Cranes, Hero Towers)"]
-    L6["Layer 6: Atmosphere, Lighting & 6-Camera Visual Gate<br/>(Panorama Sky, Glow/Bloom, Depth Fog, Clipped Asphalt Light Pools)"]
+    Spline["TrackRibbon (Curve3D Spline Unik + Evaluasi Elevasi per Sirkuit)"]
+    Spline --> TierA
+    Spline --> TierB
 
-    L1 --> L2 --> L3 --> L4 --> L5 --> L6
+    subgraph TierA["TIER A: REUSABLE CORE KIT (100% Dipakai Ulang di Semua 12 Map)"]
+        A1["1. Track Corridor Kit<br/>• RoadMesh (road_asphalt.gdshader + Wet Puddles)<br/>• RubberGroove & 3D Kerbs (Sawtooth GP / Street)<br/>• Runoff & Gravel / Concrete Barriers<br/>• Armco, Tecpro, CatchFence, Braking Boards (150/100/50m)"]
+        A2["2. Shared FIA Paddock & Infrastructure Kit<br/>• StartGantry (5 Pasang Lampu Merah FIA)<br/>• PitLaneComplex (Entry, Fast Lane, 10 Pit Boxes, Exit)<br/>• PitBuilding 2F + MainGrandstand (Live Jumbotron) + RaceControlTower<br/>• Floodlight Towers / Streetlights (Otomatis ON saat Sunset/Night/Storm)"]
+        A3["3. Shared Cel-Skybox & Multi-Time-of-Day Ambience<br/>• SharedCelSkyController (Mendukung DAY, SUNSET, NIGHT, RANDOM)<br/>• Anime Sun (Day/Sunset) ↔ Halftone Moon + Dual Halo (Night)<br/>• 900 Twinkling Manga Stars (Auto-hide saat Day)<br/>• 28 Gugus Awan 3D Cel-Shaded & Wind Banners (Bereaksi ke wind_speed)"]
+    end
+
+    subgraph TierB["TIER B: IMPROVISED BIOME & LANDMARK DECORATOR (Kustom Sesuai Concept Art Map)"]
+        B1["4. Ground Massing, Water & Terrain<br/>• GP/Alpine/Forest: Kontur Bukit, Rumput Toon, MountainVista Ring<br/>• Urban/Harbor/Marina: Urban Island Slab, Seawall, Stepped Toon Bay Water<br/>• Desert: Sand Dunes & Oasis Rock Formations"]
+        B2["5. Biome Vegetation & Near-Track Props<br/>• FoliageScatter (Cedar/Oak/Pine/Sakura/Palm/Cypress dengan Wind Sway)<br/>• Street Corridor Towers & Kanji/Sponsor Halftone Billboards"]
+        B3["6. Hero Landmarks (2–4 Landmark Ikonik Blender 5.2 .glb)<br/>• Jembatan Gantung, Portal Terowongan, Kran Pelabuhan, Kastil, Casino Arch"]
+    end
 ```
 
-### Layer 1: Track Spine & Road Surface
-* **Spline `Curve3D` (`TrackRibbon`):** Menjadi sumbu tunggal untuk geometri jalan, simulasi fisika `GtRace`, AI driving line, dan minimap 2D.
-* **Permukaan Jalan:** Wajib menggunakan `shaders/road_asphalt.gdshader` dengan *rubberized racing groove* (`EnhancedTrackGeometry`), garis tepi jalan putih tegas, marka lajur/sektor, dan *3D sawtooth kerbs* (+0,03 m untuk jalan raya, +0,05 m untuk sirkuit GP).
-
-### Layer 2: Ground Massing & Civil Envelope
-* **Daratan Sirkuit (*Ground Slab & Seawall*):** Area darat di sekitar lintasan wajib memiliki mesh daratan/pulau beton berbingkai dinding dermaga (*quay wall*) yang turun hingga permukaan air/dasar (`BASE_Y`), sehingga jalan dan gedung berdiri di atas tanah, bukan mengapung di air.
-* **Sektor Jembatan (*Bridge Viaduct*):** Wajib memiliki parapet samping, balok *box-girder* di bawah jalan, dan pilar beton ganda yang menancap ke air.
-* **Sektor Terowongan (*Underpass Cut & Cover*):** Jalan yang turun ke bawah tanah wajib diapit dinding penahan (*retaining wall* miring/vertikal) dan **di atas atap terowongan wajib berdiri massa plaza kota / jalan raya silang / blok gedung**.
-
-### Layer 3: Tier-1 Universal FIA Motorsport Kit (100% Reusable)
-Seluruh sirkuit wajib menggunakan komponen standar FIA di `scenes/race_world/paddock/` dan `scripts/world/` yang diparameterisasi (panjang, jumlah stall, dan offset lateral mengikuti `pit_layout` sirkuit):
-1. **`PitBuilding` (2 Lantai + VIP Lounge):** Pintu *roll-up shutter* beraksen warna tim, garasi terbuka berisi perlengkapan kru, lantai 2 kaca VIP Paddock Club, teras observasi, kanopi kantilever, dan bendera tim di atap.
-2. **`MainGrandstand` (Tribun Utama 3 Tingkat):** Di seberang pit straight; memiliki atap kantilever melengkung bertruss baja, 1.400+ penonton `MultiMesh`, papan iklan LED, dan layar **Jumbotron Live Leaderboard**.
-3. **`RaceControlTower` (Menara Pengawas 4 Lantai):** Berdiri di dekat Pit Exit / Turn 1 dengan kaca observasi miring dan menara antena.
-4. **`StartGantry` & `CatchFence`:** Gantry truss ganda menaungi lintasan utama + 5 pasang lampu merah FIA, serta pagar kawat pengaman (*catch fence* 3,6 m) di belakang dinding barrier.
-5. **Papan Jarak Pengereman (`150` / `100` / `50` m) & Peredam Tecpro:** Dipasang otomatis sebelum tikungan tajam.
-
-### Layer 4: Near-Track Corridor (Koridor Dekat 8 m – 45 m)
-* **Sirkuit Jalan Raya (Street Circuit):** Di belakang *catch fence* (lateral 12 m – 40 m) wajib berdiri deretan blok gedung perkotaan (*street-front podiums*), papan reklame neon menghadap lintasan, jembatan penyeberangan/gantry rambu, dan lampu jalan yang cahayanya jatuh **tepat di tengah aspal** (tidak bocor keluar sisi jembatan).
-* **Sirkuit Permanen (GP Circuit):** Di belakang *runoff* & *gravel trap* wajib terisi tribun sekunder, pos marshal, deretan pohon (`FoliageScatter`), dan bukit kontur.
-
-### Layer 5: Tier-2 City Hero Landmarks (Blender 5.2 `.glb` Pipeline)
-* Aset ikonik khas kota dibangun melalui script otomatis Blender 5.2 (`tools/build_<slug>_assets.py`) menghasilkan file `.glb` modular di `assets/world/circuits/<slug>/`:
-  - Memiliki siluet arsitektur nyata (menara jembatan gantung berkabel, variasi gedung dengan *setback*/helipad/spire/billboard frame, derek kontainer bertruss rangka, portal terowongan berventilasi).
-  - Di-instance ke dalam scene dengan `MultiMeshInstance3D` atau `MeshBatch` untuk menjaga anggaran performa.
-
-### Layer 6: Atmosphere, Lighting & Post-Processing
-* Menggunakan `WorldEnvironment` dengan langit bergradasi kaya + siluet horizon, **Glow / Bloom aktif** untuk memendarkan lampu neon, lampu jalan, dan lampu rem GT3, serta **Depth Fog** untuk memberi kedalaman jarak antar-layer gedung.
+### Aturan Emas Pembagian Tier A vs Tier B:
+1. **Jangan Pernah Menulis Ulang Tier A per Sirkuit:**
+   - Area lintasan (`RoadMesh`, `Kerbs`, `Barriers`, `CatchFence`, `BrakingMarkers`), infrastruktur paddock FIA (`PitBuilding`, `MainGrandstand`, `RaceControlTower`, `StartGantry`), dan langit (`SharedCelSkyController`) **wajib menggunakan komponen bersama (reusable)** yang otomatis membentuk dirinya mengikuti bentuk spline `TrackRibbon` sirkuit tersebut.
+2. **Improvisasi Kreatif Difokuskan 100% pada Tier B:**
+   - Saat membangun map baru dari gambar referensi (`reference-assets/tracks/<slug>/concept_key_visual.png`), pembuat map cukup mengimprovisasi **Terrain/Air**, **Vegetasi Biome**, dan **2–4 Hero Landmarks** unik yang memberi jiwa pada sirkuit tersebut.
+3. **Semua Sirkuit Wajib Mendukung 3 Segmen Waktu (`DAY`, `SUNSET`, `NIGHT`, + `RANDOM`):**
+   - Melalui `SharedCelSkyController` dan parameter `time_of_day` dari `GtWeather`, setiap map wajib tampil hidup dan koheren baik saat Siang (`DAY`), Senja Keemasan (`SUNSET`), maupun Malam (`NIGHT`).
 
 ---
 
-## 3. Gerbang Verifikasi Wajib: 6-Camera Visual Gate & Performance Gate
+## 2. Standar Wajib Gaya Visual: **Cel-Shaded Anime × Manga Inking × Halftone**
 
-Sebelum sebuah sirkuit dinyatakan selesai, eksekutor wajib menangkap **6 screenshot verifikasi 1920×1080** dan memenuhi anggaran performa:
+Seluruh elemen lingkungan (baik Tier A maupun Tier B) **wajib lulus pemeriksaan gaya visual Cel-Shaded Anime** berikut dan dilarang menggunakan material PBR mentah yang menghasilkan kilap plastik/realistis:
 
-| Gate | Sudut Kamera | Yang Wajib Terlihat Jelas (Kriteria Lulus) |
+| Aspek Visual | Aturan Teknis Wajib di Godot 4 | Larangan Keras (Anti-Patterns) |
 | :--- | :--- | :--- |
-| **Cam 1** | **Start / Pit Straight Wide** | `MainGrandstand` + Jumbotron di kiri, `StartGantry` 5 lampu FIA di tengah, `PitBuilding` 2 lantai + 10 garasi + `RaceControlTower` di kanan, `CatchFence` utuh. |
-| **Cam 2** | **Sector 1 Hero Landmark** | Landmark utama Sektor 1 (mis. *Shuto Suspension Bridge* dengan menara pylon tinggi, kabel gantung bercahaya, parapet jembatan, dan air teluk di bawahnya). |
-| **Cam 3** | **Sector 2 Hero Landmark** | Landmark utama Sektor 2 (mis. *Underpass Tunnel Portal* dengan massa overpass/plaza gedung di atasnya, dinding retaining wall, dan koridor gedung chicane + neon billboards). |
-| **Cam 4** | **Sector 3 Hero Landmark & Pit-In** | Landmark utama Sektor 3 (mis. *Harbor Hairpin* di atas dermaga beton, crane rangka truss, tumpukan kontainer detail, kerb, dan jalur pisah Pit Entry dengan crash cushion). |
-| **Cam 5** | **Helicopter Overview (Aerial)** | Pandangan udara seluruh sirkuit: **0 jalan melayang di ruang kosong**, pulau daratan/dermaga menyatu rapi dengan jembatan dan gedung. |
-| **Cam 6** | **Player Chase Cam (In-Race)** | Pandangan kamera balap di belakang mobil: koridor kiri-kanan terasa padat oleh gedung dekat, pagar, lampu jalan, dan papan neon. |
+| **Shading Permukaan** | Wajib menggunakan `render_mode diffuse_toon, specular_toon` atau pita warna bertingkat tegas (*stepped cel bands* 2–3 tone). | Dilarang memakai `StandardMaterial3D` PBR reflektif (`metallic > 0.5, roughness < 0.3`) pada air atau gedung yang memantulkan bola putih silau. |
+| **Garis Tinta (*Manga Ink Outline*)** | Gedung koridor, menara skyline, dan landmark utama wajib memiliki `next_pass` outline tinta hitam (`inverted_hull_outline.gdshader` atau `neo_wangan_skyline_outline.gdshader` di ruang dunia). | Dilarang membiarkan massa bangunan jauh menyatu tanpa kontur siluet terhadap langit. |
+| **Pola *Halftone Screentone*** | Jendela gedung menyala, papan reklame/billboard, dan bayangan kawah bulan wajib menyertakan pola titik *Ben-Day halftone* prosedural di shader. | Dilarang membuat papan reklame berupa kotak warna polos (`BoxMesh` rata tanpa grafis/tipografi/bingkai). |
+| **Permukaan Air (*Toon Water*)** | Air teluk/marina/danau wajib menggunakan shader stepped-toon (`neo_wangan_water.gdshader`) dengan pita gelombang yang bergerak mengikuti `wind_dir` & `wind_speed_kph`, serta warna yang beradaptasi terhadap `DAY` (biru laut + buih putih-cyan), `SUNSET` (lembayung-emas), dan `NIGHT` (biru malam + garis puncak neon). | Dilarang menggunakan bidang air statis tanpa gerakan gelombang angin. |
+| **Ambience Langit & Angin Hidup** | Langit wajib memiliki **Matahari Anime (Day/Sunset) ↔ Bulan Halftone (Night)**, **900 Bintang Berkedip** (otomatis tersembunyi saat Siang), **28 Awan 3D Cel-Shaded** yang berputar mengelilingi horizon sesuai `wind_speed`, serta **bendera/pohon** yang berkibar mengikuti angin cuaca. | Dilarang menampilkan bulan/bintang di siang hari atau menyalakan lampu jalan/jendela malam secara penuh pada mode `DAY`. |
 
-### Anggaran Performa Wajib:
-* **Draw Calls Sirkuit:** $\le 160$ draw calls.
-* **Segitiga Lingkungan:** $\le 320.000$ triangles.
-* **Frame Time:** Rata-rata $\le 16,66\text{ ms}$ (60 FPS locked pada 1080p High dengan 20 mobil).
-* **Zero Regression:** Seluruh test suite headless proyek wajib **100% PASS (0 FAIL)** dan **0 orphan node**.
+---
+
+## 3. Alur Kerja Standar Pembuatan Map Sirkuit Baru (Step-by-Step Workflow)
+
+Setiap kali menambahkan atau merombak sirkuit di kalender 12 ronde, ikuti 5 tahapan baku berikut:
+
+### Tahap 1: Concept Art & 4-View Visual Reference
+1. Pastikan tersedia `concept_key_visual.png` dan 4 *View Gate References* (`view1_main_straight_pitstop`, `view2_sector1_landmark`, `view3_sector2_landmark`, `view4_sector3_pit_entry`) di `reference-assets/tracks/<slug>/`.
+2. Identifikasi daftar aset **Tier B (Improvised Biome)**: jenis terrain/air, jenis pohon, dan 2–4 *Hero Landmarks* ikonik.
+
+### Tahap 2: Track Spine (`Curve3D`) & Civil Ground Envelope
+1. Bangun kurva tertutup `TrackRibbon` beserta profil elevasi (`Y`) dan daftar tikungan (`turns`).
+2. Bangun penopang sipil kontinu (**Hukum Kontinuitas Sipil — 0 Floating Road**):
+   - Daratan/pulau beton berbingkai *seawall* atau kontur bukit,
+   - Dek jembatan + pilar hingga dasar air (`BASE_Y`),
+   - Dinding *cut-and-cover* + massa plaza/bukit di atas atap terowongan.
+
+### Tahap 3: Pemasangan Otomatis **Tier A (Reusable Core Kit)**
+1. Pasang **Track Corridor Kit** di sepanjang `TrackRibbon`: aspal (`road_asphalt.gdshader`), `RubberGroove`, `Kerbs`, `Barriers` (dengan celah otomatis di Pit Entry–Exit), `CatchFence`, dan `BrakingMarkers` (`150/100/50m`).
+2. Pasang **Shared FIA Paddock Kit**: `PitLaneComplex`, `StartGantry`, `PitBuilding`, `MainGrandstand` (terhubung ke live standings `Jumbotron`), dan `RaceControlTower`.
+3. Pasang **Shared Cel-Skybox (`SharedCelSkyController`)**: otomatis menyediakan Matahari/Bulan, 900 bintang berkedip, 28 awan 3D cel-shaded yang terdorong angin, serta respons pencahayaan `DAY / SUNSET / NIGHT`.
+
+### Tahap 4: Perakitan **Tier B (Improvised Biome & Hero Landmarks)** & Shaders Cel-Shaded
+1. Cetak 2–4 model `.glb` landmark khusus map via skrip Blender 5.2 (`tools/build_<slug>_assets.py`) ke `assets/tracks/<slug>/models/`.
+2. Tempatkan landmark, vegetasi (`FoliageScatter`), atau koridor gedung + billboard Kanji/sponsor menggunakan `MultiMeshInstance3D` (per-distrik untuk frustum culling).
+3. Pastikan seluruh shader bangunan, air, dan lampu jalan merespons parameter waktu `tod` (`DAY`, `SUNSET`, `NIGHT`) dan kecepatan angin `race.weather.wind_speed`.
+
+### Tahap 5: Verifikasi 6-Camera Visual Gate, Multi-Time Gate & Performance Gate
+Sebelum sirkuit dinyatakan selesai, jalankan:
+1. **Headless Test Suite:** Seluruh test suite di `tests/test_*.gd` wajib **100% PASS (0 FAIL)**.
+2. **6-Camera Visual Gate + Time-of-Day Check (`DAY`, `SUNSET`, `NIGHT`):**
+   - **Cam 1 (Start / Pit Straight):** Paddock FIA lengkap (`MainGrandstand`, `StartGantry`, `PitBuilding`, `RaceControlTower`, `CatchFence`).
+   - **Cam 2 (Sector 1 Landmark):** Landmark utama Sektor 1 + air/terrain cel-shaded.
+   - **Cam 3 (Sector 2 Landmark):** Landmark utama Sektor 2 (terowongan/overpass/chicane).
+   - **Cam 4 (Sector 3 Landmark & Pit Entry):** Landmark Sektor 3 + jalur pisah Pit Entry.
+   - **Cam 5 (Sky & Horizon Overview):** Memperlihatkan langit hidup (Matahari/Bulan, Awan 3D Cel-Shaded, Bintang saat malam, 0 jalan melayang).
+   - **Cam 6 (Player Chase Cam Action):** Koridor dekat (8 m – 45 m) padat, cel-shading & outline tegas.
+   - **Day / Sunset / Night Verification:** Pastikan tangkapan layar pada mode `DAY`, `SUNSET`, dan `NIGHT` menampilkan transisi langit, awan, air, dan lampu bangunan yang akurat.
+3. **Performance Budget Gate:**
+   - **Draw Calls Sirkuit:** $\le 160$ draw calls per kamera (dan $< 180$ total scene).
+   - **Triangles Lingkungan:** $\le 320.000$ triangles.
+   - **Frame Time:** $\le 16,66\text{ ms}$ (60 FPS locked pada 1080p High dengan 20 mobil GT3).
