@@ -19,6 +19,7 @@ const PitBuildingKit := preload("res://scripts/world/paddock/pit_building.gd")
 const GrandstandKit := preload("res://scripts/world/paddock/main_grandstand.gd")
 const ControlTowerKit := preload("res://scripts/world/paddock/race_control_tower.gd")
 const Liveries := preload("res://scripts/car/team_liveries.gd")
+const PitDressing := preload("res://scripts/world/brianza_pit_dressing.gd")
 
 const LAP_LENGTH_M: float = 5790.0
 const ENTRY_S: float = 5530.0 # 260 m before start/finish
@@ -73,6 +74,8 @@ var lane_separator_count: int = 0
 var built: bool = false
 var crash_cushion: Node3D
 var wall_end_cushions: Array[Dictionary] = []
+var fence_poses: Array[Transform3D] = []
+var drum_poses: Array[Transform3D] = []
 var _solid_footprints: Array[Dictionary] = []
 var pit_entry_trigger: Area3D
 var pit_exit_trigger: Area3D
@@ -140,6 +143,10 @@ func build(p_ribbon: TrackRibbonScript, team_ids: Array[int] = []) -> void:
 	_build_asphalt()
 	_build_markings()
 	_build_pit_wall()
+	var dressing: Dictionary = PitDressing.build(self)
+	fence_poses = dressing["fence_poses"]
+	drum_poses = dressing["drum_poses"]
+	_solid_footprints.append_array(dressing["footprints"])
 	_build_lane_signs()
 	_build_garages()
 	_build_garage_equipment()

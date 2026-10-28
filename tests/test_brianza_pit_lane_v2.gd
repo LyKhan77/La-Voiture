@@ -48,5 +48,9 @@ func _run() -> void:
 	check("garage_equipment" in pit and pit.garage_equipment.size() == 10, "ten garages have pit equipment")
 	check("speed_limit_lines_u" in pit and pit.speed_limit_lines_u.size() == 2 and "lane_separator_count" in pit and pit.lane_separator_count == 1 and "stall_markings" in pit and pit.stall_markings.size() == 10, "limiter, separator and ten numbered box markings exist")
 	check(pit.get_node_or_null("LaneSigns") != null and pit.get_node_or_null("BoardPITLANE") != null and pit.get_node_or_null("BoardPITEXIT") != null, "pit lane and exit signs exist")
+	for name: String in ["PitEntryChevrons", "PitEntryGantry", "PitWallFence", "PitWallSponsorStrip"]:
+		check(pit.get_node_or_null(name) != null, "%s exists" % name)
+	check("drum_poses" in pit and "fence_poses" in pit and pit.drum_poses.size() == 5 and pit.fence_poses.size() >= 80, "nose drums and continuous wall fence exist")
+	check(pit.solid_footprints().any(func(fp: Dictionary) -> bool: return fp.name == "gantry_leg"), "gantry leg is included in clearance gate")
 	circuit.free()
 	quit(1 if failures else 0)
