@@ -1,10 +1,10 @@
 class_name CircuitCalendarRegistry
 extends RefCounted
 
-## The official 12-round championship calendar (FASE 12): one round per month, seven Grand Prix
-## circuits and five Sprint circuits. Round 01 is the Apex Ring the game shipped with; Round 02
-## is Neo-Wangan Shuto Express, the first night street sprint. The table is the single source of
-## truth for the race setup selector, the career season and the race weekend's circuit loading.
+## The official 10-round championship calendar (MVP): eight Grand Prix circuits and two Sprint
+## circuits. Round 01 is the Apex Ring the game shipped with; Round 02 is Neo-Wangan Shuto Express,
+## the first night street sprint. The table is the single source of truth for the race setup selector,
+## the career season and the race weekend's circuit loading.
 
 const CircuitDataScript := preload("res://scripts/core/circuit_data.gd")
 
@@ -30,19 +30,15 @@ const TABLE: Array[Array] = [
 		"res://scenes/race_world/monte_azure_circuit.tscn", 0.40, "Yacht harbor streets, zero margin for error."],
 	["ardennes", "MAY", "Ardennes Valley Ring", "", "Spa-Francorchamps", "BEL", 0, 5.40, 20, true, 104.0,
 		"res://scenes/race_world/ardennes_circuit.tscn", 0.75, "Eau Rouge compression climb, micro-climate rain."],
-	["haruna", "JUN", "Haruna Mountain Touge", "榛名山", "Mount Haruna / Gunma Pass", "JPN", 1, 2.90, 14, false, 260.0,
-		"res://scenes/race_world/haruna_circuit.tscn", 0.80, "Five back-to-back hairpins, concrete gutter."],
-	["stoke_crown", "JUL", "Stoke Crown Circuit", "", "Silverstone Circuit", "GBR", 0, 5.20, 18, true, 12.0,
+	["stoke_crown", "JUN", "Stoke Crown Circuit", "", "Silverstone Circuit", "GBR", 0, 5.20, 18, true, 12.0,
 		"res://scenes/race_world/stoke_crown_circuit.tscn", 0.65, "Maggotts-Becketts high-G aero sweepers."],
-	["pacific_corkscrew", "AUG", "Pacific Coast Corkscrew", "", "WeatherTech Raceway Laguna Seca", "USA", 1, 3.60, 11, true, 30.0,
+	["pacific_corkscrew", "JUL", "Pacific Coast Corkscrew", "", "WeatherTech Raceway Laguna Seca", "USA", 0, 4.10, 11, true, 30.0,
 		"res://scenes/race_world/pacific_corkscrew_circuit.tscn", 0.10, "Blind Corkscrew drop, coastal Californian dust."],
-	["eifel_forest", "SEP", "Eifel Forest Ring", "", "Nurburgring GP", "GER", 0, 5.15, 16, true, 30.0,
+	["eifel_forest", "AUG", "Eifel Forest Ring", "", "Nurburgring GP", "GER", 0, 5.15, 16, true, 30.0,
 		"res://scenes/race_world/eifel_forest_circuit.tscn", 0.60, "Misty pine forest, technical Schumacher S."],
-	["iron_mountain", "OCT", "Iron Mountain Ridge", "", "Mount Panorama Bathurst", "AUS", 1, 3.85, 23, true, 174.0,
-		"res://scenes/race_world/iron_mountain_circuit.tscn", 0.30, "Steep mountain descent walled in concrete."],
-	["paulistano", "NOV", "Paulistano Speed Arena", "", "Interlagos (Carlos Pace)", "BRA", 0, 4.31, 15, false, 40.0,
+	["paulistano", "SEP", "Paulistano Speed Arena", "", "Interlagos (Carlos Pace)", "BRA", 0, 4.31, 15, false, 40.0,
 		"res://scenes/race_world/paulistano_circuit.tscn", 0.70, "Anti-clockwise, Senna S descent, bowl finish climb."],
-	["kurogane", "DEC", "Kurogane Twin-Cross", "", "Suzuka International", "JPN", 0, 5.80, 20, true, 40.0,
+	["kurogane", "OCT", "Kurogane Twin-Cross", "", "Suzuka International", "JPN", 0, 5.80, 20, true, 40.0,
 		"res://scenes/race_world/kurogane_circuit.tscn", 0.20, "Figure-8 crossover bridge, rhythmic Esses, grand finale."],
 ]
 

@@ -16,13 +16,11 @@ const EXPECTED: Array[Array] = [
 	["brianza", 3, "Autodromo di Brianza", 0, "ITA", 5.79],
 	["monte_azure", 4, "Monte Azure Marina", 1, "MCO", 2.85],
 	["ardennes", 5, "Ardennes Valley Ring", 0, "BEL", 5.40],
-	["haruna", 6, "Haruna Mountain Touge", 1, "JPN", 2.90],
-	["stoke_crown", 7, "Stoke Crown Circuit", 0, "GBR", 5.20],
-	["pacific_corkscrew", 8, "Pacific Coast Corkscrew", 1, "USA", 3.60],
-	["eifel_forest", 9, "Eifel Forest Ring", 0, "GER", 5.15],
-	["iron_mountain", 10, "Iron Mountain Ridge", 1, "AUS", 3.85],
-	["paulistano", 11, "Paulistano Speed Arena", 0, "BRA", 4.31],
-	["kurogane", 12, "Kurogane Twin-Cross", 0, "JPN", 5.80],
+	["stoke_crown", 6, "Stoke Crown Circuit", 0, "GBR", 5.20],
+	["pacific_corkscrew", 7, "Pacific Coast Corkscrew", 0, "USA", 4.10],
+	["eifel_forest", 8, "Eifel Forest Ring", 0, "GER", 5.15],
+	["paulistano", 9, "Paulistano Speed Arena", 0, "BRA", 4.31],
+	["kurogane", 10, "Kurogane Twin-Cross", 0, "JPN", 5.80],
 ]
 
 var failures: int = 0
@@ -52,19 +50,19 @@ func _run() -> void:
 	quit(0 if failures == 0 else 1)
 
 
-## Twelve rounds, one per month, in championship order, with unique ids.
+## Ten rounds in championship order, with unique ids.
 func _test_calendar_shape() -> void:
 	var all: Array = RegistryScript.get_all_circuits()
 	var ids: Dictionary = {}
 	var rounds: Dictionary = {}
-	var ordered: bool = all.size() == 12
+	var ordered: bool = all.size() == 10
 	for index: int in range(all.size()):
 		var circuit: CircuitDataScript = all[index]
 		ids[circuit.circuit_id] = true
 		rounds[circuit.round_number] = true
 		ordered = ordered and circuit.round_number == index + 1
-	check(all.size() == 12 and ordered and ids.size() == 12 and rounds.size() == 12,
-		"#K1 the registry holds exactly 12 rounds, ordered Round 01 to Round 12, with 12 unique ids and round numbers (%d entries, %d ids)" % [all.size(), ids.size()])
+	check(all.size() == 10 and ordered and ids.size() == 10 and rounds.size() == 10,
+		"#K1 the registry holds exactly 10 rounds, ordered Round 01 to Round 10, with 10 unique ids and round numbers (%d entries, %d ids)" % [all.size(), ids.size()])
 
 
 ## Every row of the official table resolves to the same round, name, type, country and length.
@@ -115,7 +113,7 @@ func _test_metadata() -> void:
 		"#K4 every round carries a length, a turn count, a 3-letter country, scene and preview paths, a 0..1 rain probability and a non-empty note")
 
 
-## 7 Grand Prix + 5 Sprint, each list in championship order, and the length bands of the spec.
+## 8 Grand Prix + 2 Sprint, each list in championship order, and the length bands of the spec.
 func _test_type_filters() -> void:
 	var gp: Array = RegistryScript.get_circuits_by_type(CircuitDataScript.CircuitType.GRAND_PRIX)
 	var sprint: Array = RegistryScript.get_circuits_by_type(CircuitDataScript.CircuitType.SPRINT)
@@ -124,15 +122,15 @@ func _test_type_filters() -> void:
 	var gp_order: bool = true
 	var sprint_order: bool = true
 	for circuit: CircuitDataScript in gp:
-		gp_bands = gp_bands and circuit.length_km >= 4.16 and circuit.length_km <= 5.80
+		gp_bands = gp_bands and circuit.length_km >= 4.10 and circuit.length_km <= 5.80
 	for circuit: CircuitDataScript in sprint:
-		sprint_bands = sprint_bands and circuit.length_km >= 2.85 and circuit.length_km <= 3.85
+		sprint_bands = sprint_bands and circuit.length_km >= 2.85 and circuit.length_km <= 3.15
 	for index: int in range(1, gp.size()):
 		gp_order = gp_order and gp[index].round_number > gp[index - 1].round_number
 	for index: int in range(1, sprint.size()):
 		sprint_order = sprint_order and sprint[index].round_number > sprint[index - 1].round_number
-	check(gp.size() == 7 and sprint.size() == 5 and gp_bands and sprint_bands and gp_order and sprint_order,
-		"#K5 the calendar splits into 7 Grand Prix (4.16–5.80 km) and 5 Sprint (2.85–3.85 km) rounds, each in round order")
+	check(gp.size() == 8 and sprint.size() == 2 and gp_bands and sprint_bands and gp_order and sprint_order,
+		"#K5 the calendar splits into 8 Grand Prix (4.10–5.80 km) and 2 Sprint (2.85–3.15 km) rounds, each in round order")
 
 
 ## RaceConfigData resolves the selected round and falls back to Round 01 for an unknown id.

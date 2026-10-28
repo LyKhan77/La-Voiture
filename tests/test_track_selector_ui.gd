@@ -115,13 +115,13 @@ func _test_reserved_rounds_and_wrap() -> void:
 	_press("TrackPrevButton")
 	await process_frame
 	var back_ok: bool = _label("CircuitNameLabel") == "Apex Ring International" and config.get("selected_circuit_id") == "apex_ring"
-	# Twelve steps around the calendar return to the start, wrapping December back into January.
-	for _step: int in range(12):
+	# Ten steps around the calendar return to the start, wrapping October back into January.
+	for _step: int in range(10):
 		_press("TrackNextButton")
 	await process_frame
 	var wrapped: bool = _label("CircuitNameLabel") == "Apex Ring International" and int(Registry.round_of(config.get("selected_circuit_id"))) == 1
 	check(back_ok and wrapped,
-		"#S5 the arrows walk the calendar both ways and twelve steps wrap December back to January")
+		"#S5 the arrows walk the calendar both ways and ten steps wrap October back to January")
 
 
 func _test_public_api_and_summary() -> void:
