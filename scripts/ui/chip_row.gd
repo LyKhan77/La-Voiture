@@ -48,6 +48,21 @@ func press(index: int) -> void:
 	item_selected.emit(selected)
 
 
+## Locks or unlocks one chip (e.g. the 5 / 10 / 15 lap chips on a Sprint round). A locked chip cannot
+## be clicked or focused; `press()` and `select()` still work, so callers keep programmatic control.
+func set_chip_disabled(index: int, is_disabled: bool) -> void:
+	if index < 0 or index >= _buttons.size():
+		return
+	_buttons[index].disabled = is_disabled
+	_buttons[index].focus_mode = Control.FOCUS_NONE if is_disabled else Control.FOCUS_ALL
+
+
+func is_chip_disabled(index: int) -> bool:
+	if index < 0 or index >= _buttons.size():
+		return false
+	return _buttons[index].disabled
+
+
 func focus_selected() -> void:
 	if not _buttons.is_empty():
 		_buttons[selected].grab_focus()

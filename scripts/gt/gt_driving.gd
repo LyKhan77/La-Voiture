@@ -412,10 +412,10 @@ func _driver_errors(car: GtCar, dt: float) -> void:
 			# Capped so that a slick in standing water is five times as likely to spin on its own.
 			wet_mismatch = minf(4.0, (race.weather.track_water_pct - 25.0) / 18.0 * 1.6)
 		var attack_risk: float = 2.0 if car.pace_mode == GtTypes.PaceMode.ATTACK else (1.4 if car.pace_mode == GtTypes.PaceMode.AGGRESSIVE else 1.0)
-		var probability: float = (1.0 - car.consistency) * 0.00045 * attack_risk * (1.0 + worn_risk + wet_mismatch) * dt
+		var probability: float = (1.0 - car.consistency) * 0.00045 * attack_risk * (1.0 + worn_risk + wet_mismatch) * dt * race.incident_rate
 		if race.rng.next() < probability:
 			race.contacts.solo_incident(car)
-	var mistake_risk: float = (1.0 - car.consistency) * (1.5 if race.weather.track_water_pct > 30.0 else 1.0)
+	var mistake_risk: float = (1.0 - car.consistency) * (1.5 if race.weather.track_water_pct > 30.0 else 1.0) * race.incident_rate
 	if car.error_timer > 0.0:
 		car.error_timer -= dt
 	elif race.incidents_enabled and race.rng.next() < mistake_risk * 0.035 * dt:

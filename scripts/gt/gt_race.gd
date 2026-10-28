@@ -43,6 +43,8 @@ var latest_suggestion: Dictionary = {}
 var latest_collision: Dictionary = {}
 ## Rare solo spins, barrier taps and contact incidents. Tests that need a quiet field turn it off.
 var incidents_enabled: bool = true
+## Scales every incident roll (contacts, solo spins, mistakes): 1.0 is the stock rate, the setup's STREET CHAOS raises it.
+var incident_rate: float = 1.0
 
 var race_control: Dictionary = {
 	"flag": GtTypes.Flag.GREEN, "sector": 1, "message": "TRACK CLEAR - GREEN FLAG",

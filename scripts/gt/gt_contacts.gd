@@ -141,7 +141,7 @@ func _note_contact(car_a: GtCar, car_b: GtCar, ds: float, d_lat: float, abs_ds: 
 	var closing: float = absf(car_a.v - car_b.v)
 	var tyre_risk: float = maxf(0.0, car_a.wear - 0.6) + maxf(0.0, car_b.wear - 0.6)
 	var wet_risk: float = 1.5 if race.weather.track_water_pct > 30.0 else 1.0
-	var risk: float = (2.0 - car_a.consistency - car_b.consistency) * 0.045 * (1.0 + tyre_risk * 0.8) * wet_risk
+	var risk: float = (2.0 - car_a.consistency - car_b.consistency) * 0.045 * (1.0 + tyre_risk * 0.8) * wet_risk * race.incident_rate
 	var mid_s: float = car_a.s - ds * 0.5
 	var contact_lat: float = car_b.lateral + d_lat * 0.5
 	if race.incidents_enabled and race.rng.next() < risk and (closing > 2.8 or abs_ds < 1.6):
