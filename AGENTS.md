@@ -250,3 +250,18 @@ Sebelum suatu tugas atau fase dinyatakan **SELESAI**, agen wajib memenuhi seluru
 * **Status Roadmap Proyek:** [`ROADMAP.md`](file:///D:/Occupation/Porto/genex/La_Voiture/ROADMAP.md)
 * **Laporan Eksekutif Fase 10 (Sirkuit):** [`executor-report/reports/FASE-10-TRACK-ENVIRONMENT-UPGRADE-REPORT.md`](file:///D:/Occupation/Porto/genex/La_Voiture/executor-report/reports/FASE-10-TRACK-ENVIRONMENT-UPGRADE-REPORT.md)
 * **Laporan Eksekutif Fase 9 (Menu & Garasi):** [`executor-report/reports/FASE-9-MAIN-MENU-AND-GARAGE-FLOW-REPORT.md`](file:///D:/Occupation/Porto/genex/La_Voiture/executor-report/reports/FASE-9-MAIN-MENU-AND-GARAGE-FLOW-REPORT.md)
+* **Panduan Tata Kelola Multi-Agent & Protokol Inisiasi:** [`docs/AGENT-WORKFLOW.md`](file:///D:/Occupation/Porto/genex/La_Voiture/docs/AGENT-WORKFLOW.md)
+
+---
+
+## 12. Multi-Agent Dynamic Collaboration & ai-memory Governance
+
+1. **Peran Bersifat Fungsional (Model-Agnostic):**
+   Agen apa pun (Antigravity, Claude Code, Oh My Pi, Codex) dapat bertindak sebagai **Planner**, **Executor**, maupun **Reviewer** sesuai instruksi developer.
+2. **Kewajiban Planner — Initiate Prompt Wajib:**
+   Setiap kali peran Planner menyelesaikan tahap perencanaan, Planner **WAJIB** mencetak blok **Initiate Prompt** siap-salin untuk Executor agar eksekusi langsung tepat sasaran (*direct to the point*) tanpa kebingungan.
+3. **Kewajiban Executor — TDD & Visual Verification:**
+   Executor wajib bekerja di branch khusus (`fase-*`), menerapkan siklus TDD (Red $\rightarrow$ Green), mengambil tangkapan layar 6-kamera 1080p, dan memastikan Zero Regression test sebelum menyatakan pekerjaan selesai.
+4. **Local Control Plane (`ai-memory`):**
+   Seluruh agen wajib menjaga kontinuitas memori melalui server lokal `ai-memory` di `http://127.0.0.1:49374/` (Web UI di `/web`). Sesi baru dan proses compacting secara otomatis disinkronkan oleh hook lifecycle.
+
