@@ -568,13 +568,14 @@ func _test_race_setup_hero_map() -> void:
 	await process_frame
 	var radar := setup.get("radar") as Control
 	var drs: Variant = radar.get("drs_zones")
-	check(radar.size.x >= 1000.0 and radar.size.y >= 520.0 and drs is Array and (drs as Array).size() >= 1 and int(radar.stats()["corners"]) >= 5,
+	# FASE 12.2: the venue artwork and demand bars take the right of the map card, so the map is 780 px wide.
+	check(radar.size.x >= 760.0 and radar.size.y >= 520.0 and drs is Array and (drs as Array).size() >= 1 and int(radar.stats()["corners"]) >= 5,
 		"race setup C: the circuit map is the hero (%s px) with the real DRS zones (%s) and numbered corners" % [str(radar.size), str(drs.size()) if drs is Array else "none"])
 	var laps: Variant = setup.get("lap_select")
 	var weather: Variant = setup.get("weather_select")
 	var time: Variant = setup.get("time_select")
 	var config: RefCounted = ConfigScript.get_config()
-	var chips_ok: bool = laps != null and weather != null and time != null and laps.get_item_count() == 3 and weather.get_item_count() == 4 and time.get_item_count() == 3
+	var chips_ok: bool = laps != null and weather != null and time != null and laps.get_item_count() == 4 and weather.get_item_count() == 5 and time.get_item_count() == 4
 	if chips_ok:
 		setup.select_weather(3)
 		var via_api: bool = weather.selected == 3 and config.weather_preset == 3
@@ -583,11 +584,13 @@ func _test_race_setup_hero_map() -> void:
 		time.press(2)
 		chips_ok = via_api and weather.selected == 1 and config.weather_preset == 1 and config.total_laps == 10 and config.time_of_day == 2
 	check(chips_ok, "race setup C: laps, weather and time are chips that write straight into the race config")
-	var apex := setup.find_child("CircuitCardAPEX", true, false) as Button
-	var suzuka := setup.find_child("ComingSoonSUZUKA", true, false) as Button
-	var macau := setup.find_child("ComingSoonMACAU", true, false) as Button
-	check(apex != null and suzuka != null and macau != null and suzuka.disabled and macau.disabled and not apex.disabled,
-		"race setup C: the circuit strip has Apex Ring selected and the two other venues marked coming soon")
+	# FASE 12.2: the venue strip became the 12-round carousel; Round 01 opens selected, rounds without a scene say so.
+	var apex := setup.find_child("CarouselCard0", true, false) as Button
+	var neo := setup.find_child("CarouselCard1", true, false) as Button
+	var brianza := setup.find_child("CarouselCard2", true, false) as Button
+	check(apex != null and neo != null and brianza != null and apex.text.contains("APEX RING") and neo.text.contains("NEO-WANGAN")
+		and brianza.text.contains("IN PREPARATION") and not apex.disabled and not brianza.disabled,
+		"race setup C: the carousel opens on Round 01 Apex Ring with Neo-Wangan next and unbuilt rounds marked in preparation")
 	var next := setup.get("continue_button") as Button
 	check(next != null and next.text.contains("CONTINUE") and _skew_of(next, "normal") > 0.1, "race setup C: the continue button is a skewed street plate")
 	setup.queue_free()

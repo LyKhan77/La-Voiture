@@ -7,6 +7,8 @@ extends HBoxContainer
 signal item_selected(index: int)
 
 const StreetStyle := preload("res://scripts/ui/street_style.gd")
+## How faint a locked chip is drawn.
+const LOCKED_ALPHA: float = 0.4
 
 var selected: int = 0
 
@@ -55,6 +57,7 @@ func set_chip_disabled(index: int, is_disabled: bool) -> void:
 		return
 	_buttons[index].disabled = is_disabled
 	_buttons[index].focus_mode = Control.FOCUS_NONE if is_disabled else Control.FOCUS_ALL
+	_buttons[index].modulate.a = LOCKED_ALPHA if is_disabled else 1.0
 
 
 func is_chip_disabled(index: int) -> bool:
@@ -63,8 +66,13 @@ func is_chip_disabled(index: int) -> bool:
 	return _buttons[index].disabled
 
 
+func chip_at(index: int) -> Button:
+	return _buttons[index] if index >= 0 and index < _buttons.size() else null
+
+
 func focus_selected() -> void:
-	if not _buttons.is_empty():
+	# A locked chip cannot hold focus (it can still be the programmatic selection).
+	if not _buttons.is_empty() and _buttons[selected].focus_mode != Control.FOCUS_NONE:
 		_buttons[selected].grab_focus()
 
 
