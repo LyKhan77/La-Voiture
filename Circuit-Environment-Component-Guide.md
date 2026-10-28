@@ -74,6 +74,7 @@ Setiap kali menambahkan atau merombak sirkuit di kalender 12 ronde, ikuti 5 taha
 2. Pasang **Shared FIA Paddock Kit**: `PitLaneComplex`, `StartGantry`, `PitBuilding`, `MainGrandstand` (terhubung ke live standings `Jumbotron`), dan `RaceControlTower`.
 3. Pasang **Shared Cel-Skybox (`SharedCelSkyController`)**: otomatis menyediakan Matahari/Bulan, 900 bintang berkedip, 28 awan 3D cel-shaded yang terdorong angin, serta respons pencahayaan `DAY / SUNSET / NIGHT`.
 4. **Layout-Driven Reuse:** kirim `pit_layout` milik sirkuit ke komponen bersama; hindari konstanta sirkuit lain. Bentuk dan posisi mengikuti spline, kelengkungan, elevasi, dan jarak ke ruas lain. Komponen bersama boleh diperbaiki dengan regresi Apex dan Neo Wangan tetap hijau.
+5. **Kontrak Tim–Box:** setiap balapan hanya 10 dari 13 tim yang berlomba (`GtRace.active_teams`). Box, garasi, kru, dan shutter dipetakan lewat `stall_index_for_team(team)` (-1 bila tidak punya box) dan `assign_teams(active_teams)`, bukan lewat id tim. Kompleks pit sirkuit baru wajib lulus `tests/test_pit_team_assignment_contract.gd`.
 
 ### Tahap 4: Perakitan **Tier B (Improvised Biome & Hero Landmarks)** & Shaders Cel-Shaded
 1. Cetak 2–4 model `.glb` landmark khusus map via skrip Blender 5.2 (`tools/build_<slug>_assets.py`) ke `assets/tracks/<slug>/models/`.
