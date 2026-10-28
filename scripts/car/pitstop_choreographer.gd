@@ -192,15 +192,17 @@ func get_job(car_id: int) -> Job:
 
 ## The teams whose car is on the way to the box (or in it): their crew steps out and waits, every other
 ## crew is (or goes back) in its garage. Call every frame with the full list.
-## How many teams the pit lane in use has a box for.
-func _team_count() -> int:
-	return int(pit_lane.get("team_count")) if pit_lane != null else PitLaneScript.TEAM_COUNT
+## Whether the pit lane in use seats this team in a box. Team ids are identities (0..12), not box numbers:
+## only the teams the sim races have a box, and the lane maps them (see `assign_teams` on the pit complexes).
+func _has_box(team: int) -> bool:
+	return pit_lane != null and int(pit_lane.stall_index_for_team(team)) >= 0
 
 
 func set_ready_teams(teams: Array) -> void:
 	_wanted.clear()
 	for team: Variant in teams:
-		_wanted[clampi(int(team), 0, _team_count() - 1)] = true
+		if _has_box(int(team)):
+			_wanted[int(team)] = true
 
 
 ## Walks the crews between their garages and the working lane; `delta` is game time.
@@ -292,9 +294,7 @@ func _dismiss(crew: Crew) -> void:
 func _set_standby_visible(team: int, shown: bool) -> void:
 	if pit_lane == null:
 		return
-	var garage: Node3D = pit_lane.garage_for_team(team) if pit_lane.has_method("garage_for_team") else null
-	if garage == null and team < pit_lane.garages.size():
-		garage = pit_lane.garages[team]
+	var garage: Node3D = pit_lane.garage_for_team(team)
 	if garage == null:
 		return
 	var standby := garage.get_node_or_null("StandbyCrew") as Node3D
@@ -613,6 +613,8 @@ func present(car_id: int, team: int, actor: Node3D, compound: int, in_service: b
 			_close(job)
 		return
 	if job == null:
+		if not _has_box(team):
+			return
 		job = _open_job(car_id, team, actor, compound)
 	job.lift_m = lift_m
 	if job.chassis != null:
@@ -637,7 +639,7 @@ func present(car_id: int, team: int, actor: Node3D, compound: int, in_service: b
 func _open_job(car_id: int, team: int, actor: Node3D, compound: int) -> Job:
 	var job := Job.new()
 	job.car_id = car_id
-	job.team = clampi(team, 0, _team_count() - 1)
+	job.team = team
 	job.actor = actor
 	job.chassis = actor.get("chassis") as ModularCarAssembler
 	job.compound = clampi(compound, 0, wheel_scenes.size() - 1)

@@ -159,10 +159,14 @@ func get_pit_transform(u: float, lateral_m: float) -> Transform3D:
 
 
 func stall_transform(team: int) -> Transform3D:
-	for stall: Dictionary in stalls:
-		if int(stall["index"]) == team:
-			return stall["pose"]
-	return stalls[clampi(team, 0, stalls.size() - 1)]["pose"] if not stalls.is_empty() else Transform3D.IDENTITY
+	var index: int = stall_index_for_team(team)
+	return stalls[index]["pose"] if index >= 0 else Transform3D.IDENTITY
+
+
+## Seats `team_ids` (the teams the race runs, in the sim's stall order) in the boxes; extra boxes stay empty.
+func assign_teams(team_ids: Array[int]) -> void:
+	for i: int in range(stalls.size()):
+		stalls[i]["team"] = team_ids[i] if i < team_ids.size() else -1
 
 
 ## The crew standing in a box: the Apex Ring's 13-person line-up, fitted to this lane's apron.
@@ -177,7 +181,10 @@ func crew_spot(slot: int) -> Vector3:
 
 
 func stall_index_for_team(team: int) -> int:
-	return clampi(team, 0, STALL_COUNT - 1)
+	for i: int in range(stalls.size()):
+		if int(stalls[i]["team"]) == team:
+			return i
+	return -1
 
 
 func garage_for_team(team: int) -> Node3D:
@@ -230,7 +237,7 @@ func _build_stalls() -> void:
 		marker.transform = ribbon.get_point_at_offset(s, BOX_LATERAL_M)
 		root.add_child(marker)
 		stalls.append({
-			"index": index, "s": s, "u": u, "lateral": BOX_LATERAL_M,
+			"index": index, "team": index, "s": s, "u": u, "lateral": BOX_LATERAL_M,
 			"pose": marker.transform, "node": marker,
 		})
 

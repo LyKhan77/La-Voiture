@@ -119,6 +119,11 @@ func _ready() -> void:
 		environment.build(ribbon, track.line)
 	elif pit_lane is BrianzaPitComplex:
 		pit_lane.build(ribbon, race.active_teams)
+	elif pit_lane.has_method("assign_teams"):
+		pit_lane.assign_teams(race.active_teams)
+	for building: Node in find_children("PitBuilding", "", true, false):
+		if building.has_method("apply_teams"):
+			building.apply_teams(race.active_teams)
 	environment.bind_world($WorldEnvironment, $Sun, camera)
 	choreographer.setup(pit_lane, ActorScript.WHEEL_SCENES)
 	for car: CarScript in race.cars:

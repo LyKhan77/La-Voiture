@@ -45,6 +45,7 @@ const WINDOW_GLOW_ALPHA: float = 0.45
 var structure: MeshInstance3D
 var glass: MeshInstance3D
 var floor_count: int = 2
+var team_ids: Array[int] = []
 
 
 @export var building_length_m: float = LENGTH_M
@@ -57,6 +58,20 @@ var floor_count: int = 2
 
 func _ready() -> void:
 	if structure == null:
+		build()
+
+
+## Colours the shutter of bay i with the team seated in box i; the lane's order is the sim's stall order.
+## A building already striped for those teams is left alone.
+func apply_teams(ids: Array[int]) -> void:
+	if ids == team_ids:
+		return
+	team_ids = ids.duplicate()
+	if structure != null:
+		structure.free()
+		glass.free()
+		structure = null
+		glass = null
 		build()
 
 
@@ -76,8 +91,9 @@ func build() -> void:
 ## One roll-up shutter drum and a half-lowered door per garage, striped in the team colour.
 func _build_shutters(batch: MeshBatchScript, cel: ShaderMaterial) -> void:
 	var door_x: float = front_x - 0.1
-	for team: int in range(bay_count):
-		var z: float = -bay_stride_m * (float(team) - float(bay_count - 1) * 0.5)
+	for bay: int in range(bay_count):
+		var team: int = team_ids[bay] if bay < team_ids.size() else bay
+		var z: float = -bay_stride_m * (float(bay) - float(bay_count - 1) * 0.5)
 		var drum := Transform3D(Basis(Vector3.RIGHT, PI * 0.5), Vector3(door_x, (garage_top_y - 0.3) - 1.15, z - DOOR_WIDTH_M * 0.5))
 		batch.cylinder(cel, CONCRETE_DARK_COLOR, drum, 0.2, 0.2, DOOR_WIDTH_M, 10)
 		batch.box(cel, Liveries.color_for(team), Transform3D(Basis.IDENTITY, Vector3(door_x, (garage_top_y - 0.3) - 1.45, z)), Vector3(0.08, 0.2, DOOR_WIDTH_M))
