@@ -427,7 +427,6 @@ func _build_layer1_ground_massing() -> void:
 	_ground_samples = SurfaceGeometry.hash_samples(ribbon)
 	_build_field()
 	_build_verge()
-	_build_ground_platforms()
 	_build_park_wall()
 
 
@@ -543,6 +542,7 @@ func _build_verge() -> void:
 				for v: Vector3 in quad:
 					st.set_normal(Vector3.UP)
 					st.add_vertex(v)
+	_build_ground_platforms(grass)
 	var apron_inst := MeshInstance3D.new()
 	apron_inst.name = "ParkPathways"
 	apron_inst.mesh = _commit_surface(gravel, GRAVEL_PATH)
@@ -572,9 +572,7 @@ func _platform_contains(platform: Dictionary, s: float, lateral: float) -> bool:
 	return fposmod(s - start, ribbon.length_m) <= length and depth >= float(platform["lateral_from"]) and depth <= float(platform["lateral_to"])
 
 
-func _build_ground_platforms() -> void:
-	var st := SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+func _build_ground_platforms(st: SurfaceTool) -> void:
 	for platform: Dictionary in _ground_platforms:
 		var start: float = float(platform["s0"])
 		var end: float = float(platform["s1"])
@@ -592,13 +590,6 @@ func _build_ground_platforms() -> void:
 			for index: int in [0, 1, 2, 0, 2, 3, 3, 2, 4, 3, 4, 5]:
 				st.set_normal(Vector3.UP)
 				st.add_vertex(corners[index])
-	var inst := MeshInstance3D.new()
-	inst.name = "PitGroundPlatform"
-	inst.mesh = _commit_surface(st, GRASS_TONES[0])
-	inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	ground_root.add_child(inst)
-
-
 func _commit_surface(st: SurfaceTool, color: Color) -> ArrayMesh:
 	var mesh := ArrayMesh.new()
 	st.commit(mesh)

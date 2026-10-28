@@ -68,13 +68,17 @@ func build(ribbon: Node3D, pit: Node3D, _team_ids: Array[int] = []) -> void:
 	_add_mesh("PaddockApron", apron)
 	_add_mesh("PaddockServiceRoad", road)
 	truck_mesh.box(mat, Color.WHITE, Transform3D(Basis.IDENTITY, Vector3(0.0, 1.75, 0.0)), Vector3(3.0, 3.5, 10.0))
-	truck_mesh.box(mat, Color("#555b66"), Transform3D(Basis.IDENTITY, Vector3(0.0, 0.45, -5.7)), Vector3(2.8, 0.9, 1.5))
+	truck_mesh.box(mat, Color.WHITE, Transform3D(Basis.IDENTITY, Vector3(0.0, 1.45, -6.5)), Vector3(2.8, 2.9, 3.0))
+	truck_mesh.box(mat, Color("#313d4b"), Transform3D(Basis.IDENTITY, Vector3(0.0, 2.15, -8.02)), Vector3(2.5, 0.75, 0.08))
+	for side: float in [-1.0, 1.0]:
+		for along: float in [-6.4, 2.7, 4.2]:
+			truck_mesh.cylinder(mat, Color("#17191d"), Transform3D(Basis(Vector3.FORWARD, PI * 0.5), Vector3(side * 1.5, 0.45, along)), 0.45, 0.45, 0.2, 8)
 	for stall: Dictionary in pit.stalls:
 		var arc: float = float(stall["s"])
 		var pose: Transform3D = ribbon.get_point_at_offset(arc, 47.0)
 		var team: int = int(stall["team"])
 		transporter_poses.append({"s": arc, "team": team, "pose": pose, "color": Liveries.color_for(team)})
-		_footprints.append(Rect2(arc - 5.0, 45.5, 10.0, 3.0))
+		_footprints.append(Rect2(arc - 8.1, 45.3, 13.1, 3.4))
 	_add_instances("PaddockTransporters", truck_mesh, transporter_poses.map(func(entry: Dictionary) -> Transform3D: return entry.pose), transporter_poses.map(func(entry: Dictionary) -> Color: return entry.color))
 	tent_mesh.box(mat, white, Transform3D(Basis.IDENTITY, Vector3(0.0, 1.6, 0.0)), Vector3(7.0, 3.2, 12.0))
 	tent_mesh.box(mat, red, Transform3D(Basis.IDENTITY, Vector3(0.0, 3.3, 0.0)), Vector3(7.4, 0.25, 12.4))
@@ -98,6 +102,10 @@ func build(ribbon: Node3D, pit: Node3D, _team_ids: Array[int] = []) -> void:
 			fence_poses.append(ribbon.get_point_at_offset(arc, outer))
 	_add_instances("PaddockFence", fence_mesh, fence_poses)
 	car_mesh.box(mat, Color("#727b86"), Transform3D(Basis.IDENTITY, Vector3(0.0, 0.6, 0.0)), Vector3(2.0, 1.2, 4.0))
+	car_mesh.box(mat, Color("#323d4b"), Transform3D(Basis.IDENTITY, Vector3(0.0, 1.25, 0.0)), Vector3(1.7, 0.35, 2.0))
+	for side: float in [-1.0, 1.0]:
+		for along: float in [-1.25, 1.25]:
+			car_mesh.cylinder(mat, Color("#1b1d21"), Transform3D(Basis(Vector3.FORWARD, PI * 0.5), Vector3(side * 1.0, 0.3, along)), 0.3, 0.3, 0.15, 8)
 	for row: int in range(2):
 		for col: int in range(8):
 			var arc: float = start + 4.0 + float(row) * 9.0

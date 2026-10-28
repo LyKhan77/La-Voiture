@@ -141,6 +141,9 @@ func build(p_ribbon: TrackRibbonScript, team_ids: Array[int] = []) -> void:
 		if not team_ids.is_empty():
 			for i: int in range(stalls.size()):
 				stalls[i]["team"] = team_ids[i] if i < team_ids.size() else -1
+			for i: int in range(garages.size()):
+				_build_garage_visuals(garages[i], int(stalls[i]["team"]))
+			_build_markings()
 			if paddock != null:
 				paddock.build(p_ribbon, self, team_ids)
 		return
@@ -175,7 +178,7 @@ func lane_edges(u: float) -> Vector2:
 	var first: float = u_from_s(STALL_FIRST_S) - 14.0
 	var last: float = u_from_s(STALL_FIRST_S + float(STALL_COUNT - 1) * STALL_PITCH_M) + 14.0
 	var working: float = smoothstep(first - 12.0, first, u) * smoothstep(last + 12.0, last, u)
-	return Vector2(lerpf(6.0, FAST_LANE_M - FAST_LANE_HALF_M, blend), lerpf(lerpf(7.2, FAST_LANE_M + FAST_LANE_HALF_M, blend), GARAGE_FRONT_M - 0.6, working))
+	return Vector2(lerpf(6.0, FAST_LANE_M - FAST_LANE_HALF_M, blend), lerpf(lerpf(7.2, FAST_LANE_M + FAST_LANE_HALF_M, blend), GARAGE_FRONT_M + 0.05, working))
 
 
 func wall_lateral(u: float) -> float:
@@ -268,6 +271,8 @@ func _build_asphalt() -> void:
 
 
 func _build_markings() -> void:
+	stall_markings.clear()
+	speed_limit_lines_u.clear()
 	var batch := MeshBatchScript.new()
 	var material: Material = ToonMaterials.vertex_colored(false)
 	var left: Callable = func(u: float) -> float: return lane_edges(u).x
@@ -285,10 +290,12 @@ func _build_markings() -> void:
 		painter._paint_box(batch, material, stall)
 	stall_markings = painter.stall_markings.duplicate(true)
 	painter.free()
-	var inst := MeshInstance3D.new()
-	inst.name = "PitMarkings"
+	var inst: MeshInstance3D = get_node_or_null("PitMarkings") as MeshInstance3D
+	if inst == null:
+		inst = MeshInstance3D.new()
+		inst.name = "PitMarkings"
+		add_child(inst)
 	inst.mesh = batch.commit()
-	add_child(inst)
 
 
 func _marking_strip(batch: MeshBatchScript, material: Material, color: Color, u0: float, u1: float, left: Callable, right: Callable) -> void:
@@ -320,10 +327,14 @@ func _build_pit_wall() -> void:
 		_solid_footprints.append({"name": "wall", "u0": u0, "u1": u1, "lat0": minf(wall_lateral(u0), wall_lateral(u1)) - WALL_HALF_THICKNESS_M, "lat1": maxf(wall_lateral(u0), wall_lateral(u1)) + WALL_HALF_THICKNESS_M})
 	for u: float in [span.x, span.y]:
 		var pose: Transform3D = get_pit_transform(u, wall_lateral(u))
-		wall_end_cushions.append({"u": u, "pose": pose})
+		var blocks: Array[Transform3D] = []
 		for block: int in range(3):
 			var offset: float = float(block) * 0.8 * (-1.0 if u == span.x else 1.0)
-			batch.box(material, CUSHION_ORANGE if block % 2 == 0 else CUSHION_WHITE, Transform3D(pose.basis, pose * Vector3(0.0, 0.45, offset)), Vector3(0.65, 0.9, 0.7))
+			var block_pose: Transform3D = get_pit_transform(u + offset, wall_lateral(u))
+			block_pose.origin += Vector3.UP * 0.45
+			blocks.append(block_pose)
+			batch.box(material, CUSHION_ORANGE if block % 2 == 0 else CUSHION_WHITE, block_pose, Vector3(0.65, 0.9, 0.7))
+		wall_end_cushions.append({"u": u, "pose": pose, "blocks": blocks})
 		_solid_footprints.append({"name": "cushion", "u0": u - 2.0 if u == span.x else u, "u1": u if u == span.x else u + 2.0, "lat0": wall_lateral(u) - 0.325, "lat1": wall_lateral(u) + 0.325})
 	var inst := MeshInstance3D.new()
 	inst.name = "PitWall"
@@ -381,37 +392,44 @@ func _build_garages() -> void:
 		var garage_node := Node3D.new()
 		garage_node.name = "Garage_%d" % index
 		garage_node.transform = g_pose
-		
-		var batch := MeshBatchScript.new()
-		var mat: Material = ToonMaterials.vertex_colored(false)
-		# Open front leaves the crew visible and able to walk onto the apron.
-		batch.box(mat, GARAGE_SHELL, Transform3D(Basis.IDENTITY, Vector3(GARAGE_DEPTH_M - 0.2, GARAGE_HEIGHT_M * 0.5, 0.0)), Vector3(0.4, GARAGE_HEIGHT_M, GARAGE_WIDTH_M))
-		for side: float in [-1.0, 1.0]:
-			batch.box(mat, GARAGE_SHELL, Transform3D(Basis.IDENTITY, Vector3(GARAGE_DEPTH_M * 0.5, GARAGE_HEIGHT_M * 0.5, side * GARAGE_WIDTH_M * 0.5)), Vector3(GARAGE_DEPTH_M, GARAGE_HEIGHT_M, 0.3))
-		batch.box(mat, GARAGE_SHELL, Transform3D(Basis.IDENTITY, Vector3(GARAGE_DEPTH_M * 0.5, GARAGE_HEIGHT_M, 0.0)), Vector3(GARAGE_DEPTH_M, 0.3, GARAGE_WIDTH_M))
-		# Fascia header with team color
-		var team_col: Color = Liveries.color_for(index)
-		batch.box(mat, team_col, Transform3D(Basis.IDENTITY, Vector3(0.0, GARAGE_HEIGHT_M - 0.4, 0.0)), Vector3(0.3, 0.8, GARAGE_WIDTH_M))
-		
-		var mi := MeshInstance3D.new()
-		mi.mesh = batch.commit()
-		garage_node.add_child(mi)
-		var standby := MeshBatchScript.new()
-		var roles: Array = crew_roles()
-		for slot: int in range(roles.size()):
-			FigureScript.add(standby, mat, Transform3D(Basis(Vector3.UP, PI * 0.5), crew_spot(slot)), int(roles[slot]), team_col)
-		var crew := MeshInstance3D.new()
-		crew.name = "StandbyCrew"
-		crew.mesh = standby.commit()
-		garage_node.add_child(crew)
+		_build_garage_visuals(garage_node, int(stall["team"]))
 		add_child(garage_node)
 		garages.append(garage_node)
+
+
+func _build_garage_visuals(garage_node: Node3D, team: int) -> void:
+	var batch := MeshBatchScript.new()
+	var mat: Material = ToonMaterials.vertex_colored(false)
+	batch.box(mat, GARAGE_SHELL, Transform3D(Basis.IDENTITY, Vector3(GARAGE_DEPTH_M - 0.2, GARAGE_HEIGHT_M * 0.5, 0.0)), Vector3(0.4, GARAGE_HEIGHT_M, GARAGE_WIDTH_M))
+	for side: float in [-1.0, 1.0]:
+		batch.box(mat, GARAGE_SHELL, Transform3D(Basis.IDENTITY, Vector3(GARAGE_DEPTH_M * 0.5, GARAGE_HEIGHT_M * 0.5, side * GARAGE_WIDTH_M * 0.5)), Vector3(GARAGE_DEPTH_M, GARAGE_HEIGHT_M, 0.3))
+	batch.box(mat, GARAGE_SHELL, Transform3D(Basis.IDENTITY, Vector3(GARAGE_DEPTH_M * 0.5, GARAGE_HEIGHT_M, 0.0)), Vector3(GARAGE_DEPTH_M, 0.3, GARAGE_WIDTH_M))
+	var team_col: Color = Liveries.color_for(team)
+	batch.box(mat, team_col, Transform3D(Basis.IDENTITY, Vector3(0.0, GARAGE_HEIGHT_M - 0.4, 0.0)), Vector3(0.3, 0.8, GARAGE_WIDTH_M))
+	var shell: MeshInstance3D = garage_node.get_node_or_null("GarageShell") as MeshInstance3D
+	if shell == null:
+		shell = MeshInstance3D.new()
+		shell.name = "GarageShell"
+		garage_node.add_child(shell)
+	shell.mesh = batch.commit()
+	var standby := MeshBatchScript.new()
+	var roles: Array = crew_roles()
+	for slot: int in range(roles.size()):
+		FigureScript.add(standby, mat, Transform3D(Basis(Vector3.UP, PI * 0.5), crew_spot(slot)), int(roles[slot]), team_col)
+	var crew: MeshInstance3D = garage_node.get_node_or_null("StandbyCrew") as MeshInstance3D
+	if crew == null:
+		crew = MeshInstance3D.new()
+		crew.name = "StandbyCrew"
+		garage_node.add_child(crew)
+	crew.mesh = standby.commit()
 
 
 func _build_garage_equipment() -> void:
 	var source := ApexPitScript.new()
 	var batch := MeshBatchScript.new()
-	var equipment: Dictionary = source._garage_props(batch, ToonMaterials.vertex_colored(false), Liveries.color_for(0))
+	var material: Material = ToonMaterials.vertex_colored(false)
+	batch.quad(material, Color("#30343b"), Vector3(0.0, 0.02, -GARAGE_WIDTH_M * 0.5), Vector3(GARAGE_DEPTH_M, 0.02, -GARAGE_WIDTH_M * 0.5), Vector3(GARAGE_DEPTH_M, 0.02, GARAGE_WIDTH_M * 0.5), Vector3(0.0, 0.02, GARAGE_WIDTH_M * 0.5), Vector3.UP)
+	var equipment: Dictionary = source._garage_props(batch, material, Liveries.color_for(0))
 	source.free()
 	var instances := MultiMesh.new()
 	instances.transform_format = MultiMesh.TRANSFORM_3D

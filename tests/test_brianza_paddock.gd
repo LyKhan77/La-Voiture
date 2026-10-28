@@ -71,4 +71,6 @@ func _run() -> void:
 			env.apply_time_of_day({"mode": mode, "floodlights": float(mode), "stars_opacity": 0.0})
 			check(paddock.get_node("PaddockTents").visible and paddock.get_node("PaddockTransporters").visible, "paddock visible in time-of-day mode %d" % mode)
 	circuit.free()
+	await process_frame
+	check(int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)) == 0, "paddock teardown leaves no orphan nodes")
 	quit(1 if failures else 0)

@@ -16,9 +16,18 @@ static func build(pit: Node3D) -> Dictionary:
 	var white := Color("#f4f5f7")
 	var yellow := Color("#ffd400")
 	var dark := Color("#343945")
-	for u: float in range(0, 60, 8):
-		var pose: Transform3D = pit.get_pit_transform(u, 7.1)
-		chevrons.box(mat, white, Transform3D(pose.basis * Basis(Vector3.UP, 0.6), pose * Vector3(0.0, 0.04, 0.0)), Vector3(0.18, 0.02, 3.2))
+	for u: float in range(24, 60, 8):
+		var inner: float = 7.15
+		var outer: float = pit.lane_edges(u - 2.0).y - 0.15
+		if outer <= inner + 0.3:
+			continue
+		var middle: float = (inner + outer) * 0.5
+		for side: float in [inner, outer]:
+			var a: Vector3 = pit.get_pit_transform(u - 2.0, side - 0.08).origin + Vector3.UP * 0.04
+			var b: Vector3 = pit.get_pit_transform(u - 2.0, side + 0.08).origin + Vector3.UP * 0.04
+			var c: Vector3 = pit.get_pit_transform(u, middle + 0.08).origin + Vector3.UP * 0.04
+			var d: Vector3 = pit.get_pit_transform(u, middle - 0.08).origin + Vector3.UP * 0.04
+			chevrons.quad(mat, white, a, b, c, d, Vector3.UP)
 	for u: float in range(int(span.x), int(span.y), 3):
 		var pose: Transform3D = pit.get_pit_transform(u, pit.wall_lateral(u))
 		fence_poses.append(pose)

@@ -79,6 +79,8 @@ Setiap pengembangan sirkuit baru maupun perbaikan lingkungan (*environment overh
 4. **Tahap 4: Perakitan Tier B (Improvised Biome & 2–4 Hero Landmarks)**.
 5. **Tahap 5: Quality Gate & Definition of Done** (100% Test PASS, 6-Camera Visual Gate 1080p, $\le 160$ draw calls, 60 FPS locked, 0 orphan nodes).
 
+Layout-Driven Reuse: komponen bersama menerima layout sirkuit; bentuk mengikuti spline, elevasi, kelengkungan, dan jarak jalan lain. Perbaikan Tier A wajib menjaga regresi Apex dan Neo Wangan. Pada track berelevasi, ukur mesh terrain yang dirender terhadap jalan, pit, dan apron. Tahap 5 juga mencakup flythrough chase setiap 150 m dua arah serta gate lintasan pit bebas barrier.
+
 ---
 
 ## 5. Matriks Skenario Pergantian Agen (Cheat Sheet)

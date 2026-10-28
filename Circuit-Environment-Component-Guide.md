@@ -67,11 +67,13 @@ Setiap kali menambahkan atau merombak sirkuit di kalender 12 ronde, ikuti 5 taha
    - Daratan/pulau beton berbingkai *seawall* atau kontur bukit,
    - Dek jembatan + pilar hingga dasar air (`BASE_Y`),
    - Dinding *cut-and-cover* + massa plaza/bukit di atas atap terowongan.
+3. Pada track berelevasi, uji segitiga mesh terrain yang benar-benar dirender: sampel jalan tiap maksimum 6 m pada lateral kiri, tengah, dan kanan, serta lebar pit dan apron. Permukaan tanah harus berada di bawah jalan; uji juga jarak verge ke ruas jalan lain dan platform penopang pit.
 
 ### Tahap 3: Pemasangan Otomatis **Tier A (Reusable Core Kit)**
 1. Pasang **Track Corridor Kit** di sepanjang `TrackRibbon`: aspal (`road_asphalt.gdshader`), `RubberGroove`, `Kerbs`, `Barriers` (dengan celah otomatis di Pit Entry–Exit), `CatchFence`, dan `BrakingMarkers` (`150/100/50m`).
 2. Pasang **Shared FIA Paddock Kit**: `PitLaneComplex`, `StartGantry`, `PitBuilding`, `MainGrandstand` (terhubung ke live standings `Jumbotron`), dan `RaceControlTower`.
 3. Pasang **Shared Cel-Skybox (`SharedCelSkyController`)**: otomatis menyediakan Matahari/Bulan, 900 bintang berkedip, 28 awan 3D cel-shaded yang terdorong angin, serta respons pencahayaan `DAY / SUNSET / NIGHT`.
+4. **Layout-Driven Reuse:** kirim `pit_layout` milik sirkuit ke komponen bersama; hindari konstanta sirkuit lain. Bentuk dan posisi mengikuti spline, kelengkungan, elevasi, dan jarak ke ruas lain. Komponen bersama boleh diperbaiki dengan regresi Apex dan Neo Wangan tetap hijau.
 
 ### Tahap 4: Perakitan **Tier B (Improvised Biome & Hero Landmarks)** & Shaders Cel-Shaded
 1. Cetak 2–4 model `.glb` landmark khusus map via skrip Blender 5.2 (`tools/build_<slug>_assets.py`) ke `assets/tracks/<slug>/models/`.
@@ -79,6 +81,7 @@ Setiap kali menambahkan atau merombak sirkuit di kalender 12 ronde, ikuti 5 taha
 3. Pastikan seluruh shader bangunan, air, dan lampu jalan merespons parameter waktu `tod` (`DAY`, `SUNSET`, `NIGHT`) dan kecepatan angin `race.weather.wind_speed`.
 
 ### Tahap 5: Verifikasi 6-Camera Visual Gate, Multi-Time Gate & Performance Gate
+Tambahkan flythrough setinggi chase camera setiap 150 m sepanjang lap dalam kedua arah, ditambah aerial pit/paddock dan entry/exit. Uji jalur pit sepanjang lane dengan clearance mobil terhadap armco, dinding, dan benda padat; inspeksi hasil pada `DAY`, `SUNSET`, dan `NIGHT`.
 Sebelum sirkuit dinyatakan selesai, jalankan:
 1. **Headless Test Suite:** Seluruh test suite di `tests/test_*.gd` wajib **100% PASS (0 FAIL)**.
 2. **6-Camera Visual Gate + Time-of-Day Check (`DAY`, `SUNSET`, `NIGHT`):**

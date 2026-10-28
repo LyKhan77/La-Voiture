@@ -3,13 +3,23 @@ extends SceneTree
 const CELL_M: float = 24.0
 const Geometry := preload("res://scripts/world/enhanced_track_geometry.gd")
 
-func ground_clearance(circuit: Node, pit_samples: bool = false) -> float:
+func ground_clearance(circuit: Node, sample_kind: int = 0) -> float:
 	var points: Array[Vector3] = []
 	var cells: Dictionary = {}
 	var lap: float = circuit.ribbon.length_m
-	for s: int in range(0, 410 if pit_samples else int(lap), 6):
-		for lateral: float in ([8.0, 14.0, 20.0] if pit_samples else [-7.0, 0.0, 7.0]):
-			var p: Vector3 = circuit.get_node("PitLane").get_pit_transform(float(s), lateral).origin if pit_samples else circuit.ribbon.get_point_at_offset(float(s), lateral).origin
+	var pit: Node = circuit.get_node("PitLane")
+	var start: int = int(pit.paddock.zone.s0) if sample_kind == 2 else 0
+	var end: int = int(pit.paddock.zone.s1) if sample_kind == 2 else (410 if sample_kind == 1 else int(lap))
+	var laterals: Array[float] = [-7.0, 0.0, 7.0]
+	if sample_kind == 1:
+		laterals = [8.0, 14.0, 20.0]
+	elif sample_kind == 2:
+		laterals = []
+		for depth: int in range(32, int(pit.paddock.zone.lateral_to), 6):
+			laterals.append(float(depth))
+	for s: int in range(start, end, 6):
+		for lateral: float in laterals:
+			var p: Vector3 = pit.get_pit_transform(float(s), lateral).origin if sample_kind == 1 else circuit.ribbon.get_point_at_offset(float(s), lateral).origin
 			var key := Vector2i(floori(p.x / CELL_M), floori(p.z / CELL_M))
 			if not cells.has(key):
 				cells[key] = []
@@ -64,6 +74,12 @@ func _run() -> void:
 	var point: Vector3 = circuit.ribbon.get_point_at_offset(3860.0, 0.0).origin
 	var top: float = -INF
 	var ground: Node = circuit.get_node("Environment/ParcoRealeGroundRoot")
+	var surfaces: int = 0
+	for child: Node in ground.get_children():
+		if child is MeshInstance3D and child.mesh != null:
+			surfaces += child.mesh.get_surface_count()
+	var budget_ok: bool = surfaces <= 6
+	print("[%s] ground platforms share the verge draw call (%d surfaces)" % ["PASS" if budget_ok else "FAIL", surfaces])
 	for child: Node in ground.get_children():
 		if not child is MeshInstance3D:
 			continue
@@ -85,25 +101,32 @@ func _run() -> void:
 			if u < -0.00001 or v < -0.00001 or u + v > 1.00001:
 				continue
 			top = maxf(top, a.y + u * (b.y - a.y) + v * (c.y - a.y))
-	var ok: bool = top <= point.y - 0.05
-	print("[%s] rendered ground below road at s=3860 (ground %.2f, road %.2f)" % ["PASS" if ok else "FAIL", top, point.y])
+	var road_point_ok: bool = top <= point.y - 0.05
+	print("[%s] rendered ground below road at s=3860 (ground %.2f, road %.2f)" % ["PASS" if road_point_ok else "FAIL", top, point.y])
+	var ok: bool = road_point_ok and budget_ok
 	var worst: float = ground_clearance(circuit)
 	var road_ok: bool = worst <= -0.05
 	print("[%s] rendered ground below every road sample (worst %.3f m)" % ["PASS" if road_ok else "FAIL", worst])
 	ok = ok and road_ok
-	var pit_worst: float = ground_clearance(circuit, true)
+	var pit_worst: float = ground_clearance(circuit, 1)
 	var pit_ok: bool = pit_worst <= -0.005
 	print("[%s] rendered ground below pit lane samples (worst %.3f m)" % ["PASS" if pit_ok else "FAIL", pit_worst])
 	ok = ok and pit_ok
+	var apron_worst: float = ground_clearance(circuit, 2)
+	var apron_ok: bool = apron_worst <= -0.005
+	print("[%s] rendered ground below paddock apron samples (worst %.3f m)" % ["PASS" if apron_ok else "FAIL", apron_worst])
+	ok = ok and apron_ok
 	var sample_cells: Dictionary = Geometry.hash_samples(circuit.ribbon)
 	var hits: int = 0
-	for s: int in range(0, int(circuit.ribbon.length_m), 16):
-		for side: float in [-1.0, 1.0]:
-			for band: int in range(1, 4):
-				var distance: float = [7.3, 12.0, 40.0, 80.0][band]
-				var verge_point: Vector3 = circuit.get_node("Environment")._verge_point(float(s), side * distance, band)
-				if Geometry.other_road_distance(sample_cells, circuit.ribbon, float(s), verge_point) < 8.0:
-					hits += 1
+	var verge_node: MeshInstance3D = circuit.get_node("Environment/ParcoRealeGroundRoot/ParcoRealeVerge")
+	var verge_faces: PackedVector3Array = verge_node.mesh.get_faces()
+	var rows: int = ceili(circuit.ribbon.length_m / 10.0)
+	for index: int in range(mini(verge_faces.size(), rows * 24)):
+		var row: int = int(index / 12) % rows
+		var arc: float = float(row) * 10.0
+		var verge_point: Vector3 = verge_node.transform * verge_faces[index]
+		if Geometry.other_road_distance(sample_cells, circuit.ribbon, arc, verge_point) < 8.0:
+			hits += 1
 	var verge_ok: bool = hits == 0
 	print("[%s] verge stays outside other road corridors (%d hits)" % ["PASS" if verge_ok else "FAIL", hits])
 	ok = ok and verge_ok
