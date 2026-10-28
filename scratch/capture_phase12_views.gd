@@ -3,6 +3,8 @@ extends SceneTree
 ## Native 1080p visual gates. Uses the real twenty-car weekend and authored circuit spans.
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
 const Config := preload("res://scripts/core/race_config_data.gd")
+const PitKit := preload("res://scripts/world/neo_wangan_pit_complex.gd")
+const Settings := preload("res://scripts/core/presentation_settings.gd")
 const SHOTS := "res://executor-report/screenshots/phases/"
 var world: Node3D
 var camera: Camera3D
@@ -14,6 +16,7 @@ func _initialize() -> void:
 func _run() -> void:
 	DisplayServer.window_set_size(Vector2i(1920, 1080))
 	root.size = Vector2i(1920, 1080)
+	Settings.set_quality(Settings.Quality.HIGH)
 	var config := Config.get_config()
 	config.selected_circuit_id = "neo_wangan"
 	config.total_laps = 3
@@ -57,6 +60,25 @@ func _run() -> void:
 	camera.look_at(actor.global_position - actor.global_basis.z * 18.0 + Vector3.UP)
 	camera.make_current()
 	await _capture("cam6-chase-cam-action")
+	root.canvas_cull_mask = 0
+	await _view("pit-entry-runup", PitKit.ENTRY_S - 18.0, 14.0, 8.5, PitKit.ENTRY_S + 90.0, 11.0, 1.2)
+	var first_car: GtCar = world.race.cars[0]
+	for car: GtCar in world.race.cars:
+		if world.race.stall_index_for_team(car.team_id) == 0:
+			first_car = car
+			break
+	var requested: bool = world.request_pit(first_car.id)
+	var service: bool = false
+	for frame: int in range(9000):
+		world.step(1.0 / 60.0)
+		if first_car.pit != null and first_car.pit.phase == GtTypes.PitPhase.BOX and first_car.v < 0.8 and first_car.pit.timer > 0.0:
+			service = true
+			break
+	print("PIT_POLISH_SERVICE requested=%s servicing=%s team=%d stall=%d car=%d" % [requested, service, first_car.team_id, world.race.stall_index_for_team(first_car.team_id), first_car.id])
+	if not requested or not service:
+		failures += 1
+	camera.make_current()
+	await _view("pit-garage-lighting", PitKit.s_from_u(PitKit.STALL_FIRST_OFFSET_M - 9.0), 9.8, 3.0, PitKit.s_from_u(PitKit.STALL_FIRST_OFFSET_M + 18.0), 19.0, 2.1)
 	print("CAMERA_GATES cars=%d environment=%s" % [world.actors.size(), world.environment.stats()])
 	world.queue_free()
 	camera.queue_free()

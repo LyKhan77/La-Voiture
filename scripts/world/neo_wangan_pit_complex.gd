@@ -1,7 +1,7 @@
 class_name NeoWanganPitComplex
 extends Node3D
 
-## The FIA pit connection of the Neo-Wangan street circuit (FASE 12, Task 3): a 140 m fast lane
+## The FIA pit connection of the Neo-Wangan street circuit: a 200 m fast lane
 ## hanging off the right-hand edge of the last straight, ten 12 m team boxes, a concrete pit wall
 ## with an orange impact attenuator on its nose, and a pit exit that runs on the inside of Turn 1
 ## behind an 80 m solid blend line — so a car leaving the pits can never meet a car on the racing
@@ -31,9 +31,10 @@ const Liveries := preload("res://scripts/car/team_liveries.gd")
 ## The circuit's homologated lap (see NeoWanganCircuitBuilder.LENGTH_M; repeated here so this
 ## script stays free of a circular preload with the builder).
 const LAP_LENGTH_M: float = 3150.0
-const ENTRY_S: float = 3075.0 # 75 m before the start/finish line
+const ENTRY_RUNUP_M: float = 60.0
+const ENTRY_S: float = 3075.0 - ENTRY_RUNUP_M # 135 m before the start/finish line
 const EXIT_S: float = 65.0 # 65 m after the line, at the entry to Turn 1
-const LANE_LENGTH_M: float = 140.0
+const LANE_LENGTH_M: float = 140.0 + ENTRY_RUNUP_M
 const BYPASS_MERGE_S: float = 145.0 # rejoin past Turn 1 (apex at 120)
 const BYPASS_RAMP_M: float = 65.0 # from 80 m to 145 m
 const BLEND_LINE_M: float = 80.0 # from the pit exit to the merge
@@ -41,7 +42,7 @@ const SPEED_LIMIT_MPS: float = 80.0 / 3.6
 
 const STALL_COUNT: int = 10
 const STALL_PITCH_M: float = 12.0
-const STALL_FIRST_OFFSET_M: float = 8.0 # from Pit Entry
+const STALL_FIRST_OFFSET_M: float = 8.0 + ENTRY_RUNUP_M # keep existing garage positions
 const GARAGE_ZONE_M: float = 140.0
 
 const ENTRY_LATERAL_M: float = 5.2 # the pit entry trigger, on the right edge of the road
@@ -111,7 +112,7 @@ static func s_from_u(u: float) -> float:
 	return fposmod(ENTRY_S + u, LAP_LENGTH_M)
 
 
-## u of the pit exit trigger (the end of the 140 m lane).
+## u of the pit exit trigger (the end of the 200 m lane).
 static func exit_u() -> float:
 	return LANE_LENGTH_M
 
@@ -133,6 +134,8 @@ func build(p_ribbon: TrackRibbonScript) -> void:
 	_build_crash_cushion()
 	_build_garages()
 	_build_shared_paddock()
+	_build_pit_lighting()
+	_build_entry_sign()
 	_build_triggers()
 	_build_bypass_ramp()
 	# Garage glass and LED strips are glow-masked vertices: light them like the city around them.
@@ -265,8 +268,14 @@ func _surface_left(u: float) -> float:
 
 
 func _surface_right(u: float) -> float:
-	return lerpf(GARAGE_FRONT_M, FAST_LANE_M + FAST_LANE_HALF_M, smoothstep(0.0, ENTRY_BLEND_M, u)) if u <= LANE_LENGTH_M \
-		else FAST_LANE_M + FAST_LANE_HALF_M
+	var fast_edge: float = FAST_LANE_M + FAST_LANE_HALF_M
+	if u > LANE_LENGTH_M:
+		return fast_edge
+	var entry_edge: float = lerpf(ENTRY_LATERAL_M + FAST_LANE_HALF_M, fast_edge, smoothstep(0.0, ENTRY_BLEND_M, u))
+	var last_box: float = STALL_FIRST_OFFSET_M + STALL_PITCH_M * float(STALL_COUNT - 1)
+	var apron: float = smoothstep(STALL_FIRST_OFFSET_M - 24.0, STALL_FIRST_OFFSET_M - 8.0, u) \
+		* (1.0 - smoothstep(last_box + 12.0, LANE_LENGTH_M, u))
+	return lerpf(entry_edge, GARAGE_FRONT_M, apron)
 
 
 func _at(u: float, lateral_m: float, y: float) -> Vector3:
@@ -290,6 +299,15 @@ func _build_markings() -> void:
 	# Yellow limiter lines across the lane at Pit Entry and Pit Exit.
 	add_band.call(0.0, 1.2, func(u: float) -> float: return _surface_left(u), func(u: float) -> float: return _surface_right(u), PAINT_YELLOW, LINE_Y + 0.004)
 	add_band.call(LANE_LENGTH_M - 1.2, LANE_LENGTH_M, func(u: float) -> float: return _surface_left(u), func(u: float) -> float: return _surface_right(u), PAINT_YELLOW, LINE_Y + 0.004)
+	for u: float in [28.0, 40.0]:
+		batch.quad(paint, PAINT_WHITE, _at(u - 2.0, 8.3, LINE_Y), _at(u + 0.5, 8.3, LINE_Y), _at(u + 0.5, 8.7, LINE_Y), _at(u - 2.0, 8.7, LINE_Y), Vector3.UP)
+		batch.triangle(paint, PAINT_WHITE, _at(u + 3.0, FAST_LANE_M, LINE_Y), _at(u, 7.6, LINE_Y), _at(u, 9.4, LINE_Y), Vector3.UP)
+	for stall: Dictionary in stalls:
+		var u: float = float(stall["u"])
+		add_band.call(u - 3.0, u + 3.0, func(_u: float) -> float: return 11.6, func(_u: float) -> float: return 11.75, PAINT_WHITE, LINE_Y)
+		add_band.call(u - 3.0, u + 3.0, func(_u: float) -> float: return 14.25, func(_u: float) -> float: return 14.4, PAINT_WHITE, LINE_Y)
+		for end: float in [-3.0, 2.85]:
+			add_band.call(u + end, u + end + 0.15, func(_u: float) -> float: return 11.6, func(_u: float) -> float: return 14.4, PAINT_WHITE, LINE_Y)
 	var mesh := MeshInstance3D.new()
 	mesh.name = "PitMarkings"
 	mesh.mesh = batch.commit()
@@ -321,17 +339,17 @@ func _build_pit_wall() -> void:
 	for index: int in range(steps):
 		var ua: float = WALL_START_U + (LANE_LENGTH_M - WALL_START_U) * float(index) / float(steps)
 		var ub: float = WALL_START_U + (LANE_LENGTH_M - WALL_START_U) * float(index + 1) / float(steps)
-		var a: Vector3 = _at(ua, PIT_WALL_M, 0.0)
-		var b: Vector3 = _at(ub, PIT_WALL_M, 0.0)
+		var a: Vector3 = _at(ua, PIT_WALL_M, WALL_HEIGHT_M * 0.5)
+		var b: Vector3 = _at(ub, PIT_WALL_M, WALL_HEIGHT_M * 0.5)
 		var half: Vector3 = Vector3.UP * WALL_HEIGHT_M * 0.5
 		var side: Vector3 = (b - a).cross(Vector3.UP).normalized() * WALL_HALF_THICKNESS_M
 		batch.quad(concrete, WALL_COLOR, a - side + half, b - side + half, b + side + half, a + side + half, Vector3.UP)
 		batch.quad(concrete, WALL_COPING, a - side + half, b - side + half, b - side - half, a - side - half, -side)
 		batch.quad(concrete, WALL_COPING, a + side - half, b + side - half, b + side + half, a + side + half, side)
 		if index == 0:
-			batch.quad(concrete, WALL_COLOR, a - side, a + side, a + side + half, a - side + half, (b - a).normalized() * -1.0)
+			batch.quad(concrete, WALL_COLOR, a - side - half, a + side - half, a + side + half, a - side + half, (b - a).normalized() * -1.0)
 		if index == steps - 1:
-			batch.quad(concrete, WALL_COLOR, b - side, b + side, b + side + half, b - half + side, (b - a).normalized())
+			batch.quad(concrete, WALL_COLOR, b - side - half, b + side - half, b + side + half, b - side + half, (b - a).normalized())
 		wall_arcs.append(s_from_u_local(ua))
 	var mesh := MeshInstance3D.new()
 	mesh.name = "PitWall"
@@ -435,7 +453,7 @@ func _build_shared_paddock() -> void:
 	for side: float in [-1.0, 1.0]:
 		var previous := Vector3.ZERO
 		var connected: bool = false
-		for index: int in range(49):
+		for index: int in range(ceili((LANE_LENGTH_M + 100.0) / 5.0) + 1):
 			var u: float = -40.0 + float(index) * 5.0
 			# Keep entry and exit merge corridors open; the pit-side fence follows only the wall.
 			if side > 0.0 and (u < WALL_START_U or u > LANE_LENGTH_M):
@@ -453,6 +471,124 @@ func _build_shared_paddock() -> void:
 	catch_fence.name = "CatchFence"
 	catch_fence.mesh = fence.commit()
 	add_child(catch_fence)
+
+
+func _build_pit_lighting() -> void:
+	var lighting := Node3D.new()
+	lighting.name = "PitLighting"
+	add_child(lighting)
+	var fixtures: Array[Transform3D] = []
+	var strips: Array[Transform3D] = []
+	var floors: Array[Transform3D] = []
+	var apron_fixtures: Array[Transform3D] = []
+	var apron_strips: Array[Transform3D] = []
+	for stall: Dictionary in stalls:
+		var u: float = float(stall["u"])
+		var floor_pose: Transform3D = get_pit_transform(u, GARAGE_FRONT_M + GARAGE_DEPTH_M * 0.5)
+		floor_pose.origin += Vector3.UP * -0.025
+		floors.append(floor_pose)
+		var apron_pose: Transform3D = get_pit_transform(u, 14.4)
+		apron_pose.origin += Vector3.UP * 4.55
+		apron_fixtures.append(apron_pose)
+		apron_pose.origin -= Vector3.UP * 0.11
+		apron_strips.append(apron_pose)
+		var task := SpotLight3D.new()
+		task.name = "ApronLight%d" % int(stall["index"])
+		var task_origin: Vector3 = _at(u, 14.4, 4.45)
+		task.transform = Transform3D(Basis.looking_at(_at(u, BOX_LATERAL_M, 0.0) - task_origin, Vector3.UP), task_origin)
+		task.light_color = Color("#e4edff")
+		task.light_energy = 10.0
+		task.spot_range = 16.0
+		task.spot_angle = 65.0
+		task.shadow_enabled = false
+		task.set_meta(&"no_shadow", true)
+		lighting.add_child(task)
+		for lateral: float in [18.0, 22.0]:
+			var pose: Transform3D = get_pit_transform(u, lateral)
+			pose.origin += Vector3.UP * 4.1
+			fixtures.append(pose)
+			pose.origin -= Vector3.UP * 0.11
+			strips.append(pose)
+	_instanced_boxes(lighting, "CeilingHousings", Vector3(0.38, 0.18, 9.6), fixtures, ToonMaterials.make(Color("#222b3a")))
+	var led: StandardMaterial3D = ToonMaterials.emissive(Color("#e6f2ff"), 2.4)
+	led.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_instanced_boxes(lighting, "CeilingLEDs", Vector3(0.18, 0.04, 9.2), strips, led)
+	_instanced_boxes(lighting, "ApronHousings", Vector3(0.5, 0.18, 7.6), apron_fixtures, ToonMaterials.make(Color("#222b3a")))
+	_instanced_boxes(lighting, "ApronLEDs", Vector3(0.35, 0.04, 7.2), apron_strips, led)
+	_instanced_boxes(lighting, "GarageFloors", Vector3(GARAGE_DEPTH_M, 0.08, GARAGE_WIDTH_M), floors, ToonMaterials.make(Color("#515a69")))
+	# One broad, shadowless fill serves two bays; ceiling strips supply the visible light source.
+	for pair: int in range(STALL_COUNT / 2):
+		var fill := OmniLight3D.new()
+		fill.name = "GarageFill%d" % pair
+		fill.position = _at(STALL_FIRST_OFFSET_M + (float(pair) * 2.0 + 0.5) * STALL_PITCH_M, 18.0, 3.8)
+		fill.light_color = Color("#d5e5ff")
+		fill.light_energy = 8.0
+		fill.omni_range = 17.0
+		fill.omni_attenuation = 1.5
+		fill.shadow_enabled = false
+		fill.set_meta(&"no_shadow", true)
+		lighting.add_child(fill)
+	for u: float in [18.0, 42.0]:
+		var light := SpotLight3D.new()
+		light.name = "EntryLight%d" % int(u)
+		var origin: Vector3 = _at(u, 13.0, 6.0)
+		light.transform = Transform3D(Basis.looking_at(_at(u + 3.0, FAST_LANE_M, 0.0) - origin, Vector3.UP), origin)
+		light.light_color = Color("#d5e5ff")
+		light.light_energy = 2.5
+		light.spot_range = 20.0
+		light.spot_angle = 65.0
+		light.shadow_enabled = false
+		light.set_meta(&"no_shadow", true)
+		lighting.add_child(light)
+
+
+func _instanced_boxes(parent: Node3D, node_name: String, size: Vector3, poses: Array[Transform3D], material: Material) -> void:
+	var mesh := BoxMesh.new()
+	mesh.size = size
+	var batch := MultiMesh.new()
+	batch.transform_format = MultiMesh.TRANSFORM_3D
+	batch.mesh = mesh
+	batch.instance_count = poses.size()
+	for index: int in range(poses.size()):
+		batch.set_instance_transform(index, poses[index])
+	var instance := MultiMeshInstance3D.new()
+	instance.name = node_name
+	instance.multimesh = batch
+	instance.material_override = material
+	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	parent.add_child(instance)
+
+
+func _build_entry_sign() -> void:
+	var batch := MeshBatchScript.new()
+	var material: Material = ToonMaterials.vertex_colored(false)
+	for u: float in [18.0, 42.0]:
+		var pole: Transform3D = get_pit_transform(u, 13.0)
+		pole.origin += Vector3.UP * 3.0
+		batch.box(material, Color("#3d4a5e"), pole, Vector3(0.2, 6.0, 0.2))
+		pole.origin += Vector3.UP * 3.0 - pole.basis.x * 2.2
+		batch.box(material, Color("#e6f2ff"), pole, Vector3(4.6, 0.12, 0.35))
+	var sign_pose: Transform3D = get_pit_transform(6.0, 13.0)
+	sign_pose.origin += Vector3.UP * 3.0
+	batch.box(material, Color("#3d4a5e"), sign_pose, Vector3(0.22, 6.0, 0.22))
+	var board: Transform3D = get_pit_transform(6.0, FAST_LANE_M)
+	board.origin += Vector3.UP * 5.6
+	batch.box(material, Color("#123b32"), board, Vector3(5.4, 1.4, 0.22))
+	batch.strut(material, Color("#3d4a5e"), _at(6.0, 13.0, 5.9), _at(6.0, FAST_LANE_M, 5.9), 0.16)
+	var structure := MeshInstance3D.new()
+	structure.name = "PitEntryFixtures"
+	structure.mesh = batch.commit()
+	add_child(structure)
+	var sign := Label3D.new()
+	sign.name = "PitEntrySign"
+	sign.text = "PIT  //  80"
+	sign.font = preload("res://assets/fonts/BarlowCondensed.ttf")
+	sign.font_size = 64
+	sign.outline_size = 6
+	sign.pixel_size = 0.01
+	sign.transform = board
+	sign.position += board.basis.z * 0.13
+	add_child(sign)
 
 
 func _build_triggers() -> void:

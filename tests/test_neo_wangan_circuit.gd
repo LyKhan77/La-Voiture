@@ -49,6 +49,7 @@ func _run() -> void:
 	_test_elevation()
 	_test_road_surface()
 	_test_pit_connection()
+	_test_pit_polish()
 	_test_urban_set()
 	await _test_ground_clearance()
 	_test_apex_preserved()
@@ -154,7 +155,7 @@ func _test_pit_connection() -> void:
 	var entry_lateral: float = float(entry.get_meta(&"lateral_m", 0.0)) if entry != null else 0.0
 	var exit_s: float = float(exit.get_meta(&"arc_s", -1.0)) if exit != null else -1.0
 	var lane_length: float = fposmod(exit_s - entry_s, ribbon.length_m)
-	check(entry != null and exit != null and absf(entry_s - (ribbon.length_m - 75.0)) <= 0.5 \
+	check(entry != null and exit != null and absf(entry_s - (ribbon.length_m - 135.0)) <= 0.5 \
 			and absf(entry_lateral - 5.2) < 0.001 and absf(lane_length - PitScript.LANE_LENGTH_M) < 0.5,
 		"#W10 Pit Entry sits %.0f m before the line at +%.1f m on the right, and the lane runs %.1f m to Pit Exit" % [ribbon.length_m - entry_s, entry_lateral, lane_length])
 
@@ -203,6 +204,62 @@ func _test_pit_connection() -> void:
 		"#W14 an 80 m solid blend line guards a 65 m bypass ramp that rejoins %.0f m past Turn 1's %.0f m apex" % [merge_s - t1_apex, t1_apex])
 	check(is_equal_approx(PitScript.SPEED_LIMIT_MPS, 80.0 / 3.6) and pit.sim_layout()["entry_s"] == PitScript.ENTRY_S,
 		"#W15 the lane is limited to 80 km/h and hands the sim its own entry, exit and lateral layout")
+
+
+func _test_pit_polish() -> void:
+	var pit: Node3D = circuit.get_node("PitLane")
+	var first_u: float = float(pit.stalls[0]["u"])
+	check(first_u >= 60.0 and first_u - PitScript.ENTRY_BLEND_M - 18.0 >= 24.0 and is_equal_approx(float(pit.stalls[0]["s"]), 3083.0),
+		"#W41 first stall has at least 24 m of straight fast lane after entry blend and before pull-in; existing garages stay at s=3083 m")
+	var apron: bool = true
+	for stall: Dictionary in pit.stalls:
+		apron = apron and pit._surface_right(float(stall["u"])) >= PitScript.BOX_LATERAL_M + 1.2
+	check(apron, "#W42 asphalt working apron supports the full width of a car at every team box")
+	var lighting: Node3D = pit.get_node_or_null("PitLighting")
+	var fills: Array = lighting.find_children("*", "OmniLight3D", true, false) if lighting != null else []
+	var covered: bool = fills.size() == 5
+	for garage: Node3D in pit.garages:
+		var floor_center: Vector3 = garage.position + garage.basis.x * 4.5
+		var lit: bool = false
+		for fill: OmniLight3D in fills:
+			lit = lit or (fill.position.distance_to(floor_center) < fill.omni_range * 0.9 and fill.light_energy > 1.0 and not fill.shadow_enabled and bool(fill.get_meta(&"no_shadow", false)))
+		covered = covered and lit
+	check(covered, "#W43 five shadowless garage fill lights cover all ten garage floors and crew work areas")
+	var leds: MultiMeshInstance3D = lighting.get_node_or_null("CeilingLEDs") if lighting != null else null
+	var floors: MultiMeshInstance3D = lighting.get_node_or_null("GarageFloors") if lighting != null else null
+	var entries: Array = lighting.find_children("EntryLight*", "SpotLight3D", true, false) if lighting != null else []
+	check(leds != null and leds.multimesh.instance_count == 20 and floors != null and floors.multimesh.instance_count == 10 and entries.size() == 2 and pit.has_node("PitEntrySign"),
+		"#W44 instanced ceiling strips, garage floors, two entry lights and an 80 km/h entry sign complete the lit pit approach")
+	var environment: Node3D = circuit.get_node("Environment")
+	check(is_equal_approx(PitScript.ENTRY_S, 3015.0) and environment._in_pit_gap(PitScript.ENTRY_S - 10.0),
+		"#W45 roadside barriers and streetlights leave the extended pit entry mouth clear")
+	var apron_lights: Array = lighting.find_children("ApronLight*", "SpotLight3D", true, false) if lighting != null else []
+	var apron_lit: bool = apron_lights.size() == 10
+	for light: SpotLight3D in apron_lights:
+		apron_lit = apron_lit and light.position.y >= 4.0 and light.light_energy >= 6.0 and not light.shadow_enabled and bool(light.get_meta(&"no_shadow", false))
+	check(apron_lit and lighting.has_node("ApronLEDs"), "#W47 each service box has a shadowless canopy task light above car and crew, separate from garage interior fill")
+	var wall: MeshInstance3D = pit.get_node("PitWall")
+	var anchors: Array[Vector3] = []
+	for arc: float in pit.wall_arcs:
+		anchors.append(ribbon.get_point_at_offset(arc, PitScript.PIT_WALL_M).origin)
+	anchors.append(pit.get_pit_transform(PitScript.LANE_LENGTH_M, PitScript.PIT_WALL_M).origin)
+	var min_y: float = INF
+	var max_y: float = -INF
+	for surface: int in range(wall.mesh.get_surface_count()):
+		var vertices: PackedVector3Array = wall.mesh.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]
+		for vertex: Vector3 in vertices:
+			var nearest: Vector3 = anchors[0]
+			var distance_squared: float = INF
+			for anchor: Vector3 in anchors:
+				var delta: Vector3 = vertex - anchor
+				var horizontal: float = delta.x * delta.x + delta.z * delta.z
+				if horizontal < distance_squared:
+					distance_squared = horizontal
+					nearest = anchor
+			min_y = minf(min_y, vertex.y - nearest.y)
+			max_y = maxf(max_y, vertex.y - nearest.y)
+	check(min_y >= -0.001 and absf(max_y - PitScript.WALL_HEIGHT_M) < 0.01,
+		"#W48 extended pit wall stands on the surface with the full 1.2 m visible height, not half buried below it (%.3f to %.3f m)" % [min_y, max_y])
 
 
 ## Task 4: the night set — MultiMesh street furniture, the 180 m underpass, the harbor and the
@@ -287,7 +344,7 @@ func _test_race_weekend_integration() -> void:
 		and is_equal_approx(world.road_width_m, 11.5) \
 		and world.actors.size() == 20 \
 		and world.pit_lane.has_method("sim_layout") \
-		and is_equal_approx(float(world.race.pit_layout["entry_s"]), 3075.0) \
+		and is_equal_approx(float(world.race.pit_layout["entry_s"]), 3015.0) \
 		and is_equal_approx(float(world.race.pit_layout["stall_pitch_m"]), 12.0)
 	check(integrated,
 		"#W21 a Neo-Wangan race weekend loads the street scene: %.0f m ribbon, %.1f m wide, %d cars, and the sim pits on the street layout" % [world.ribbon.length_m, world.road_width_m, world.actors.size()])
@@ -317,16 +374,32 @@ func _test_race_weekend_integration() -> void:
 	# just for the geometry test. The sim runs every tick, so no frames are needed.
 	world.race.incidents_enabled = false
 	var target = world.race.cars[0]
+	for car: GtCar in world.race.cars:
+		if world.race.stall_index_for_team(car.team_id) == 0:
+			target = car
+			break
 	var stops_before: int = target.stops
 	var requested: bool = world.request_pit(target.id)
 	var guard: int = 0
+	var straight_samples: int = 0
+	var straight_centered: bool = true
+	var on_pavement: bool = true
 	while not world.race.is_finished() and guard < 20000:
 		world.race.step()
 		guard += 1
+		if target.pit != null:
+			var u: float = target.s - target.pit.start_s
+			if target.pit.phase == GtTypes.PitPhase.IN and u >= 30.0 and u <= 45.0:
+				straight_samples += 1
+				straight_centered = straight_centered and absf(target.lateral - PitScript.FAST_LANE_M) < 0.4
+			if u >= 25.0 and u <= PitScript.LANE_LENGTH_M:
+				on_pavement = on_pavement and target.lateral + 1.0 <= world.pit_lane._surface_right(u) + 0.05
 	var winner = world.race.standings()[0]
 	check(requested and world.race.is_finished() and target.stops > stops_before and target.finished_at >= 0.0 and winner.lap >= 3,
 		"#W25 a three-lap street race runs to the flag (%d cars finished, %d sim ticks), and a car that boxes is serviced in the 10-stall lane (%d stops)" % [
 			_count_finished(world.race), guard, target.stops - stops_before])
+	check(straight_samples >= 8 and straight_centered and on_pavement,
+		"#W46 first-team car completes a centered straight run after entry before turning to its box, with both tyres supported by pit asphalt (%d samples)" % straight_samples)
 
 	world.queue_free()
 	ConfigScript.reset()

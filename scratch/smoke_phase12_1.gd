@@ -25,6 +25,12 @@ func _run() -> void:
 	world = World.instantiate()
 	root.add_child(world)
 	world.race.incidents_enabled = false
+	var pit_car: GtCar = world.race.cars[0]
+	for car: GtCar in world.race.cars:
+		if world.race.stall_index_for_team(car.team_id) == 0:
+			pit_car = car
+			break
+	var pit_requested: bool = world.request_pit(pit_car.id)
 	world.finish_grid_intro()
 	while not world.director.is_racing():
 		await process_frame
@@ -56,7 +62,8 @@ func _run() -> void:
 		if car.finished_at >= 0.0:
 			finishers += 1
 	print("PHASE12_SMOKE finished=%s finishers=%d cars=%d laps=3 orphans_in_race=%d" % [world.race.is_finished(), finishers, world.actors.size(), int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT))])
-	var finished: bool = world.race.is_finished() and finishers == 20
+	print("PHASE12_PIT first_stall_car=%d requested=%s service_stops=%d" % [pit_car.id, pit_requested, pit_car.stops])
+	var finished: bool = world.race.is_finished() and finishers == 20 and pit_requested and pit_car.stops > 0
 	world.queue_free()
 	for frame: int in range(6):
 		await process_frame

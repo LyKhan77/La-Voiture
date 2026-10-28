@@ -20,6 +20,7 @@ const SkylineShader := preload("res://shaders/neo_wangan_skyline.gdshader")
 const PoolShader := preload("res://shaders/neo_wangan_light_pool.gdshader")
 const Liveries := preload("res://scripts/car/team_liveries.gd")
 const TracksideKit := preload("res://scripts/world/trackside_furniture_builder.gd")
+const PitKit := preload("res://scripts/world/neo_wangan_pit_complex.gd")
 const MODEL_DIR := "res://assets/tracks/neo_wangan/models/"
 
 const BARRIER_LATERAL_M: float = 6.35
@@ -296,8 +297,8 @@ func _build_barriers() -> void:
 
 ## The right-hand barrier stops for the pit entry and starts again after the pit exit merge.
 func _in_pit_gap(s: float) -> bool:
-	var from: float = 3050.0
-	var until: float = 150.0
+	var from: float = PitKit.ENTRY_S - 25.0
+	var until: float = PitKit.BYPASS_MERGE_S + 5.0
 	return fposmod(s - from, ribbon.length_m) <= fposmod(until - from, ribbon.length_m)
 
 
