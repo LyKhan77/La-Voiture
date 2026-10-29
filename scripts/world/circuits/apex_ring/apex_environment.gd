@@ -1,5 +1,5 @@
 class_name ApexEnvironment
-extends Node3D
+extends "res://scripts/world/circuits/base/circuit_environment.gd"
 
 ## Hybrid procedural trackside set for the race weekend (FASE 5.5, upgraded in FASE 10), all
 ## generated from the ribbon without touching its spline: 3D sawtooth kerbs, tarmac runoff and
@@ -8,18 +8,15 @@ extends Node3D
 ## anime trees and the time-of-day lighting. Everything is flat-shaded with the cel shaders and
 ## instanced through MultiMeshes where it repeats.
 
-const TrackRibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const AdaptiveLineScript := preload("res://scripts/car/adaptive_racing_line.gd")
 const PitLaneScript := preload("res://scripts/world/circuits/apex_ring/apex_pit_complex.gd")
 const PitZoneScript := preload("res://scripts/world/shared/pit_zone.gd")
 const ToonMaterials := preload("res://scripts/world/shared/toon_materials.gd")
 const RibbonGeometry := preload("res://scripts/world/shared/ribbon_geometry.gd")
 const SurfaceGeometry := preload("res://scripts/world/shared/enhanced_track_geometry.gd")
-const FurnitureScript := preload("res://scripts/world/shared/trackside_furniture_builder.gd")
 const PitBuildingScript := preload("res://scripts/world/paddock/pit_building.gd")
 const GrandstandScript := preload("res://scripts/world/paddock/main_grandstand.gd")
 const ControlTowerScript := preload("res://scripts/world/paddock/race_control_tower.gd")
-const Liveries := preload("res://scripts/car/team_liveries.gd")
 const PitBuildingScene := preload("res://scenes/race_world/paddock/pit_building_structure.tscn")
 const GrandstandScene := preload("res://scenes/race_world/paddock/main_grandstand.tscn")
 const ControlTowerScene := preload("res://scenes/race_world/paddock/race_control_tower.tscn")
@@ -46,10 +43,6 @@ const PIT_TOWER_LATERAL_M: float = 36.0
 const GRANDSTAND_TOWER_LATERAL_M: float = GrandstandScript.FRONT_X_M + GrandstandScript.DEPTH_M + 8.0
 const CONTROL_TOWER_TOWER_LATERAL_M: float = 40.0
 const CONTROL_TOWER_CLEAR_S_M: float = 16.0
-## The Jumbotron leaderboard repaints this often (seconds).
-const LEADERBOARD_REFRESH_S: float = 0.5
-## Bar length of a leaderboard row drops by this much per position behind the leader.
-const LEADERBOARD_STEP: float = 0.08
 
 ## Trees keep this far clear (arc margin, then lateral depth) of the landmark buildings.
 const FOLIAGE_PIT_MARGIN_M: float = 60.0
@@ -61,7 +54,6 @@ const WHITE := SurfaceGeometry.KERB_WHITE
 const POST_COLOR := Color("#5c6270")
 const GRASS_COLOR := Color("#4f9a45")
 
-var ribbon: TrackRibbonScript
 var line: AdaptiveLineScript
 
 ## One entry per kerb: {s0, s1, side}. side is the lateral sign of the inside of the corner.
@@ -82,7 +74,6 @@ var fence_post_arcs: PackedFloat32Array = PackedFloat32Array()
 var tree_count: int = 0
 var kerb_inner_m: float = 5.5
 ## Armco, Tecpro, braking boards and floodlight towers (see TracksideFurnitureBuilder).
-var furniture: FurnitureScript
 ## The pit building, main grandstand and race control tower, each instanced from its own scene.
 var paddock: Node3D
 var grandstand: GrandstandScript
@@ -93,13 +84,18 @@ var lighting: LightingScript
 ## Cel Sun/Moon disc and wind-driven clouds shared with every circuit; the vista keeps the only starfield.
 var sky_controller: SharedSkyScript
 var sky_ambience_root: Node3D
+var _wind_kph: float = 0.0
 
-var _leaderboard_clock: float = LEADERBOARD_REFRESH_S
+
+func _init() -> void:
+	circuit_id = "apex_ring"
+	_leaderboard_clock = LEADERBOARD_PERIOD_S
 
 
-func build(p_ribbon: TrackRibbonScript, p_line: AdaptiveLineScript) -> void:
+func build(p_ribbon: TrackRibbonScript, p_line: Variant = null) -> void:
 	ribbon = p_ribbon
-	line = p_line
+	line = p_line as AdaptiveLineScript
+	built = true
 	kerb_inner_m = ribbon.road_half_width_m - SurfaceGeometry.KERB_INSET_M
 	_paint_ground()
 	_build_kerbs()
@@ -233,30 +229,31 @@ func _build_paddock() -> void:
 
 
 ## Per-frame upkeep: the Jumbotron leaderboard and the time-of-day lighting follow the race.
-func update(delta: float, race: GtRace) -> void:
-	_update_leaderboard(delta, race)
+func update(delta: float, race) -> void:
+	_feed_leaderboards(delta, race, [grandstand.jumbotron] if grandstand != null else [])
 	var weather: GtWeather = race.weather
 	var gloom: float = maxf(clampf(sqrt(weather.rain_intensity), 0.0, 1.0), weather.track_water_pct / 100.0)
 	if lighting != null:
+		_wind_kph = weather.wind_speed
 		lighting.apply(weather.time_of_day, gloom, weather.wind_speed, delta)
 	if sky_controller != null:
 		sky_controller.apply_wind(delta, weather.wind_speed)
 		sky_controller.apply_time_of_day(weather.time_of_day, gloom)
 
 
-## Repaints the Jumbotron from the live standings a couple of times a second.
-func _update_leaderboard(delta: float, race: GtRace) -> void:
-	_leaderboard_clock += delta
-	if _leaderboard_clock < LEADERBOARD_REFRESH_S or grandstand == null:
-		return
-	_leaderboard_clock = 0.0
-	var colors: Array[Color] = []
-	var values: Array[float] = []
-	var order: Array[GtCar] = race.standings()
-	for row: int in range(mini(order.size(), grandstand.jumbotron.ROWS)):
-		colors.append(Liveries.color_for(order[row].team_id))
-		values.append(1.0 - LEADERBOARD_STEP * float(row))
-	grandstand.jumbotron.set_leaderboard(colors, values)
+## DAY / SUNSET / NIGHT now, for the sky and the lighting rig (update() does the same every frame with the weather's time of day).
+func apply_time_of_day(tod: Dictionary, gloom: float = 0.0) -> void:
+	if sky_controller != null:
+		sky_controller.apply_time_of_day(tod, gloom)
+	if lighting != null:
+		lighting.apply(tod, gloom, _wind_kph, 0.0)
+
+
+func apply_wind(delta: float, wind_kph: float, _wind_dir: float) -> void:
+	_wind_kph = wind_kph
+	if sky_controller != null:
+		sky_controller.apply_wind(delta, wind_kph)
+
 
 
 ## Tall translucent fence behind the guardrail on the outside of each sharp corner, as two MultiMeshes.

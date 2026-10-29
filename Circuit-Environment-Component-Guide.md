@@ -60,7 +60,7 @@ Setiap sirkuit adalah modul sendiri; kode bersama tidak boleh dipinjam dari sirk
 ```
 scripts/world/
 ├── circuits/
-│   ├── base/circuit_pit_complex.gd     # kelas dasar kontrak pit (CircuitPitComplex)
+│   ├── base/      circuit_pit_complex.gd (kontrak pit), circuit_environment.gd (kontrak environment)
 │   ├── apex_ring/    apex_pit_complex.gd, apex_environment.gd
 │   ├── neo_wangan/   neo_wangan_circuit_builder.gd, neo_wangan_environment.gd, neo_wangan_pit_complex.gd
 │   └── brianza/      brianza_circuit_builder.gd, brianza_environment.gd, brianza_pit_complex.gd,
@@ -77,9 +77,10 @@ scenes/race_world/circuits/<id>/        # <id>_circuit.tscn dan scene pit sirkui
 Aturan:
 1. Nama berkas `<id>_<peran>.gd` dan kelas `<Id><Peran>` (`BrianzaPitComplex`, `ApexEnvironment`); folder `<id>` sama dengan id di `CircuitCalendarRegistry`.
 2. Kompleks pit **mewarisi `CircuitPitComplex`**: isi `stalls` dan `garages` saat `build(ribbon, team_ids)` (box i melayani `stalls[i]["team"]`, garasi i berdiri di box i), isi `team_count`, `garage_front_m`, `stall_lane_m` di `_init()`, dan override hanya `_on_teams_assigned()` (segarkan fascia, kru, papan nama, transporter), `crew_spot()` bila garasi tidak standar, serta `sim_layout()` bila lane berbeda dari default Apex. Pencarian box, garasi, dan titik parkir (`stall_index_for_team`, `garage_for_team`, `stall_transform`) sudah ada di kelas dasar dan tidak ditulis ulang.
+2b. Environment sirkuit **mewarisi `CircuitEnvironment`**: override `build(ribbon, source)` (set `built`), `bind_world()`, `update(delta, race)`, `apply_time_of_day(tod, gloom)` (kamus waktu dari `GtWeather.compute_time_of_day`), `apply_wind()`, `ground_y_at()` bila ada medan, dan `_extra_stats()`; isi `circuit_id` di `_init()`. Kelas dasar menyediakan `stats()` (`circuit_id`, `built`, `draw_calls`, `triangles`, `multimeshes`; ukuran statis tanpa bergantung kamera), `measure()`, dan `_feed_leaderboards()` untuk jumbotron. `furniture` (panel bendera LED) boleh null bila sirkuit tidak punya.
 3. Fungsi gambar yang identik di semua sirkuit (`PitKit`: aspal, susunan kru, cat dan nomor box, perlengkapan garasi) dipakai dari `scripts/world/shared/pit_kit.gd`, bukan dari Apex.
 4. `RaceWeekendWorld` memasang tim lewat `pit_lane.seat_teams(ribbon, active_teams)` untuk semua sirkuit; jangan menambah cabang per sirkuit di orkestrator.
-5. Sirkuit baru wajib lulus `tests/test_pit_complex_contract.gd`, `test_pit_team_assignment_contract.gd`, `test_team_signage_contract.gd`, dan `test_team_identity_consistency.gd` (tambahkan id-nya ke daftar `CIRCUITS` tes-tes itu).
+5. Sirkuit baru wajib lulus `tests/test_pit_complex_contract.gd`, `test_circuit_environment_contract.gd`, `test_pit_team_assignment_contract.gd`, `test_team_signage_contract.gd`, dan `test_team_identity_consistency.gd` (tambahkan id-nya ke daftar `CIRCUITS` tes-tes itu).
 
 ## 3. Alur Kerja Standar Pembuatan Map Sirkuit Baru (Step-by-Step Workflow)
 

@@ -1,5 +1,5 @@
 class_name BrianzaEnvironment
-extends Node3D
+extends "res://scripts/world/circuits/base/circuit_environment.gd"
 
 ## Autodromo di Brianza Environment (FASE 13): 2-Tier Architecture combining Tier A Reusable
 ## Core Kit (Trackside Furniture, Kerbs, Runoff, Gravel, Rubber Groove, Shared Cel Skybox) with
@@ -11,7 +11,6 @@ extends Node3D
 const RibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const AdaptiveLineScript := preload("res://scripts/car/adaptive_racing_line.gd")
 const CircuitBuilderScript := preload("res://scripts/world/circuits/brianza/brianza_circuit_builder.gd")
-const FurnitureScript := preload("res://scripts/world/shared/trackside_furniture_builder.gd")
 const PitZoneScript := preload("res://scripts/world/shared/pit_zone.gd")
 const SurfaceGeometry := preload("res://scripts/world/shared/enhanced_track_geometry.gd")
 const SharedSkyScript := preload("res://scripts/world/shared/shared_cel_sky_controller.gd")
@@ -19,7 +18,6 @@ const ToonMaterials := preload("res://scripts/world/shared/toon_materials.gd")
 const MeshBatchScript := preload("res://scripts/world/shared/mesh_batch.gd")
 const WeatherScript := preload("res://scripts/gt/gt_weather.gd")
 const JumbotronScript := preload("res://scripts/world/paddock/jumbotron.gd")
-const Liveries := preload("res://scripts/car/team_liveries.gd")
 
 const SERRAGLIO_OVERPASS_S: float = 3450.0
 const ASCARI_TOWER_S: float = 4150.0
@@ -81,7 +79,6 @@ const CORNER_TIER_RISE_M: float = 2.4
 const CORNER_CROWD_STEP_M: float = 1.8
 const CROWD_SHIRTS: Array[Color] = [Color("#d9232e"), Color("#f0f2f5"), Color("#2f8f46"), Color("#ffd400"), Color("#2b5fb8"), Color("#22262e")]
 ## The Jumbotrons repaint from the live standings this often (seconds).
-const JUMBOTRON_PERIOD_S: float = 0.5
 
 const KERB_CURVATURE: float = 0.006
 const KERB_MIN_LENGTH_M: float = 14.0
@@ -108,14 +105,11 @@ const PARK_WALL_CAP := Color("#d4d0c7")
 const PARK_WALL_HEIGHT_M: float = 3.2
 const PARK_WALL_MARGIN_M: float = 380.0
 
-var ribbon: RibbonScript
 var builder: CircuitBuilderScript
 var line: AdaptiveLineScript
-var furniture: FurnitureScript
 var shared_sky: SharedSkyScript
 var sopraelevata: Node3D
 var tree_multimeshes: Array[MultiMeshInstance3D] = []
-var built: bool = false
 var kerbs: Array[Dictionary] = []
 var runoff_plans: Array[Dictionary] = []
 var ground_root: Node3D
@@ -143,7 +137,6 @@ var _current_tod: Dictionary = {"mode": 0, "floodlights": 0.0, "stars_opacity": 
 var _current_gloom: float = 0.0
 var _ascari_screen: Jumbotron
 var _main_screen: Jumbotron
-var _jumbotron_clock: float = 0.0
 
 var _track_pos: PackedVector3Array = PackedVector3Array()
 var _track_centre: Vector2 = Vector2.ZERO
@@ -154,12 +147,16 @@ var _field_rows: int = 0
 var _field_y: PackedFloat32Array = PackedFloat32Array()
 
 
-func build(p_ribbon: RibbonScript, p_builder: CircuitBuilderScript) -> void:
+func _init() -> void:
+	circuit_id = "brianza"
+
+
+func build(p_ribbon: TrackRibbonScript, p_builder: Variant = null) -> void:
 	if built:
 		return
 	built = true
 	ribbon = p_ribbon
-	builder = p_builder
+	builder = p_builder as CircuitBuilderScript
 	_pit_zone = PitZoneScript.from_layout(p_builder.get_node("PitLane").call("sim_layout"), ribbon.length_m)
 	_ground_platforms = p_builder.get_node("PitLane").call("ground_platforms")
 	line = AdaptiveLineScript.new(ribbon)
@@ -203,7 +200,7 @@ func update(delta: float, race) -> void:
 		var tod = weather.time_of_day if "time_of_day" in weather else {}
 		if tod is Dictionary and not tod.is_empty():
 			apply_time_of_day(tod, gloom)
-	_feed_jumbotrons(delta, race)
+	_feed_leaderboards(delta, race, _screens())
 
 
 ## The Ascari screen plus the pit complex's main-stand screen (looked up once, then cached).
@@ -217,26 +214,8 @@ func _screens() -> Array[Jumbotron]:
 	return screens
 
 
-## Both screens (main stand + Ascari) show the live order, leader first.
-func _feed_jumbotrons(delta: float, race) -> void:
-	_jumbotron_clock += delta
-	if race == null or _jumbotron_clock < JUMBOTRON_PERIOD_S:
-		return
-	_jumbotron_clock = 0.0
-	var screens: Array[Jumbotron] = _screens()
-	if screens.is_empty():
-		return
-	var colors: Array[Color] = []
-	var values: Array[float] = []
-	var order: Array = race.standings()
-	for row: int in range(mini(order.size(), Jumbotron.ROWS)):
-		colors.append(Liveries.color_for(order[row].team_id))
-		values.append(1.0 - 0.08 * float(row))
-	for screen: Jumbotron in screens:
-		screen.set_leaderboard(colors, values)
 
-
-func apply_time_of_day(tod, gloom: float = 0.0) -> void:
+func apply_time_of_day(tod: Dictionary, gloom: float = 0.0) -> void:
 	_current_tod = tod
 	_current_gloom = gloom
 	if shared_sky != null:
@@ -337,11 +316,9 @@ func _build_layer6_vista_ring() -> void:
 	add_child(vista_ring)
 
 
-func stats() -> Dictionary:
+func _extra_stats() -> Dictionary:
 	return {
-		"circuit_id": "brianza",
 		"length_m": ribbon.curve.get_baked_length() if ribbon != null and ribbon.curve != null else 0.0,
-		"built": built,
 		"sopraelevata_active": sopraelevata != null,
 		"tree_batches": tree_multimeshes.size(),
 	}

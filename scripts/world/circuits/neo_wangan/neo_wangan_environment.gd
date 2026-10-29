@@ -1,5 +1,5 @@
 class_name NeoWanganEnvironment
-extends Node3D
+extends "res://scripts/world/circuits/base/circuit_environment.gd"
 
 ## Neo-Wangan six-layer environment (FASE 12.1). TrackRibbon owns the road spine; UrbanIslandRoot
 ## owns continuous civil ground and cut-and-cover roof mass. PitLane owns the shared FIA kit.
@@ -24,7 +24,6 @@ const BillboardShader := preload("res://shaders/neo_wangan_billboard.gdshader")
 const WindBannerShader := preload("res://shaders/neo_wangan_wind_banner.gdshader")
 const SharedSkyScript := preload("res://scripts/world/shared/shared_cel_sky_controller.gd")
 const WeatherScript := preload("res://scripts/gt/gt_weather.gd")
-const Liveries := preload("res://scripts/car/team_liveries.gd")
 const TracksideKit := preload("res://scripts/world/shared/trackside_furniture_builder.gd")
 const PitKit := preload("res://scripts/world/circuits/neo_wangan/neo_wangan_pit_complex.gd")
 const MODEL_DIR := "res://assets/tracks/neo_wangan/models/"
@@ -85,15 +84,15 @@ const WATER_COLOR := Color("#07121e")
 const METAL := Color("#3c4250")
 const LAMP_HEAD := Color("#fff0c8")
 
-var ribbon: RibbonScript
 var circuit
+
+
+func _init() -> void:
+	circuit_id = "neo_wangan"
+
 ## RaceWeekendWorld reads this for its digital flag panels; the street circuit has none.
-var furniture: Node = null
 
 ## Render budget of the whole set, filled by measure().
-var draw_calls: int = 0
-var triangle_count: int = 0
-var multimesh_count: int = 0
 
 var barrier_instance: MultiMeshInstance3D
 var streetlight_instance: MultiMeshInstance3D
@@ -131,7 +130,6 @@ var _current_gloom: float = 0.0
 ## Live wind from race.weather, in km/h; the ambience (clouds, water, banners) follows it.
 var current_wind_kph: float = 12.0
 var _clock_s: float = 0.0
-var _leaderboard_clock: float = 0.0
 var _jumbotron: Jumbotron
 var urban_island_root: Node3D
 var hero_landmarks_root: Node3D
@@ -144,7 +142,7 @@ var bridge_pier_poses: Array[Transform3D] = []
 
 
 ## Builds the whole set against the circuit's ribbon and its authored spans.
-func build(p_ribbon: RibbonScript, p_circuit) -> void:
+func build(p_ribbon: TrackRibbonScript, p_circuit: Variant = null) -> void:
 	ribbon = p_ribbon
 	circuit = p_circuit
 	_jumbotron = get_parent().get_node_or_null("PitLane/MainGrandstand/Jumbotron") as Jumbotron
@@ -167,6 +165,7 @@ func build(p_ribbon: RibbonScript, p_circuit) -> void:
 	_build_sky_ambience()
 	_build_wind_banners()
 	apply_time_of_day(_current_tod, _current_gloom)
+	built = true
 	measure()
 
 
@@ -196,22 +195,13 @@ func update(delta: float, race) -> void:
 			tod = weather.time_of_day
 		gloom = maxf(clampf(sqrt(weather.rain_intensity), 0.0, 1.0), weather.track_water_pct / 100.0)
 	apply_time_of_day(tod, gloom)
-	apply_wind_ambience(delta, wind_kph, wind_dir)
-	_leaderboard_clock += delta
-	if race != null and _jumbotron != null and _leaderboard_clock >= 0.5:
-		_leaderboard_clock = 0.0
-		var colors: Array[Color] = []
-		var values: Array[float] = []
-		var order: Array[GtCar] = race.standings()
-		for row: int in range(mini(order.size(), _jumbotron.ROWS)):
-			colors.append(Liveries.color_for(order[row].team_id))
-			values.append(1.0 - 0.08 * float(row))
-		_jumbotron.set_leaderboard(colors, values)
+	apply_wind(delta, wind_kph, wind_dir)
+	_feed_leaderboards(delta, race, [_jumbotron] if _jumbotron != null else [])
 
 
 ## Wind drives the whole ambience: bay ripples and banner flutter read the uniforms, the cloud ring
 ## spins faster the harder it blows. Called every frame from update() with race.weather's wind.
-func apply_wind_ambience(delta: float, wind_kph: float, wind_dir: float) -> void:
+func apply_wind(delta: float, wind_kph: float, wind_dir: float) -> void:
 	current_wind_kph = wind_kph
 	if _water_shader_mat != null:
 		_water_shader_mat.set_shader_parameter("time_s", _clock_s)
@@ -224,12 +214,8 @@ func apply_wind_ambience(delta: float, wind_kph: float, wind_dir: float) -> void
 		sky_controller.apply_wind(delta, wind_kph)
 
 
-func stats() -> Dictionary:
-	measure()
+func _extra_stats() -> Dictionary:
 	return {
-		"draw_calls": draw_calls,
-		"triangles": triangle_count,
-		"multimeshes": multimesh_count,
 		"barriers": barrier_count,
 		"streetlights": streetlight_count,
 		"containers": container_count,
@@ -238,46 +224,6 @@ func stats() -> Dictionary:
 		"near_track_buildings": near_track_buildings.size(),
 		"harbor_cranes": crane_poses.size(),
 	}
-
-
-## Counts what a frame would submit and how heavy it is. MultiMesh instances cost one draw call per
-## surface and pay their triangles once per instance.
-func measure() -> void:
-	draw_calls = 0
-	triangle_count = 0
-	multimesh_count = 0
-	_measure_node(self)
-
-
-func _measure_node(node: Node) -> void:
-	if node is Node3D and not (node as Node3D).visible:
-		return
-	if node is MultiMeshInstance3D:
-		var instanced := node as MultiMeshInstance3D
-		if instanced.multimesh != null and instanced.multimesh.mesh != null:
-			multimesh_count += 1
-			_measure_mesh(instanced.multimesh.mesh, instanced.multimesh.instance_count, instanced.material_override)
-	elif node is MeshInstance3D:
-		var mesh_instance := node as MeshInstance3D
-		if mesh_instance.mesh != null:
-			_measure_mesh(mesh_instance.mesh, 1, mesh_instance.material_override)
-	for child: Node in node.get_children():
-		_measure_node(child)
-
-
-func _measure_mesh(mesh: Mesh, copies: int, override: Material) -> void:
-	for surface: int in range(mesh.get_surface_count()):
-		var material: Material = override if override != null else mesh.surface_get_material(surface)
-		var passes: int = 1
-		while material != null and material.next_pass != null:
-			passes += 1
-			material = material.next_pass
-		var arrays: Array = mesh.surface_get_arrays(surface)
-		var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX] if arrays[Mesh.ARRAY_INDEX] is PackedInt32Array else PackedInt32Array()
-		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-		var count: int = indices.size() / 3 if not indices.is_empty() else vertices.size() / 3
-		draw_calls += passes
-		triangle_count += count * copies * passes
 
 
 static func _mesh_triangles(mesh: Mesh) -> int:

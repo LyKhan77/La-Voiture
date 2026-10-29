@@ -72,11 +72,11 @@ func _run() -> void:
 	check(billboards != null and billboards.material_override is ShaderMaterial, "StreetBillboardMM uses custom Kanji/Halftone ShaderMaterial")
 
 	# 6. Wind responsiveness: the direct hook, then the real per-frame update(delta, race) path
-	if env.has_method("apply_wind_ambience"):
-		env.call("apply_wind_ambience", 0.5, 38.0, 1.2)
+	if env.has_method("apply_wind"):
+		env.call("apply_wind", 0.5, 38.0, 1.2)
 		check(_wind(env) == 38.0, "NeoWanganEnvironment tracks live wind_speed from weather")
 	else:
-		check(false, "NeoWanganEnvironment implements apply_wind_ambience(delta, wind_kph, wind_dir)")
+		check(false, "NeoWanganEnvironment implements apply_wind(delta, wind_kph, wind_dir)")
 	var race := StubRace.new()
 	race.weather = WeatherScript.new(5, 1234, WeatherScript.Archetype.DRY_SUNNY)
 	race.weather.wind_speed = 21.0

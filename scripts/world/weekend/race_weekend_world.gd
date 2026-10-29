@@ -73,10 +73,10 @@ var _tick_accumulator: float = 0.0
 var _chequered_clock_s: float = -1.0 # seconds since the flag fell, -1 until it does
 
 @onready var ribbon: RibbonScript = $TrackCircuit
-## The set and the pit lane are duck-typed: the Apex Ring ships its own (ApexEnvironment,
+## The set and the pit lane are typed by contract (CircuitEnvironment, CircuitPitComplex): the Apex Ring ships its own (ApexEnvironment,
 ## ApexPitComplex) and a street circuit swaps in its own pair (NeoWanganEnvironment,
-## NeoWanganPitComplex). Both honour build/bind_world/update and the crew API.
-@onready var environment: Node = $Environment
+## NeoWanganPitComplex), and every circuit fulfils the base classes in scripts/world/circuits/base.
+@onready var environment: CircuitEnvironment = $Environment
 @onready var gantry: GantryScript = $StartGantry
 @onready var pit_lane: CircuitPitComplex = $PitLane
 @onready var choreographer: ChoreographerScript = $Choreographer
@@ -204,7 +204,7 @@ func _install_circuit(override_id: String = "") -> void:
 		circuit_sky.queue_free()
 	var city_set: Node = node.get_node_or_null("Environment")
 	if city_set != null:
-		environment = city_set
+		environment = city_set as CircuitEnvironment
 	var street_pit: Node = node.get_node_or_null("PitLane")
 	if street_pit != null:
 		pit_lane = street_pit as CircuitPitComplex
@@ -296,9 +296,8 @@ func step(delta: float) -> void:
 
 ## The trackside digital panels show the flag race control shows, on the sector it applies to.
 func _update_flag_panels() -> void:
-	var furniture: Variant = environment.get("furniture")
-	if furniture != null:
-		furniture.apply_flag(int(race.race_control["flag"]), int(race.race_control["sector"]))
+	if environment.furniture != null: # a circuit may have no flag panels (Neo-Wangan)
+		environment.furniture.apply_flag(int(race.race_control["flag"]), int(race.race_control["sector"]))
 
 
 ## Fixed 20 Hz ticks, so 1x and 16x run the same sequence.
