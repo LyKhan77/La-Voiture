@@ -260,7 +260,10 @@ func cancel_pit(car_id: int) -> bool:
 	return race.cancel_pit(car_id)
 
 
-func _physics_process(delta: float) -> void:
+## Steps on render frames, not physics frames: the step presents 20 cars, the camera, the HUD and the VFX, and from a
+## fixed 60 Hz physics tick it beat against the 60 FPS limiter (some render frames stepped twice, others not at all).
+## The sim itself still runs its fixed 20 Hz ticks off the accumulator in `_run_ticks`.
+func _process(delta: float) -> void:
 	step(delta)
 
 
@@ -388,7 +391,7 @@ func show_podium() -> void:
 		"race_seed": race_seed, "director_seed": director_seed, "weather_archetype": weather_archetype,
 		"circuit_id": active_circuit.circuit_id if active_circuit != null else "apex_ring",
 	}
-	set_physics_process(false)
+	set_process(false)
 	hud.set_shown(false)
 	# SceneTree destroys the race only after its final physics callback has returned.
 	_open_winning_studio.call_deferred()

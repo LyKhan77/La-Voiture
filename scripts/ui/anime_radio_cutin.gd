@@ -24,6 +24,9 @@ const TICKER_OFFSET := 84.0
 const SLIDE_X := 32.0
 const SLIDE_IN_SEC := 0.22
 const HOLD_SEC := 3.5
+## What `prewarm` lays the card out with, and how many frames it lets the hidden card draw.
+const PREWARM_TEXT := "ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789 !?:;.,'#%/-() THE ENGINEER SAYS CHECK THE TELEMETRY"
+const PREWARM_FRAMES: int = 2
 const SLIDE_OUT_SEC := 0.18
 const PORTRAIT_SIZE := 62.0
 const PORTRAIT_RING := 4.0
@@ -120,6 +123,8 @@ var rich: RichTextLabel
 var sweating: bool = false
 var _sfx: Label
 var _message := ""
+var _prewarm_frames: int = 0
+var _prewarm_kept: Array = []
 var _urgent := false
 var _balloon_h := BALLOON_MIN_H
 var _banner_h := BANNER_MIN_HEIGHT
@@ -382,6 +387,45 @@ func play_radio(car_id: int, message: String, urgent: bool = false, hold: float 
 		_pending = [car_id, message, urgent, hold]
 		return
 	_play(car_id, message, urgent, hold)
+
+
+## Lays the card out once with a full alphabet and lets it draw offscreen for a couple of frames, then puts it back.
+## Without it the first real call of a race stalls for 13-48 ms shaping the font's glyphs and building the first draw
+## lists, a hitch right after the lights go out. A real call that arrives meanwhile owns the card and is left alone.
+func prewarm() -> void:
+	if not is_node_ready():
+		if not ready.is_connected(prewarm): # built before its parent is in the tree: warm up once it is
+			ready.connect(prewarm, CONNECT_ONE_SHOT)
+		return
+	if _present or _prewarm_frames > 0:
+		return
+	_prewarm_kept = [_message, _speaker.text, _sfx.text]
+	_message = PREWARM_TEXT
+	_speaker.text = PREWARM_TEXT.left(30)
+	_sfx.text = SFX_URGENT + " " + SFX_ROUTINE
+	# The first colour override on a label builds its font's theme cache (about 11 ms for the SFX label), so the
+	# calls `_play` makes are made here once too.
+	_speaker.add_theme_color_override("font_color", INK)
+	rich.add_theme_color_override("default_color", INK)
+	_sfx.add_theme_color_override("font_color", _accent)
+	_refresh_layout() # a card that is not present sits offscreen
+	banner.visible = true
+	_prewarm_frames = PREWARM_FRAMES
+	get_tree().process_frame.connect(_on_prewarm_frame, CONNECT_ONE_SHOT)
+
+
+func _on_prewarm_frame() -> void:
+	_prewarm_frames -= 1
+	if _prewarm_frames > 0:
+		get_tree().process_frame.connect(_on_prewarm_frame, CONNECT_ONE_SHOT)
+		return
+	if _present:
+		return
+	_message = String(_prewarm_kept[0])
+	_speaker.text = String(_prewarm_kept[1])
+	_sfx.text = String(_prewarm_kept[2])
+	banner.visible = false
+	_refresh_layout()
 
 
 func set_portrait(texture: Texture2D) -> void:

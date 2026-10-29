@@ -36,7 +36,7 @@ func check(ok: bool, description: String) -> void:
 func _run() -> void:
 	world = WorldScene.instantiate()
 	root.add_child(world)
-	world.set_physics_process(false)
+	world.set_process(false) # the test steps the world by hand
 	world.race.incidents_enabled = false
 	world.director._enter(DirectorScript.State.GREEN_RACING)
 	for _i: int in range(30):
@@ -608,6 +608,9 @@ func _test_radio_banner_redraws_only_the_wave() -> void:
 	if wave == null:
 		check(false, "radio banner: the equaliser bars live on their own layer, apart from the static halftone art")
 		return
+	# The card prewarms itself for a few frames after the HUD is built and hides itself again; let that finish first.
+	for _i: int in range(6):
+		await process_frame
 	banner.visible = true # a hidden banner is never painted
 	await process_frame
 	await process_frame

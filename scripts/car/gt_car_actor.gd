@@ -43,6 +43,10 @@ const CHASSIS_BY_TEAM: Dictionary = {
 const GRAVITY: float = 9.81
 const BRAKE_GLOW_G: float = 1.5
 const BRAKE_GLOW_RISE: float = 8.0
+## The glow overlay is a StandardMaterial3D built and first drawn on a car's first braking: 9-13 ms in one frame a few
+## seconds after the start. For its first frames on the grid every rotor carries it at a strength too faint to see.
+const GLOW_WARM_LEVEL: float = 0.02
+const GLOW_WARM_FRAMES: int = 6
 const BRAKE_GLOW_FALL: float = 1.2
 ## Time constant of each of the two cascaded low-passes that turn the sim's 20 Hz steps into body motion.
 const BODY_EASE_S: float = 0.07
@@ -64,6 +68,7 @@ var track: GtTrack
 ## Unused by the GT sim (it moves pit cars itself); kept so the pit crew can treat any actor alike.
 var external_pose: bool = false
 var brake_glow: float = 0.0
+var _glow_warm_left: int = GLOW_WARM_FRAMES
 var steer_visual: float = 0.0
 ## Emission of the rear cluster: 6.5 on the brakes, 1.2 resting at night or in the gloom, else dark.
 var taillight_energy: float = 0.0
@@ -257,9 +262,13 @@ func _animate_wheels(dt: float, spin_scale: float) -> void:
 	chassis.socket_wheel_fr.rotation.y = steer_visual
 	brake_glow = brake_glow_for(-car.longitudinal_g, brake_glow, dt)
 	var rolling: float = car.v * spin_scale
+	var glow: float = brake_glow
+	if _glow_warm_left > 0:
+		_glow_warm_left -= 1
+		glow = maxf(glow, GLOW_WARM_LEVEL)
 	for wheel: WheelControllerScript in wheel_controllers:
 		wheel.set_rolling_speed(rolling)
-		wheel.set_brake_glow(brake_glow)
+		wheel.set_brake_glow(glow)
 
 
 ## Two cascaded low-passes: a step becomes an S-curve with no jerk at its start, like a sprung body.

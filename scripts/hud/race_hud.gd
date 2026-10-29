@@ -177,6 +177,10 @@ func bind(p_world: Node3D) -> void:
 	radio = _make_cut_in("AnimeRadioCutIn", CutInScript.Role.DRIVER, "DRIVER", PORTRAIT)
 	engineer_radio = _make_cut_in("EngineerRadioCutIn", CutInScript.Role.ENGINEER, "ENGINEER", ENGINEER_PORTRAIT)
 	_paint_engineer_card()
+	# The first radio call of a race stalled 13-48 ms on first-use costs: warm the cards and the voice manifest now.
+	radio.prewarm()
+	engineer_radio.prewarm()
+	RadioVoice.entries()
 	for car: GtCar in race.cars:
 		_portraits[car.id] = _load_portrait(car.id)
 	race.radio_message.connect(_on_radio)
