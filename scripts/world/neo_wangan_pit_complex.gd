@@ -423,6 +423,8 @@ func _build_shared_paddock() -> void:
 	building.front_x = 15.5
 	building.garage_top_y = 4.7
 	building.accent_color = Color("#00f0ff")
+	# The building stands right in front of the garage fascias here, so the names go on its doors.
+	building.name_doors = true
 	building.transform = pose
 	add_child(building)
 	var stand := GrandstandKit.new()

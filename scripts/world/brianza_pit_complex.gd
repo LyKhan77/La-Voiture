@@ -19,6 +19,7 @@ const PitBuildingKit := preload("res://scripts/world/paddock/pit_building.gd")
 const GrandstandKit := preload("res://scripts/world/paddock/main_grandstand.gd")
 const ControlTowerKit := preload("res://scripts/world/paddock/race_control_tower.gd")
 const Liveries := preload("res://scripts/car/team_liveries.gd")
+const TeamSignage := preload("res://scripts/world/paddock/team_signage.gd")
 const PitDressing := preload("res://scripts/world/brianza_pit_dressing.gd")
 const PaddockScript := preload("res://scripts/world/brianza_paddock.gd")
 
@@ -143,6 +144,7 @@ func build(p_ribbon: TrackRibbonScript, team_ids: Array[int] = []) -> void:
 				stalls[i]["team"] = team_ids[i] if i < team_ids.size() else -1
 			for i: int in range(garages.size()):
 				_build_garage_visuals(garages[i], int(stalls[i]["team"]))
+			_build_team_plates()
 			_build_markings()
 			if paddock != null:
 				paddock.build(p_ribbon, self, team_ids)
@@ -159,6 +161,7 @@ func build(p_ribbon: TrackRibbonScript, team_ids: Array[int] = []) -> void:
 	_solid_footprints.append_array(dressing["footprints"])
 	_build_lane_signs()
 	_build_garages()
+	_build_team_plates()
 	_build_garage_equipment()
 	_build_shared_paddock()
 	paddock = PaddockScript.new()
@@ -422,6 +425,19 @@ func _build_garage_visuals(garage_node: Node3D, team: int) -> void:
 		crew.name = "StandbyCrew"
 		garage_node.add_child(crew)
 	crew.mesh = standby.commit()
+
+
+## Team names on the garage fascias: the shared TeamSignage kit, one mesh for the whole lane.
+func _build_team_plates() -> void:
+	var batch: RefCounted = TeamSignage.new_batch()
+	var flat: Material = ToonMaterials.vertex_colored(false)
+	var plates: Array = []
+	for index: int in range(garages.size()):
+		var team: int = int(stalls[index]["team"])
+		var pose: Transform3D = TeamSignage.fascia_pose(garages[index].transform, -0.2, GARAGE_HEIGHT_M - 0.4)
+		# The building's shutter hoods cover the ends of the fascia: keep the name in the middle ~7 m.
+		plates.append(TeamSignage.add_plate(batch, flat, team, pose, 7.0, Liveries.color_for(team)))
+	TeamSignage.commit_node(self, batch, plates)
 
 
 func _build_garage_equipment() -> void:

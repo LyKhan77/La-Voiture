@@ -20,6 +20,7 @@ const ToonMaterials := preload("res://scripts/world/toon_materials.gd")
 const MeshBatchScript := preload("res://scripts/world/mesh_batch.gd")
 const FigureScript := preload("res://scripts/car/pit_crew_figure.gd")
 const Liveries := preload("res://scripts/car/team_liveries.gd")
+const TeamSignage := preload("res://scripts/world/paddock/team_signage.gd")
 const EngineScript := preload("res://scripts/core/race_sim_engine.gd")
 const RoadShader := preload("res://shaders/road_asphalt.gdshader")
 
@@ -142,6 +143,7 @@ func build(p_ribbon: TrackRibbonScript, team_ids: Array[int] = []) -> void:
 	_build_pit_wall()
 	for stall: Dictionary in stalls:
 		garages.append(_build_garage(stall))
+	_build_team_plates()
 	_build_signs()
 
 
@@ -422,17 +424,19 @@ func _build_garage(stall: Dictionary) -> Node3D:
 	for slot: int in range(roles.size()):
 		FigureScript.add(standby, flat, Transform3D(Basis(Vector3.UP, PI * 0.5), standby_spot(slot)), int(roles[slot]), color)
 	garage.add_child(_mesh_node("StandbyCrew", standby.commit()))
-	var label := Label3D.new()
-	label.name = "TeamPlate"
-	label.text = EngineScript.TEAM_NAMES[team].to_upper()
-	label.font_size = 96
-	label.pixel_size = 0.0052
-	label.modulate = Color("#14161c")
-	label.outline_size = 0
-	label.position = Vector3(-0.58, h - 0.35, 0.0)
-	label.rotation.y = -PI * 0.5 # faces the pit lane, -X
-	garage.add_child(label)
 	return garage
+
+
+## Team names on the garage fascias: the shared TeamSignage kit, one mesh for the whole lane.
+func _build_team_plates() -> void:
+	var batch: RefCounted = TeamSignage.new_batch()
+	var flat: ShaderMaterial = ToonMaterials.vertex_colored(false)
+	var plates: Array = []
+	for index: int in range(garages.size()):
+		var team: int = int(stalls[index]["team"])
+		var pose: Transform3D = TeamSignage.fascia_pose(garages[index].transform, -0.58, GARAGE_HEIGHT_M - 0.35)
+		plates.append(TeamSignage.add_plate(batch, flat, team, pose, GARAGE_WIDTH_M - 1.0, Liveries.color_for(team)))
+	TeamSignage.commit_node(self, batch, plates)
 
 
 func _mesh_node(node_name: String, mesh: ArrayMesh) -> MeshInstance3D:

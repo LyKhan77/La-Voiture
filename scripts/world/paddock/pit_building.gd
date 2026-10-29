@@ -11,6 +11,7 @@ const PitLaneScript := preload("res://scripts/world/pit_lane_complex.gd")
 const ToonMaterials := preload("res://scripts/world/toon_materials.gd")
 const MeshBatchScript := preload("res://scripts/world/mesh_batch.gd")
 const Liveries := preload("res://scripts/car/team_liveries.gd")
+const TeamSignage := preload("res://scripts/world/paddock/team_signage.gd")
 
 ## Arc distance of the middle of the ten stalls; the scene is placed on the centreline here.
 const CENTRE_S: float = PitLaneScript.STALL_FIRST_S + PitLaneScript.STALL_PITCH_M * (float(PitLaneScript.TEAM_COUNT) - 1.0) * 0.5
@@ -46,6 +47,8 @@ var structure: MeshInstance3D
 var glass: MeshInstance3D
 var floor_count: int = 2
 var team_ids: Array[int] = []
+## Team names lettered on the half-lowered doors, in this node's frame (see `name_doors`).
+var name_plates: Array = []
 
 
 @export var building_length_m: float = LENGTH_M
@@ -54,6 +57,8 @@ var team_ids: Array[int] = []
 @export var front_x: float = FRONT_X
 @export var garage_top_y: float = GARAGE_TOP_Y
 @export var accent_color: Color = CONCRETE_COLOR
+## Letter each team's name on its door: for lanes whose building stands right in front of the garage fascias.
+@export var name_doors: bool = false
 
 
 func _ready() -> void:
@@ -91,6 +96,7 @@ func build() -> void:
 ## One roll-up shutter drum and a half-lowered door per garage, striped in the team colour.
 func _build_shutters(batch: MeshBatchScript, cel: ShaderMaterial) -> void:
 	var door_x: float = front_x - 0.1
+	name_plates.clear()
 	for bay: int in range(bay_count):
 		var team: int = team_ids[bay] if bay < team_ids.size() else bay
 		var z: float = -bay_stride_m * (float(bay) - float(bay_count - 1) * 0.5)
@@ -100,6 +106,10 @@ func _build_shutters(batch: MeshBatchScript, cel: ShaderMaterial) -> void:
 		for slat: int in range(SLAT_COUNT):
 			var y: float = (garage_top_y - 0.3) - 1.7 - 0.14 * float(slat)
 			batch.box(cel, SHUTTER_COLORS[slat % 2], Transform3D(Basis.IDENTITY, Vector3(door_x, y, z)), Vector3(0.06, 0.13, DOOR_WIDTH_M - 0.2))
+		if name_doors:
+			var pose: Transform3D = Transform3D(TeamSignage.facing_basis(Vector3(-1.0, 0.0, 0.0)), Vector3(door_x - 0.04, (garage_top_y - 0.3) - 1.98, z))
+			var named_team: int = team if team_ids.is_empty() or bay < team_ids.size() else -1
+			name_plates.append(TeamSignage.add_plate(batch, cel, named_team, pose, DOOR_WIDTH_M - 0.8, SHUTTER_COLORS[0]))
 
 
 ## The lounge block, sill and header bands and the glass mullions.

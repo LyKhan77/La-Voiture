@@ -51,6 +51,17 @@
 
   Podium tampil di ketiganya. Draw call environment per sampel: Brianza maks 171, Apex maks 155, Wangan maks 146.
 
+## Papan nama tim pada aset
+
+- Permintaan: aset paddock dan garasi memiliki nama tim, dan komponen yang dipakai ulang konsisten di setiap sirkuit. Sebelumnya hanya garasi Apex yang punya `Label3D` `TeamPlate`.
+- Komponen bersama `scripts/world/paddock/team_signage.gd`: nama diambil dari `GtData.TEAM_NAMES` (huruf besar), hurufnya geometri nyata (`TextMesh`, `curve_step` 4, ±390 segitiga per nama) yang digabung ke satu surface `MeshBatch`. Satu sirkuit membayar satu draw call untuk semua papan, bukan satu `Label3D` per garasi. Warna huruf gelap di atas pita terang dan terang di atas pita gelap; nama dikecilkan agar muat lebar papan.
+- Penempatan: Apex dan Brianza di fascia garasi (mesh `TeamPlates` pada kompleks pit; Label3D Apex diganti). Wangan: gedung pit berdiri tepat di depan fascia garasi sehingga drum dan pintu shutter menutupnya; nama ditulis di pintu shutter lewat `PitBuilding.name_doors` (komponen gedung pit bersama). Paddock Brianza: nama tim pada sisi transporter yang menghadap trek (mesh `TransporterPlates`, sisi dipilih dari posisi lintasan).
+- Aturan tim: papan hanya untuk tim yang punya box (`active_teams`), mengikuti urutan stall sim, diperbarui saat tim dipasang ulang (`assign_teams`/`apply_teams`).
+- `tests/test_team_signage_contract.gd` (3 sirkuit × pemain tim 4/11/12, 57 assertion): satu papan per tim yang berlomba, ejaan sama dengan `TEAM_NAMES`, papan berada di depan garasi tim itu sendiri, tim tanpa box tanpa papan, semua papan garasi satu surface dengan lettering nyata, dan papan transporter Brianza berada di truk timnya sendiri menghadap trek. Test gagal (12 FAIL) sebelum implementasi.
+- Bukti visual: `executor-report/screenshots/phases/phase-13-3-signage-*.png` (Apex, Brianza garasi dan transporter, Wangan pintu dan lane). Hasil capture awal Wangan memperlihatkan fascia di belakang pintu tidak terlihat, yang mendorong pemindahan nama ke pintu.
+- Smoke native 3 lap dengan 6 pit stop setelah perubahan: tiga sirkuit finis 20 mobil, 0 orphan, rata-rata 16,67–16,71 ms (59,8–60,0 FPS), p95 22,8–24,5 ms (naik-turun 21–25 ms antar-run pada kode yang sama). Regresi penuh 59/59 lulus.
+- Catatan: draw call environment per sampel bergantung posisi kamera (Brianza 171–218 antar-run), sehingga tidak cocok sebagai pembanding bersih untuk dua mesh tambahan (`TeamPlates`, `TransporterPlates`); papan garasi Apex justru turun dari 10 `Label3D` menjadi satu mesh.
+
 ## Gate terbuka
 
 - Draw call environment Brianza: maksimum sampel 171 (sebelumnya 170) melewati batas plan <= 169 dan target <= 160, tetapi masih di bawah batas AGENTS.md (< 180). Apex dan Wangan di bawah 160. Tidak dioptimalkan pada fase ini.
@@ -59,6 +70,6 @@
 
 ## Belum dikerjakan (diusulkan untuk fase berikutnya)
 
-- Nama tim pada aset (fascia garasi, sisi transporter paddock, gedung pit) sebagai komponen bersama yang konsisten di tiga sirkuit; hanya `PitLaneComplex` Apex yang punya `TeamPlate`. Garasi Neo Wangan masih netral tanpa warna tim atau kru standby.
+- Garasi Neo Wangan masih netral di dalam (tanpa kru standby berwarna tim); namanya kini ada di pintu shutter. Apex dan Wangan belum punya transporter paddock; hanya Brianza yang memilikinya.
 - Nilai `crew_skill` netral per tim di `GtData`; matriks performa kru lengkap ditunda ke mode karier.
 - Rancang ulang titik temu keluar–masuk box (celah bumper 3–4 m), kebijakan pit AI, pelepasan tidak aman dan penalti, serta interaksi dengan Safety Car.
