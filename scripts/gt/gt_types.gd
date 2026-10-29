@@ -53,6 +53,17 @@ const ACCEL: float = 6.8
 const BRAKE: float = 16.5
 const PIT_SPEED: float = 22.0 # 80 km/h limiter
 const PIT_STOP_TIME: float = 3.2
+## Braking a car plans for on the pit lane: queues slow down like traffic, they never stop dead.
+const PIT_COMFORT_DECEL: float = 5.0
+## Hardest braking a pit car ever applies (a firm stop, not the old instant one).
+const PIT_BRAKE_MAX: float = 9.0
+## Bumper-to-bumper room a pit car keeps to the car ahead; teammates stack on a centre-to-centre gap.
+const PIT_FOLLOW_GAP_M: float = 2.0
+const PIT_TEAMMATE_GAP_M: float = 8.0
+## A box release waits at most this long for the fast lane behind to clear; a car held still this long
+## by traffic stops yielding to it (nothing may keep a pit scene stuck).
+const PIT_RELEASE_WAIT_MAX_S: float = 5.0
+const PIT_STALL_FAILSAFE_S: float = 15.0
 const FOLLOW_GAP: float = 18.0
 
 const CAR_LENGTH_M: float = 4.45

@@ -19,3 +19,9 @@ var penalty_hold_s: float = 0.0
 var penalty_taken: bool = false
 ## Total race time the car spent from entry to exit, for the pit wall.
 var elapsed: float = 0.0
+## Seconds the finished stop waited for the fast lane behind to clear before the car pulled out.
+var release_wait_s: float = 0.0
+## Seconds the car sat still with nothing but traffic to blame; past the failsafe it stops yielding.
+var stalled_s: float = 0.0
+## Seconds a car pulling out held its line for a car passing on the fast lane.
+var merge_wait_s: float = 0.0

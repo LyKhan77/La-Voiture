@@ -18,6 +18,13 @@ var race: GtRace
 # Working values of the car being updated.
 var _target: float = 0.0
 var _target_lateral: float = 0.0
+## A car counts as parked on its stall within this distance; it creeps in at PARK_CREEP_MPS so the last
+## metres are driven, not teleported.
+const PARK_TOLERANCE_M: float = 0.05
+const PARK_CREEP_MPS: float = 0.3
+## Pit cars closer than this sideways count as sharing a lane (a car's width plus a margin, widened for merges).
+const PIT_LANE_BAND_M: float = 3.2
+
 var _teammate_ahead: GtCar = null
 var _blue_flagged: bool = false
 
@@ -310,7 +317,9 @@ func update_car(car: GtCar, ctx: Variant, dt: float) -> void:
 
 	# --- longitudinal step
 	var effective_accel: float = GtTypes.ACCEL + accel_bonus
-	var brake_rate: float = 38.0 if car.pit != null else GtTypes.BRAKE
+	var brake_rate: float = GtTypes.BRAKE
+	if car.pit != null and car.pit.phase != GtTypes.PitPhase.ENTRY:
+		brake_rate = GtTypes.PIT_BRAKE_MAX
 	if car.pit == null and GtTypes.is_slick(car.compound):
 		brake_rate *= aquaplane_brake_mult(race.weather.track_water_pct)
 	var is_braking: bool = car.v > _target
@@ -897,6 +906,11 @@ func _pit_logic(car: GtCar, dt: float) -> void:
 			# Limiter envelope down to 80 km/h at the line, then onto the lane.
 			var to_line: float = maxf(-rel - 1.5, 0.0)
 			_target = minf(_target, sqrt(GtTypes.PIT_SPEED * GtTypes.PIT_SPEED + 2.0 * GtTypes.BRAKE * to_line))
+			# A box just past the line needs the stopping curve to start before the line, not after it.
+			if _teammate_ahead == null:
+				_target = minf(_target, _approach_box_speed(dist_to_box))
+			else:
+				_queue_behind_teammate(car, pit, rel, false)
 			_target_lateral = float(race.pit_layout["edge_lateral_m"])
 			if rel >= 0.0:
 				pit.phase = GtTypes.PitPhase.IN
@@ -904,41 +918,29 @@ func _pit_logic(car: GtCar, dt: float) -> void:
 			_target = minf(_target, GtTypes.PIT_SPEED)
 			_target_lateral = fast_lane_at(rel)
 			if _teammate_ahead != null:
-				# Double stack: hold 8 m behind the stall until the teammate is released.
-				var to_queue: float = minf(pit.box_s - float(race.pit_layout["queue_gap_m"]) - car.s, _teammate_ahead.s - float(race.pit_layout["queue_gap_m"]) - car.s)
-				if to_queue <= 24.0:
-					_target_lateral = float(race.pit_layout["stall_lane_m"]) + 0.6
-					if to_queue > 0.6:
-						_target = minf(GtTypes.PIT_SPEED, maxf(1.0, to_queue * 1.3))
-					else:
-						_target = 0.0
-						car.v = 0.0
-						car.v_lat = 0.0
-			elif dist_to_box <= 18.0:
-				pit.phase = GtTypes.PitPhase.BOX
+				_queue_behind_teammate(car, pit, rel)
+			else:
+				_target = minf(_target, _approach_box_speed(dist_to_box))
+				if dist_to_box <= 18.0:
+					pit.phase = GtTypes.PitPhase.BOX
 		GtTypes.PitPhase.BOX:
 			if _teammate_ahead != null:
-				var to_queue: float = minf(pit.box_s - float(race.pit_layout["queue_gap_m"]) - car.s, _teammate_ahead.s - float(race.pit_layout["queue_gap_m"]) - car.s)
-				_target_lateral = float(race.pit_layout["stall_lane_m"]) + 0.6
-				if to_queue > 0.6:
-					_target = minf(GtTypes.PIT_SPEED, maxf(1.0, to_queue * 1.3))
-				else:
-					_target = 0.0
-					car.v = 0.0
-					car.v_lat = 0.0
+				_queue_behind_teammate(car, pit, rel)
 			else:
 				var pull_in: float = 1.0 - clampf((dist_to_box - 1.5) / 16.5, 0.0, 1.0)
 				_target_lateral = lerpf(fast_lane_at(rel), float(race.pit_layout["stall_lane_m"]), pull_in)
-				if dist_to_box > 0.4:
-					_target = minf(GtTypes.PIT_SPEED, maxf(0.9, dist_to_box * 1.6))
-				else:
-					_target = 0.0
-					if car.v < 0.8:
-						_service_car(car, pit, dt)
+				_target = minf(_target, _approach_box_speed(dist_to_box))
+				if dist_to_box <= PARK_TOLERANCE_M and car.v < 0.8:
+					_service_car(car, pit, dt)
 		GtTypes.PitPhase.OUT:
 			_target = GtTypes.PIT_SPEED
 			var pull_out: float = clampf((car.s - pit.box_s) / 16.0, 0.0, 1.0)
 			_target_lateral = lerpf(float(race.pit_layout["stall_lane_m"]), fast_lane_at(rel), pull_out)
+			# Merging yields to a car already on the fast lane: hold the line and creep until it has passed.
+			if pull_out > 0.0 and pull_out < 1.0 and pit.merge_wait_s < GtTypes.PIT_RELEASE_WAIT_MAX_S and _pit_exit_blocked(car, rel):
+				pit.merge_wait_s += dt
+				_target_lateral = car.lateral
+				_target = minf(_target, PARK_CREEP_MPS * 4.0)
 			if car.s - pit.box_s > 20.0:
 				pit.phase = GtTypes.PitPhase.EXIT
 		GtTypes.PitPhase.EXIT:
@@ -948,13 +950,70 @@ func _pit_logic(car: GtCar, dt: float) -> void:
 			_target_lateral = fast_lane_at(rel)
 			if rel >= pit_length():
 				car.pit = null
-	# Cars on the fast lane follow the car ahead; the stall lane is never blocked by them.
-	if car.pit != null and car.pit.phase != GtTypes.PitPhase.BOX:
+	# A car held still by nothing but traffic stops yielding to it after a while: a pit scene never sticks.
+	if car.pit != null:
+		var parked: bool = car.pit.phase == GtTypes.PitPhase.BOX and absf(car.pit.box_s - car.s) <= PARK_TOLERANCE_M
+		if car.v < 0.3 and not parked and _teammate_ahead == null:
+			car.pit.stalled_s += dt
+		else:
+			car.pit.stalled_s = 0.0
+	# Cars in the lane follow the car ahead at a braking distance, never a fixed gap.
+	if car.pit != null and car.pit.stalled_s < GtTypes.PIT_STALL_FAILSAFE_S:
+		# A car on its way into its own box stops there; a car queued beyond the box is no reason to stop short of it.
+		var heading_in: bool = car.pit.phase <= GtTypes.PitPhase.BOX and car.s < car.pit.box_s
 		for other: GtCar in race.cars:
-			if other == car or other.pit == null or other.s <= car.s or other.s - car.s > 14.0:
+			if other == car or other.pit == null or other.s <= car.s or other.s - car.s > 70.0:
 				continue
-			if absf(other.lateral - car.lateral) < 2.4:
-				_target = minf(_target, maxf(0.0, minf(other.v, (other.s - car.s - 6.5) * 1.3)))
+			if absf(other.lateral - car.lateral) >= PIT_LANE_BAND_M:
+				continue
+			if heading_in and other.s - car.pit.box_s >= GtTypes.CAR_LENGTH_M:
+				continue
+			var gap: float = GtTypes.PIT_TEAMMATE_GAP_M if other.team_id == car.team_id else GtTypes.CAR_LENGTH_M + GtTypes.PIT_FOLLOW_GAP_M
+			_target = minf(_target, pit_safe_speed(other.s - car.s - gap, other.v))
+
+
+## Speed from which a car still stops `distance` ahead (or settles to a leader's `lead_v`) at comfortable braking.
+static func pit_safe_speed(distance: float, lead_v: float = 0.0) -> float:
+	return sqrt(lead_v * lead_v + 2.0 * GtTypes.PIT_COMFORT_DECEL * maxf(distance, 0.0))
+
+
+## Speed on the way into the box: a braking curve to the stall that ends in a slow creep, then a stop.
+func _approach_box_speed(dist_to_box: float) -> float:
+	if dist_to_box <= PARK_TOLERANCE_M:
+		return 0.0
+	return maxf(PARK_CREEP_MPS, pit_safe_speed(dist_to_box - PARK_TOLERANCE_M))
+
+
+## Double stack: the second car waits behind the stall (or behind its teammate) and eases onto the working
+## lane as it closes up, instead of stopping dead where it happens to be.
+func _queue_behind_teammate(car: GtCar, pit: GtPit, rel: float, steer: bool = true) -> void:
+	# Never so deep behind the stall that the waiting car overlaps the car parked in the previous box.
+	var queue_gap: float = minf(float(race.pit_layout["queue_gap_m"]), float(race.pit_layout["stall_pitch_m"]) - GtTypes.CAR_LENGTH_M - 0.5)
+	var stop_s: float = minf(pit.box_s - queue_gap, _teammate_ahead.s - GtTypes.PIT_TEAMMATE_GAP_M)
+	var room: float = stop_s - car.s
+	# Swing onto the working lane only once abreast of the box, never while the previous box is still alongside.
+	var join: float = 1.0 - clampf((pit.box_s - car.s - 7.0) / 3.5, 0.0, 1.0)
+	if steer:
+		_target_lateral = lerpf(fast_lane_at(rel), float(race.pit_layout["stall_lane_m"]) + 0.6, smoothstep(0.0, 1.0, join))
+	if room <= PARK_TOLERANCE_M:
+		_target = 0.0
+	else:
+		_target = minf(_target, maxf(PARK_CREEP_MPS, pit_safe_speed(room - PARK_TOLERANCE_M, _teammate_ahead.v)))
+
+
+## True while a moving car on the fast lane behind would run into this one as it pulls out.
+func _pit_exit_blocked(car: GtCar, rel: float) -> bool:
+	var lane: float = fast_lane_at(rel)
+	for other: GtCar in race.cars:
+		if other == car or other.pit == null:
+			continue
+		var behind: float = car.s - other.s
+		if behind > 0.0 and behind <= 8.0 + other.v * 3.0 and absf(other.lateral - lane) < PIT_LANE_BAND_M + 0.8 and (other.v > 3.0 or behind <= 8.0):
+			return true
+		# Neither can a car ahead on the way out, or one easing into the next box, be cut across.
+		if behind <= 0.0 and -behind < 20.0 and minf(absf(other.lateral - car.lateral), absf(other.lateral - lane)) < PIT_LANE_BAND_M + 1.0:
+			return true
+	return false
 
 
 ## Stopped in the box: tyre swap, fuel and repair run on the stop timer.
@@ -985,6 +1044,10 @@ func _service_car(car: GtCar, pit: GtPit, dt: float) -> void:
 	else:
 		pit.lift_y = minf(0.15, maxf(0.0, (pit.duration - pit.timer) * 0.45))
 	if pit.timer >= pit.duration:
+		if _pit_exit_blocked(car, car.s - pit.start_s) and pit.release_wait_s < GtTypes.PIT_RELEASE_WAIT_MAX_S:
+			pit.release_wait_s += dt
+			pit.lift_y = 0.0
+			return
 		car.compound = pit.compound
 		car.wear = 0.0
 		car.tyre_cliff_called = false
