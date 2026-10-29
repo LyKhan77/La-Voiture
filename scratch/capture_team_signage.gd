@@ -56,15 +56,17 @@ func _run() -> void:
 		var target_garage: Node3D = garages[int(shot[3])]
 		var target: Vector3 = target_garage.global_transform * Vector3(-0.4, 3.3, 0.0)
 		await _shoot(circuit + "-garage-" + String(shot[0]), origin, target)
-	if circuit == "brianza":
-		var paddock: Node3D = pit.paddock
-		var entry: Dictionary = paddock.transporter_poses[4]
-		var pose: Transform3D = entry["pose"]
-		var to_track: Vector3 = world.ribbon.get_point_at_offset(float(entry["s"]), 0.0).origin - pose.origin
-		to_track.y = 0.0
-		var origin: Vector3 = pose.origin + to_track.normalized() * 14.0 + Vector3.UP * 3.0
-		await _shoot(circuit + "-transporter", origin, pose.origin + Vector3.UP * 2.0)
-	world.free()
+	var kit: Node3D = pit.find_child("TeamTransporters", true, false) as Node3D
+	var entry: Dictionary = kit.transporter_poses[4]
+	var pose: Transform3D = entry["pose"]
+	var to_track: Vector3 = world.ribbon.get_point_at_offset(float(entry["s"]), 0.0).origin - pose.origin
+	to_track.y = 0.0
+	var side: Vector3 = to_track.normalized()
+	await _shoot(circuit + "-transporter", pose.origin + side * 14.0 + Vector3.UP * 3.0, pose.origin + Vector3.UP * 2.0)
+	# The whole row seen from above and behind, to judge the layout against the pit building and the scenery.
+	var row_centre: Vector3 = (kit.transporter_poses[0]["pose"] as Transform3D).origin.lerp((kit.transporter_poses[-1]["pose"] as Transform3D).origin, 0.5)
+	await _shoot(circuit + "-transporter-row", row_centre - side * 55.0 + Vector3.UP * 38.0 + (pose.basis.z * 40.0), row_centre)
+	await _shoot(circuit + "-transporter-ground", row_centre - side * 22.0 + Vector3.UP * 5.0 - (pose.basis.z * 70.0), row_centre + pose.basis.z * 10.0)
 	camera.free()
 	quit(0)
 

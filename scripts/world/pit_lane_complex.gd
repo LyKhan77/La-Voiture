@@ -21,6 +21,7 @@ const MeshBatchScript := preload("res://scripts/world/mesh_batch.gd")
 const FigureScript := preload("res://scripts/car/pit_crew_figure.gd")
 const Liveries := preload("res://scripts/car/team_liveries.gd")
 const TeamSignage := preload("res://scripts/world/paddock/team_signage.gd")
+const TransportersKit := preload("res://scripts/world/paddock/team_transporters.gd")
 const EngineScript := preload("res://scripts/core/race_sim_engine.gd")
 const RoadShader := preload("res://shaders/road_asphalt.gdshader")
 
@@ -58,6 +59,8 @@ const BOX_LINE_M: float = 0.12
 const GARAGE_WIDTH_M: float = 12.4
 const GARAGE_DEPTH_M: float = 9.0
 const GARAGE_HEIGHT_M: float = 4.2
+## Where the transporter row stands, measured from the circuit centre line: clear of the pit building and its terrace.
+const TRANSPORTER_LATERAL_M: float = 47.0
 const STEP_M: float = 2.0
 const WALL_STEP_M: float = 3.0
 ## The wall starts once it can stand this far off the circuit edge.
@@ -85,6 +88,7 @@ var stall_lane_m: float = STALL_LANE_M
 var length_m: float = NOMINAL_LENGTH_M
 var stalls: Array[Dictionary] = [] # per team: {team, s, u, lateral, pose}
 var garages: Array[Node3D] = []
+var transporters: Node3D
 var speed_limit_lines_u: Array[float] = []
 ## The pit wall pieces' poses and the arc distance each stands at, and the crash cushions at its ends.
 var wall_poses: Array[Transform3D] = []
@@ -144,6 +148,7 @@ func build(p_ribbon: TrackRibbonScript, team_ids: Array[int] = []) -> void:
 	for stall: Dictionary in stalls:
 		garages.append(_build_garage(stall))
 	_build_team_plates()
+	_build_team_transporters()
 	_build_signs()
 
 
@@ -425,6 +430,14 @@ func _build_garage(stall: Dictionary) -> Node3D:
 		FigureScript.add(standby, flat, Transform3D(Basis(Vector3.UP, PI * 0.5), standby_spot(slot)), int(roles[slot]), color)
 	garage.add_child(_mesh_node("StandbyCrew", standby.commit()))
 	return garage
+
+
+## One transporter per racing team in the open ground behind the pit building (shared TeamTransporters kit).
+func _build_team_transporters() -> void:
+	transporters = TransportersKit.new()
+	transporters.name = "TeamTransporters"
+	add_child(transporters)
+	transporters.build(ribbon, stalls, TRANSPORTER_LATERAL_M, true)
 
 
 ## Team names on the garage fascias: the shared TeamSignage kit, one mesh for the whole lane.

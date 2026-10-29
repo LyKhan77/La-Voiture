@@ -5,10 +5,11 @@ const Batch := preload("res://scripts/world/mesh_batch.gd")
 const Toon := preload("res://scripts/world/toon_materials.gd")
 const Geo := preload("res://scripts/world/enhanced_track_geometry.gd")
 const Liveries := preload("res://scripts/car/team_liveries.gd")
-const TeamSignage := preload("res://scripts/world/paddock/team_signage.gd")
+const TransportersKit := preload("res://scripts/world/paddock/team_transporters.gd")
 
 var zone: Dictionary = {}
 var platform: Dictionary = {}
+var transporters: Node3D
 var transporter_poses: Array[Dictionary] = []
 var tent_poses: Array[Transform3D] = []
 var fence_poses: Array[Transform3D] = []
@@ -22,14 +23,7 @@ func footprints() -> Array[Rect2]:
 
 func build(ribbon: Node3D, pit: Node3D, _team_ids: Array[int] = []) -> void:
 	if _built:
-		var instances: MultiMesh = (get_node("PaddockTransporters") as MultiMeshInstance3D).multimesh
-		for i: int in range(transporter_poses.size()):
-			var team: int = int(pit.stalls[i]["team"])
-			var color: Color = Liveries.color_for(team)
-			transporter_poses[i]["team"] = team
-			transporter_poses[i]["color"] = color
-			instances.set_instance_color(i, color)
-		_build_transporter_plates(ribbon)
+		transporters.apply_teams(pit.stalls)
 		return
 	_built = true
 	var start: float = float(pit.stalls[0]["s"]) - 30.0
@@ -48,7 +42,6 @@ func build(ribbon: Node3D, pit: Node3D, _team_ids: Array[int] = []) -> void:
 	var gate := Batch.new()
 	var props := Batch.new()
 	var fence_mesh := Batch.new()
-	var truck_mesh := Batch.new()
 	var tent_mesh := Batch.new()
 	var car_mesh := Batch.new()
 	var white := Color("#f1eee7")
@@ -69,20 +62,12 @@ func build(ribbon: Node3D, pit: Node3D, _team_ids: Array[int] = []) -> void:
 	road.quad(mat, dark, connector[0], connector[1], connector[2], connector[3], Vector3.UP)
 	_add_mesh("PaddockApron", apron)
 	_add_mesh("PaddockServiceRoad", road)
-	truck_mesh.box(mat, Color.WHITE, Transform3D(Basis.IDENTITY, Vector3(0.0, 1.75, 0.0)), Vector3(3.0, 3.5, 10.0))
-	truck_mesh.box(mat, Color.WHITE, Transform3D(Basis.IDENTITY, Vector3(0.0, 1.45, -6.5)), Vector3(2.8, 2.9, 3.0))
-	truck_mesh.box(mat, Color("#313d4b"), Transform3D(Basis.IDENTITY, Vector3(0.0, 2.15, -8.02)), Vector3(2.5, 0.75, 0.08))
-	for side: float in [-1.0, 1.0]:
-		for along: float in [-6.4, 2.7, 4.2]:
-			truck_mesh.cylinder(mat, Color("#17191d"), Transform3D(Basis(Vector3.FORWARD, PI * 0.5), Vector3(side * 1.5, 0.45, along)), 0.45, 0.45, 0.2, 8)
-	for stall: Dictionary in pit.stalls:
-		var arc: float = float(stall["s"])
-		var pose: Transform3D = ribbon.get_point_at_offset(arc, 47.0)
-		var team: int = int(stall["team"])
-		transporter_poses.append({"s": arc, "team": team, "pose": pose, "color": Liveries.color_for(team)})
-		_footprints.append(Rect2(arc - 8.1, 45.3, 13.1, 3.4))
-	_add_instances("PaddockTransporters", truck_mesh, transporter_poses.map(func(entry: Dictionary) -> Transform3D: return entry.pose), transporter_poses.map(func(entry: Dictionary) -> Color: return entry.color))
-	_build_transporter_plates(ribbon)
+	transporters = TransportersKit.new()
+	transporters.name = "TeamTransporters"
+	add_child(transporters)
+	transporters.build(ribbon, pit.stalls, 47.0)
+	transporter_poses = transporters.transporter_poses
+	_footprints.append_array(transporters.footprints)
 	tent_mesh.box(mat, white, Transform3D(Basis.IDENTITY, Vector3(0.0, 1.6, 0.0)), Vector3(7.0, 3.2, 12.0))
 	tent_mesh.box(mat, red, Transform3D(Basis.IDENTITY, Vector3(0.0, 3.3, 0.0)), Vector3(7.4, 0.25, 12.4))
 	tent_mesh.quad(mat, white, Vector3(-3.7, 3.4, -6.2), Vector3(-3.7, 3.4, 6.2), Vector3(0.0, 5.0, 6.2), Vector3(0.0, 5.0, -6.2), Vector3.UP)
@@ -135,20 +120,6 @@ func build(ribbon: Node3D, pit: Node3D, _team_ids: Array[int] = []) -> void:
 	for i: int in range(3):
 		props.cylinder(mat, Color("#1b1d21"), Transform3D(tyres.basis, tyres.origin + Vector3.UP * float(i) * 0.3), 0.35, 0.35, 0.3, 8)
 	_add_mesh("PaddockProps", props)
-
-## Each team's name on the side of its transporter that faces the circuit (shared TeamSignage kit, one mesh).
-func _build_transporter_plates(ribbon: Node3D) -> void:
-	var batch: RefCounted = TeamSignage.new_batch()
-	var flat: Material = Toon.vertex_colored(false)
-	var plates: Array = []
-	for entry: Dictionary in transporter_poses:
-		var team: int = int(entry["team"])
-		var pose: Transform3D = entry["pose"]
-		var to_track: Vector3 = ribbon.get_point_at_offset(float(entry["s"]), 0.0).origin - pose.origin
-		var side: float = 1.0 if pose.basis.x.dot(to_track) > 0.0 else -1.0
-		var sign_pose: Transform3D = pose * Transform3D(TeamSignage.facing_basis(Vector3(side, 0.0, 0.0)), Vector3(side * 1.52, 2.0, 0.0))
-		plates.append(TeamSignage.add_plate(batch, flat, team, sign_pose, 8.0, Liveries.color_for(team)))
-	TeamSignage.commit_node(self, batch, plates, "TransporterPlates")
 
 
 func _add_mesh(node_name: String, batch: RefCounted) -> void:

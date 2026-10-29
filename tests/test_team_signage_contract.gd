@@ -69,29 +69,27 @@ func _audit(circuit: String, player_team: int) -> void:
 		var verts: int = (plates_node.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
 		check(verts > 300 * race.active_teams.size(), "%s: the sign mesh holds real lettering (%d vertices)" % [label, verts])
 
-	if circuit == "brianza":
-		var paddock: Node3D = pit.paddock
-		var holder: MeshInstance3D = paddock.get_node_or_null("TransporterPlates") as MeshInstance3D if paddock != null else null
-		check(holder != null, "%s: the paddock carries a TransporterPlates sign mesh" % label)
-		if holder != null:
-			var signs: Array = holder.get_meta(&"plates", [])
-			check(signs.size() == race.active_teams.size(), "%s: one transporter sign per racing team (%d)" % [label, signs.size()])
-			var well_placed: bool = true
-			for entry: Dictionary in paddock.transporter_poses:
-				var team: int = int(entry["team"])
-				if team < 0:
-					continue
-				var found: Dictionary = _plate_of(signs, team)
-				if found.is_empty():
-					well_placed = false
-					continue
-				var pose: Transform3D = entry["pose"]
-				well_placed = well_placed and (found["origin"] as Vector3).distance_to(pose.origin) < 3.5
-				# The sign faces the circuit, not the paddock fence.
-				var toward_track: Vector3 = world.ribbon.get_point_at_offset(float(entry["s"]), 0.0).origin - (found["origin"] as Vector3)
-				well_placed = well_placed and (found["normal"] as Vector3).dot(toward_track.normalized()) > 0.3
-			check(well_placed, "%s: transporter signs sit on their own truck, facing the track" % label)
-	world.queue_free()
+	var kit: Node3D = pit.find_child("TeamTransporters", true, false) as Node3D
+	var holder: MeshInstance3D = kit.get_node_or_null("TransporterPlates") as MeshInstance3D if kit != null else null
+	check(holder != null, "%s: the paddock carries a TransporterPlates sign mesh" % label)
+	if holder != null:
+		var signs: Array = holder.get_meta(&"plates", [])
+		check(signs.size() == race.active_teams.size(), "%s: one transporter sign per racing team (%d)" % [label, signs.size()])
+		var well_placed: bool = true
+		for entry: Dictionary in kit.transporter_poses:
+			var team: int = int(entry["team"])
+			if team < 0:
+				continue
+			var found: Dictionary = _plate_of(signs, team)
+			if found.is_empty():
+				well_placed = false
+				continue
+			var pose: Transform3D = entry["pose"]
+			well_placed = well_placed and (found["origin"] as Vector3).distance_to(pose.origin) < 3.5
+			# The sign faces the circuit, not the paddock fence.
+			var toward_track: Vector3 = world.ribbon.get_point_at_offset(float(entry["s"]), 0.0).origin - (found["origin"] as Vector3)
+			well_placed = well_placed and (found["normal"] as Vector3).dot(toward_track.normalized()) > 0.3
+		check(well_placed, "%s: transporter signs sit on their own truck, facing the track" % label)
 	await process_frame
 
 

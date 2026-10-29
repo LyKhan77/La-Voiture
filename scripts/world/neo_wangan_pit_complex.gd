@@ -27,6 +27,8 @@ const PitBuildingKit := preload("res://scripts/world/paddock/pit_building.gd")
 const GrandstandKit := preload("res://scripts/world/paddock/main_grandstand.gd")
 const ControlTowerKit := preload("res://scripts/world/paddock/race_control_tower.gd")
 const Liveries := preload("res://scripts/car/team_liveries.gd")
+const TransportersKit := preload("res://scripts/world/paddock/team_transporters.gd")
+const FigureScript := preload("res://scripts/car/pit_crew_figure.gd")
 
 ## The circuit's homologated lap (see NeoWanganCircuitBuilder.LENGTH_M; repeated here so this
 ## script stays free of a circular preload with the builder).
@@ -57,6 +59,8 @@ const BOX_LATERAL_M: float = 13.0
 const GARAGE_FRONT_M: float = 16.0
 const GARAGE_DEPTH_M: float = 9.0
 const GARAGE_HEIGHT_M: float = 4.4
+## Where the transporter row stands, measured from the circuit centre line: on the deck behind the pit building.
+const TRANSPORTER_LATERAL_M: float = 40.0
 const GARAGE_PITCH_M: float = STALL_PITCH_M
 const GARAGE_WIDTH_M: float = 11.4
 const ENTRY_BLEND_M: float = 20.0
@@ -86,6 +90,7 @@ var garage_front_m: float = GARAGE_FRONT_M
 var stall_lane_m: float = BOX_LATERAL_M
 var stalls: Array[Dictionary] = [] # {index, s, u, lateral, pose, node}
 var garages: Array[Node3D] = []
+var transporters: Node3D
 var built: bool = false
 ## The pit wall's arc span and the crash cushion standing on its nose.
 var wall_arcs: Array[float] = []
@@ -133,6 +138,7 @@ func build(p_ribbon: TrackRibbonScript) -> void:
 	_build_pit_wall()
 	_build_crash_cushion()
 	_build_garages()
+	_build_team_transporters()
 	_build_shared_paddock()
 	_build_pit_lighting()
 	_build_entry_sign()
@@ -167,6 +173,10 @@ func stall_transform(team: int) -> Transform3D:
 func assign_teams(team_ids: Array[int]) -> void:
 	for i: int in range(stalls.size()):
 		stalls[i]["team"] = team_ids[i] if i < team_ids.size() else -1
+	if transporters != null:
+		transporters.apply_teams(stalls)
+	if not garages.is_empty():
+		_build_standby_crews()
 
 
 ## The crew standing in a box: the Apex Ring's 13-person line-up, fitted to this lane's apron.
@@ -410,6 +420,33 @@ func _build_garages() -> void:
 	mesh.name = "PitGarages"
 	mesh.mesh = batch.commit()
 	add_child(mesh)
+	_build_standby_crews()
+
+
+## The crew waiting in each garage in its team's overalls, as on the other circuits; the choreographer hides it while
+## the animated twin works in the lane.
+func _build_standby_crews() -> void:
+	var flat: Material = ToonMaterials.vertex_colored(false)
+	var roles: Array = crew_roles()
+	for index: int in range(garages.size()):
+		var color: Color = Liveries.color_for(int(stalls[index]["team"]))
+		var batch := MeshBatchScript.new()
+		for slot: int in range(roles.size()):
+			FigureScript.add(batch, flat, Transform3D(Basis(Vector3.UP, PI * 0.5), crew_spot(slot)), int(roles[slot]), color)
+		var crew: MeshInstance3D = garages[index].get_node_or_null("StandbyCrew") as MeshInstance3D
+		if crew == null:
+			crew = MeshInstance3D.new()
+			crew.name = "StandbyCrew"
+			garages[index].add_child(crew)
+		crew.mesh = batch.commit()
+
+
+## One transporter per racing team on the deck behind the pit building (shared TeamTransporters kit).
+func _build_team_transporters() -> void:
+	transporters = TransportersKit.new()
+	transporters.name = "TeamTransporters"
+	add_child(transporters)
+	transporters.build(ribbon, stalls, TRANSPORTER_LATERAL_M, true)
 
 
 func _build_shared_paddock() -> void:

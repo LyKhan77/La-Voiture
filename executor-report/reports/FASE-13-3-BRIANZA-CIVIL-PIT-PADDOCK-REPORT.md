@@ -62,6 +62,15 @@
 - Smoke native 3 lap dengan 6 pit stop setelah perubahan: tiga sirkuit finis 20 mobil, 0 orphan, rata-rata 16,67–16,71 ms (59,8–60,0 FPS), p95 22,8–24,5 ms (naik-turun 21–25 ms antar-run pada kode yang sama). Regresi penuh 59/59 lulus.
 - Catatan: draw call environment per sampel bergantung posisi kamera (Brianza 171–218 antar-run), sehingga tidak cocok sebagai pembanding bersih untuk dua mesh tambahan (`TeamPlates`, `TransporterPlates`); papan garasi Apex justru turun dari 10 `Label3D` menjadi satu mesh.
 
+## Konsistensi objek unik tim lintas sirkuit
+
+- Himpunan objek unik tim yang disepakati untuk sementara: nama tim, pita warna fascia/strip pintu shutter, kru standby berseragam tim, cat kotak box, kru animasi di lane, dan transporter paddock. Objek lain (papan pit, awning, banner) ditunda.
+- Celah yang ditemukan audit: garasi Wangan tidak punya kru standby berwarna tim, dan transporter paddock hanya ada di Brianza.
+- Perbaikan: kru standby di garasi Wangan (mesh `StandbyCrew`, disembunyikan choreographer saat kru animasi bekerja, seperti di Apex dan Brianza); komponen bersama `scripts/world/paddock/team_transporters.gd` (satu MultiMesh truk berwarna livery + papan nama + apron aspal opsional) menggantikan kode truk khusus Brianza dan kini dipakai Apex (lateral 47 m, rumput di belakang gedung pit), Wangan (lateral 40 m, dek di belakang gedung pit), dan Brianza (lateral 47 m, apron paddock sendiri). Hanya jarak lateral baris yang berbeda per sirkuit, sehingga tata letak tetap mengikuti spline masing-masing.
+- `tests/test_team_identity_consistency.gd` (3 sirkuit × pemain tim 4/11/12, 54 assertion): kru standby berseragam tim di setiap garasi, satu transporter per tim, warna livery, sejajar dengan box timnya, dan berada di belakang dinding garasi. Pada kode sebelum perbaikan tes gagal 12 kali (transporter Apex/Wangan/Brianza tidak ada di `TeamTransporters`, kru standby Wangan tidak ada).
+- Pengujian Safety Car: `tests/test_pit_under_safety_car.gd` (enam mobil dipanggil ke pit dengan SC keluar, dua urutan) lulus dan gagal 0/6 saat servis box dimatikan.
+- Bukti visual: `executor-report/screenshots/phases/phase-13-3-identity-*.png`.
+
 ## Gate terbuka
 
 - Draw call environment Brianza: maksimum sampel 171 (sebelumnya 170) melewati batas plan <= 169 dan target <= 160, tetapi masih di bawah batas AGENTS.md (< 180). Apex dan Wangan di bawah 160. Tidak dioptimalkan pada fase ini.
