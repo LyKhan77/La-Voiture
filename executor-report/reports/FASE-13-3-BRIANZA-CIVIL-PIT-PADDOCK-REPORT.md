@@ -1,6 +1,6 @@
 # FASE 13.3 — Brianza Civil, Pit Lane & Paddock
 
-**Status: selesai dengan gate terbuka.** Regresi penuh lulus; target draw call dan gate 60 FPS terkunci belum terpenuhi (lihat bagian akhir).
+**Status: selesai dengan gate terbuka.** Regresi penuh 58/58 lulus; target draw call dan gate 60 FPS terkunci belum terpenuhi (lihat bagian akhir).
 
 ## Implementasi
 
@@ -30,8 +30,35 @@
 - Verifikasi: `tests/test_pit_team_assignment_contract.gd` (3 sirkuit × pemain tim 4/11/12, 54 assertion) gagal sebelum perbaikan dan lulus sesudahnya; seluruh 57 suite lulus. Probe 9 balapan dengan permintaan pit acak: hold pit terlama 51 dtk, tidak ada mobil macet permanen. Laporan "mobil macet" belum bisa direproduksi; dugaan: antrean rekan satu tim 8 m di belakang box (disengaja).
 - Belum ditangani: garasi Neo Wangan netral (tanpa warna tim atau kru standby).
 
+## Antrean pit dan servis (commit 19b7496)
+
+- Keluhan uji manual: antrean menuju pit kurang halus, dan kru kadang diam sejenak saat mobil sudah masuk box.
+- Antrean: mobil di pit lane mengerem sepanjang kurva nyaman (`PIT_COMFORT_DECEL` 5 m/s², batas keras `PIT_BRAKE_MAX` 9 m/s²) alih-alih berhenti mendadak; mobil mengikuti mobil di depan pada jarak pengereman; rekan satu tim menumpuk 8 m di belakang box; pelepasan dari box dan penggabungan ke fast lane menunggu paling lama `PIT_RELEASE_WAIT_MAX_S` (5 dtk). Sebelumnya: deselerasi 38 m/s² dan lompatan posisi 0,40 m; sesudahnya ≤ 9 m/s² dan ≤ 0,05 m.
+- Kru diam: akar masalahnya aturan "ikuti mobil di depan" menahan mobil kedua sebuah tim 0,3–0,5 m sebelum box-nya, karena mobil yang antre di box berikutnya berhenti sekitar 4–6 m di depannya; pengaman anti-stuck tidak aktif karena jarak 0,5 m dianggap sudah parkir. Mobil menunggu 4–19 dtk sebelum servis mulai. Perbaikan: mobil yang menuju box-nya sendiri mengabaikan mobil yang antre di luar box itu, titik tunggu mobil kedua dibatasi `stall_pitch_m − panjang mobil − 0,5 m` (Wangan: pitch 12 m), dan toleransi parkir pengaman 0,05 m. Setelah perbaikan jeda tiba-ke-servis 0,35–0,45 dtk (waktu mengerem), seluruh 20 mobil dalam satu putaran selesai dalam 70 dtk (sebelumnya 77).
+- `tests/test_pit_queue_flow.gd`: 20 mobil masuk pit bersamaan dalam 4 skenario (kereta 30 m, rapat 20 m, hujan, tersebar). Menguji semua terlayani, hold terlama ≤ 100 dtk, deselerasi ≤ 10 m/s², tanpa lompatan > 0,05 m, dan servis mulai ≤ 1 dtk setelah tiba. Cek jeda servis gagal (14,1 dtk dan 5,9 dtk) saat perbaikan dimatikan, lulus saat dihidupkan.
+- Keterbatasan yang diketahui: celah bumper di titik temu mobil yang keluar dengan mobil yang masuk ke box berikutnya tetap overlap 3–4 m pada skenario seluruh grid masuk bersamaan; hanya dicetak, tidak di-assert. Perbaikan penuh butuh rancangan ulang geometri temu keluar–masuk (fase tersendiri, menyentuh geometri sim dan 3D di tiga sirkuit).
+
+## Regresi final dan smoke native
+
+- Seluruh 58 `tests/test_*.gd` headless lulus (exit 0, 0 `[FAIL]`) setelah semua perubahan di atas, termasuk `test_pit_queue_flow.gd`.
+- Smoke native `scratch/smoke_pit_race.gd` (1920×1080, vsync mati, 3 lap, 20 mobil, 6 mobil dipanggil ke box bersamaan, diukur saat 6 mobil berada di pit lane, 559 frame):
+
+| Sirkuit | Pit stop | Mobil finis | Rata-rata | p95 | Terburuk | Orphan |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| Brianza | 6 | 20 | 16,75 ms (59,7 FPS) | 22,96 ms | 32,95 ms | 0 |
+| Apex Ring | 6 | 20 | 16,69 ms (59,9 FPS) | 21,42 ms | 29,02 ms | 0 |
+| Neo-Wangan | 6 | 20 | 16,75 ms (59,7 FPS) | 23,05 ms | 34,02 ms | 0 |
+
+  Podium tampil di ketiganya. Draw call environment per sampel: Brianza maks 171, Apex maks 155, Wangan maks 146.
+
 ## Gate terbuka
 
-- Draw call environment pada smoke: 167, 170, 169, 166, 70 per sampel. Satu sampel (170) melewati batas plan <= 169 dan semuanya di atas target <= 160, tetapi masih di bawah batas AGENTS.md (< 180). Tidak dioptimalkan pada fase ini.
-- 60 FPS terkunci belum terbukti: p95 22,36 ms dan terburuk 26,20 ms melewati 16,66 ms. Rata-rata 59,9 FPS dari satu sesi smoke pendek; jangan mengklaim gate terpenuhi.
-- Smoke 3 lap penuh dengan pit stop di layout baru belum diukur ulang secara native; smoke headless pit (masuk, servis, keluar, finis) lulus.
+- Draw call environment Brianza: maksimum sampel 171 (sebelumnya 170) melewati batas plan <= 169 dan target <= 160, tetapi masih di bawah batas AGENTS.md (< 180). Apex dan Wangan di bawah 160. Tidak dioptimalkan pada fase ini.
+- 60 FPS terkunci belum terbukti: p95 21–23 ms dan terburuk 29–34 ms di ketiga sirkuit, melewati 16,66 ms, sedangkan rata-rata 59,7–59,9 FPS. Pola sama di semua sirkuit termasuk Apex yang tidak disentuh fase ini, dan tidak berubah dengan pit lane penuh, jadi sumber lonjakan bukan environment Brianza. Perlu profiling sendiri; jangan mengklaim gate terpenuhi.
+- Smoke 3 lap dengan pit stop sudah diukur native (tabel di atas) dan lulus tanpa error atau orphan.
+
+## Belum dikerjakan (diusulkan untuk fase berikutnya)
+
+- Nama tim pada aset (fascia garasi, sisi transporter paddock, gedung pit) sebagai komponen bersama yang konsisten di tiga sirkuit; hanya `PitLaneComplex` Apex yang punya `TeamPlate`. Garasi Neo Wangan masih netral tanpa warna tim atau kru standby.
+- Nilai `crew_skill` netral per tim di `GtData`; matriks performa kru lengkap ditunda ke mode karier.
+- Rancang ulang titik temu keluar–masuk box (celah bumper 3–4 m), kebijakan pit AI, pelepasan tidak aman dan penalti, serta interaksi dengan Safety Car.
