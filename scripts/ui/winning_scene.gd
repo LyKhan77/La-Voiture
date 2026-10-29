@@ -796,8 +796,7 @@ COMPLETE"
 		_car_model = model
 		_car_box = _car_bounds(model)
 		var team: int = Roster.CAR_SLUGS.find(slug)
-		headline.text = "%s
-TAKES IT" % Roster.CAR_NAMES[team].split(" ")[0].to_upper()
+		headline.text = "%s\nTAKES IT" % Roster.CAR_NAMES[team].split(" ")[0].to_upper()
 		hero_callouts = Callouts.build(Roster.CAR_NAMES[team], Roster.CAR_ENGINES[team])
 		_stage.add_child(hero_callouts)
 	for i: int in range(order.size()):
