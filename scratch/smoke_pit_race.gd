@@ -13,6 +13,7 @@ const WinningStudio := preload("res://scripts/ui/winning_scene.gd")
 const MEASURE_FRAMES: int = 600
 const WARMUP_FRAMES: int = 40
 const SAMPLE_EVERY: int = 60
+const SETTLE_FRAMES: int = 8
 const PIT_CALLERS: int = 6
 
 var world: Node
@@ -66,6 +67,9 @@ func _run() -> void:
 		peak_in_lane = maxi(peak_in_lane, _cars_in_lane())
 		if measured % SAMPLE_EVERY == 0:
 			await _sample_environment_cost()
+			# Hiding and showing the environment disturbs the next frames: let them settle, off the record.
+			for _settle: int in range(SETTLE_FRAMES):
+				await process_frame
 			last_usec = Time.get_ticks_usec()
 	world.set_time_scale(16.0)
 	var guard: int = 0

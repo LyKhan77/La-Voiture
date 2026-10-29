@@ -43,9 +43,11 @@ func _run() -> void:
 	var race = world.race
 	for key: String in PHASES:
 		samples[key] = []
-	# Warm up: 40 s of racing so the field has spread out.
-	for _i: int in range(int(40.0 / Types.TICK_DT)):
-		race.step()
+	# Warm up: 40 s of racing so the field has spread out. `cold` skips it to expose first-tick costs.
+	var cold: bool = args.size() > 2 and args[2] == "cold"
+	if not cold:
+		for _i: int in range(int(40.0 / Types.TICK_DT)):
+			race.step()
 	if pits:
 		for index: int in range(6):
 			race.request_pit(race.cars[index * 3].id, 1)
@@ -53,7 +55,13 @@ func _run() -> void:
 	var car_total: Dictionary = {}
 	for _i: int in range(int(sim_seconds / Types.TICK_DT)):
 		_timed_step(race, per_car, car_total)
-	print("SIM PROFILE %s %s ticks=%d (ms per tick)" % [circuit, "6 cars pitting" if pits else "normal race", int(sim_seconds / Types.TICK_DT)])
+	print("SIM PROFILE %s %s ticks=%d (ms per tick)" % [circuit, "cold start" if cold else ("6 cars pitting" if pits else "normal race"), int(sim_seconds / Types.TICK_DT)])
+	if cold:
+		for key: String in PHASES:
+			var first: Array[String] = []
+			for value: float in (samples[key] as Array).slice(0, 6):
+				first.append("%.2f" % value)
+			print("  FIRST TICKS %-20s %s" % [key, " ".join(first)])
 	for key: String in PHASES:
 		var values: Array = samples[key]
 		values.sort()

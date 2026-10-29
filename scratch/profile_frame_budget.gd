@@ -1,7 +1,7 @@
 extends SceneTree
 
 ## Where do the slow frames come from? Native run (needs a GPU, not --headless):
-##   godot --path . --resolution 1920x1080 --script res://scratch/profile_frame_budget.gd -- <circuit_id> [seconds] [capped|uncapped]
+##   godot --path . --resolution 1920x1080 --script res://scratch/profile_frame_budget.gd -- <circuit_id> [seconds] [capped|uncapped|vsync]
 ## Records every frame of a normal 1x race: wall time, script time, physics time, CPU and GPU render time of the
 ## viewport, draw calls, and how many sim ticks ran in that frame. Reports percentiles and what the frames over
 ## the 60 FPS budget have in common (sim ticks, frame spacing), and writes a CSV to temp/perf/.
@@ -15,6 +15,8 @@ const WARMUP_FRAMES: int = 240
 const BUDGET_MS: float = 1000.0 / 60.0
 
 var world: Node3D
+var _mode_label: String = "uncapped"
+var _variant: String = "base"
 
 
 func _initialize() -> void:
@@ -25,9 +27,13 @@ func _run() -> void:
 	var args: PackedStringArray = OS.get_cmdline_user_args()
 	var circuit: String = args[0] if args.size() > 0 else "brianza"
 	var seconds: float = float(args[1]) if args.size() > 1 else 25.0
-	var capped: bool = args.size() > 2 and args[2] == "capped"
-	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+	var mode: String = args[2] if args.size() > 2 else "uncapped"
+	_mode_label = mode
+	var capped: bool = mode == "capped"
+	# capped: run/max_fps 60, no vsync. vsync: the display's own pacing, no limiter. uncapped: neither.
+	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if mode == "vsync" else DisplayServer.VSYNC_DISABLED)
 	Engine.max_fps = 60 if capped else 0
+	print("DISPLAY refresh %.1f Hz, mode %s" % [DisplayServer.screen_get_refresh_rate(), mode])
 	var config := ConfigScript.get_config()
 	config.selected_circuit_id = circuit
 	config.total_laps = 3
@@ -40,14 +46,53 @@ func _run() -> void:
 	world.finish_grid_intro()
 	var rid: RID = root.get_viewport_rid()
 	RenderingServer.viewport_set_measure_render_time(rid, true)
+	# Experiment variants (4th argument) to find what shapes the frame pacing; "base" changes nothing.
+	var variant: String = args[3] if args.size() > 3 else "base"
+	_variant = variant
+	match variant:
+		"hud_off":
+			world.hud.visible = false
+		"radio_off":
+			for card: CanvasLayer in [world.hud.radio, world.hud.engineer_radio]:
+				card.visible = false
+				card.set_process(false)
+		"cars_off":
+			for actor: Node3D in world.actors:
+				actor.visible = false
+		"shadows_off":
+			(world.get_node("Sun") as DirectionalLight3D).shadow_enabled = false
+		"phys120":
+			Engine.physics_ticks_per_second = 120
+		"step_in_process":
+			world.set_physics_process(false)
+	if variant == "pits":
+		# Six cars called to box at once; run fast until the lane is busy, then measure at 1x like a real stop.
+		for index: int in range(6):
+			world.race.request_pit(world.race.cars[index * 3].id, 1)
+		world.set_time_scale(8.0)
+		var guard: int = 0
+		while guard < 6000:
+			await process_frame
+			guard += 1
+			var in_lane: int = 0
+			for car in world.race.cars:
+				in_lane += 1 if car.pit != null else 0
+			if in_lane >= 3:
+				break
+		world.set_time_scale(1.0)
+	print("VARIANT %s" % variant)
 	for _i: int in range(WARMUP_FRAMES):
 		await process_frame
+		if variant == "step_in_process":
+			world.step(_frame_delta())
 	var rows: Array[Dictionary] = []
 	var last_usec: int = Time.get_ticks_usec()
 	var last_time: float = float(world.race.time)
 	var begin: int = Time.get_ticks_msec()
 	while float(Time.get_ticks_msec() - begin) < seconds * 1000.0 and not world.race.is_finished():
 		await process_frame
+		if variant == "step_in_process":
+			world.step(_frame_delta())
 		var now: int = Time.get_ticks_usec()
 		var race_time: float = float(world.race.time)
 		rows.append({
@@ -68,7 +113,7 @@ func _run() -> void:
 
 
 func _report(circuit: String, capped: bool, rows: Array[Dictionary]) -> void:
-	print("PROFILE %s %s frames=%d" % [circuit, "capped60" if capped else "uncapped", rows.size()])
+	print("PROFILE %s %s frames=%d" % [circuit, _mode_label, rows.size()])
 	for key: String in ["frame", "process", "physics", "cpu", "gpu", "calls"]:
 		var values: Array[float] = []
 		for row: Dictionary in rows:
@@ -126,8 +171,19 @@ func _pct(sorted_values: Array[float], fraction: float) -> float:
 
 func _write_csv(circuit: String, capped: bool, rows: Array[Dictionary]) -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://temp/perf/"))
-	var file := FileAccess.open("res://temp/perf/%s-%s.csv" % [circuit, "capped" if capped else "uncapped"], FileAccess.WRITE)
+	var file := FileAccess.open("res://temp/perf/%s-%s.csv" % [circuit, _mode_label], FileAccess.WRITE)
 	file.store_line("index,frame_ms,process_ms,physics_ms,render_cpu_ms,render_gpu_ms,draw_calls,ticks")
 	for index: int in range(rows.size()):
 		var row: Dictionary = rows[index]
 		file.store_line("%d,%.3f,%.3f,%.3f,%.3f,%.3f,%d,%d" % [index, row["frame"], row["process"], row["physics"], row["cpu"], row["gpu"], int(row["calls"]), int(row["ticks"])])
+
+
+var _prev_step_usec: int = 0
+
+
+## Seconds since the previous call: SceneTree has no process delta of its own.
+func _frame_delta() -> float:
+	var now: int = Time.get_ticks_usec()
+	var delta: float = float(now - _prev_step_usec) / 1000000.0 if _prev_step_usec > 0 else 1.0 / 60.0
+	_prev_step_usec = now
+	return clampf(delta, 0.001, 0.1)
