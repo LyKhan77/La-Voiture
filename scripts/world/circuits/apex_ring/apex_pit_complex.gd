@@ -20,6 +20,7 @@ const ToonMaterials := preload("res://scripts/world/shared/toon_materials.gd")
 const MeshBatchScript := preload("res://scripts/world/shared/mesh_batch.gd")
 const FigureScript := preload("res://scripts/car/pit_crew_figure.gd")
 const Liveries := preload("res://scripts/car/team_liveries.gd")
+const PitKit := preload("res://scripts/world/shared/pit_kit.gd")
 const TeamSignage := preload("res://scripts/world/paddock/team_signage.gd")
 const TransportersKit := preload("res://scripts/world/paddock/team_transporters.gd")
 const EngineScript := preload("res://scripts/core/race_sim_engine.gd")
@@ -53,9 +54,6 @@ const RAMP_OUT_M: float = 90.0
 const STRIP_START_LEFT_M: float = 6.0
 const STRIP_START_RIGHT_M: float = 7.2
 
-const BOX_HALF_WIDTH_M: float = 1.65
-const BOX_LENGTH_M: float = 6.4
-const BOX_LINE_M: float = 0.12
 const GARAGE_WIDTH_M: float = 12.4
 const GARAGE_DEPTH_M: float = 9.0
 const GARAGE_HEIGHT_M: float = 4.2
@@ -67,11 +65,10 @@ const WALL_STEP_M: float = 3.0
 const WALL_MIN_VERGE_M: float = 1.1
 const SURFACE_Y: float = 0.015
 const LINE_Y: float = 0.03
-const PAINT_Y: float = 0.035
 
 const ASPHALT_COLOR := Color("#2a2c33")
-const PAINT_WHITE := Color("#f4f5f7")
-const PAINT_YELLOW := Color("#ffd400")
+const PAINT_WHITE := PitKit.PAINT_WHITE
+const PAINT_YELLOW := PitKit.PAINT_YELLOW
 const WALL_COLOR := Color("#b9bdc7")
 const WALL_COPING_COLOR := Color("#e4e6ec")
 const GARAGE_SHELL_COLOR := Color("#2a2d36")
@@ -97,10 +94,8 @@ var wall_end_cushions: Array[Dictionary] = []
 ## One entry per pit box: {team, number, lateral, half_width, length}.
 var stall_markings: Array[Dictionary] = []
 var lane_separator_count: int = 0
-## Per garage: counts of what it holds (see _garage_props).
+## Per garage: counts of what it holds (see PitKit.garage_props).
 var garage_equipment: Array[Dictionary] = []
-
-static var _asphalt_material: ShaderMaterial
 
 
 ## Lateral of the cars' path at `u` for a lane `length` long: from the circuit edge, across the entry road to the
@@ -112,29 +107,6 @@ static func lane_lateral_at(u: float, length: float) -> float:
 ## 0 at Pit Entry and Pit Exit, 1 along the full fast lane.
 static func lane_blend(u: float, length: float) -> float:
 	return minf(smoothstep(0.0, RAMP_IN_M, u), smoothstep(length, length - RAMP_OUT_M, u))
-
-
-## The asphalt both pit lane and road share: the track's own weather shader, dark asphalt vertex colour.
-static func asphalt_material() -> ShaderMaterial:
-	if _asphalt_material == null:
-		_asphalt_material = ShaderMaterial.new()
-		_asphalt_material.shader = RoadShader
-	return _asphalt_material
-
-
-## The roles of the crew standing by, in the order they line up across the garage mouth.
-static func standby_roles() -> Array:
-	return [
-		FigureScript.Role.FIRE, FigureScript.Role.JACK, FigureScript.Role.GUNNER, FigureScript.Role.GUNNER, FigureScript.Role.HANDLER,
-		FigureScript.Role.HANDLER, FigureScript.Role.LOLLIPOP, FigureScript.Role.HANDLER, FigureScript.Role.HANDLER,
-		FigureScript.Role.GUNNER, FigureScript.Role.GUNNER, FigureScript.Role.JACK, FigureScript.Role.FUELER,
-	]
-
-
-## Where crew member `slot` stands inside the garage (garage frame: +x away from the lane).
-static func standby_spot(slot: int) -> Vector3:
-	var count: int = standby_roles().size()
-	return Vector3(1.5, 0.0, (float(slot) - float(count - 1) * 0.5) * 0.88)
 
 
 ## Builds the lane, garages and markings against `p_ribbon`.
@@ -210,12 +182,12 @@ func garage_for_team(team: int) -> Node3D:
 
 ## The crew standing in a box: 13 people, in the order they line up across the garage mouth.
 func crew_roles() -> Array:
-	return standby_roles()
+	return PitKit.standby_roles()
 
 
 ## Where crew member `slot` stands at the garage mouth (garage frame: +x away from the lane).
 func crew_spot(slot: int) -> Vector3:
-	return standby_spot(slot)
+	return PitKit.standby_spot(slot)
 
 
 func stall_index_for_team(team: int) -> int:
@@ -253,7 +225,7 @@ func _build_stalls(team_ids: Array[int] = []) -> void:
 ## One asphalt with the circuit: same shader, same vertex colour, one merged surface.
 func _build_asphalt() -> void:
 	var batch := MeshBatchScript.new()
-	var material: ShaderMaterial = asphalt_material()
+	var material: ShaderMaterial = PitKit.asphalt_material()
 	var left: Callable = func(u: float) -> float: return lane_edges(u).x
 	var right: Callable = func(u: float) -> float: return lane_edges(u).y
 	_strip(batch, material, ASPHALT_COLOR, SURFACE_Y, 0.0, length_m, left, right)
@@ -301,62 +273,12 @@ func _build_markings() -> void:
 		_strip(batch, paint, PAINT_YELLOW, LINE_Y + 0.003, cross_u, cross_u + 1.5, left, right)
 	speed_limit_lines_u = [0.0, length_m - 1.5]
 	for stall: Dictionary in stalls:
-		_paint_box(batch, paint, stall)
+		PitKit.paint_box(batch, paint, stall, global_transform.affine_inverse() * (stall["pose"] as Transform3D), STALL_LANE_M, stall_markings)
 	var instance := MeshInstance3D.new()
 	instance.name = "PitMarkings"
 	instance.mesh = batch.commit()
 	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(instance)
-
-
-## The team's pit box: coloured pad, white outline, yellow nose line and the box number.
-func _paint_box(batch: MeshBatchScript, material: Material, stall: Dictionary) -> void:
-	var team: int = int(stall.get("team", 0))
-	var pose: Transform3D = global_transform.affine_inverse() * (stall["pose"] as Transform3D)
-	var half_w: float = BOX_HALF_WIDTH_M
-	var half_l: float = BOX_LENGTH_M * 0.5
-	var color: Color = Liveries.color_for(team)
-	# Local box frame: x across the lane (toward the garage), z along it (- forward).
-	batch.box(material, color, _local(pose, Vector3(0.0, PAINT_Y - 0.004, 0.0)), Vector3(half_w * 2.0 - 0.3, 0.012, BOX_LENGTH_M - 0.3))
-	for edge: float in [-1.0, 1.0]:
-		batch.box(material, PAINT_WHITE, _local(pose, Vector3(edge * half_w, PAINT_Y, 0.0)), Vector3(BOX_LINE_M, 0.014, BOX_LENGTH_M))
-		batch.box(material, PAINT_WHITE, _local(pose, Vector3(0.0, PAINT_Y, edge * half_l)), Vector3(half_w * 2.0, 0.014, BOX_LINE_M))
-	# Where the nose goes (the sim parks the car's centre on the box): a short yellow bar.
-	batch.box(material, PAINT_YELLOW, _local(pose, Vector3(0.0, PAINT_Y + 0.002, -(half_l - 0.55))), Vector3(1.5, 0.014, 0.16))
-	_paint_number(batch, material, pose, team + 1)
-	stall_markings.append({"team": team, "number": team + 1, "lateral": STALL_LANE_M, "half_width": half_w, "length": BOX_LENGTH_M})
-
-
-## Seven-segment numerals laid on the ground beside the box, readable from the fast lane.
-func _paint_number(batch: MeshBatchScript, material: Material, pose: Transform3D, number: int) -> void:
-	var digits: Array[int] = []
-	for character: String in str(number):
-		digits.append(int(character))
-	var segments: Array[int] = [0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x6F]
-	var width: float = 0.5
-	var height: float = 0.9
-	var thickness: float = 0.1
-	# Per segment a..g: (offset along the text's up, offset across, size along up, size across).
-	var layout: Array[Vector4] = [
-		Vector4(height * 0.5, 0.0, thickness, width), Vector4(height * 0.25, width * 0.5, height * 0.5, thickness),
-		Vector4(-height * 0.25, width * 0.5, height * 0.5, thickness), Vector4(-height * 0.5, 0.0, thickness, width),
-		Vector4(-height * 0.25, -width * 0.5, height * 0.5, thickness), Vector4(height * 0.25, -width * 0.5, height * 0.5, thickness),
-		Vector4(0.0, 0.0, thickness, width),
-	]
-	for place: int in range(digits.size()):
-		# Text up = toward the garage (+x), advancing along +z.
-		var origin := Vector3(-(BOX_HALF_WIDTH_M + 0.9), PAINT_Y, (float(place) - float(digits.size() - 1) * 0.5) * (width + 0.25))
-		var mask: int = segments[digits[place]]
-		for bit: int in range(7):
-			if (mask >> bit) & 1 == 0:
-				continue
-			var segment: Vector4 = layout[bit]
-			batch.box(material, PAINT_WHITE, _local(pose, origin + Vector3(segment.x, 0.0, segment.y)), Vector3(segment.z, 0.014, segment.w))
-
-
-## A box-local offset (x across the lane, z along it) in the pit lane's own frame.
-func _local(pose: Transform3D, offset: Vector3) -> Transform3D:
-	return Transform3D(pose.basis, pose * offset)
 
 
 # --- pit wall ----------------------------------------------------------------------------------------------
@@ -422,12 +344,12 @@ func _build_garage(stall: Dictionary) -> Node3D:
 	garage.add_child(_mesh_node("Body", batch.commit()))
 	var props := MeshBatchScript.new()
 	var flat: ShaderMaterial = ToonMaterials.vertex_colored(false)
-	garage_equipment.append(_garage_props(props, flat, color))
+	garage_equipment.append(PitKit.garage_props(props, flat, color))
 	garage.add_child(_mesh_node("Props", props.commit()))
 	var standby := MeshBatchScript.new()
-	var roles: Array = standby_roles()
+	var roles: Array = PitKit.standby_roles()
 	for slot: int in range(roles.size()):
-		FigureScript.add(standby, flat, Transform3D(Basis(Vector3.UP, PI * 0.5), standby_spot(slot)), int(roles[slot]), color)
+		FigureScript.add(standby, flat, Transform3D(Basis(Vector3.UP, PI * 0.5), PitKit.standby_spot(slot)), int(roles[slot]), color)
 	garage.add_child(_mesh_node("StandbyCrew", standby.commit()))
 	return garage
 
@@ -457,52 +379,6 @@ func _mesh_node(node_name: String, mesh: ArrayMesh) -> MeshInstance3D:
 	instance.name = node_name
 	instance.mesh = mesh
 	return instance
-
-
-## Tyre stacks, wheel guns, jacks, fuel rig, extinguishers, the monitor desk with its engineers and the
-## lights, in garage coordinates. Returns what was placed, for the equipment check.
-func _garage_props(batch: MeshBatchScript, material: Material, team_color: Color) -> Dictionary:
-	var tyre := Color("#17181c")
-	var compounds: Array[Color] = [Color("#e0212e"), Color("#ffd400"), Color("#f4f5f7"), Color("#2f6fe0")] # soft, medium, hard, wet
-	for stack: int in range(4):
-		var z: float = -5.3 + 1.05 * float(stack)
-		for layer: int in range(4):
-			batch.cylinder(material, tyre, Transform3D(Basis.IDENTITY, Vector3(7.9, 0.02 + 0.3 * float(layer), z)), 0.33, 0.33, 0.3, 10, true, false)
-		batch.cylinder(material, compounds[stack], Transform3D(Basis.IDENTITY, Vector3(7.9, 1.23, z)), 0.27, 0.27, 0.025, 10, true, false)
-	# Wheel guns on a rack against the back wall, with their air hoses.
-	batch.box(material, Color("#4a505c"), Transform3D(Basis.IDENTITY, Vector3(8.5, 0.45, 4.6)), Vector3(0.5, 0.9, 1.5))
-	for gun: int in range(4):
-		batch.box(material, FigureScript.GUN_COLOR, Transform3D(Basis.IDENTITY, Vector3(8.45, 0.98, 4.1 + 0.33 * float(gun))), Vector3(0.12, 0.12, 0.26))
-		batch.box(material, FigureScript.HOSE_COLOR, Transform3D(Basis.IDENTITY, Vector3(8.85, 0.7, 4.1 + 0.33 * float(gun))), Vector3(0.05, 0.05, 0.3))
-	# Two hydraulic jack carts.
-	for jack: int in range(2):
-		var z: float = 2.6 + 1.1 * float(jack)
-		batch.box(material, FigureScript.GUN_COLOR, Transform3D(Basis.IDENTITY, Vector3(3.4, 0.14, z)), Vector3(0.9, 0.2, 0.5))
-		batch.box(material, FigureScript.GUN_COLOR, Transform3D(Basis.IDENTITY, Vector3(3.2, 0.48, z)), Vector3(0.12, 0.7, 0.12))
-		batch.box(material, FigureScript.HOSE_COLOR, Transform3D(Basis.IDENTITY, Vector3(3.9, 0.62, z)), Vector3(0.6, 0.05, 0.05))
-	# Fuel rig: tank on a trolley with a hose and nozzle.
-	batch.cylinder(material, Color("#9aa1ae"), Transform3D(Basis.IDENTITY, Vector3(4.2, 0.2, -5.4)), 0.3, 0.3, 0.9, 10)
-	batch.box(material, Color("#4a505c"), Transform3D(Basis.IDENTITY, Vector3(4.2, 0.1, -5.4)), Vector3(0.9, 0.12, 0.7))
-	batch.box(material, FigureScript.HOSE_COLOR, Transform3D(Basis.IDENTITY, Vector3(3.2, 0.5, -5.4)), Vector3(1.8, 0.05, 0.05))
-	batch.box(material, Color("#c9cdd6"), Transform3D(Basis.IDENTITY, Vector3(2.2, 0.55, -5.4)), Vector3(0.3, 0.1, 0.1))
-	# Extinguishers at both sides of the garage mouth.
-	for side: float in [-1.0, 1.0]:
-		batch.cylinder(material, FigureScript.EXTINGUISHER_COLOR, Transform3D(Basis.IDENTITY, Vector3(0.7, 0.0, side * 5.95)), 0.1, 0.1, 0.6, 8)
-	# Monitor desk with three screens and two engineers.
-	batch.box(material, Color("#3a3f4a"), Transform3D(Basis.IDENTITY, Vector3(6.0, 0.4, 0.0)), Vector3(0.9, 0.8, 2.6))
-	for monitor: int in range(3):
-		batch.box(material, Color(0.2, 0.7, 1.0, 0.3), Transform3D(Basis(Vector3.UP, 0.12 * float(monitor - 1)), Vector3(5.8, 1.08, (float(monitor) - 1.0) * 0.8)), Vector3(0.06, 0.5, 0.7))
-	for engineer: int in range(2):
-		FigureScript.add(batch, material, Transform3D(Basis(Vector3.UP, -PI * 0.5), Vector3(6.9, 0.0, (float(engineer) - 0.5) * 1.1)), FigureScript.Role.ENGINEER, team_color)
-	# A tool chest, a pennant in the team colour, and three light bars under the roof.
-	batch.box(material, FigureScript.EXTINGUISHER_COLOR, Transform3D(Basis.IDENTITY, Vector3(8.4, 0.55, 1.3)), Vector3(0.6, 1.1, 1.0))
-	batch.box(material, team_color, Transform3D(Basis.IDENTITY, Vector3(8.78, 2.8, 0.0)), Vector3(0.05, 1.4, 3.6))
-	for bar: int in range(3):
-		batch.box(material, Color(1.0, 0.97, 0.88, 0.0), Transform3D(Basis.IDENTITY, Vector3(2.0 + 2.6 * float(bar), GARAGE_HEIGHT_M - 0.08, 0.0)), Vector3(0.14, 0.06, 7.0))
-	return {"tyre_stacks": 4, "wheel_guns": 4, "jacks": 2, "fuel_rigs": 1, "extinguishers": 2, "monitors": 3, "light_bars": 3, "engineers": 2}
-
-
-# --- signs ------------------------------------------------------------------------------------------------
 
 ## 80 km/h limit signs on posts beside the wall, plus the PIT LANE and PIT EXIT boards.
 func _build_signs() -> void:

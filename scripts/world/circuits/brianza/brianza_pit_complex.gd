@@ -11,7 +11,7 @@ extends Node3D
 
 const TrackRibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const MeshBatchScript := preload("res://scripts/world/shared/mesh_batch.gd")
-const ApexPitScript := preload("res://scripts/world/circuits/apex_ring/apex_pit_complex.gd")
+const PitKit := preload("res://scripts/world/shared/pit_kit.gd")
 const FigureScript := preload("res://scripts/car/pit_crew_figure.gd")
 const ToonMaterials := preload("res://scripts/world/shared/toon_materials.gd")
 const RoadShader := preload("res://shaders/road_asphalt.gdshader")
@@ -220,11 +220,11 @@ func garage_for_team(team: int) -> Node3D:
 
 
 func crew_roles() -> Array:
-	return ApexPitScript.standby_roles()
+	return PitKit.standby_roles()
 
 
 func crew_spot(slot: int) -> Vector3:
-	return ApexPitScript.standby_spot(slot)
+	return PitKit.standby_spot(slot)
 
 
 func _build_stalls(team_ids: Array[int] = []) -> void:
@@ -254,7 +254,7 @@ func _build_stalls(team_ids: Array[int] = []) -> void:
 
 func _build_asphalt() -> void:
 	var batch := MeshBatchScript.new()
-	var material: ShaderMaterial = ApexPitScript.asphalt_material()
+	var material: ShaderMaterial = PitKit.asphalt_material()
 	var steps: int = ceili(LANE_LENGTH_M / 3.0)
 	for i: int in range(steps):
 		var u0: float = float(i) * 3.0
@@ -287,12 +287,8 @@ func _build_markings() -> void:
 	for u: float in [0.0, LANE_LENGTH_M - 1.5]:
 		_marking_strip(batch, material, PAINT_YELLOW, u, u + 1.5, left, right)
 		speed_limit_lines_u.append(u)
-	var painter := ApexPitScript.new()
-	add_child(painter)
 	for stall: Dictionary in stalls:
-		painter._paint_box(batch, material, stall)
-	stall_markings = painter.stall_markings.duplicate(true)
-	painter.free()
+		PitKit.paint_box(batch, material, stall, global_transform.affine_inverse() * (stall["pose"] as Transform3D), BOX_LATERAL_M, stall_markings)
 	var inst: MeshInstance3D = get_node_or_null("PitMarkings") as MeshInstance3D
 	if inst == null:
 		inst = MeshInstance3D.new()
@@ -441,12 +437,10 @@ func _build_team_plates() -> void:
 
 
 func _build_garage_equipment() -> void:
-	var source := ApexPitScript.new()
 	var batch := MeshBatchScript.new()
 	var material: Material = ToonMaterials.vertex_colored(false)
 	batch.quad(material, Color("#30343b"), Vector3(0.0, 0.02, -GARAGE_WIDTH_M * 0.5), Vector3(GARAGE_DEPTH_M, 0.02, -GARAGE_WIDTH_M * 0.5), Vector3(GARAGE_DEPTH_M, 0.02, GARAGE_WIDTH_M * 0.5), Vector3(0.0, 0.02, GARAGE_WIDTH_M * 0.5), Vector3.UP)
-	var equipment: Dictionary = source._garage_props(batch, material, Liveries.color_for(0))
-	source.free()
+	var equipment: Dictionary = PitKit.garage_props(batch, material, Liveries.color_for(0))
 	var instances := MultiMesh.new()
 	instances.transform_format = MultiMesh.TRANSFORM_3D
 	instances.mesh = batch.commit()

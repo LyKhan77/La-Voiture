@@ -20,7 +20,7 @@ extends Node3D
 
 const TrackRibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const MeshBatchScript := preload("res://scripts/world/shared/mesh_batch.gd")
-const ApexPitScript := preload("res://scripts/world/circuits/apex_ring/apex_pit_complex.gd")
+const PitKit := preload("res://scripts/world/shared/pit_kit.gd")
 const ToonMaterials := preload("res://scripts/world/shared/toon_materials.gd")
 const RoadShader := preload("res://shaders/road_asphalt.gdshader")
 const PitBuildingKit := preload("res://scripts/world/paddock/pit_building.gd")
@@ -181,7 +181,7 @@ func assign_teams(team_ids: Array[int]) -> void:
 
 ## The crew standing in a box: the Apex Ring's 13-person line-up, fitted to this lane's apron.
 func crew_roles() -> Array:
-	return ApexPitScript.standby_roles()
+	return PitKit.standby_roles()
 
 
 ## Where crew member `slot` stands at the garage mouth (garage frame: +x away from the lane).
@@ -478,10 +478,8 @@ func _build_shared_paddock() -> void:
 	tower.transform = pose
 	tower.position += pose.basis.z * -76.0
 	add_child(tower)
-	var props_source := ApexPitScript.new()
 	var props := MeshBatchScript.new()
-	props_source._garage_props(props, ToonMaterials.vertex_colored(false), Liveries.color_for(0))
-	props_source.free()
+	PitKit.garage_props(props, ToonMaterials.vertex_colored(false), Liveries.color_for(0))
 	var equipment := MultiMesh.new()
 	equipment.transform_format = MultiMesh.TRANSFORM_3D
 	equipment.mesh = props.commit()

@@ -21,6 +21,7 @@ enum Phase { LIFTING, SERVICING, LOWERING, RELEASE }
 enum CrewState { STANDBY, WALKING_OUT, READY, WALKING_BACK }
 
 const PitLaneScript := preload("res://scripts/world/circuits/apex_ring/apex_pit_complex.gd")
+const PitKit := preload("res://scripts/world/shared/pit_kit.gd")
 const ModularCarAssembler := preload("res://scripts/car/modular_car_assembler.gd")
 const ToonMaterials := preload("res://scripts/world/shared/toon_materials.gd")
 const Liveries := preload("res://scripts/car/team_liveries.gd")
@@ -40,7 +41,7 @@ const FireExtinguisherScene := preload("res://assets/props/fire_extinguisher.glb
 
 const PIT_GUN_STREAM := preload("res://assets/audio/sfx/pit_gun.wav")
 
-## People per team by role; the garage's standing crew (ApexPitComplex.standby_roles) is the same set.
+## People per team by role; the garage's standing crew (PitKit.standby_roles) is the same set.
 const ROSTER: Dictionary = {"gunner": 4, "handler": 4, "jack": 2, "fueler": 1, "fire": 1, "lollipop": 1}
 ## Where each role waits for the car, in the box frame (x across the lane toward the garage, z along it,
 ## - is the direction of travel); the car's centre is the origin. Corner order: FL, FR, RL, RR. Everyone
@@ -271,7 +272,7 @@ func _begin_crew(team: int) -> Crew:
 	add_child(crew.root)
 	crew.root.global_transform = pit_lane.stall_transform(team)
 	var color: Color = Liveries.color_for(team)
-	var roles: Array = pit_lane.crew_roles() if pit_lane != null else PitLaneScript.standby_roles()
+	var roles: Array = pit_lane.crew_roles() if pit_lane != null else PitKit.standby_roles()
 	var counts: Dictionary = {}
 	for slot: int in range(roles.size()):
 		var role: int = roles[slot]
@@ -409,7 +410,7 @@ func _make_member(crew: Crew, role: int, index: int, slot: int, color: Color) ->
 	member.work = (WORK_SPOTS[role_name] as Array)[index]
 	# The garage mouth is where the lane's own geometry puts it, so a street circuit's shallower
 	# working lane walks the crew out over its own apron, not the Apex Ring's.
-	var door_garage: Vector3 = pit_lane.crew_spot(slot) if pit_lane != null else PitLaneScript.standby_spot(slot)
+	var door_garage: Vector3 = pit_lane.crew_spot(slot) if pit_lane != null else PitKit.standby_spot(slot)
 	var setback: float = (float(pit_lane.garage_front_m) - float(pit_lane.stall_lane_m)) if pit_lane != null else (PitLaneScript.GARAGE_FRONT_M - PitLaneScript.STALL_LANE_M)
 	var home := Vector3(door_garage.x + setback, 0.0, door_garage.z)
 	member.route = _route(home, spot, role)
