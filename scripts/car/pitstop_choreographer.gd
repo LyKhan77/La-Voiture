@@ -40,7 +40,7 @@ const FireExtinguisherScene := preload("res://assets/props/fire_extinguisher.glb
 
 const PIT_GUN_STREAM := preload("res://assets/audio/sfx/pit_gun.wav")
 
-## People per team by role; the garage's standing crew (PitLaneComplex.standby_roles) is the same set.
+## People per team by role; the garage's standing crew (ApexPitComplex.standby_roles) is the same set.
 const ROSTER: Dictionary = {"gunner": 4, "handler": 4, "jack": 2, "fueler": 1, "fire": 1, "lollipop": 1}
 ## Where each role waits for the car, in the box frame (x across the lane toward the garage, z along it,
 ## - is the direction of travel); the car's centre is the origin. Corner order: FL, FR, RL, RR. Everyone

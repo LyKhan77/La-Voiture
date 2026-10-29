@@ -13,8 +13,8 @@ const LAP_RECORDS: Dictionary = {"apex_ring": 79.6}
 ## Rounds raced after dark.
 const NIGHT_ROUNDS: Dictionary = {"neo_wangan": true}
 
-const APEX_RING_SCENE := "res://scenes/race_world/track_circuit.tscn"
-const NEO_WANGAN_SCENE := "res://scenes/race_world/neo_wangan_circuit.tscn"
+const APEX_RING_SCENE := "res://scenes/race_world/circuits/apex_ring/apex_circuit.tscn"
+const NEO_WANGAN_SCENE := "res://scenes/race_world/circuits/neo_wangan/neo_wangan_circuit.tscn"
 const DEFAULT_CIRCUIT_ID := "apex_ring"
 
 ## Championship table, in round order: id, month, name, native name, inspiration, country, type,
@@ -25,7 +25,7 @@ const TABLE: Array[Array] = [
 	["neo_wangan", "FEB", "Neo-Wangan Shuto Express", "新湾岸高速", "Tokyo Shuto C1 / Marina Bay", "JPN", 1, 3.15, 12, true, 9.7,
 		NEO_WANGAN_SCENE, 0.25, "Elevated bay expressway, underground underpass, harbor hairpin at night."],
 	["brianza", "MAR", "Autodromo di Brianza", "", "Autodromo Nazionale Monza", "ITA", 0, 5.79, 11, true, 12.0,
-		"res://scenes/race_world/brianza_circuit.tscn", 0.35, "Temple of speed, Variante chicanes, slipstream war."],
+		"res://scenes/race_world/circuits/brianza/brianza_circuit.tscn", 0.35, "Temple of speed, Variante chicanes, slipstream war."],
 	["monte_azure", "APR", "Monte Azure Marina", "", "Circuit de Monaco / Macau", "MCO", 1, 2.85, 19, true, 42.0,
 		"res://scenes/race_world/monte_azure_circuit.tscn", 0.40, "Yacht harbor streets, zero margin for error."],
 	["ardennes", "MAY", "Ardennes Valley Ring", "", "Spa-Francorchamps", "BEL", 0, 5.40, 20, true, 104.0,

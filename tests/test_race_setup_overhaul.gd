@@ -8,7 +8,7 @@ extends SceneTree
 const ConfigScript := preload("res://scripts/core/race_config_data.gd")
 const MenuScene := preload("res://scenes/ui/race_setup_menu.tscn")
 const GarageScene := preload("res://scenes/ui/garage_team_select.tscn")
-const TrackScene := preload("res://scenes/race_world/track_circuit.tscn")
+const TrackScene := preload("res://scenes/race_world/circuits/apex_ring/apex_circuit.tscn")
 const TrackScript := preload("res://scripts/gt/gt_track.gd")
 const RaceScript := preload("res://scripts/gt/gt_race.gd")
 

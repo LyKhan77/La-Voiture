@@ -5,7 +5,7 @@ extends SceneTree
 ## 10 pit sockets, Sopraelevata overpass, and Parco Reale vegetation instancing.
 ## Run: godot --headless --path . -s res://tests/test_brianza_circuit.gd
 
-const ScenePath := "res://scenes/race_world/brianza_circuit.tscn"
+const ScenePath := "res://scenes/race_world/circuits/brianza/brianza_circuit.tscn"
 const RegistryScript := preload("res://scripts/core/circuit_calendar_registry.gd")
 const BuilderScript := preload("res://scripts/world/circuits/brianza/brianza_circuit_builder.gd")
 const PitScript := preload("res://scripts/world/circuits/brianza/brianza_pit_complex.gd")

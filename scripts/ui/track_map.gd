@@ -6,9 +6,9 @@ extends Control
 ## colours and the real elevation profile. It follows whichever round the Track Selector picks —
 ## Apex Ring, Neo-Wangan, or a calendar round whose layout is not built yet (then it says so).
 
-const CircuitScene := preload("res://scenes/race_world/track_circuit.tscn")
+const CircuitScene := preload("res://scenes/race_world/circuits/apex_ring/apex_circuit.tscn")
 const CircuitDataScript := preload("res://scripts/core/circuit_data.gd")
-const DEFAULT_SCENE_PATH := "res://scenes/race_world/track_circuit.tscn"
+const DEFAULT_SCENE_PATH := "res://scenes/race_world/circuits/apex_ring/apex_circuit.tscn"
 const T := preload("res://scripts/ui/ui_theme_tokens.gd")
 const DISPLAY := preload("res://assets/fonts/Anton.ttf")
 const MONO := preload("res://assets/fonts/JetBrainsMono.ttf")

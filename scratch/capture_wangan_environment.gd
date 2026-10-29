@@ -3,7 +3,7 @@ extends SceneTree
 ## Temp capture of the Neo-Wangan street circuit (needs a GPU, not --headless):
 ##   godot --path . --resolution 1600x900 --script res://temp/capture_wangan_env.gd
 
-const CircuitScene := preload("res://scenes/race_world/neo_wangan_circuit.tscn")
+const CircuitScene := preload("res://scenes/race_world/circuits/neo_wangan/neo_wangan_circuit.tscn")
 
 const VIEWS: Array[Dictionary] = [
 	{"name": "start", "s": 3050.0, "lateral": -9.0, "height": 4.5, "look": 60.0, "look_lateral": 0.0, "look_height": 1.2},

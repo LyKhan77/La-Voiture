@@ -17,7 +17,7 @@ const RaceScript := preload("res://scripts/gt/gt_race.gd")
 const CarScript := preload("res://scripts/gt/gt_car.gd")
 const WeatherScript := preload("res://scripts/gt/gt_weather.gd")
 const Types := preload("res://scripts/gt/gt_types.gd")
-const ActorScene := preload("res://scenes/race_world/gt_car_actor.tscn")
+const ActorScene := preload("res://scenes/car/gt_car_actor.tscn")
 const ActorScript := preload("res://scripts/car/gt_car_actor.gd")
 const RibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const DirectorScript := preload("res://scripts/world/weekend/race_weekend_director.gd")
@@ -73,8 +73,8 @@ var _tick_accumulator: float = 0.0
 var _chequered_clock_s: float = -1.0 # seconds since the flag fell, -1 until it does
 
 @onready var ribbon: RibbonScript = $TrackCircuit
-## The set and the pit lane are duck-typed: the Apex Ring ships its own (TrackEnvironmentBuilder,
-## PitLaneComplex) and a street circuit swaps in its own pair (NeoWanganEnvironment,
+## The set and the pit lane are duck-typed: the Apex Ring ships its own (ApexEnvironment,
+## ApexPitComplex) and a street circuit swaps in its own pair (NeoWanganEnvironment,
 ## NeoWanganPitComplex). Both honour build/bind_world/update and the crew API.
 @onready var environment: Node = $Environment
 @onready var gantry: GantryScript = $StartGantry

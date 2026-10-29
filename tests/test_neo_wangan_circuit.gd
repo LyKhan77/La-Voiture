@@ -7,8 +7,8 @@ extends SceneTree
 ## Pit-lane and urban-furniture checks live in the same suite (Tasks 3 and 4).
 ## Run: godot --headless --path . -s res://tests/test_neo_wangan_circuit.gd
 
-const CircuitScene := preload("res://scenes/race_world/neo_wangan_circuit.tscn")
-const ApexScene := preload("res://scenes/race_world/track_circuit.tscn")
+const CircuitScene := preload("res://scenes/race_world/circuits/neo_wangan/neo_wangan_circuit.tscn")
+const ApexScene := preload("res://scenes/race_world/circuits/apex_ring/apex_circuit.tscn")
 const BuilderScript := preload("res://scripts/world/circuits/neo_wangan/neo_wangan_circuit_builder.gd")
 const RibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const PitScript := preload("res://scripts/world/circuits/neo_wangan/neo_wangan_pit_complex.gd")

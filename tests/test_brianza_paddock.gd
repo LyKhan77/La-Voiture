@@ -19,7 +19,7 @@ func _initialize() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
-	var circuit: Node = load("res://scenes/race_world/brianza_circuit.tscn").instantiate()
+	var circuit: Node = load("res://scenes/race_world/circuits/brianza/brianza_circuit.tscn").instantiate()
 	root.add_child(circuit)
 	await process_frame
 	var pit: Node = circuit.get_node("PitLane")

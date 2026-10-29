@@ -77,7 +77,7 @@ var _driving: GtDriving
 var pit_layout: Dictionary = {}
 
 
-## The Apex Ring pit lane, exactly as PitLaneComplex builds it.
+## The Apex Ring pit lane, exactly as ApexPitComplex builds it.
 static func default_pit_layout() -> Dictionary:
 	return {
 		"entry_s": PitLaneScript.ENTRY_S,

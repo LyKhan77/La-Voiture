@@ -1,13 +1,13 @@
 extends SceneTree
 
-## Generates scenes/race_world/track_circuit.tscn: a closed ~4.2 km test circuit.
+## Generates scenes/race_world/circuits/apex_ring/apex_circuit.tscn: a closed ~4.2 km test circuit.
 ## Run: Godot --headless --path . --script res://tools/build_track_circuit.gd
 ##
 ## The layout is a turtle path (straights + constant-radius arcs, start heading
 ## east). Straights "A" and "B" are solved so the loop closes exactly. The path
 ## is written as a Catmull-Rom-equivalent Bezier through points sampled on it.
 
-const OUTPUT_PATH := "res://scenes/race_world/track_circuit.tscn"
+const OUTPUT_PATH := "res://scenes/race_world/circuits/apex_ring/apex_circuit.tscn"
 const RibbonScript := preload("res://scripts/car/track_ribbon.gd")
 
 ## ["S", length_m] straight | ["L"/"R", radius_m, angle_deg] arc.

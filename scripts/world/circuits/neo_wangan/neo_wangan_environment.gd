@@ -9,7 +9,7 @@ extends Node3D
 ## Every element that repeats more than three times is one MultiMeshInstance3D, so the whole set
 ## costs a handful of draw calls (see stats()). No textures: flat cel colours and one shader.
 ##
-## This is the city set of Neo-Wangan only; the Apex Ring keeps TrackEnvironmentBuilder.
+## This is the city set of Neo-Wangan only; the Apex Ring keeps ApexEnvironment.
 
 const RibbonGeometry := preload("res://scripts/world/shared/ribbon_geometry.gd")
 const MeshBatchScript := preload("res://scripts/world/shared/mesh_batch.gd")

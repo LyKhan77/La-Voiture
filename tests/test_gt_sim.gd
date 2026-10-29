@@ -3,7 +3,7 @@ extends SceneTree
 ## FASE 5.6 acceptance: the GT sim (GDScript port of gt-manager `race.ts`) on the 3D
 ## ribbon. Run: Godot --headless --path . -s res://tests/test_gt_sim.gd
 
-const TrackScene := preload("res://scenes/race_world/track_circuit.tscn")
+const TrackScene := preload("res://scenes/race_world/circuits/apex_ring/apex_circuit.tscn")
 const RibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const TrackScript := preload("res://scripts/gt/gt_track.gd")
 const RaceScript := preload("res://scripts/gt/gt_race.gd")

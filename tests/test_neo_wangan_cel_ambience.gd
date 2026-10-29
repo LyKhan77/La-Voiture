@@ -5,7 +5,7 @@ extends SceneTree
 ## the 160 draw call / 320 000 triangle budget.
 ## Run: godot --headless --path . -s res://tests/test_neo_wangan_cel_ambience.gd
 
-const CircuitScene := preload("res://scenes/race_world/neo_wangan_circuit.tscn")
+const CircuitScene := preload("res://scenes/race_world/circuits/neo_wangan/neo_wangan_circuit.tscn")
 const WeatherScript := preload("res://scripts/gt/gt_weather.gd")
 
 

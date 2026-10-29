@@ -18,7 +18,7 @@ flowchart TD
 
     subgraph TierA["TIER A: REUSABLE CORE KIT (100% Dipakai Ulang di Semua 12 Map)"]
         A1["1. Track Corridor Kit<br/>• RoadMesh (road_asphalt.gdshader + Wet Puddles)<br/>• RubberGroove & 3D Kerbs (Sawtooth GP / Street)<br/>• Runoff & Gravel / Concrete Barriers<br/>• Armco, Tecpro, CatchFence, Braking Boards (150/100/50m)"]
-        A2["2. Shared FIA Paddock & Infrastructure Kit<br/>• StartGantry (5 Pasang Lampu Merah FIA)<br/>• PitLaneComplex (Entry, Fast Lane, 10 Pit Boxes, Exit)<br/>• PitBuilding 2F + MainGrandstand (Live Jumbotron) + RaceControlTower<br/>• Floodlight Towers / Streetlights (Otomatis ON saat Sunset/Night/Storm)"]
+        A2["2. Shared FIA Paddock & Infrastructure Kit<br/>• StartGantry (5 Pasang Lampu Merah FIA)<br/>• ApexPitComplex (Entry, Fast Lane, 10 Pit Boxes, Exit)<br/>• PitBuilding 2F + MainGrandstand (Live Jumbotron) + RaceControlTower<br/>• Floodlight Towers / Streetlights (Otomatis ON saat Sunset/Night/Storm)"]
         A3["3. Shared Cel-Skybox & Multi-Time-of-Day Ambience<br/>• SharedCelSkyController (Mendukung DAY, SUNSET, NIGHT, RANDOM)<br/>• Anime Sun (Day/Sunset) ↔ Halftone Moon + Dual Halo (Night)<br/>• 900 Twinkling Manga Stars (Auto-hide saat Day)<br/>• 28 Gugus Awan 3D Cel-Shaded & Wind Banners (Bereaksi ke wind_speed)"]
     end
 
@@ -71,7 +71,7 @@ Setiap kali menambahkan atau merombak sirkuit di kalender 12 ronde, ikuti 5 taha
 
 ### Tahap 3: Pemasangan Otomatis **Tier A (Reusable Core Kit)**
 1. Pasang **Track Corridor Kit** di sepanjang `TrackRibbon`: aspal (`road_asphalt.gdshader`), `RubberGroove`, `Kerbs`, `Barriers` (dengan celah otomatis di Pit Entry–Exit), `CatchFence`, dan `BrakingMarkers` (`150/100/50m`).
-2. Pasang **Shared FIA Paddock Kit**: `PitLaneComplex`, `StartGantry`, `PitBuilding`, `MainGrandstand` (terhubung ke live standings `Jumbotron`), dan `RaceControlTower`.
+2. Pasang **Shared FIA Paddock Kit**: `ApexPitComplex`, `StartGantry`, `PitBuilding`, `MainGrandstand` (terhubung ke live standings `Jumbotron`), dan `RaceControlTower`.
 3. Pasang **Shared Cel-Skybox (`SharedCelSkyController`)**: otomatis menyediakan Matahari/Bulan, 900 bintang berkedip, 28 awan 3D cel-shaded yang terdorong angin, serta respons pencahayaan `DAY / SUNSET / NIGHT`.
 4. **Layout-Driven Reuse:** kirim `pit_layout` milik sirkuit ke komponen bersama; hindari konstanta sirkuit lain. Bentuk dan posisi mengikuti spline, kelengkungan, elevasi, dan jarak ke ruas lain. Komponen bersama boleh diperbaiki dengan regresi Apex dan Neo Wangan tetap hijau.
 5. **Kontrak Tim–Box:** setiap balapan hanya 10 dari 13 tim yang berlomba (`GtRace.active_teams`). Box, garasi, kru, dan shutter dipetakan lewat `stall_index_for_team(team)` (-1 bila tidak punya box) dan `assign_teams(active_teams)`, bukan lewat id tim. Kompleks pit sirkuit baru wajib lulus `tests/test_pit_team_assignment_contract.gd`.

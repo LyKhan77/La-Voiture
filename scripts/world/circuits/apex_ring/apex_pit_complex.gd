@@ -1,4 +1,4 @@
-class_name PitLaneComplex
+class_name ApexPitComplex
 extends Node3D
 
 ## Pit lane beside the start straight (FASE 5.5, refined after the FASE 10 feedback): a separate 410 m

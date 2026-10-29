@@ -4,7 +4,7 @@ extends Node3D
 ## Keys: 1-5 = 1x 2x 4x 8x 16x, Left/Right = follow another car.
 
 const Sim := preload("res://scripts/car/traffic_race_sim.gd")
-const CarActorScene := preload("res://scenes/race_world/car_actor.tscn")
+const CarActorScene := preload("res://scenes/car/car_actor.tscn")
 const ActorScript := preload("res://scripts/car/kinematic_car_actor.gd")
 const RibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const CarStateScript := preload("res://scripts/core/car_state.gd")

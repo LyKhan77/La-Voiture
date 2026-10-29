@@ -4,7 +4,7 @@ extends SceneTree
 ## or on the queue, and the race gets back to green. Run:
 ##   godot --headless --path . -s res://tests/test_pit_under_safety_car.gd
 
-const TrackScene := preload("res://scenes/race_world/track_circuit.tscn")
+const TrackScene := preload("res://scenes/race_world/circuits/apex_ring/apex_circuit.tscn")
 const TrackScript := preload("res://scripts/gt/gt_track.gd")
 const RaceScript := preload("res://scripts/gt/gt_race.gd")
 const CarScript := preload("res://scripts/gt/gt_car.gd")

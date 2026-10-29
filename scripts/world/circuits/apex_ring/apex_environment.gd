@@ -1,4 +1,4 @@
-class_name TrackEnvironmentBuilder
+class_name ApexEnvironment
 extends Node3D
 
 ## Hybrid procedural trackside set for the race weekend (FASE 5.5, upgraded in FASE 10), all
@@ -25,7 +25,7 @@ const GrandstandScene := preload("res://scenes/race_world/paddock/main_grandstan
 const ControlTowerScene := preload("res://scenes/race_world/paddock/race_control_tower.tscn")
 const FoliageScript := preload("res://scripts/world/shared/foliage_scatter.gd")
 const VistaScript := preload("res://scripts/world/shared/mountain_vista.gd")
-const VistaScene := preload("res://scenes/race_world/mountain_vista.tscn")
+const VistaScene := preload("res://scenes/race_world/shared/mountain_vista.tscn")
 const LightingScript := preload("res://scripts/world/shared/circuit_lighting_controller.gd")
 const SharedSkyScript := preload("res://scripts/world/shared/shared_cel_sky_controller.gd")
 

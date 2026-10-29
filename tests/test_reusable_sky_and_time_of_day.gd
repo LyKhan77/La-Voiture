@@ -3,7 +3,7 @@ extends SceneTree
 ## Fase 12.3 TDD: Reusable SharedCelSkyController + Neo-Wangan & Apex Ring DAY / SUNSET / NIGHT support.
 ## Run: godot --headless --path . -s res://tests/test_reusable_sky_and_time_of_day.gd
 
-const WanganScene := preload("res://scenes/race_world/neo_wangan_circuit.tscn")
+const WanganScene := preload("res://scenes/race_world/circuits/neo_wangan/neo_wangan_circuit.tscn")
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
 const WeatherScript := preload("res://scripts/gt/gt_weather.gd")
 const ConfigScript := preload("res://scripts/core/race_config_data.gd")
@@ -115,7 +115,7 @@ func _run() -> void:
 	for _i: int in range(3):
 		await process_frame
 
-	# 2. Apex Ring (TrackEnvironmentBuilder) shares SkyAmbienceRoot via SharedCelSkyController
+	# 2. Apex Ring (ApexEnvironment) shares SkyAmbienceRoot via SharedCelSkyController
 	ConfigScript.current = null
 	var world: Node3D = WorldScene.instantiate()
 	root.add_child(world)
@@ -124,7 +124,7 @@ func _run() -> void:
 	world.step(1.0 / 60.0)
 
 	var apex_sky := world.environment.get_node_or_null("SkyAmbienceRoot") as Node3D
-	check(apex_sky != null, "Apex Ring TrackEnvironmentBuilder also mounts reusable SkyAmbienceRoot")
+	check(apex_sky != null, "Apex Ring ApexEnvironment also mounts reusable SkyAmbienceRoot")
 	if apex_sky != null:
 		var apex_disc := apex_sky.get_node_or_null("AnimeMoon") as MeshInstance3D
 		var apex_clouds := apex_sky.get_node_or_null("AnimeNightClouds") as MultiMeshInstance3D

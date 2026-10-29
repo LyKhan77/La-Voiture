@@ -1,6 +1,6 @@
 extends SceneTree
 
-const Circuit := preload("res://scenes/race_world/track_circuit.tscn")
+const Circuit := preload("res://scenes/race_world/circuits/apex_ring/apex_circuit.tscn")
 const Race := preload("res://scripts/gt/gt_race.gd")
 const Track := preload("res://scripts/gt/gt_track.gd")
 const Types := preload("res://scripts/gt/gt_types.gd")

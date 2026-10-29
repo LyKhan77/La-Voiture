@@ -67,7 +67,7 @@ func _initialize() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
-	var scene: PackedScene = load("res://scenes/race_world/brianza_circuit.tscn")
+	var scene: PackedScene = load("res://scenes/race_world/circuits/brianza/brianza_circuit.tscn")
 	var circuit: Node = scene.instantiate()
 	root.add_child(circuit)
 	await process_frame

@@ -623,7 +623,7 @@ func _test_stage3_architecture() -> void:
 
 # --- stage 4: horizon vista, foliage, time-of-day lighting ---------------------------------------
 
-const VISTA_SCENE_PATH := "res://scenes/race_world/mountain_vista.tscn"
+const VISTA_SCENE_PATH := "res://scenes/race_world/shared/mountain_vista.tscn"
 const RaceConfigScript := preload("res://scripts/core/race_config_data.gd")
 const FOLIAGE_KINDS: Array[String] = ["cedar", "oak", "pine"]
 

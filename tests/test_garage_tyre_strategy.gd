@@ -5,7 +5,7 @@ extends SceneTree
 ## aquaplaning, snap oversteer, wets on a dry track).
 ## Run: godot --headless --path . -s tests/test_garage_tyre_strategy.gd
 
-const TrackScene := preload("res://scenes/race_world/track_circuit.tscn")
+const TrackScene := preload("res://scenes/race_world/circuits/apex_ring/apex_circuit.tscn")
 const TrackScript := preload("res://scripts/gt/gt_track.gd")
 const RaceScript := preload("res://scripts/gt/gt_race.gd")
 const WeatherScript := preload("res://scripts/gt/gt_weather.gd")

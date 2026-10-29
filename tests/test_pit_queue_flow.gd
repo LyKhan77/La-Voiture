@@ -4,7 +4,7 @@ extends SceneTree
 ## moves like traffic: no instant stops and no teleports (bumper overlap at merges is measured, not yet fixed).
 ## Run: godot --headless --path . -s res://tests/test_pit_queue_flow.gd
 
-const TrackScene := preload("res://scenes/race_world/track_circuit.tscn")
+const TrackScene := preload("res://scenes/race_world/circuits/apex_ring/apex_circuit.tscn")
 const TrackScript := preload("res://scripts/gt/gt_track.gd")
 const RaceScript := preload("res://scripts/gt/gt_race.gd")
 const CarScript := preload("res://scripts/gt/gt_car.gd")

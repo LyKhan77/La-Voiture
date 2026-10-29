@@ -5,7 +5,7 @@ extends SceneTree
 ## pacing, so each time scale advances the sim by a whole number of ticks/frame.
 
 const WorldScene := preload("res://scenes/test_race_world.tscn")
-const TrackScene := preload("res://scenes/race_world/track_circuit.tscn")
+const TrackScene := preload("res://scenes/race_world/circuits/apex_ring/apex_circuit.tscn")
 const ActorScript := preload("res://scripts/car/kinematic_car_actor.gd")
 const RibbonScript := preload("res://scripts/car/track_ribbon.gd")
 

@@ -10,7 +10,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var inst: Node3D = (load("res://scenes/race_world/brianza_circuit.tscn") as PackedScene).instantiate()
+	var inst: Node3D = (load("res://scenes/race_world/circuits/brianza/brianza_circuit.tscn") as PackedScene).instantiate()
 	root.add_child(inst)
 	await process_frame
 	var env: Node = inst.get_node("Environment")

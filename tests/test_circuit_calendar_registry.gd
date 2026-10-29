@@ -95,10 +95,10 @@ func _test_metadata() -> void:
 	var apex: CircuitDataScript = RegistryScript.get_circuit("apex_ring")
 	var wangan: CircuitDataScript = RegistryScript.get_circuit("neo_wangan")
 	var apex_ok: bool = apex != null and apex.circuit_type == CircuitDataScript.CircuitType.GRAND_PRIX \
-		and not apex.direction_clockwise and apex.turns_count == 9 and apex.scene_path == "res://scenes/race_world/track_circuit.tscn"
+		and not apex.direction_clockwise and apex.turns_count == 9 and apex.scene_path == "res://scenes/race_world/circuits/apex_ring/apex_circuit.tscn"
 	var wangan_ok: bool = wangan != null and wangan.circuit_type == CircuitDataScript.CircuitType.SPRINT \
 		and wangan.japanese_name == "新湾岸高速" and wangan.real_inspiration.contains("Shuto") \
-		and wangan.scene_path == "res://scenes/race_world/neo_wangan_circuit.tscn" and wangan.turns_count == 12
+		and wangan.scene_path == "res://scenes/race_world/circuits/neo_wangan/neo_wangan_circuit.tscn" and wangan.turns_count == 12
 	check(apex_ok and wangan_ok and ResourceLoader.exists(apex.scene_path),
 		"#K3 Round 01 is Apex Ring (GP, anti-clockwise, 9 corners, the existing scene) and Round 02 is 新湾岸高速 Neo-Wangan (SPRINT, 3.15 km, 12 turns, its own reserved scene)")
 

@@ -2,7 +2,7 @@ class_name PitBuilding
 extends Node3D
 
 ## Pit building and VIP Paddock Club (FASE 10): the second storey over the ten garages
-## of PitLaneComplex plus roll-up shutters on the ground floor. Local axes follow the ribbon
+## of ApexPitComplex plus roll-up shutters on the ground floor. Local axes follow the ribbon
 ## at CENTRE_S: +X is right of travel (away from the lane), -Z is the direction of travel.
 ## All steel and concrete is one merged cel surface, the tinted lounge glass a second one,
 ## so the whole building is a handful of draw calls.

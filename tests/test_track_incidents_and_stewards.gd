@@ -4,7 +4,7 @@ extends SceneTree
 ## trackside digital flag panels, DNF wreckage and in-lap evacuation, and the steward time penalty.
 ## Run: Godot --headless --path . -s res://tests/test_track_incidents_and_stewards.gd
 
-const TrackScene := preload("res://scenes/race_world/track_circuit.tscn")
+const TrackScene := preload("res://scenes/race_world/circuits/apex_ring/apex_circuit.tscn")
 const RibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const TrackScript := preload("res://scripts/gt/gt_track.gd")
 const RaceScript := preload("res://scripts/gt/gt_race.gd")

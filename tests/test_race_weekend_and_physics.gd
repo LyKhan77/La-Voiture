@@ -9,7 +9,7 @@ extends SceneTree
 ## takes about 70 seconds).
 
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
-const TrackScene := preload("res://scenes/race_world/track_circuit.tscn")
+const TrackScene := preload("res://scenes/race_world/circuits/apex_ring/apex_circuit.tscn")
 const RibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const ActorScript := preload("res://scripts/car/gt_car_actor.gd")
 const LineScript := preload("res://scripts/car/adaptive_racing_line.gd")

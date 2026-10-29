@@ -11,7 +11,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var ribbon := load("res://scenes/race_world/track_circuit.tscn").instantiate() as Ribbon
+	var ribbon := load("res://scenes/race_world/circuits/apex_ring/apex_circuit.tscn").instantiate() as Ribbon
 	root.add_child(ribbon)
 	await process_frame
 	var points: Array = []

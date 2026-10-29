@@ -11,7 +11,7 @@ const RainScene := preload("res://scenes/vfx/manga_rain_3d.tscn")
 const SmokeScene := preload("res://scenes/vfx/manga_smoke_emitter.tscn")
 const SprayScript := preload("res://scripts/vfx/manga_road_spray.gd")
 const WetShader := preload("res://shaders/road_asphalt.gdshader")
-const ActorScene := preload("res://scenes/race_world/gt_car_actor.tscn")
+const ActorScene := preload("res://scenes/car/gt_car_actor.tscn")
 const ActorScript := preload("res://scripts/car/gt_car_actor.gd")
 
 ## Rear of the car in actor space (+Z), where the spray leaves the road.

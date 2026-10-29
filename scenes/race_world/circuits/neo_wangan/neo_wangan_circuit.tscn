@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/world/circuits/neo_wangan/neo_wangan_circuit_builder.gd" id="1_builder"]
 [ext_resource type="Script" path="res://scripts/car/track_ribbon.gd" id="2_ribbon"]
-[ext_resource type="PackedScene" path="res://scenes/race_world/neo_wangan_paddock/pit_complex.tscn" id="3_pit"]
+[ext_resource type="PackedScene" path="res://scenes/race_world/circuits/neo_wangan/neo_wangan_pit_complex.tscn" id="3_pit"]
 [ext_resource type="Script" path="res://scripts/world/circuits/neo_wangan/neo_wangan_environment.gd" id="4_env"]
 
 [sub_resource type="Curve3D" id="Curve3D_centerline"]

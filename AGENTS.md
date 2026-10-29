@@ -216,7 +216,7 @@ Sebelum suatu tugas atau fase dinyatakan **SELESAI**, agen wajib memenuhi seluru
 * Pastikan file `.gdignore` selalu ada pada folder non-game (`executor-report/`, `temp/`, `meshy_output/`, `docs/`, `design/`).
 
 ### ASK FIRST:
-* Mengubah koordinat titik kontrol atau handle tangent pada `Curve3D` di `scenes/race_world/track_circuit.tscn`.
+* Mengubah koordinat titik kontrol atau handle tangent pada `Curve3D` di `scenes/race_world/circuits/apex_ring/apex_circuit.tscn`.
 * Menambahkan dependensi baru (GDExtension, plugin pihak ketiga, library C++ eksternal).
 * Mengubah nama atau karakteristik 20 driver di `DRIVER-CHARACTERIZATION-ROSTER.md`.
 

@@ -3,7 +3,7 @@ extends SceneTree
 const Pit := preload("res://scripts/world/paddock/pit_building.gd")
 const Stand := preload("res://scripts/world/paddock/main_grandstand.gd")
 const Tower := preload("res://scripts/world/paddock/race_control_tower.gd")
-const Circuit := preload("res://scenes/race_world/neo_wangan_circuit.tscn")
+const Circuit := preload("res://scenes/race_world/circuits/neo_wangan/neo_wangan_circuit.tscn")
 var failures: int = 0
 
 func check(ok: bool, label: String) -> void:

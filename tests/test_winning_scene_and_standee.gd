@@ -2,7 +2,7 @@
 
 ## Run: godot --headless --path . -s res://tests/test_winning_scene_and_standee.gd
 const SCENE := "res://scenes/ui/winning_scene.tscn"
-const TrackScene := preload("res://scenes/race_world/track_circuit.tscn")
+const TrackScene := preload("res://scenes/race_world/circuits/apex_ring/apex_circuit.tscn")
 const Track := preload("res://scripts/gt/gt_track.gd")
 const Race := preload("res://scripts/gt/gt_race.gd")
 const Roster := preload("res://scripts/ui/garage_roster.gd")

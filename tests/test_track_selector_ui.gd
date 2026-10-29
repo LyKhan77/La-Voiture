@@ -9,8 +9,8 @@ extends SceneTree
 
 const MenuScene := preload("res://scenes/ui/race_setup_menu.tscn")
 const RadarScene := preload("res://scenes/pit_wall/circuit_radar_2d.tscn")
-const NeoCircuitScene := preload("res://scenes/race_world/neo_wangan_circuit.tscn")
-const ApexScene := preload("res://scenes/race_world/track_circuit.tscn")
+const NeoCircuitScene := preload("res://scenes/race_world/circuits/neo_wangan/neo_wangan_circuit.tscn")
+const ApexScene := preload("res://scenes/race_world/circuits/apex_ring/apex_circuit.tscn")
 const ConfigScript := preload("res://scripts/core/race_config_data.gd")
 const Registry := preload("res://scripts/core/circuit_calendar_registry.gd")
 const TrackMapView := preload("res://scripts/ui/track_map.gd")
