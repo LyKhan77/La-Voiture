@@ -14,8 +14,6 @@ const ToonMaterials := preload("res://scripts/world/shared/toon_materials.gd")
 const SurfaceGeometry := preload("res://scripts/world/shared/enhanced_track_geometry.gd")
 const MeshBatchScript := preload("res://scripts/world/shared/mesh_batch.gd")
 const MarkerShader := preload("res://shaders/braking_marker.gdshader")
-const PanelShader := preload("res://shaders/digital_flag_panel.gdshader")
-const FlagType := preload("res://scripts/gt/gt_types.gd")
 
 # --- armco ---------------------------------------------------------------------
 ## Along-the-rail spacing of posts (and rail sections).
@@ -82,21 +80,9 @@ const STEEL_COLOR := Color("#8a92a3")
 const DARK_STEEL_COLOR := Color("#2d313b")
 const LAMP_COLOR := Color(1.0, 0.95, 0.82, LAMP_GLOW_ALPHA)
 
-# --- digital flag panels -------------------------------------------------------------
-const PANEL_COUNT: int = 8
-const PANEL_W_M: float = 1.8
-const PANEL_H_M: float = 1.2
-const PANEL_BASE_M: float = 1.6
-const PANEL_FRAME_M: float = 0.1
-## Stands this far behind the guardrail, and this many metres before the corner it warns of.
+# --- digital flag panels (FlagPanelSet draws them) -------------------------------------
+## Stands this far behind the guardrail.
 const PANEL_BEHIND_RAIL_M: float = 0.6
-const PANEL_LEAD_M: float = 70.0
-## Anchors the same panel may not be repeated within this arc distance.
-const PANEL_MIN_SPACING_M: float = 150.0
-## The panel before the start / finish line is always first.
-const PANEL_FINISH_LEAD_M: float = 60.0
-## Instance custom data x of a panel; digital_flag_panel.gdshader draws one pattern per value.
-enum PanelState { GREEN, YELLOW, SC }
 
 var ribbon: TrackRibbonScript
 var line: AdaptiveLineScript
@@ -107,13 +93,8 @@ var marker_instance: MultiMeshInstance3D
 ## The 7-segment board face; the lighting controller dims it at night.
 var marker_face_material: ShaderMaterial
 var tower_instance: MultiMeshInstance3D
-## The eight digital flag panels: one MultiMesh, the state of each in its custom data.
-var flag_panel_instance: MultiMeshInstance3D
-## One record per panel: {s, side, sector (1..3)}.
-var flag_panel_records: Array[Dictionary] = []
-## PanelState of each panel as last written; headless runs cannot read MultiMesh custom data back.
-var flag_panel_states: Array[int] = []
-var flag_panel_count: int = 0
+## The eight digital flag panels behind the guardrail (see FlagPanelSet).
+var flag_panels: FlagPanelSet
 ## The poses handed to each MultiMesh, kept here as well: headless runs have no MultiMesh data to read back.
 var armco_transforms: Array[Transform3D] = []
 ## Arc distance each pose was generated at (parallel to the transform arrays).
@@ -511,100 +492,25 @@ func _leg_point(corner: Vector2, height: float) -> Vector3:
 
 # --- digital flag panels -----------------------------------------------------------------
 
-## Panels stand before the finish line, Turn 1, the hairpin and the chicanes (at most five of them, never two
-## within PANEL_MIN_SPACING_M), then the biggest remaining gaps of the lap are split until there are eight.
+## Panels stand before the finish line, Turn 1, the hairpin and the chicanes (FlagPanelSet.plan keeps them apart and
+## fills the biggest gaps of the lap up to eight), on the outside of the corner behind the guardrail.
 func _build_flag_panels(kerbs: Array[Dictionary]) -> void:
-	var anchors: Array[Dictionary] = [{"s": fposmod(-PANEL_FINISH_LEAD_M, ribbon.length_m), "side": -1.0}]
+	var preferred: Array[Dictionary] = []
 	for corner: int in _critical_corners(kerbs):
-		var s: float = fposmod(_apex(kerbs[corner]) - PANEL_LEAD_M, ribbon.length_m)
-		if anchors.size() < 5 and _clear_of_anchors(anchors, s):
-			anchors.append({"s": s, "side": -float(kerbs[corner]["side"])})
-	while anchors.size() < PANEL_COUNT:
-		anchors.append({"s": _widest_gap_midpoint(anchors), "side": -1.0})
+		preferred.append({"s": _apex(kerbs[corner]) - FlagPanelSet.LEAD_M, "side": -float(kerbs[corner]["side"])})
+	var anchors: Array[Dictionary] = FlagPanelSet.plan(ribbon.length_m, preferred)
 	var poses: Array[Transform3D] = []
 	for anchor: Dictionary in anchors:
 		var s: float = anchor["s"]
 		var side: float = anchor["side"]
 		if not has_armco_at(side, s):
 			side = -1.0
+		anchor["side"] = side
 		poses.append(ribbon.get_point_at_offset(s, armco_lateral(side, s) + side * PANEL_BEHIND_RAIL_M))
-		flag_panel_records.append({"s": s, "side": side, "sector": mini(2, floori(s / ribbon.length_m * 3.0)) + 1})
-		flag_panel_states.append(PanelState.GREEN)
-	flag_panel_count = poses.size()
-	var multimesh := _multimesh(_flag_panel_mesh(), poses, true)
-	for index: int in range(poses.size()):
-		multimesh.set_instance_custom_data(index, Color(float(PanelState.GREEN), 0.0, 0.0, 0.0))
-	flag_panel_instance = _wrap("FlagPanels", multimesh)
-
-
-func _clear_of_anchors(anchors: Array[Dictionary], s: float) -> bool:
-	for anchor: Dictionary in anchors:
-		var gap: float = absf(fposmod(s - float(anchor["s"]) + ribbon.length_m * 0.5, ribbon.length_m) - ribbon.length_m * 0.5)
-		if gap < PANEL_MIN_SPACING_M:
-			return false
-	return true
-
-
-func _widest_gap_midpoint(anchors: Array[Dictionary]) -> float:
-	var arcs: Array[float] = []
-	for anchor: Dictionary in anchors:
-		arcs.append(float(anchor["s"]))
-	arcs.sort()
-	var best_start: float = arcs[-1]
-	var best_gap: float = arcs[0] + ribbon.length_m - arcs[-1]
-	for index: int in range(arcs.size() - 1):
-		if arcs[index + 1] - arcs[index] > best_gap:
-			best_gap = arcs[index + 1] - arcs[index]
-			best_start = arcs[index]
-	return fposmod(best_start + best_gap * 0.5, ribbon.length_m)
-
-
-## The state each panel shows for the current race-control flag. `sector` is 1-based, as in set_flag().
-func panel_state_for(flag: int, sector: int, panel_sector: int) -> int:
-	if flag == FlagType.Flag.SC:
-		return PanelState.SC
-	if flag == FlagType.Flag.VSC:
-		return PanelState.YELLOW
-	if flag == FlagType.Flag.YELLOW and sector == panel_sector:
-		return PanelState.YELLOW
-	return PanelState.GREEN
-
-
-## Writes the panel states for the flag race control shows; only a changed panel touches the MultiMesh.
-func apply_flag(flag: int, sector: int) -> void:
-	for index: int in range(flag_panel_count):
-		var state: int = panel_state_for(flag, sector, int(flag_panel_records[index]["sector"]))
-		if state != flag_panel_states[index]:
-			flag_panel_states[index] = state
-			flag_panel_instance.multimesh.set_instance_custom_data(index, Color(float(state), 0.0, 0.0, 0.0))
-
-
-## Two posts, a matte black housing and the LED face on its own shader (the face looks toward +z, at the cars).
-func _flag_panel_mesh() -> ArrayMesh:
-	var batch := MeshBatchScript.new()
-	var material: ShaderMaterial = ToonMaterials.vertex_colored()
-	var centre_y: float = PANEL_BASE_M + PANEL_H_M * 0.5
-	for x: float in [-PANEL_W_M * 0.4, PANEL_W_M * 0.4]:
-		batch.box(material, POST_COLOR, Transform3D(Basis.IDENTITY, Vector3(x, PANEL_BASE_M * 0.5, -0.06)), Vector3(0.1, PANEL_BASE_M, 0.1))
-	batch.box(material, HAZARD_BLACK, Transform3D(Basis.IDENTITY, Vector3(0.0, centre_y, 0.0)), Vector3(PANEL_W_M + PANEL_FRAME_M * 2.0, PANEL_H_M + PANEL_FRAME_M * 2.0, 0.14))
-	var mesh: ArrayMesh = batch.commit()
-	var face := SurfaceTool.new()
-	face.begin(Mesh.PRIMITIVE_TRIANGLES)
-	face.set_normal(Vector3.BACK)
-	var half_w: float = PANEL_W_M * 0.5
-	var half_h: float = PANEL_H_M * 0.5
-	var corners: Array[Array] = [
-		[Vector3(-half_w, centre_y + half_h, 0.075), Vector2(0.0, 0.0)], [Vector3(half_w, centre_y + half_h, 0.075), Vector2(1.0, 0.0)],
-		[Vector3(half_w, centre_y - half_h, 0.075), Vector2(1.0, 1.0)], [Vector3(-half_w, centre_y - half_h, 0.075), Vector2(0.0, 1.0)],
-	]
-	for slot: int in [0, 1, 2, 0, 2, 3]:
-		face.set_uv(corners[slot][1])
-		face.add_vertex(corners[slot][0])
-	face.commit(mesh)
-	var face_material := ShaderMaterial.new()
-	face_material.shader = PanelShader
-	mesh.surface_set_material(mesh.get_surface_count() - 1, face_material)
-	return mesh
+	flag_panels = FlagPanelSet.new()
+	flag_panels.name = "FlagPanels"
+	flag_panels.build(ribbon.length_m, anchors, poses)
+	add_child(flag_panels)
 
 
 # --- shared ----------------------------------------------------------------------------

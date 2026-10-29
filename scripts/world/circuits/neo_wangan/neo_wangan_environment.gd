@@ -37,6 +37,18 @@ const HAZARD_CURVATURE: float = 0.006
 const LAMP_PITCH_M: float = 42.0
 const LAMP_LATERAL_M: float = 6.9
 const LAMP_HEIGHT_M: float = 9.0
+const LAMP_FIRST_S: float = 14.0
+
+## Flag panel centre, off the road axis: the barrier's back face is at 6.63 m and a post stands 0.77 m from the centre.
+const PANEL_LATERAL_M: float = 7.7
+const PANEL_ZONE_MARGIN_M: float = 25.0
+const PANEL_POLE_CLEAR_M: float = 2.0
+## Gantry sign posts stand at 7.4 m, braking boards at 7.0 m: a panel keeps this far along the road from them.
+const PANEL_GANTRY_CLEAR_M: float = 8.0
+const PANEL_BOARD_CLEAR_M: float = 8.0
+const PANEL_SHIFT_M: float = 9.0
+const PANEL_SHIFT_TRIES: int = 8
+const BOARD_DISTANCES_M: Array[float] = [150.0, 100.0, 50.0]
 
 const GANTRY_S: Array[float] = [300.0, 900.0, 1750.0, 2600.0]
 const GANTRY_HALF_SPAN_M: float = 7.4
@@ -90,9 +102,6 @@ var circuit
 func _init() -> void:
 	circuit_id = "neo_wangan"
 
-## RaceWeekendWorld reads this for its digital flag panels; the street circuit has none.
-
-## Render budget of the whole set, filled by measure().
 
 var barrier_instance: MultiMeshInstance3D
 var streetlight_instance: MultiMeshInstance3D
@@ -156,6 +165,7 @@ func build(p_ribbon: TrackRibbonScript, p_circuit: Variant = null) -> void:
 	_build_streetlights()
 	_build_gantry_signs()
 	_build_braking_boards()
+	_build_flag_panels()
 	_build_tunnel()
 	_build_bridge()
 	_build_harbor()
@@ -347,7 +357,7 @@ func _build_streetlights() -> void:
 	var pole_mesh: ArrayMesh = batch.commit()
 	var head_mesh: ArrayMesh = heads.commit()
 	var transforms: Array[Transform3D] = []
-	var s: float = 14.0
+	var s: float = LAMP_FIRST_S
 	while s < ribbon.length_m:
 		for side: float in [-1.0, 1.0]:
 			if side > 0.0 and _in_pit_gap(s):
@@ -439,10 +449,88 @@ func _build_braking_boards() -> void:
 	for turn: Dictionary in circuit.turns:
 		var apex: float = float(turn["apex_s"][0])
 		var side: float = -float(turn["direction"])
-		for distance: float in [150.0, 100.0, 50.0]:
+		for distance: float in BOARD_DISTANCES_M:
 			poses.append(ribbon.get_point_at_offset(apex - distance, side * 7.0))
 			distances.append(distance)
 	_multimesh("BrakingMarkers", mesh, poses, null, distances)
+
+
+## Digital flag panels behind the concrete barrier, on the outside of the tightest turns and before the finish line.
+## Never in the tunnel or on the bridge (no room behind the wall / past the deck edge), never on the open pit side,
+## never on a streetlight pole.
+func _build_flag_panels() -> void:
+	var turns: Array = circuit.turns.duplicate()
+	turns.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return float(a["radius_m"]) < float(b["radius_m"]))
+	var preferred: Array[Dictionary] = []
+	for turn: Dictionary in turns:
+		var apex: float = float(turn["apex_s"][0])
+		preferred.append({"s": apex - FlagPanelSet.LEAD_M, "side": _outside_side(apex)})
+	var anchors: Array[Dictionary] = FlagPanelSet.plan(ribbon.length_m, preferred)
+	var poses: Array[Transform3D] = []
+	for anchor: Dictionary in anchors:
+		var side: float = float(anchor["side"])
+		var s: float = _panel_clear_arc(float(anchor["s"]), side)
+		if side > 0.0 and _in_pit_gap(s):
+			side = -1.0
+			s = _panel_clear_arc(s, side)
+		anchor["s"] = s
+		anchor["side"] = side
+		poses.append(ribbon.get_point_at_offset(s, side * PANEL_LATERAL_M))
+	flag_panels = FlagPanelSet.new()
+	flag_panels.name = "FlagPanels"
+	flag_panels.build(ribbon.length_m, anchors, poses)
+	add_child(flag_panels)
+
+
+## The side (+1 right, -1 left) away from the inside of the bend at `apex_s`: the inside is the one closer to the chord.
+func _outside_side(apex_s: float) -> float:
+	var chord_mid: Vector3 = (ribbon.get_point_at_offset(apex_s - 40.0, 0.0).origin + ribbon.get_point_at_offset(apex_s + 40.0, 0.0).origin) * 0.5
+	var right: float = ribbon.get_point_at_offset(apex_s, 10.0).origin.distance_to(chord_mid)
+	var left: float = ribbon.get_point_at_offset(apex_s, -10.0).origin.distance_to(chord_mid)
+	return -1.0 if right < left else 1.0
+
+
+## `s` moved on (in steps of PANEL_SHIFT_M) until a panel on `side` stands clear of the tunnel, the bridge, the
+## streetlight poles, the gantry signs and the braking boards.
+func _panel_clear_arc(s: float, side: float) -> float:
+	var wrapped: float = fposmod(s, ribbon.length_m)
+	for _attempt: int in range(PANEL_SHIFT_TRIES):
+		wrapped = _panel_clear_of_zones(wrapped)
+		if not _panel_blocked_by_props(wrapped, side):
+			break
+		wrapped = fposmod(wrapped + PANEL_SHIFT_M, ribbon.length_m)
+	return wrapped
+
+
+## True where a panel at arc `s` on `side` would overlap a gantry sign post or a braking board.
+func _panel_blocked_by_props(s: float, side: float) -> bool:
+	for gantry_s: float in GANTRY_S:
+		if _arc_gap(s, gantry_s) < PANEL_GANTRY_CLEAR_M:
+			return true
+	for turn: Dictionary in circuit.turns:
+		if -float(turn["direction"]) != side:
+			continue
+		for distance: float in BOARD_DISTANCES_M:
+			if _arc_gap(s, float(turn["apex_s"][0]) - distance) < PANEL_BOARD_CLEAR_M:
+				return true
+	return false
+
+
+func _arc_gap(a: float, b: float) -> float:
+	return absf(fposmod(a - b + ribbon.length_m * 0.5, ribbon.length_m) - ribbon.length_m * 0.5)
+
+
+## `s` moved out of the tunnel and the bridge, and off the streetlight poles.
+func _panel_clear_of_zones(s: float) -> float:
+	var wrapped: float = fposmod(s, ribbon.length_m)
+	if wrapped >= CircuitScript.TUNNEL_START_M - PANEL_ZONE_MARGIN_M and wrapped <= CircuitScript.TUNNEL_END_M + PANEL_ZONE_MARGIN_M:
+		wrapped = CircuitScript.TUNNEL_START_M - PANEL_ZONE_MARGIN_M if wrapped < (CircuitScript.TUNNEL_START_M + CircuitScript.TUNNEL_END_M) * 0.5 else CircuitScript.TUNNEL_END_M + PANEL_ZONE_MARGIN_M
+	if wrapped >= CircuitScript.BRIDGE_START_M - PANEL_ZONE_MARGIN_M and wrapped <= CircuitScript.BRIDGE_END_M + PANEL_ZONE_MARGIN_M:
+		wrapped = CircuitScript.BRIDGE_START_M - PANEL_ZONE_MARGIN_M if wrapped < (CircuitScript.BRIDGE_START_M + CircuitScript.BRIDGE_END_M) * 0.5 else CircuitScript.BRIDGE_END_M + PANEL_ZONE_MARGIN_M
+	var from_pole: float = fposmod(wrapped - LAMP_FIRST_S, LAMP_PITCH_M)
+	if from_pole < PANEL_POLE_CLEAR_M or from_pole > LAMP_PITCH_M - PANEL_POLE_CLEAR_M:
+		wrapped += 2.0 * PANEL_POLE_CLEAR_M
+	return fposmod(wrapped, ribbon.length_m)
 
 
 func _box_at(s: float, lateral_m: float, height_m: float, centre_height_m: float) -> Transform3D:

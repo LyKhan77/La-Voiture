@@ -694,6 +694,7 @@ func _build_tier_a_furniture() -> void:
 	furniture.name = "TracksideFurniture"
 	add_child(furniture)
 	furniture.build(ribbon, line, kerbs, runoff_plans, hero_zones, _pit_zone)
+	flag_panels = furniture.flag_panels
 
 
 func _build_tier_a_sky() -> void:

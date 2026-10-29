@@ -12,7 +12,8 @@ extends Node3D
 ##   apply_wind()        pushes the wind to whatever flutters (default: nothing)
 ##   ground_y_at()       top of the solid ground under a world point (default: the point itself, a flat circuit)
 ##   _extra_stats()      circuit-specific numbers added to stats()
-## `furniture` (flag LED panels, trackside boards) may be null: a circuit without them simply has no panels.
+## `flag_panels` (the digital flag LED panels, see FlagPanelSet) must be set by build(): the world shows the race-control
+## flag on them. `furniture` (Armco, Tecpro, boards, floodlights) may be null: a street circuit has its own barriers.
 ## `tests/test_circuit_environment_contract.gd` holds every circuit to this.
 
 const TrackRibbonScript := preload("res://scripts/car/track_ribbon.gd")
@@ -27,6 +28,7 @@ const LEADERBOARD_STEP: float = 0.08
 var circuit_id: String = ""
 var ribbon: TrackRibbonScript
 var furniture: FurnitureScript
+var flag_panels: FlagPanelSet
 var built: bool = false
 ## What a frame of this set submits (see measure()): draw calls, triangles and MultiMesh instances' surfaces.
 var draw_calls: int = 0

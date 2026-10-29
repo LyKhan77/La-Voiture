@@ -137,50 +137,48 @@ func _test_slide_goes_to_the_outside_and_scrubs_speed() -> void:
 
 # --- Task 2: digital flag panels -----------------------------------------------------
 
-func _panel_sector(furniture: Node3D, index: int) -> int:
-	return int((furniture.get("flag_panel_records") as Array)[index]["sector"])
+func _panel_sector(panels: FlagPanelSet, index: int) -> int:
+	return int(panels.records[index]["sector"])
 
 
-## A missing feature has to fail a check, not abort the run (headless Godot exits 0 after a script error).
-func _panel_states(furniture: Node3D) -> Array:
-	var states: Variant = furniture.get("flag_panel_states")
-	return states if states is Array else []
+func _panel_states(panels: FlagPanelSet) -> Array:
+	return panels.states
 
 
 func _test_flag_panels_follow_the_flag() -> void:
 	var furniture: Node3D = world.environment.furniture
+	var panels: FlagPanelSet = world.environment.flag_panels
 	var panel_nodes: Array[Node] = furniture.find_children("FlagPanels", "MultiMeshInstance3D", false, false)
-	var raw_count: Variant = furniture.get("flag_panel_count")
-	var count: int = raw_count if raw_count is int else -1
+	var count: int = panels.count
 	check(count == 8 and panel_nodes.size() == 1 and (panel_nodes[0] as MultiMeshInstance3D).multimesh.instance_count == 8,
 		"panels: eight digital flag panels share ONE MultiMeshInstance3D (%d panels, %d node)" % [count, panel_nodes.size()])
 	if count != 8:
 		return
 	var sectors: Dictionary = {}
 	for index: int in range(count):
-		sectors[_panel_sector(furniture, index)] = true
+		sectors[_panel_sector(panels, index)] = true
 	check(sectors.size() == 3, "panels: every one of the three sectors carries at least one panel")
 	world.step(FRAME)
-	check(_panel_states(furniture).count(0) == count, "panels: all eight glow a dim steady green under the green flag")
+	check(_panel_states(panels).count(0) == count, "panels: all eight glow a dim steady green under the green flag")
 
 	world.race.set_flag(Types.Flag.YELLOW, 2, "YELLOW FLAG (SEC 2) - TEST", 14.0)
 	world.step(FRAME)
 	var in_sector_two: int = 0
 	var yellow_ok: bool = true
 	for index: int in range(count):
-		var is_two: bool = _panel_sector(furniture, index) == 2
+		var is_two: bool = _panel_sector(panels, index) == 2
 		in_sector_two += 1 if is_two else 0
-		yellow_ok = yellow_ok and int(_panel_states(furniture)[index]) == (1 if is_two else 0)
+		yellow_ok = yellow_ok and int(_panel_states(panels)[index]) == (1 if is_two else 0)
 	check(in_sector_two > 0 and yellow_ok,
 		"panels: a sector 2 yellow blinks only the %d panels of sector 2" % in_sector_two)
 
 	world.race.set_flag(Types.Flag.SC, 1, "SAFETY CAR DEPLOYED - TEST", 30.0)
 	world.step(FRAME)
-	check(_panel_states(furniture).count(2) == count, "panels: the safety car puts SC on every panel of the circuit")
+	check(_panel_states(panels).count(2) == count, "panels: the safety car puts SC on every panel of the circuit")
 
 	world.race.set_flag(Types.Flag.GREEN, 1, "TRACK CLEAR - GREEN FLAG", 0.0)
 	world.step(FRAME)
-	check(_panel_states(furniture).count(0) == count, "panels: the green flag returns every panel to dim green")
+	check(_panel_states(panels).count(0) == count, "panels: the green flag returns every panel to dim green")
 
 
 # --- Task 1: the match collider through a slide ---------------------------------------

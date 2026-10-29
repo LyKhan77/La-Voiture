@@ -296,8 +296,7 @@ func step(delta: float) -> void:
 
 ## The trackside digital panels show the flag race control shows, on the sector it applies to.
 func _update_flag_panels() -> void:
-	if environment.furniture != null: # a circuit may have no flag panels (Neo-Wangan)
-		environment.furniture.apply_flag(int(race.race_control["flag"]), int(race.race_control["sector"]))
+	environment.flag_panels.apply_flag(int(race.race_control["flag"]), int(race.race_control["sector"]))
 
 
 ## Fixed 20 Hz ticks, so 1x and 16x run the same sequence.

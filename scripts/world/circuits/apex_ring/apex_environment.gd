@@ -203,6 +203,7 @@ func _build_furniture() -> void:
 	furniture.name = "Furniture"
 	add_child(furniture)
 	furniture.build(ribbon, line, kerbs, runoff_plans, hero_zones, pit_zone)
+	flag_panels = furniture.flag_panels
 	armco_post_count = furniture.armco_post_count
 
 
