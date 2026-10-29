@@ -24,6 +24,17 @@ const PARK_TOLERANCE_M: float = 0.05
 const PARK_CREEP_MPS: float = 0.3
 ## Pit cars closer than this sideways count as sharing a lane (a car's width plus a margin, widened for merges).
 const PIT_LANE_BAND_M: float = 3.2
+## A car on the fast lane behind a pulling-out car counts as in the way when it is within 8 m plus the distance it
+## covers in this many seconds at its speed plus this margin (it accelerates while the other car merges).
+const PIT_MERGE_LOOKAHEAD_S: float = 3.0
+const PIT_MERGE_SPEED_MARGIN_MPS: float = 8.0
+## A car heading for a later box is looked for further out: pulling out takes this many seconds before the lane is clear of its path.
+const PIT_ARRIVING_LOOKAHEAD_S: float = 5.0
+## Never merge in front of a car moving faster than this that is within this gap plus this many seconds of travel behind.
+const PIT_MERGE_UNSAFE_MIN_MPS: float = 1.5
+const PIT_MERGE_UNSAFE_GAP_M: float = 6.0
+const PIT_MERGE_UNSAFE_TIME_S: float = 2.5
+const PIT_FOLLOW_MARGIN_M: float = 2.0
 
 var _teammate_ahead: GtCar = null
 var _blue_flagged: bool = false
@@ -937,9 +948,10 @@ func _pit_logic(car: GtCar, dt: float) -> void:
 			var pull_out: float = clampf((car.s - pit.box_s) / 16.0, 0.0, 1.0)
 			_target_lateral = lerpf(float(race.pit_layout["stall_lane_m"]), fast_lane_at(rel), pull_out)
 			# Merging yields to a car already on the fast lane: hold the line and creep until it has passed.
-			if pull_out > 0.0 and pull_out < 1.0 and pit.merge_wait_s < GtTypes.PIT_RELEASE_WAIT_MAX_S and _pit_exit_blocked(car, rel):
+			if pull_out > 0.0 and car.lateral > fast_lane_at(rel) + 0.4 and (pit.merge_wait_s < GtTypes.PIT_MERGE_WAIT_MAX_S and _pit_exit_blocked(car, rel) or _pit_merge_unsafe(car, rel)):
 				pit.merge_wait_s += dt
-				_target_lateral = car.lateral
+				# Wait outside the fast lane's band, not half way across it: the cars passing must not have to brake for this one.
+				_target_lateral = maxf(car.lateral, fast_lane_at(rel) + PIT_LANE_BAND_M + 0.3)
 				_target = minf(_target, PARK_CREEP_MPS * 4.0)
 			if car.s - pit.box_s > 20.0:
 				pit.phase = GtTypes.PitPhase.EXIT
@@ -973,8 +985,12 @@ func _pit_logic(car: GtCar, dt: float) -> void:
 
 
 ## Speed from which a car still stops `distance` ahead (or settles to a leader's `lead_v`) at comfortable braking.
+## Already inside the gap (`distance` < 0) it drops below the leader by PIT_GAP_RECOVERY_GAIN per metre of deficit, so a
+## pair that closed up falls apart instead of driving on together at the same speed.
 static func pit_safe_speed(distance: float, lead_v: float = 0.0) -> float:
-	return sqrt(lead_v * lead_v + 2.0 * GtTypes.PIT_COMFORT_DECEL * maxf(distance, 0.0))
+	if distance < 0.0:
+		return maxf(0.0, lead_v + GtTypes.PIT_GAP_RECOVERY_GAIN * distance)
+	return sqrt(lead_v * lead_v + 2.0 * GtTypes.PIT_COMFORT_DECEL * distance)
 
 
 ## Speed on the way into the box: a braking curve to the stall that ends in a slow creep, then a stop.
@@ -987,8 +1003,10 @@ func _approach_box_speed(dist_to_box: float) -> float:
 ## Double stack: the second car waits behind the stall (or behind its teammate) and eases onto the working
 ## lane as it closes up, instead of stopping dead where it happens to be.
 func _queue_behind_teammate(car: GtCar, pit: GtPit, rel: float, steer: bool = true) -> void:
-	# Never so deep behind the stall that the waiting car overlaps the car parked in the previous box.
-	var queue_gap: float = minf(float(race.pit_layout["queue_gap_m"]), float(race.pit_layout["stall_pitch_m"]) - GtTypes.CAR_LENGTH_M - 0.5)
+	# Never so deep behind the stall that the waiting car overlaps the car parked in the previous box, and never so
+	# close that it overlaps the car in its own box: a car length plus a margin, when the stall pitch leaves that room.
+	var deepest: float = float(race.pit_layout["stall_pitch_m"]) - GtTypes.CAR_LENGTH_M - 0.5
+	var queue_gap: float = maxf(minf(float(race.pit_layout["queue_gap_m"]), deepest), minf(GtTypes.CAR_LENGTH_M + 0.5, deepest))
 	var stop_s: float = minf(pit.box_s - queue_gap, _teammate_ahead.s - GtTypes.PIT_TEAMMATE_GAP_M)
 	var room: float = stop_s - car.s
 	# Swing onto the working lane only once abreast of the box, never while the previous box is still alongside.
@@ -1001,6 +1019,24 @@ func _queue_behind_teammate(car: GtCar, pit: GtPit, rel: float, steer: bool = tr
 		_target = minf(_target, maxf(PARK_CREEP_MPS, pit_safe_speed(room - PARK_TOLERANCE_M, _teammate_ahead.v)))
 
 
+## True while a car moving along the fast lane behind is so close that pulling out now would put this one in its
+## path. The waits above end on a timer so a pit scene never sticks; this one does not, because a car that merges
+## in front of a moving car is an overlap, not a deadlock: the car behind passes in a few seconds.
+func _pit_merge_unsafe(car: GtCar, rel: float) -> bool:
+	var lane: float = fast_lane_at(rel)
+	for other: GtCar in race.cars:
+		if other == car or other.pit == null or other.v <= PIT_MERGE_UNSAFE_MIN_MPS:
+			continue
+		var behind: float = car.s - other.s
+		# A moving car just ahead and sideways is as much in the way: it swings across the same stretch of lane.
+		var reach: float = PIT_MERGE_UNSAFE_GAP_M + other.v * PIT_MERGE_UNSAFE_TIME_S
+		if behind > reach or behind < -(GtTypes.CAR_LENGTH_M + PIT_FOLLOW_MARGIN_M):
+			continue
+		if absf(other.lateral - lane) < PIT_LANE_BAND_M + 0.8 or (behind <= 0.0 and absf(other.lateral - car.lateral) < PIT_LANE_BAND_M):
+			return true
+	return false
+
+
 ## True while a moving car on the fast lane behind would run into this one as it pulls out.
 func _pit_exit_blocked(car: GtCar, rel: float) -> bool:
 	var lane: float = fast_lane_at(rel)
@@ -1008,7 +1044,13 @@ func _pit_exit_blocked(car: GtCar, rel: float) -> bool:
 		if other == car or other.pit == null:
 			continue
 		var behind: float = car.s - other.s
-		if behind > 0.0 and behind <= 8.0 + other.v * 3.0 and absf(other.lateral - lane) < PIT_LANE_BAND_M + 0.8 and (other.v > 3.0 or behind <= 8.0):
+		# A car behind closes up while this one is still pulling out, so its speed in a few seconds counts, not only now.
+		var reach: float = 8.0 + minf(GtTypes.PIT_SPEED, other.v + PIT_MERGE_SPEED_MARGIN_MPS) * PIT_MERGE_LOOKAHEAD_S
+		if behind > 0.0 and behind <= reach and absf(other.lateral - lane) < PIT_LANE_BAND_M + 0.8 and (other.v > 3.0 or behind <= 8.0):
+			return true
+		# A car still heading for a box further along this pit lane crosses the stall lane this one pulls out into,
+		# whatever lane it is on right now.
+		if behind > 0.0 and behind <= 8.0 + minf(GtTypes.PIT_SPEED, other.v + PIT_MERGE_SPEED_MARGIN_MPS) * PIT_ARRIVING_LOOKAHEAD_S and other.pit.phase <= GtTypes.PitPhase.BOX and other.pit.box_s > car.s:
 			return true
 		# Neither can a car ahead on the way out, or one easing into the next box, be cut across.
 		if behind <= 0.0 and -behind < 20.0 and minf(absf(other.lateral - car.lateral), absf(other.lateral - lane)) < PIT_LANE_BAND_M + 1.0:
@@ -1044,7 +1086,7 @@ func _service_car(car: GtCar, pit: GtPit, dt: float) -> void:
 	else:
 		pit.lift_y = minf(0.15, maxf(0.0, (pit.duration - pit.timer) * 0.45))
 	if pit.timer >= pit.duration:
-		if _pit_exit_blocked(car, car.s - pit.start_s) and pit.release_wait_s < GtTypes.PIT_RELEASE_WAIT_MAX_S:
+		if (_pit_exit_blocked(car, car.s - pit.start_s) and pit.release_wait_s < GtTypes.PIT_RELEASE_WAIT_MAX_S) or _pit_merge_unsafe(car, car.s - pit.start_s):
 			pit.release_wait_s += dt
 			pit.lift_y = 0.0
 			return

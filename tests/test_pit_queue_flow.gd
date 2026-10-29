@@ -1,7 +1,7 @@
 extends SceneTree
 
 ## The whole field boxes in the same lap: every car is serviced, nobody sticks in the lane, and the queue
-## moves like traffic: no instant stops and no teleports (bumper overlap at merges is measured, not yet fixed).
+## moves like traffic: no instant stops, no teleports and no car driving into another (deepest body overlap at merges is capped).
 ## Run: godot --headless --path . -s res://tests/test_pit_queue_flow.gd
 
 const TrackScene := preload("res://scenes/race_world/circuits/apex_ring/apex_circuit.tscn")
@@ -16,7 +16,11 @@ const LANE_DECEL_MAX: float = 10.0
 const TELEPORT_MAX_M: float = 0.05
 ## Body shell without mirrors and arches: sharing a lane means this close sideways.
 const HULL_WIDTH_M: float = 1.9
-const BUMPER_GAP_MIN_M: float = 0.5
+## How deep two bodies may overlap: the smaller of the bumper overlap and the sideways overlap (mirrors brushing in
+## adjacent boxes or a merge is a few tenths; nose into tail on one lane is the whole car length).
+const OVERLAP_MAX_M: float = 1.0
+## A brush that deep may last this many ticks (one second at 20 Hz); a car locked into another's tail lasts for tens of seconds.
+const DEEP_OVERLAP_TICKS_MAX: int = 20
 const HOLD_MAX_S: float = 100.0
 const ARRIVAL_WAIT_MAX_S: float = 1.0
 const SERVICE_DEADLINE_S: float = 420.0
@@ -70,6 +74,8 @@ func _scenario(label: String, spacing: float, speed: float, weather: int) -> voi
 	var max_decel: float = 0.0
 	var max_teleport: float = 0.0
 	var min_gap: float = INF
+	var deepest_overlap: float = 0.0
+	var deep_overlap_ticks: int = 0
 	var worst_hold: float = 0.0
 	var since: Dictionary = {}
 	var arrived: Dictionary = {}
@@ -104,7 +110,12 @@ func _scenario(label: String, spacing: float, speed: float, weather: int) -> voi
 				if other == car or other.pit == null or other.s <= car.s or other.s - car.s > 30.0:
 					continue
 				if absf(other.lateral - car.lateral) < HULL_WIDTH_M:
-					min_gap = minf(min_gap, other.s - car.s - Types.CAR_LENGTH_M)
+					var bumper_gap: float = other.s - car.s - Types.CAR_LENGTH_M
+					min_gap = minf(min_gap, bumper_gap)
+					if bumper_gap < 0.0:
+						var depth: float = minf(-bumper_gap, HULL_WIDTH_M - absf(other.lateral - car.lateral))
+						deepest_overlap = maxf(deepest_overlap, depth)
+						deep_overlap_ticks += 1 if depth > OVERLAP_MAX_M else 0
 		var done: bool = true
 		for car: CarScript in race.cars:
 			done = done and car.stops >= 1 and car.pit == null
@@ -119,7 +130,5 @@ func _scenario(label: String, spacing: float, speed: float, weather: int) -> voi
 	check(worst_arrival_wait <= ARRIVAL_WAIT_MAX_S, "%s: service starts right after a car reaches its box (%.2f s)" % [label, worst_arrival_wait])
 	check(max_decel <= LANE_DECEL_MAX, "%s: lane braking stays comfortable (%.1f m/s2)" % [label, max_decel])
 	check(max_teleport <= TELEPORT_MAX_M, "%s: no car is pushed or teleported (%.2f m)" % [label, max_teleport])
-	# Open issue (see FASE-13-3 report): cars still touch where a pulling-out car merges with one easing into
-	# the next box, so the bumper gap is measured and reported but not yet asserted.
-	print("  [%s] closest bumper gap in the lane: %.2f m (target >= %.1f)" % [label, min_gap, BUMPER_GAP_MIN_M])
+	check(deep_overlap_ticks <= DEEP_OVERLAP_TICKS_MAX, "%s: no car drives into another: %d car-pair ticks overlap by more than %.1f m (deepest %.2f m, closest bumper gap %.2f m)" % [label, deep_overlap_ticks, OVERLAP_MAX_M, deepest_overlap, min_gap])
 	race.dispose()

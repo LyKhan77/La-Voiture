@@ -17,7 +17,7 @@ param(
   [string]$Filter = "",
   [int]$From = 0,
   [int]$To = -1,
-  [int]$TimeoutSec = 400,
+  [int]$TimeoutSec = 600,
   [string]$Godot = $(if ($env:GODOT_CONSOLE) { $env:GODOT_CONSOLE } else { "C:\Users\Lee\Downloads\Godot_v4.7.2-stable_win64.exe\Godot_v4.7.2-stable_win64_console.exe" })
 )
 

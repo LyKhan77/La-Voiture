@@ -60,9 +60,13 @@ const PIT_BRAKE_MAX: float = 9.0
 ## Bumper-to-bumper room a pit car keeps to the car ahead; teammates stack on a centre-to-centre gap.
 const PIT_FOLLOW_GAP_M: float = 2.0
 const PIT_TEAMMATE_GAP_M: float = 8.0
+## A pit car already inside its following gap slows this many m/s below the car ahead per metre of deficit.
+const PIT_GAP_RECOVERY_GAIN: float = 1.5
 ## A box release waits at most this long for the fast lane behind to clear; a car held still this long
 ## by traffic stops yielding to it (nothing may keep a pit scene stuck).
-const PIT_RELEASE_WAIT_MAX_S: float = 5.0
+const PIT_RELEASE_WAIT_MAX_S: float = 12.0
+## A car pulling out waits this long, outside the fast lane's band, for the cars on it to pass before it merges anyway.
+const PIT_MERGE_WAIT_MAX_S: float = 12.0
 const PIT_STALL_FAILSAFE_S: float = 15.0
 const FOLLOW_GAP: float = 18.0
 
