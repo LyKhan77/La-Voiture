@@ -1,8 +1,8 @@
-[gd_resource type="ShaderMaterial" load_steps=4 format=3]
+[gd_resource type="ShaderMaterial" format=3 uid="uid://bqe24gwdbholf"]
 
-[ext_resource type="Shader" path="res://shaders/anime_cel_shaded.gdshader" id="1_toon"]
-[ext_resource type="Shader" path="res://shaders/inverted_hull_outline.gdshader" id="2_outline"]
-[ext_resource type="Texture2D" path="res://assets/cars/porsche_911/textures/base_color.jpg" id="3_color"]
+[ext_resource type="Shader" uid="uid://vw8w3ftgme8q" path="res://shaders/anime_cel_shaded.gdshader" id="1_toon"]
+[ext_resource type="Shader" uid="uid://civnt6k48s2cs" path="res://shaders/inverted_hull_outline.gdshader" id="2_outline"]
+[ext_resource type="Texture2D" uid="uid://c6sb72tpfdo54" path="res://assets/cars/porsche_911/textures/base_color.jpg" id="3_color"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_outline"]
 render_priority = 1
@@ -14,12 +14,12 @@ shader_parameter/outline_color = Color(0.02, 0.02, 0.02, 1)
 render_priority = 0
 next_pass = SubResource("ShaderMaterial_outline")
 shader = ExtResource("1_toon")
-shader_parameter/base_color = Color(1, 1, 1, 1)
 shader_parameter/albedo_texture = ExtResource("3_color")
+shader_parameter/use_livery = false
+shader_parameter/base_color = Color(1, 1, 1, 1)
 shader_parameter/shadow_tint = Color(0.12, 0.14, 0.22, 1)
 shader_parameter/shadow_threshold = 0.48
 shader_parameter/shadow_smoothness = 0.015
 shader_parameter/rim_threshold = 0.65
 shader_parameter/rim_intensity = 0.35
 shader_parameter/rim_color = Color(0.8, 1, 0, 1)
-shader_parameter/use_livery = false

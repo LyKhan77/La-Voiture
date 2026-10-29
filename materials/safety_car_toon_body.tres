@@ -1,7 +1,7 @@
-[gd_resource type="ShaderMaterial" load_steps=7 format=3]
+[gd_resource type="ShaderMaterial" format=3 uid="uid://c5sabu856ieli"]
 
-[ext_resource type="Shader" path="res://shaders/toon_car_paint.gdshader" id="1_toon"]
-[ext_resource type="Shader" path="res://shaders/inverted_hull_outline.gdshader" id="2_outline"]
+[ext_resource type="Shader" uid="uid://u1ytro17ngkg" path="res://shaders/toon_car_paint.gdshader" id="1_toon"]
+[ext_resource type="Shader" uid="uid://civnt6k48s2cs" path="res://shaders/inverted_hull_outline.gdshader" id="2_outline"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_outline"]
 render_priority = 1
@@ -29,6 +29,7 @@ shader_parameter/rim_threshold = 0.65
 shader_parameter/rim_intensity = 0.35
 shader_parameter/rim_color = Color(0.8, 1, 0, 1)
 shader_parameter/use_normal_map = false
+shader_parameter/normal_strength = 1.0
 shader_parameter/orm_texture = SubResource("GradientTexture2D_orm")
 shader_parameter/ao_strength = 0.5
 shader_parameter/spec_color = Color(1, 1, 1, 1)
