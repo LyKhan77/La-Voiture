@@ -27,8 +27,10 @@ func _run() -> void:
 	check(paddock != null, "Brianza paddock exists")
 	if paddock != null:
 		check(paddock.transporter_poses.size() == 10 and paddock.tent_poses.size() >= 6 and paddock.tent_poses.size() <= 8 and paddock.fence_poses.size() > 0 and paddock.parking_poses.size() >= 16, "paddock has transporters, tents, fencing and parking")
-		for name: String in ["PaddockApron", "PaddockServiceRoad", "PaddockTransporters", "PaddockTents", "PaddockFence", "PaddockGate", "PaddockParking", "PaddockProps"]:
+		for name: String in ["PaddockApron", "PaddockServiceRoad", "PaddockTents", "PaddockFence", "PaddockGate", "PaddockParking", "PaddockProps"]:
 			check(paddock.get_node_or_null(name) != null, "%s exists" % name)
+		# The trucks come from the shared TeamTransporters kit, a child of the paddock.
+		check(paddock.transporters != null and paddock.transporters.get_node_or_null("PaddockTransporters") != null, "PaddockTransporters exists")
 		var cells: Dictionary = Geo.hash_samples(circuit.ribbon)
 		var safe: bool = true
 		for rect: Rect2 in paddock.footprints():
@@ -44,7 +46,7 @@ func _run() -> void:
 				clear = clear and not box.grow(3.0).has_point((entry.pose as Transform3D).origin)
 		check(clear, "transporters clear the race control tower")
 		var surfaces: int = 0
-		for child: Node in paddock.get_children():
+		for child: Node in paddock.get_children() + paddock.transporters.get_children():
 			if child is MeshInstance3D and child.mesh != null:
 				surfaces += child.mesh.get_surface_count()
 			elif child is MultiMeshInstance3D and child.multimesh != null:
@@ -69,7 +71,7 @@ func _run() -> void:
 		check(remapped, "rebuild updates transporter teams without duplicating nodes")
 		for mode: int in [0, 1, 2]:
 			env.apply_time_of_day({"mode": mode, "floodlights": float(mode), "stars_opacity": 0.0})
-			check(paddock.get_node("PaddockTents").visible and paddock.get_node("PaddockTransporters").visible, "paddock visible in time-of-day mode %d" % mode)
+			check(paddock.get_node("PaddockTents").visible and paddock.transporters.get_node("PaddockTransporters").visible, "paddock visible in time-of-day mode %d" % mode)
 	circuit.free()
 	await process_frame
 	check(int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)) == 0, "paddock teardown leaves no orphan nodes")
