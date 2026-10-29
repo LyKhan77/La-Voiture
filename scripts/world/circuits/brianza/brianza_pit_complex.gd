@@ -1,5 +1,5 @@
 class_name BrianzaPitComplex
-extends Node3D
+extends "res://scripts/world/circuits/base/circuit_pit_complex.gd"
 
 ## Standard GP Pit Complex for Autodromo di Brianza (Round 03, FASE 13): a 410 m FIA-standard pit lane
 ## running along the right side of the main straight. Peels off at s = 5 530 m (260 m before the line),
@@ -9,9 +9,7 @@ extends Node3D
 ## safety debris fence and crash cushion, team garages with liveries, the 2-storey PitBuilding, the
 ## MainGrandstand with live Jumbotron standings, and RaceControlTower.
 
-const TrackRibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const MeshBatchScript := preload("res://scripts/world/shared/mesh_batch.gd")
-const PitKit := preload("res://scripts/world/shared/pit_kit.gd")
 const FigureScript := preload("res://scripts/car/pit_crew_figure.gd")
 const ToonMaterials := preload("res://scripts/world/shared/toon_materials.gd")
 const RoadShader := preload("res://shaders/road_asphalt.gdshader")
@@ -63,18 +61,11 @@ const CUSHION_WHITE := Color("#f0f2f5")
 const GARAGE_SHELL := Color("#232630")
 const MONZA_RED := Color("#d9232e")
 
-var ribbon: TrackRibbonScript
-var team_count: int = STALL_COUNT
-var garage_front_m: float = GARAGE_FRONT_M
-var stall_lane_m: float = BOX_LATERAL_M
-var stalls: Array[Dictionary] = []
-var garages: Array[Node3D] = []
 var paddock: PaddockScript
 var garage_equipment: Array[Dictionary] = []
 var stall_markings: Array[Dictionary] = []
 var speed_limit_lines_u: Array[float] = []
 var lane_separator_count: int = 0
-var built: bool = false
 var crash_cushion: Node3D
 var wall_end_cushions: Array[Dictionary] = []
 var fence_poses: Array[Transform3D] = []
@@ -82,6 +73,12 @@ var drum_poses: Array[Transform3D] = []
 var _solid_footprints: Array[Dictionary] = []
 var pit_entry_trigger: Area3D
 var pit_exit_trigger: Area3D
+
+
+func _init() -> void:
+	team_count = STALL_COUNT
+	garage_front_m = GARAGE_FRONT_M
+	stall_lane_m = BOX_LATERAL_M
 
 
 static func lane_lateral_at(u: float) -> float:
@@ -98,6 +95,16 @@ static func s_from_u(u: float) -> float:
 
 func s_from_u_local(u: float) -> float:
 	return fposmod(ENTRY_S + u, LAP_LENGTH_M)
+
+
+## Re-seating recolours the garages, the name signs and the box paint, and moves the transporters.
+func _on_teams_assigned() -> void:
+	for i: int in range(garages.size()):
+		_build_garage_visuals(garages[i], int(stalls[i]["team"]))
+	_build_team_plates()
+	_build_markings()
+	if paddock != null:
+		paddock.build(ribbon, self)
 
 
 func u_from_s(s: float) -> float:
@@ -140,14 +147,7 @@ func get_pit_transform(u: float, lateral: float) -> Transform3D:
 func build(p_ribbon: TrackRibbonScript, team_ids: Array[int] = []) -> void:
 	if built:
 		if not team_ids.is_empty():
-			for i: int in range(stalls.size()):
-				stalls[i]["team"] = team_ids[i] if i < team_ids.size() else -1
-			for i: int in range(garages.size()):
-				_build_garage_visuals(garages[i], int(stalls[i]["team"]))
-			_build_team_plates()
-			_build_markings()
-			if paddock != null:
-				paddock.build(p_ribbon, self, team_ids)
+			assign_teams(team_ids)
 		return
 	built = true
 	ribbon = p_ribbon
@@ -201,30 +201,6 @@ func wall_span_u() -> Vector2:
 func solid_footprints() -> Array[Dictionary]:
 	return _solid_footprints
 
-
-func stall_index_for_team(team: int) -> int:
-	for i: int in range(stalls.size()):
-		if int(stalls[i]["team"]) == team:
-			return i
-	return -1
-
-
-func stall_transform(team: int) -> Transform3D:
-	var index: int = stall_index_for_team(team)
-	return stalls[index]["pose"] if index >= 0 else Transform3D.IDENTITY
-
-
-func garage_for_team(team: int) -> Node3D:
-	var index: int = stall_index_for_team(team)
-	return garages[index] if index >= 0 and index < garages.size() else null
-
-
-func crew_roles() -> Array:
-	return PitKit.standby_roles()
-
-
-func crew_spot(slot: int) -> Vector3:
-	return PitKit.standby_spot(slot)
 
 
 func _build_stalls(team_ids: Array[int] = []) -> void:

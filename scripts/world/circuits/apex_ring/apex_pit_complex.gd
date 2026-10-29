@@ -1,5 +1,5 @@
 class_name ApexPitComplex
-extends Node3D
+extends "res://scripts/world/circuits/base/circuit_pit_complex.gd"
 
 ## Pit lane beside the start straight (FASE 5.5, refined after the FASE 10 feedback): a separate 410 m
 ## lane that peels off the right edge of the circuit at s = 3900 m, passes ten team garages and rejoins the
@@ -15,12 +15,10 @@ extends Node3D
 ## The 80 km/h limiter applies from u = 0 to the Pit Exit line. The GT sim drives its cars along
 ## lane_lateral_at() and parks them on STALL_LANE_M, so the geometry here and the car paths agree.
 
-const TrackRibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const ToonMaterials := preload("res://scripts/world/shared/toon_materials.gd")
 const MeshBatchScript := preload("res://scripts/world/shared/mesh_batch.gd")
 const FigureScript := preload("res://scripts/car/pit_crew_figure.gd")
 const Liveries := preload("res://scripts/car/team_liveries.gd")
-const PitKit := preload("res://scripts/world/shared/pit_kit.gd")
 const TeamSignage := preload("res://scripts/world/paddock/team_signage.gd")
 const TransportersKit := preload("res://scripts/world/paddock/team_transporters.gd")
 const EngineScript := preload("res://scripts/core/race_sim_engine.gd")
@@ -76,16 +74,8 @@ const GARAGE_FLOOR_COLOR := Color("#1c1e25")
 const CUSHION_RED := Color("#d9232e")
 const CUSHION_WHITE := Color("#f0f2f5")
 
-var ribbon: TrackRibbonScript
-## What a crew (and the choreographer) needs to know about this lane's geometry.
-var team_count: int = TEAM_COUNT
-var garage_front_m: float = GARAGE_FRONT_M
-var stall_lane_m: float = STALL_LANE_M
 ## Arc length of the pit lane in meters, from Pit Entry to Pit Exit.
 var length_m: float = NOMINAL_LENGTH_M
-var stalls: Array[Dictionary] = [] # per team: {team, s, u, lateral, pose}
-var garages: Array[Node3D] = []
-var transporters: Node3D
 var speed_limit_lines_u: Array[float] = []
 ## The pit wall pieces' poses and the arc distance each stands at, and the crash cushions at its ends.
 var wall_poses: Array[Transform3D] = []
@@ -96,6 +86,12 @@ var stall_markings: Array[Dictionary] = []
 var lane_separator_count: int = 0
 ## Per garage: counts of what it holds (see PitKit.garage_props).
 var garage_equipment: Array[Dictionary] = []
+
+
+func _init() -> void:
+	team_count = TEAM_COUNT
+	garage_front_m = GARAGE_FRONT_M
+	stall_lane_m = STALL_LANE_M
 
 
 ## Lateral of the cars' path at `u` for a lane `length` long: from the circuit edge, across the entry road to the
@@ -111,6 +107,9 @@ static func lane_blend(u: float, length: float) -> float:
 
 ## Builds the lane, garages and markings against `p_ribbon`.
 func build(p_ribbon: TrackRibbonScript, team_ids: Array[int] = []) -> void:
+	if built:
+		return
+	built = true
 	ribbon = p_ribbon
 	length_m = fposmod(EXIT_S - ENTRY_S, ribbon.length_m)
 	_build_stalls(team_ids)
@@ -122,6 +121,26 @@ func build(p_ribbon: TrackRibbonScript, team_ids: Array[int] = []) -> void:
 	_build_team_plates()
 	_build_team_transporters()
 	_build_signs()
+
+
+## Re-seating rebuilds the lane: the garages, the box paint, the name signs and the transporters all depend on who
+## sits where, and this complex draws them once, at build time.
+func _on_teams_assigned() -> void:
+	var seated: Array[int] = []
+	for stall: Dictionary in stalls:
+		seated.append(int(stall["team"]))
+	for child: Node in get_children():
+		child.free()
+	transporters = null
+	garages.clear()
+	wall_poses.clear()
+	wall_arcs.clear()
+	wall_end_cushions.clear()
+	stall_markings.clear()
+	speed_limit_lines_u.clear()
+	garage_equipment.clear()
+	built = false
+	build(ribbon, seated)
 
 
 ## Arc distance from Pit Entry for a ribbon distance (wraps over the start line).
@@ -163,38 +182,6 @@ func stall_u(team: int) -> float:
 		if int(stall.get("team", -1)) == team:
 			return float(stall["u"])
 	return float(stalls[clampi(team, 0, stalls.size() - 1)]["u"]) if not stalls.is_empty() else 0.0
-
-
-func stall_transform(team: int) -> Transform3D:
-	for stall: Dictionary in stalls:
-		if int(stall.get("team", -1)) == team:
-			return stall["pose"]
-	return stalls[clampi(team, 0, stalls.size() - 1)]["pose"] if not stalls.is_empty() else Transform3D.IDENTITY
-
-
-func garage_for_team(team: int) -> Node3D:
-	for i: int in range(stalls.size()):
-		if int(stalls[i].get("team", -1)) == team:
-			if i < garages.size():
-				return garages[i]
-	return null
-
-
-## The crew standing in a box: 13 people, in the order they line up across the garage mouth.
-func crew_roles() -> Array:
-	return PitKit.standby_roles()
-
-
-## Where crew member `slot` stands at the garage mouth (garage frame: +x away from the lane).
-func crew_spot(slot: int) -> Vector3:
-	return PitKit.standby_spot(slot)
-
-
-func stall_index_for_team(team: int) -> int:
-	for i: int in range(stalls.size()):
-		if int(stalls[i].get("team", -1)) == team:
-			return i
-	return -1
 
 
 ## The wall centre's lateral at u (a fixed verge off the lane's left edge, PIT_WALL_M on the full lane).

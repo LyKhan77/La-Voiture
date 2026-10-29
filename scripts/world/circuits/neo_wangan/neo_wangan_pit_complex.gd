@@ -1,5 +1,5 @@
 class_name NeoWanganPitComplex
-extends Node3D
+extends "res://scripts/world/circuits/base/circuit_pit_complex.gd"
 
 ## The FIA pit connection of the Neo-Wangan street circuit: a 200 m fast lane
 ## hanging off the right-hand edge of the last straight, ten 12 m team boxes, a concrete pit wall
@@ -18,9 +18,7 @@ extends Node3D
 ##   10.75 .. 16.0  working lane, the box car stops at 13.0
 ##   16.0 .. 25.0   ten garages, 12 m apart on the 12 m stall pitch
 
-const TrackRibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const MeshBatchScript := preload("res://scripts/world/shared/mesh_batch.gd")
-const PitKit := preload("res://scripts/world/shared/pit_kit.gd")
 const ToonMaterials := preload("res://scripts/world/shared/toon_materials.gd")
 const RoadShader := preload("res://shaders/road_asphalt.gdshader")
 const PitBuildingKit := preload("res://scripts/world/paddock/pit_building.gd")
@@ -83,15 +81,6 @@ const GARAGE_SHELL := Color("#232630")
 const GARAGE_GLASS := Color(0.0, 0.82, 1.0, 0.28)
 const GARAGE_LED := Color(1.0, 0.12, 0.48, 0.0)
 
-var ribbon: TrackRibbonScript
-## What a crew (and the choreographer) needs to know about this lane's geometry.
-var team_count: int = STALL_COUNT
-var garage_front_m: float = GARAGE_FRONT_M
-var stall_lane_m: float = BOX_LATERAL_M
-var stalls: Array[Dictionary] = [] # {index, s, u, lateral, pose, node}
-var garages: Array[Node3D] = []
-var transporters: Node3D
-var built: bool = false
 ## The pit wall's arc span and the crash cushion standing on its nose.
 var wall_arcs: Array[float] = []
 var crash_cushion: Node3D
@@ -101,6 +90,12 @@ var bypass_ramp: Node3D
 var blend_line: MeshInstance3D
 var asphalt: MeshInstance3D
 var garage_zone_length_m: float = GARAGE_ZONE_M
+
+
+func _init() -> void:
+	team_count = STALL_COUNT
+	garage_front_m = GARAGE_FRONT_M
+	stall_lane_m = BOX_LATERAL_M
 
 
 ## Lateral of the cars' path at `u` metres from Pit Entry: off the road edge onto the fast lane,
@@ -127,7 +122,7 @@ static func merge_u() -> float:
 	return LANE_LENGTH_M + EXIT_BLEND_M
 
 
-func build(p_ribbon: TrackRibbonScript) -> void:
+func build(p_ribbon: TrackRibbonScript, team_ids: Array[int] = []) -> void:
 	if built:
 		return
 	built = true
@@ -146,6 +141,8 @@ func build(p_ribbon: TrackRibbonScript) -> void:
 	_build_bypass_ramp()
 	# Garage glass and LED strips are glow-masked vertices: light them like the city around them.
 	ToonMaterials.set_glow_energy(1.6)
+	if not team_ids.is_empty():
+		assign_teams(team_ids)
 
 
 func u_from_s(s: float) -> float:
@@ -164,42 +161,12 @@ func get_pit_transform(u: float, lateral_m: float) -> Transform3D:
 	return ribbon.get_point_at_offset(s_from_u_local(u), lateral_m)
 
 
-func stall_transform(team: int) -> Transform3D:
-	var index: int = stall_index_for_team(team)
-	return stalls[index]["pose"] if index >= 0 else Transform3D.IDENTITY
-
-
-## Seats `team_ids` (the teams the race runs, in the sim's stall order) in the boxes; extra boxes stay empty.
-func assign_teams(team_ids: Array[int]) -> void:
-	for i: int in range(stalls.size()):
-		stalls[i]["team"] = team_ids[i] if i < team_ids.size() else -1
+## The transporters and the crews in the garages follow the teams seated in the boxes.
+func _on_teams_assigned() -> void:
 	if transporters != null:
 		transporters.apply_teams(stalls)
 	if not garages.is_empty():
 		_build_standby_crews()
-
-
-## The crew standing in a box: the Apex Ring's 13-person line-up, fitted to this lane's apron.
-func crew_roles() -> Array:
-	return PitKit.standby_roles()
-
-
-## Where crew member `slot` stands at the garage mouth (garage frame: +x away from the lane).
-func crew_spot(slot: int) -> Vector3:
-	var count: int = crew_roles().size()
-	return Vector3(1.5, 0.0, (float(slot) - float(count - 1) * 0.5) * 0.88)
-
-
-func stall_index_for_team(team: int) -> int:
-	for i: int in range(stalls.size()):
-		if int(stalls[i]["team"]) == team:
-			return i
-	return -1
-
-
-func garage_for_team(team: int) -> Node3D:
-	var index: int = stall_index_for_team(team)
-	return garages[index] if index >= 0 and index < garages.size() else null
 
 
 ## The layout the GT sim drives this pit lane with (see GtRace.default_pit_layout for the Apex

@@ -52,7 +52,7 @@ Semua perintah berikut dapat dijalankan dari terminal repositori:
 | :--- | :--- |
 | **Menjalankan Game (Playtest)** | `godot --path . scenes/main.tscn` |
 | **Menjalankan 1 Test Headless** | `godot --headless --path . -s tests/<nama_test>.gd` |
-| **Menjalankan Seluruh 23 Test Suite** | `Get-ChildItem tests\test_*.gd \| ForEach-Object { godot --headless --path . -s "res://tests/$($_.Name)" }` |
+| **Menjalankan Seluruh Test Suite** | `powershell -File tools/run_tests.ps1` (satu proses per suite dengan timeout; `-Filter pit`, `-From 0 -To 20` untuk sebagian) |
 | **Uji Gate Fitment Roda & Sasis** | `godot --headless --path . -s scratch/fit_cars.gd` |
 | **Automasi Pipeline Mobil GT3 Baru** | `powershell -File scratch/make_car.ps1 -Car <slug_mobil>` |
 | **Cek Status Git & LFS** | `git status -s` dan `git lfs status` |
@@ -79,7 +79,7 @@ La_Voiture/
 │   ├── main.tscn           # Entry point utama game (membuka scenes/ui/main_menu.tscn)
 │   ├── ui/                 # Main menu, race setup, 3D garage team select, transition, settings, podium
 │   ├── car/                # Scene chassis mobil (<slug>_chassis.tscn)
-│   ├── race_world/         # Sirkuit, paddock, pit building, gantry start, camera director
+│   ├── race_world/         # circuits/<id>/ (scene sirkuit + pit tiap sirkuit), shared/ (vista, gantry), paddock/ (kit paddock bersama)
 │   ├── hud/                # In-game HUD, radio cut-in dock, race standings, timing tower
 │   ├── vfx/                # Efek partikel visual (spray, rain, tire smoke)
 │   └── audio/              # Audio player bus nodes
@@ -87,7 +87,9 @@ La_Voiture/
 ├── scripts/                # Kode sumber GDScript terstruktur per arsitektur domain
 │   ├── core/               # Game state, race config data (RaceConfigData), presentation settings
 │   ├── car/                # Dinamika kendaraan, ban (Pacejka), AI agent, telemetry, pit crew figures
-│   ├── world/              # Generator trek, pitstop complex, garage environment builder, paddock
+│   ├── world/              # weekend/ (world, director, kamera), circuits/<id>/ + circuits/base/ (kontrak pit), shared/ (kit bersama), paddock/, garage/
+│   ├── hud/                # HUD balapan, timing tower, deck taktis
+│   ├── vfx/                # Efek visual balapan (spray, asap ban, hujan)
 │   ├── ui/                 # Logika antarmuka, modal settings, orbit camera, transitions, radar 2D
 │   ├── audio/              # Audio manager, radio audio director, dynamic engine synthesizer
 │   └── gt/                 # Core simulation engine, physics solver, contact resolver, race coordinator
@@ -98,10 +100,10 @@ La_Voiture/
 ├── materials/              # Resource material bersama (.tres, .material)
 │
 ├── tests/                  # Automated test suites (Headless Godot Engine)
-│   ├── test_*.gd           # Seluruh unit & integration test (23 suite wajib 100% PASS)
+│   ├── test_*.gd           # Seluruh unit & integration test (semua suite wajib 100% PASS, jalankan via tools/run_tests.ps1)
 │   └── wheel_fit_checks.gd # Helper bersama pengukuran fitment roda & lengkung fender
 │
-├── tools/                  # Utilitas build & generator level offline (tools/build_track_circuit.gd)
+├── tools/                  # Utilitas build & generator level offline (tools/build_track_circuit.gd) dan tools/run_tests.ps1 (runner test ber-timeout)
 │
 ├── scratch/                # Skrip rekayasa teknis & pipeline aset offline
 │   ├── make_car.ps1        # Automasi ujung-ke-ujung pembuatan mobil GT3
@@ -201,7 +203,7 @@ flowchart TD
 ## 8. Testing & Quality Assurance (Definition of Done)
 
 Sebelum suatu tugas atau fase dinyatakan **SELESAI**, agen wajib memenuhi seluruh kriteria DoD berikut:
-1. **Zero Regression Test:** Seluruh 23 test suite headless di `tests/test_*.gd` wajib dijalankan via `godot --headless` dan menghasilkan **100% PASS, 0 FAIL**.
+1. **Zero Regression Test:** Seluruh test suite headless di `tests/test_*.gd` wajib dijalankan via `tools/run_tests.ps1` (suite gagal bila exit code bukan 0, tanpa `[PASS]`, atau ada `[FAIL]`/`SCRIPT ERROR`/`Parse Error`) dan menghasilkan **100% PASS, 0 FAIL**.
 2. **Native Smoke Test:** Menjalankan balapan 3 lap 20 mobil tanpa error, tanpa frame drop di bawah 60 FPS, dan kembali ke menu utama dengan 0 orphan node.
 3. **Dokumentasi Resmi:** Laporan markdown resmi ditulis di `executor-report/reports/FASE-*.md`, dan seluruh tangkapan layar verifikasi disimpan di `executor-report/screenshots/`.
 

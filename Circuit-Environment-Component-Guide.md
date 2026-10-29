@@ -53,6 +53,34 @@ Seluruh elemen lingkungan (baik Tier A maupun Tier B) **wajib lulus pemeriksaan 
 
 ---
 
+## 2b. Struktur Modul Sirkuit (wajib untuk sirkuit baru)
+
+Setiap sirkuit adalah modul sendiri; kode bersama tidak boleh dipinjam dari sirkuit lain.
+
+```
+scripts/world/
+├── circuits/
+│   ├── base/circuit_pit_complex.gd     # kelas dasar kontrak pit (CircuitPitComplex)
+│   ├── apex_ring/    apex_pit_complex.gd, apex_environment.gd
+│   ├── neo_wangan/   neo_wangan_circuit_builder.gd, neo_wangan_environment.gd, neo_wangan_pit_complex.gd
+│   └── brianza/      brianza_circuit_builder.gd, brianza_environment.gd, brianza_pit_complex.gd,
+│                     brianza_pit_dressing.gd, brianza_paddock.gd
+├── shared/       # kit bersama: pit_kit, mesh_batch, toon_materials, foliage_scatter, geometri, langit, lampu,
+│                 # furnitur trackside, start_gantry, pit_zone, mountain_vista
+├── paddock/      # kit paddock bersama: pit_building, main_grandstand, race_control_tower, jumbotron,
+│                 # team_signage, team_transporters
+├── weekend/      # race_weekend_world, race_weekend_director, broadcast_camera_director (orkestrasi, tidak tahu sirkuit)
+└── garage/       # garage_environment_builder (garasi 3D pada layar pilih tim)
+scenes/race_world/circuits/<id>/        # <id>_circuit.tscn dan scene pit sirkuit itu
+```
+
+Aturan:
+1. Nama berkas `<id>_<peran>.gd` dan kelas `<Id><Peran>` (`BrianzaPitComplex`, `ApexEnvironment`); folder `<id>` sama dengan id di `CircuitCalendarRegistry`.
+2. Kompleks pit **mewarisi `CircuitPitComplex`**: isi `stalls` dan `garages` saat `build(ribbon, team_ids)` (box i melayani `stalls[i]["team"]`, garasi i berdiri di box i), isi `team_count`, `garage_front_m`, `stall_lane_m` di `_init()`, dan override hanya `_on_teams_assigned()` (segarkan fascia, kru, papan nama, transporter), `crew_spot()` bila garasi tidak standar, serta `sim_layout()` bila lane berbeda dari default Apex. Pencarian box, garasi, dan titik parkir (`stall_index_for_team`, `garage_for_team`, `stall_transform`) sudah ada di kelas dasar dan tidak ditulis ulang.
+3. Fungsi gambar yang identik di semua sirkuit (`PitKit`: aspal, susunan kru, cat dan nomor box, perlengkapan garasi) dipakai dari `scripts/world/shared/pit_kit.gd`, bukan dari Apex.
+4. `RaceWeekendWorld` memasang tim lewat `pit_lane.seat_teams(ribbon, active_teams)` untuk semua sirkuit; jangan menambah cabang per sirkuit di orkestrator.
+5. Sirkuit baru wajib lulus `tests/test_pit_complex_contract.gd`, `test_pit_team_assignment_contract.gd`, `test_team_signage_contract.gd`, dan `test_team_identity_consistency.gd` (tambahkan id-nya ke daftar `CIRCUITS` tes-tes itu).
+
 ## 3. Alur Kerja Standar Pembuatan Map Sirkuit Baru (Step-by-Step Workflow)
 
 Setiap kali menambahkan atau merombak sirkuit di kalender 12 ronde, ikuti 5 tahapan baku berikut:
@@ -71,7 +99,7 @@ Setiap kali menambahkan atau merombak sirkuit di kalender 12 ronde, ikuti 5 taha
 
 ### Tahap 3: Pemasangan Otomatis **Tier A (Reusable Core Kit)**
 1. Pasang **Track Corridor Kit** di sepanjang `TrackRibbon`: aspal (`road_asphalt.gdshader`), `RubberGroove`, `Kerbs`, `Barriers` (dengan celah otomatis di Pit Entry–Exit), `CatchFence`, dan `BrakingMarkers` (`150/100/50m`).
-2. Pasang **Shared FIA Paddock Kit**: `ApexPitComplex`, `StartGantry`, `PitBuilding`, `MainGrandstand` (terhubung ke live standings `Jumbotron`), dan `RaceControlTower`.
+2. Pasang **Shared FIA Paddock Kit**: kompleks pit sirkuit itu (turunan `CircuitPitComplex`), `StartGantry`, `PitBuilding`, `MainGrandstand` (terhubung ke live standings `Jumbotron`), dan `RaceControlTower`.
 3. Pasang **Shared Cel-Skybox (`SharedCelSkyController`)**: otomatis menyediakan Matahari/Bulan, 900 bintang berkedip, 28 awan 3D cel-shaded yang terdorong angin, serta respons pencahayaan `DAY / SUNSET / NIGHT`.
 4. **Layout-Driven Reuse:** kirim `pit_layout` milik sirkuit ke komponen bersama; hindari konstanta sirkuit lain. Bentuk dan posisi mengikuti spline, kelengkungan, elevasi, dan jarak ke ruas lain. Komponen bersama boleh diperbaiki dengan regresi Apex dan Neo Wangan tetap hijau.
 5. **Kontrak Tim–Box:** setiap balapan hanya 10 dari 13 tim yang berlomba (`GtRace.active_teams`). Box, garasi, kru, dan shutter dipetakan lewat `stall_index_for_team(team)` (-1 bila tidak punya box) dan `assign_teams(active_teams)`, bukan lewat id tim. Kompleks pit sirkuit baru wajib lulus `tests/test_pit_team_assignment_contract.gd`.

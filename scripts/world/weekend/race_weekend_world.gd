@@ -78,7 +78,7 @@ var _chequered_clock_s: float = -1.0 # seconds since the flag fell, -1 until it 
 ## NeoWanganPitComplex). Both honour build/bind_world/update and the crew API.
 @onready var environment: Node = $Environment
 @onready var gantry: GantryScript = $StartGantry
-@onready var pit_lane: Node = $PitLane
+@onready var pit_lane: CircuitPitComplex = $PitLane
 @onready var choreographer: ChoreographerScript = $Choreographer
 @onready var camera_director: CameraDirectorScript = $CameraDirector
 @onready var vfx: RaceVfx = $Vfx
@@ -114,13 +114,9 @@ func _ready() -> void:
 	director.light_lit.connect(_on_light_lit)
 	director.state_changed.connect(_on_director_state)
 	gantry.global_transform = ribbon.get_point_on_ribbon(0.0, 1)
+	pit_lane.seat_teams(ribbon, race.active_teams)
 	if circuit_root == null:
-		pit_lane.build(ribbon, race.active_teams)
 		environment.build(ribbon, track.line)
-	elif pit_lane is BrianzaPitComplex:
-		pit_lane.build(ribbon, race.active_teams)
-	elif pit_lane.has_method("assign_teams"):
-		pit_lane.assign_teams(race.active_teams)
 	for building: Node in find_children("PitBuilding", "", true, false):
 		if building.has_method("apply_teams"):
 			building.apply_teams(race.active_teams)
@@ -211,7 +207,7 @@ func _install_circuit(override_id: String = "") -> void:
 		environment = city_set
 	var street_pit: Node = node.get_node_or_null("PitLane")
 	if street_pit != null:
-		pit_lane = street_pit
+		pit_lane = street_pit as CircuitPitComplex
 	circuit_root = node
 	old_track.queue_free()
 	old_environment.queue_free()
@@ -221,8 +217,10 @@ func _install_circuit(override_id: String = "") -> void:
 ## The pit lane layout this round is raced with (GtRace.default_pit_layout when the circuit does not
 ## publish one, which is the Apex Ring's own 410 m lane).
 func _pit_layout() -> Dictionary:
-	if circuit_root != null and pit_lane != null and pit_lane.has_method("sim_layout"):
-		return pit_lane.call("sim_layout")
+	if circuit_root != null and pit_lane != null:
+		var layout: Dictionary = pit_lane.sim_layout()
+		if not layout.is_empty():
+			return layout
 	return RaceScript.default_pit_layout()
 
 
