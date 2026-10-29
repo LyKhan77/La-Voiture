@@ -1508,3 +1508,719 @@ tests/test_radio_and_podium.gd
 tests/test_track_incidents_and_stewards.gd
 ---
 
+## Session End: 20261028_112046
+### Commits
+4e76ce9 fix(ui): keep the team garage valid for DYNAMIC weather and RANDOM time (Fase 12.2)
+eb759dc feat(ui): race setup overhaul with carousel, demand bars and meteo radar (Fase 12.2 task 3)
+f21104b feat(core): DYNAMIC weather, RANDOM time, rerollable seed and race dynamics (Fase 12.2 task 2)
+13ad7ef feat(world): cel-shaded Neo-Wangan sky, wind and toon shaders (Fase 12.2 task 1)
+de957df docs(fase-12-2): add cel-shaded sky/wind ambience and race setup overhaul spec, plan, and handoff prompt
+fa3af38 docs: update Phase 12.1 pit polish verification
+3f3c0e4 feat(world): light Neo-Wangan pit boxes and extend entry runup
+5132e93 docs: record Phase 12.1 evidence and keep native frame gate open
+03ec1b9 perf(hud): instance telemetry halftone dots without changing pixels
+---
+
+## Session End: 20261028_114927
+### Commits
+71aa8dc docs(fase-12-2): report, roadmap and native verification screenshots
+4e76ce9 fix(ui): keep the team garage valid for DYNAMIC weather and RANDOM time (Fase 12.2)
+eb759dc feat(ui): race setup overhaul with carousel, demand bars and meteo radar (Fase 12.2 task 3)
+f21104b feat(core): DYNAMIC weather, RANDOM time, rerollable seed and race dynamics (Fase 12.2 task 2)
+13ad7ef feat(world): cel-shaded Neo-Wangan sky, wind and toon shaders (Fase 12.2 task 1)
+de957df docs(fase-12-2): add cel-shaded sky/wind ambience and race setup overhaul spec, plan, and handoff prompt
+fa3af38 docs: update Phase 12.1 pit polish verification
+3f3c0e4 feat(world): light Neo-Wangan pit boxes and extend entry runup
+5132e93 docs: record Phase 12.1 evidence and keep native frame gate open
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/session-log.md
+---
+
+## Session End: 20261028_120046
+### Commits
+71aa8dc docs(fase-12-2): report, roadmap and native verification screenshots
+4e76ce9 fix(ui): keep the team garage valid for DYNAMIC weather and RANDOM time (Fase 12.2)
+eb759dc feat(ui): race setup overhaul with carousel, demand bars and meteo radar (Fase 12.2 task 3)
+f21104b feat(core): DYNAMIC weather, RANDOM time, rerollable seed and race dynamics (Fase 12.2 task 2)
+13ad7ef feat(world): cel-shaded Neo-Wangan sky, wind and toon shaders (Fase 12.2 task 1)
+de957df docs(fase-12-2): add cel-shaded sky/wind ambience and race setup overhaul spec, plan, and handoff prompt
+fa3af38 docs: update Phase 12.1 pit polish verification
+3f3c0e4 feat(world): light Neo-Wangan pit boxes and extend entry runup
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/session-log.md
+---
+
+## Session End: 20261028_132713
+### Commits
+8cb91c5 feat(world): shared cel skybox with DAY/SUNSET/NIGHT for Neo-Wangan and Apex Ring (Fase 12.3)
+557a55a docs(fase-12-3): update Circuit-Environment-Component-Guide v2.0 and add reusable cel-skybox Day/Sunset/Night spec, plan, and handoff
+71aa8dc docs(fase-12-2): report, roadmap and native verification screenshots
+4e76ce9 fix(ui): keep the team garage valid for DYNAMIC weather and RANDOM time (Fase 12.2)
+eb759dc feat(ui): race setup overhaul with carousel, demand bars and meteo radar (Fase 12.2 task 3)
+f21104b feat(core): DYNAMIC weather, RANDOM time, rerollable seed and race dynamics (Fase 12.2 task 2)
+13ad7ef feat(world): cel-shaded Neo-Wangan sky, wind and toon shaders (Fase 12.2 task 1)
+de957df docs(fase-12-2): add cel-shaded sky/wind ambience and race setup overhaul spec, plan, and handoff prompt
+fa3af38 docs: update Phase 12.1 pit polish verification
+3f3c0e4 feat(world): light Neo-Wangan pit boxes and extend entry runup
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261028_134709
+### Commits
+00dd7de fix(world): drop the circuit's own night WorldEnvironment inside the race world so DAY/SUNSET skies show (Fase 12.3)
+8cb91c5 feat(world): shared cel skybox with DAY/SUNSET/NIGHT for Neo-Wangan and Apex Ring (Fase 12.3)
+557a55a docs(fase-12-3): update Circuit-Environment-Component-Guide v2.0 and add reusable cel-skybox Day/Sunset/Night spec, plan, and handoff
+71aa8dc docs(fase-12-2): report, roadmap and native verification screenshots
+4e76ce9 fix(ui): keep the team garage valid for DYNAMIC weather and RANDOM time (Fase 12.2)
+eb759dc feat(ui): race setup overhaul with carousel, demand bars and meteo radar (Fase 12.2 task 3)
+f21104b feat(core): DYNAMIC weather, RANDOM time, rerollable seed and race dynamics (Fase 12.2 task 2)
+13ad7ef feat(world): cel-shaded Neo-Wangan sky, wind and toon shaders (Fase 12.2 task 1)
+de957df docs(fase-12-2): add cel-shaded sky/wind ambience and race setup overhaul spec, plan, and handoff prompt
+fa3af38 docs: update Phase 12.1 pit polish verification
+3f3c0e4 feat(world): light Neo-Wangan pit boxes and extend entry runup
+### Uncommitted Changes
+ROADMAP.md
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261028_135421
+### Commits
+69933e4 docs(fase-12-3): report and roadmap, regression run after WorldEnvironment fix still partial
+00dd7de fix(world): drop the circuit's own night WorldEnvironment inside the race world so DAY/SUNSET skies show (Fase 12.3)
+8cb91c5 feat(world): shared cel skybox with DAY/SUNSET/NIGHT for Neo-Wangan and Apex Ring (Fase 12.3)
+557a55a docs(fase-12-3): update Circuit-Environment-Component-Guide v2.0 and add reusable cel-skybox Day/Sunset/Night spec, plan, and handoff
+71aa8dc docs(fase-12-2): report, roadmap and native verification screenshots
+4e76ce9 fix(ui): keep the team garage valid for DYNAMIC weather and RANDOM time (Fase 12.2)
+eb759dc feat(ui): race setup overhaul with carousel, demand bars and meteo radar (Fase 12.2 task 3)
+f21104b feat(core): DYNAMIC weather, RANDOM time, rerollable seed and race dynamics (Fase 12.2 task 2)
+13ad7ef feat(world): cel-shaded Neo-Wangan sky, wind and toon shaders (Fase 12.2 task 1)
+de957df docs(fase-12-2): add cel-shaded sky/wind ambience and race setup overhaul spec, plan, and handoff prompt
+fa3af38 docs: update Phase 12.1 pit polish verification
+3f3c0e4 feat(world): light Neo-Wangan pit boxes and extend entry runup
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261028_141215
+### Commits
+69933e4 docs(fase-12-3): report and roadmap, regression run after WorldEnvironment fix still partial
+00dd7de fix(world): drop the circuit's own night WorldEnvironment inside the race world so DAY/SUNSET skies show (Fase 12.3)
+8cb91c5 feat(world): shared cel skybox with DAY/SUNSET/NIGHT for Neo-Wangan and Apex Ring (Fase 12.3)
+557a55a docs(fase-12-3): update Circuit-Environment-Component-Guide v2.0 and add reusable cel-skybox Day/Sunset/Night spec, plan, and handoff
+71aa8dc docs(fase-12-2): report, roadmap and native verification screenshots
+4e76ce9 fix(ui): keep the team garage valid for DYNAMIC weather and RANDOM time (Fase 12.2)
+eb759dc feat(ui): race setup overhaul with carousel, demand bars and meteo radar (Fase 12.2 task 3)
+f21104b feat(core): DYNAMIC weather, RANDOM time, rerollable seed and race dynamics (Fase 12.2 task 2)
+13ad7ef feat(world): cel-shaded Neo-Wangan sky, wind and toon shaders (Fase 12.2 task 1)
+de957df docs(fase-12-2): add cel-shaded sky/wind ambience and race setup overhaul spec, plan, and handoff prompt
+fa3af38 docs: update Phase 12.1 pit polish verification
+3f3c0e4 feat(world): light Neo-Wangan pit boxes and extend entry runup
+### Uncommitted Changes
+executor-report/screenshots/phases/phase-12-3-apex-ring-cel-sky.png
+executor-report/screenshots/phases/phase-12-3-wangan-day-bridge.png
+executor-report/screenshots/phases/phase-12-3-wangan-night-skyline.png
+executor-report/screenshots/phases/phase-12-3-wangan-sunset-skyline.png
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+scripts/world/neo_wangan_environment.gd
+shaders/anime_cel_vertex_color.gdshader
+---
+
+## Session End: 20261028_163747
+### Commits
+8705c79 fix(brianza): anchor stands to real corners, layer the vista ring, keep plants off stand footprints
+6a8faf2 feat(brianza): implement distant Alpine vista ring and full bind_world lighting controller
+78b08e4 feat(brianza): implement FIA catch fencing, overhead braking gantries, and retro sponsor billboards
+ecba991 feat(brianza): overhaul Royal Park vegetation with multi-tier umbrella pines, cypresses, and undergrowth
+853e583 feat(brianza): add Rettifilo and Ascari corner grandstands with instanced crowd and live Jumbotrons
+f429669 feat(brianza): upgrade Sopraelevata into monumental 480m curved banked oval deck
+2664847 feat(brianza): implement Layer 1 ground massing and historic park perimeter wall
+9dca5ce feat(fase-13): implement Autodromo di Brianza GP circuit and 10-round calendar
+10f17de docs(fase-13): track design specs, 5 concept art visual gates, and implementation plan for Autodromo di Brianza
+5077aea feat(core): update MVP calendar to 10 rounds (8 GP + 2 Sprint)
+7cdd0e0 feat(fase-12-3): adapt CorridorTower GLBs to Day/Sunset/Night and verify 51/51 test suites
+69933e4 docs(fase-12-3): report and roadmap, regression run after WorldEnvironment fix still partial
+00dd7de fix(world): drop the circuit's own night WorldEnvironment inside the race world so DAY/SUNSET skies show (Fase 12.3)
+8cb91c5 feat(world): shared cel skybox with DAY/SUNSET/NIGHT for Neo-Wangan and Apex Ring (Fase 12.3)
+557a55a docs(fase-12-3): update Circuit-Environment-Component-Guide v2.0 and add reusable cel-skybox Day/Sunset/Night spec, plan, and handoff
+71aa8dc docs(fase-12-2): report, roadmap and native verification screenshots
+4e76ce9 fix(ui): keep the team garage valid for DYNAMIC weather and RANDOM time (Fase 12.2)
+eb759dc feat(ui): race setup overhaul with carousel, demand bars and meteo radar (Fase 12.2 task 3)
+f21104b feat(core): DYNAMIC weather, RANDOM time, rerollable seed and race dynamics (Fase 12.2 task 2)
+13ad7ef feat(world): cel-shaded Neo-Wangan sky, wind and toon shaders (Fase 12.2 task 1)
+de957df docs(fase-12-2): add cel-shaded sky/wind ambience and race setup overhaul spec, plan, and handoff prompt
+fa3af38 docs: update Phase 12.1 pit polish verification
+3f3c0e4 feat(world): light Neo-Wangan pit boxes and extend entry runup
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261028_171826
+### Commits
+8705c79 fix(brianza): anchor stands to real corners, layer the vista ring, keep plants off stand footprints
+6a8faf2 feat(brianza): implement distant Alpine vista ring and full bind_world lighting controller
+78b08e4 feat(brianza): implement FIA catch fencing, overhead braking gantries, and retro sponsor billboards
+ecba991 feat(brianza): overhaul Royal Park vegetation with multi-tier umbrella pines, cypresses, and undergrowth
+853e583 feat(brianza): add Rettifilo and Ascari corner grandstands with instanced crowd and live Jumbotrons
+f429669 feat(brianza): upgrade Sopraelevata into monumental 480m curved banked oval deck
+2664847 feat(brianza): implement Layer 1 ground massing and historic park perimeter wall
+9dca5ce feat(fase-13): implement Autodromo di Brianza GP circuit and 10-round calendar
+10f17de docs(fase-13): track design specs, 5 concept art visual gates, and implementation plan for Autodromo di Brianza
+5077aea feat(core): update MVP calendar to 10 rounds (8 GP + 2 Sprint)
+7cdd0e0 feat(fase-12-3): adapt CorridorTower GLBs to Day/Sunset/Night and verify 51/51 test suites
+69933e4 docs(fase-12-3): report and roadmap, regression run after WorldEnvironment fix still partial
+00dd7de fix(world): drop the circuit's own night WorldEnvironment inside the race world so DAY/SUNSET skies show (Fase 12.3)
+8cb91c5 feat(world): shared cel skybox with DAY/SUNSET/NIGHT for Neo-Wangan and Apex Ring (Fase 12.3)
+557a55a docs(fase-12-3): update Circuit-Environment-Component-Guide v2.0 and add reusable cel-skybox Day/Sunset/Night spec, plan, and handoff
+71aa8dc docs(fase-12-2): report, roadmap and native verification screenshots
+4e76ce9 fix(ui): keep the team garage valid for DYNAMIC weather and RANDOM time (Fase 12.2)
+eb759dc feat(ui): race setup overhaul with carousel, demand bars and meteo radar (Fase 12.2 task 3)
+f21104b feat(core): DYNAMIC weather, RANDOM time, rerollable seed and race dynamics (Fase 12.2 task 2)
+13ad7ef feat(world): cel-shaded Neo-Wangan sky, wind and toon shaders (Fase 12.2 task 1)
+de957df docs(fase-12-2): add cel-shaded sky/wind ambience and race setup overhaul spec, plan, and handoff prompt
+fa3af38 docs: update Phase 12.1 pit polish verification
+3f3c0e4 feat(world): light Neo-Wangan pit boxes and extend entry runup
+### Uncommitted Changes
+AGENTS.md
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261028_172514
+### Commits
+0166988 docs(brianza): complete Phase 13.1 visual verification, render budget gate and executive report
+8705c79 fix(brianza): anchor stands to real corners, layer the vista ring, keep plants off stand footprints
+6a8faf2 feat(brianza): implement distant Alpine vista ring and full bind_world lighting controller
+78b08e4 feat(brianza): implement FIA catch fencing, overhead braking gantries, and retro sponsor billboards
+ecba991 feat(brianza): overhaul Royal Park vegetation with multi-tier umbrella pines, cypresses, and undergrowth
+853e583 feat(brianza): add Rettifilo and Ascari corner grandstands with instanced crowd and live Jumbotrons
+f429669 feat(brianza): upgrade Sopraelevata into monumental 480m curved banked oval deck
+2664847 feat(brianza): implement Layer 1 ground massing and historic park perimeter wall
+9dca5ce feat(fase-13): implement Autodromo di Brianza GP circuit and 10-round calendar
+10f17de docs(fase-13): track design specs, 5 concept art visual gates, and implementation plan for Autodromo di Brianza
+5077aea feat(core): update MVP calendar to 10 rounds (8 GP + 2 Sprint)
+7cdd0e0 feat(fase-12-3): adapt CorridorTower GLBs to Day/Sunset/Night and verify 51/51 test suites
+69933e4 docs(fase-12-3): report and roadmap, regression run after WorldEnvironment fix still partial
+00dd7de fix(world): drop the circuit's own night WorldEnvironment inside the race world so DAY/SUNSET skies show (Fase 12.3)
+8cb91c5 feat(world): shared cel skybox with DAY/SUNSET/NIGHT for Neo-Wangan and Apex Ring (Fase 12.3)
+557a55a docs(fase-12-3): update Circuit-Environment-Component-Guide v2.0 and add reusable cel-skybox Day/Sunset/Night spec, plan, and handoff
+71aa8dc docs(fase-12-2): report, roadmap and native verification screenshots
+4e76ce9 fix(ui): keep the team garage valid for DYNAMIC weather and RANDOM time (Fase 12.2)
+eb759dc feat(ui): race setup overhaul with carousel, demand bars and meteo radar (Fase 12.2 task 3)
+f21104b feat(core): DYNAMIC weather, RANDOM time, rerollable seed and race dynamics (Fase 12.2 task 2)
+13ad7ef feat(world): cel-shaded Neo-Wangan sky, wind and toon shaders (Fase 12.2 task 1)
+de957df docs(fase-12-2): add cel-shaded sky/wind ambience and race setup overhaul spec, plan, and handoff prompt
+fa3af38 docs: update Phase 12.1 pit polish verification
+3f3c0e4 feat(world): light Neo-Wangan pit boxes and extend entry runup
+### Uncommitted Changes
+AGENTS.md
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261028_190835
+### Commits
+90e1626 docs: record Fase 13.2 Brianza pitstop and clearance polish in ROADMAP.md
+6eefe7b fix: polish Brianza pit lane and grandstand clearance
+f1cc8d7 docs: add multi-agent governance and Fase 13.1 design trilogy
+0166988 docs(brianza): complete Phase 13.1 visual verification, render budget gate and executive report
+8705c79 fix(brianza): anchor stands to real corners, layer the vista ring, keep plants off stand footprints
+6a8faf2 feat(brianza): implement distant Alpine vista ring and full bind_world lighting controller
+78b08e4 feat(brianza): implement FIA catch fencing, overhead braking gantries, and retro sponsor billboards
+ecba991 feat(brianza): overhaul Royal Park vegetation with multi-tier umbrella pines, cypresses, and undergrowth
+853e583 feat(brianza): add Rettifilo and Ascari corner grandstands with instanced crowd and live Jumbotrons
+f429669 feat(brianza): upgrade Sopraelevata into monumental 480m curved banked oval deck
+2664847 feat(brianza): implement Layer 1 ground massing and historic park perimeter wall
+9dca5ce feat(fase-13): implement Autodromo di Brianza GP circuit and 10-round calendar
+10f17de docs(fase-13): track design specs, 5 concept art visual gates, and implementation plan for Autodromo di Brianza
+5077aea feat(core): update MVP calendar to 10 rounds (8 GP + 2 Sprint)
+7cdd0e0 feat(fase-12-3): adapt CorridorTower GLBs to Day/Sunset/Night and verify 51/51 test suites
+69933e4 docs(fase-12-3): report and roadmap, regression run after WorldEnvironment fix still partial
+00dd7de fix(world): drop the circuit's own night WorldEnvironment inside the race world so DAY/SUNSET skies show (Fase 12.3)
+8cb91c5 feat(world): shared cel skybox with DAY/SUNSET/NIGHT for Neo-Wangan and Apex Ring (Fase 12.3)
+557a55a docs(fase-12-3): update Circuit-Environment-Component-Guide v2.0 and add reusable cel-skybox Day/Sunset/Night spec, plan, and handoff
+71aa8dc docs(fase-12-2): report, roadmap and native verification screenshots
+4e76ce9 fix(ui): keep the team garage valid for DYNAMIC weather and RANDOM time (Fase 12.2)
+eb759dc feat(ui): race setup overhaul with carousel, demand bars and meteo radar (Fase 12.2 task 3)
+### Uncommitted Changes
+.gitignore
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261028_191824
+### Commits
+90e1626 docs: record Fase 13.2 Brianza pitstop and clearance polish in ROADMAP.md
+6eefe7b fix: polish Brianza pit lane and grandstand clearance
+f1cc8d7 docs: add multi-agent governance and Fase 13.1 design trilogy
+0166988 docs(brianza): complete Phase 13.1 visual verification, render budget gate and executive report
+8705c79 fix(brianza): anchor stands to real corners, layer the vista ring, keep plants off stand footprints
+6a8faf2 feat(brianza): implement distant Alpine vista ring and full bind_world lighting controller
+78b08e4 feat(brianza): implement FIA catch fencing, overhead braking gantries, and retro sponsor billboards
+ecba991 feat(brianza): overhaul Royal Park vegetation with multi-tier umbrella pines, cypresses, and undergrowth
+853e583 feat(brianza): add Rettifilo and Ascari corner grandstands with instanced crowd and live Jumbotrons
+f429669 feat(brianza): upgrade Sopraelevata into monumental 480m curved banked oval deck
+2664847 feat(brianza): implement Layer 1 ground massing and historic park perimeter wall
+9dca5ce feat(fase-13): implement Autodromo di Brianza GP circuit and 10-round calendar
+10f17de docs(fase-13): track design specs, 5 concept art visual gates, and implementation plan for Autodromo di Brianza
+5077aea feat(core): update MVP calendar to 10 rounds (8 GP + 2 Sprint)
+7cdd0e0 feat(fase-12-3): adapt CorridorTower GLBs to Day/Sunset/Night and verify 51/51 test suites
+69933e4 docs(fase-12-3): report and roadmap, regression run after WorldEnvironment fix still partial
+00dd7de fix(world): drop the circuit's own night WorldEnvironment inside the race world so DAY/SUNSET skies show (Fase 12.3)
+8cb91c5 feat(world): shared cel skybox with DAY/SUNSET/NIGHT for Neo-Wangan and Apex Ring (Fase 12.3)
+557a55a docs(fase-12-3): update Circuit-Environment-Component-Guide v2.0 and add reusable cel-skybox Day/Sunset/Night spec, plan, and handoff
+71aa8dc docs(fase-12-2): report, roadmap and native verification screenshots
+4e76ce9 fix(ui): keep the team garage valid for DYNAMIC weather and RANDOM time (Fase 12.2)
+### Uncommitted Changes
+.gitignore
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261028_192453
+### Commits
+90e1626 docs: record Fase 13.2 Brianza pitstop and clearance polish in ROADMAP.md
+6eefe7b fix: polish Brianza pit lane and grandstand clearance
+f1cc8d7 docs: add multi-agent governance and Fase 13.1 design trilogy
+0166988 docs(brianza): complete Phase 13.1 visual verification, render budget gate and executive report
+8705c79 fix(brianza): anchor stands to real corners, layer the vista ring, keep plants off stand footprints
+6a8faf2 feat(brianza): implement distant Alpine vista ring and full bind_world lighting controller
+78b08e4 feat(brianza): implement FIA catch fencing, overhead braking gantries, and retro sponsor billboards
+ecba991 feat(brianza): overhaul Royal Park vegetation with multi-tier umbrella pines, cypresses, and undergrowth
+853e583 feat(brianza): add Rettifilo and Ascari corner grandstands with instanced crowd and live Jumbotrons
+f429669 feat(brianza): upgrade Sopraelevata into monumental 480m curved banked oval deck
+2664847 feat(brianza): implement Layer 1 ground massing and historic park perimeter wall
+9dca5ce feat(fase-13): implement Autodromo di Brianza GP circuit and 10-round calendar
+10f17de docs(fase-13): track design specs, 5 concept art visual gates, and implementation plan for Autodromo di Brianza
+5077aea feat(core): update MVP calendar to 10 rounds (8 GP + 2 Sprint)
+7cdd0e0 feat(fase-12-3): adapt CorridorTower GLBs to Day/Sunset/Night and verify 51/51 test suites
+69933e4 docs(fase-12-3): report and roadmap, regression run after WorldEnvironment fix still partial
+00dd7de fix(world): drop the circuit's own night WorldEnvironment inside the race world so DAY/SUNSET skies show (Fase 12.3)
+8cb91c5 feat(world): shared cel skybox with DAY/SUNSET/NIGHT for Neo-Wangan and Apex Ring (Fase 12.3)
+557a55a docs(fase-12-3): update Circuit-Environment-Component-Guide v2.0 and add reusable cel-skybox Day/Sunset/Night spec, plan, and handoff
+71aa8dc docs(fase-12-2): report, roadmap and native verification screenshots
+### Uncommitted Changes
+.gitignore
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261028_202918
+### Commits
+3e3c0ef feat(brianza): populate paddock with team facilities
+d99ce21 feat(brianza): add pit entry and wall dressing
+d4e63df feat(brianza): align pit lane and garages to the straight
+93dec74 fix(brianza): keep terrain below road and support pit platform
+02a19a3 fix(brianza): drive pit gaps from circuit layout
+90e1626 docs: record Fase 13.2 Brianza pitstop and clearance polish in ROADMAP.md
+6eefe7b fix: polish Brianza pit lane and grandstand clearance
+f1cc8d7 docs: add multi-agent governance and Fase 13.1 design trilogy
+0166988 docs(brianza): complete Phase 13.1 visual verification, render budget gate and executive report
+8705c79 fix(brianza): anchor stands to real corners, layer the vista ring, keep plants off stand footprints
+6a8faf2 feat(brianza): implement distant Alpine vista ring and full bind_world lighting controller
+78b08e4 feat(brianza): implement FIA catch fencing, overhead braking gantries, and retro sponsor billboards
+ecba991 feat(brianza): overhaul Royal Park vegetation with multi-tier umbrella pines, cypresses, and undergrowth
+853e583 feat(brianza): add Rettifilo and Ascari corner grandstands with instanced crowd and live Jumbotrons
+f429669 feat(brianza): upgrade Sopraelevata into monumental 480m curved banked oval deck
+2664847 feat(brianza): implement Layer 1 ground massing and historic park perimeter wall
+9dca5ce feat(fase-13): implement Autodromo di Brianza GP circuit and 10-round calendar
+10f17de docs(fase-13): track design specs, 5 concept art visual gates, and implementation plan for Autodromo di Brianza
+5077aea feat(core): update MVP calendar to 10 rounds (8 GP + 2 Sprint)
+7cdd0e0 feat(fase-12-3): adapt CorridorTower GLBs to Day/Sunset/Night and verify 51/51 test suites
+69933e4 docs(fase-12-3): report and roadmap, regression run after WorldEnvironment fix still partial
+00dd7de fix(world): drop the circuit's own night WorldEnvironment inside the race world so DAY/SUNSET skies show (Fase 12.3)
+8cb91c5 feat(world): shared cel skybox with DAY/SUNSET/NIGHT for Neo-Wangan and Apex Ring (Fase 12.3)
+557a55a docs(fase-12-3): update Circuit-Environment-Component-Guide v2.0 and add reusable cel-skybox Day/Sunset/Night spec, plan, and handoff
+### Uncommitted Changes
+.gitignore
+Circuit-Environment-Component-Guide.md
+ROADMAP.md
+docs/AGENT-WORKFLOW.md
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+scripts/world/brianza_environment.gd
+scripts/world/brianza_paddock.gd
+scripts/world/brianza_pit_complex.gd
+scripts/world/brianza_pit_dressing.gd
+tests/test_brianza_paddock.gd
+tests/test_brianza_pit_lane_v2.gd
+tests/test_brianza_terrain_gate.gd
+---
+
+## Session End: 20261028_204518
+### Commits
+2bbb62b feat(brianza): finish pit/paddock polish, docs and report for fase 13.3
+3e3c0ef feat(brianza): populate paddock with team facilities
+d99ce21 feat(brianza): add pit entry and wall dressing
+d4e63df feat(brianza): align pit lane and garages to the straight
+93dec74 fix(brianza): keep terrain below road and support pit platform
+02a19a3 fix(brianza): drive pit gaps from circuit layout
+90e1626 docs: record Fase 13.2 Brianza pitstop and clearance polish in ROADMAP.md
+6eefe7b fix: polish Brianza pit lane and grandstand clearance
+f1cc8d7 docs: add multi-agent governance and Fase 13.1 design trilogy
+0166988 docs(brianza): complete Phase 13.1 visual verification, render budget gate and executive report
+8705c79 fix(brianza): anchor stands to real corners, layer the vista ring, keep plants off stand footprints
+6a8faf2 feat(brianza): implement distant Alpine vista ring and full bind_world lighting controller
+78b08e4 feat(brianza): implement FIA catch fencing, overhead braking gantries, and retro sponsor billboards
+ecba991 feat(brianza): overhaul Royal Park vegetation with multi-tier umbrella pines, cypresses, and undergrowth
+853e583 feat(brianza): add Rettifilo and Ascari corner grandstands with instanced crowd and live Jumbotrons
+f429669 feat(brianza): upgrade Sopraelevata into monumental 480m curved banked oval deck
+2664847 feat(brianza): implement Layer 1 ground massing and historic park perimeter wall
+9dca5ce feat(fase-13): implement Autodromo di Brianza GP circuit and 10-round calendar
+10f17de docs(fase-13): track design specs, 5 concept art visual gates, and implementation plan for Autodromo di Brianza
+5077aea feat(core): update MVP calendar to 10 rounds (8 GP + 2 Sprint)
+7cdd0e0 feat(fase-12-3): adapt CorridorTower GLBs to Day/Sunset/Night and verify 51/51 test suites
+69933e4 docs(fase-12-3): report and roadmap, regression run after WorldEnvironment fix still partial
+00dd7de fix(world): drop the circuit's own night WorldEnvironment inside the race world so DAY/SUNSET skies show (Fase 12.3)
+8cb91c5 feat(world): shared cel skybox with DAY/SUNSET/NIGHT for Neo-Wangan and Apex Ring (Fase 12.3)
+557a55a docs(fase-12-3): update Circuit-Environment-Component-Guide v2.0 and add reusable cel-skybox Day/Sunset/Night spec, plan, and handoff
+### Uncommitted Changes
+.gitignore
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261028_214414
+### Commits
+2bbb62b feat(brianza): finish pit/paddock polish, docs and report for fase 13.3
+3e3c0ef feat(brianza): populate paddock with team facilities
+d99ce21 feat(brianza): add pit entry and wall dressing
+d4e63df feat(brianza): align pit lane and garages to the straight
+93dec74 fix(brianza): keep terrain below road and support pit platform
+02a19a3 fix(brianza): drive pit gaps from circuit layout
+90e1626 docs: record Fase 13.2 Brianza pitstop and clearance polish in ROADMAP.md
+6eefe7b fix: polish Brianza pit lane and grandstand clearance
+f1cc8d7 docs: add multi-agent governance and Fase 13.1 design trilogy
+0166988 docs(brianza): complete Phase 13.1 visual verification, render budget gate and executive report
+8705c79 fix(brianza): anchor stands to real corners, layer the vista ring, keep plants off stand footprints
+6a8faf2 feat(brianza): implement distant Alpine vista ring and full bind_world lighting controller
+78b08e4 feat(brianza): implement FIA catch fencing, overhead braking gantries, and retro sponsor billboards
+ecba991 feat(brianza): overhaul Royal Park vegetation with multi-tier umbrella pines, cypresses, and undergrowth
+853e583 feat(brianza): add Rettifilo and Ascari corner grandstands with instanced crowd and live Jumbotrons
+f429669 feat(brianza): upgrade Sopraelevata into monumental 480m curved banked oval deck
+2664847 feat(brianza): implement Layer 1 ground massing and historic park perimeter wall
+9dca5ce feat(fase-13): implement Autodromo di Brianza GP circuit and 10-round calendar
+10f17de docs(fase-13): track design specs, 5 concept art visual gates, and implementation plan for Autodromo di Brianza
+5077aea feat(core): update MVP calendar to 10 rounds (8 GP + 2 Sprint)
+7cdd0e0 feat(fase-12-3): adapt CorridorTower GLBs to Day/Sunset/Night and verify 51/51 test suites
+69933e4 docs(fase-12-3): report and roadmap, regression run after WorldEnvironment fix still partial
+00dd7de fix(world): drop the circuit's own night WorldEnvironment inside the race world so DAY/SUNSET skies show (Fase 12.3)
+### Uncommitted Changes
+.gitignore
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+scripts/car/pitstop_choreographer.gd
+scripts/world/neo_wangan_pit_complex.gd
+scripts/world/paddock/pit_building.gd
+scripts/world/race_weekend_world.gd
+---
+
+## Session End: 20261028_214659
+### Commits
+2bbb62b feat(brianza): finish pit/paddock polish, docs and report for fase 13.3
+3e3c0ef feat(brianza): populate paddock with team facilities
+d99ce21 feat(brianza): add pit entry and wall dressing
+d4e63df feat(brianza): align pit lane and garages to the straight
+93dec74 fix(brianza): keep terrain below road and support pit platform
+02a19a3 fix(brianza): drive pit gaps from circuit layout
+90e1626 docs: record Fase 13.2 Brianza pitstop and clearance polish in ROADMAP.md
+6eefe7b fix: polish Brianza pit lane and grandstand clearance
+f1cc8d7 docs: add multi-agent governance and Fase 13.1 design trilogy
+0166988 docs(brianza): complete Phase 13.1 visual verification, render budget gate and executive report
+8705c79 fix(brianza): anchor stands to real corners, layer the vista ring, keep plants off stand footprints
+6a8faf2 feat(brianza): implement distant Alpine vista ring and full bind_world lighting controller
+78b08e4 feat(brianza): implement FIA catch fencing, overhead braking gantries, and retro sponsor billboards
+ecba991 feat(brianza): overhaul Royal Park vegetation with multi-tier umbrella pines, cypresses, and undergrowth
+853e583 feat(brianza): add Rettifilo and Ascari corner grandstands with instanced crowd and live Jumbotrons
+f429669 feat(brianza): upgrade Sopraelevata into monumental 480m curved banked oval deck
+2664847 feat(brianza): implement Layer 1 ground massing and historic park perimeter wall
+9dca5ce feat(fase-13): implement Autodromo di Brianza GP circuit and 10-round calendar
+10f17de docs(fase-13): track design specs, 5 concept art visual gates, and implementation plan for Autodromo di Brianza
+5077aea feat(core): update MVP calendar to 10 rounds (8 GP + 2 Sprint)
+7cdd0e0 feat(fase-12-3): adapt CorridorTower GLBs to Day/Sunset/Night and verify 51/51 test suites
+69933e4 docs(fase-12-3): report and roadmap, regression run after WorldEnvironment fix still partial
+### Uncommitted Changes
+.gitignore
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+scripts/car/pitstop_choreographer.gd
+scripts/world/neo_wangan_pit_complex.gd
+scripts/world/paddock/pit_building.gd
+scripts/world/race_weekend_world.gd
+---
+
+## Session End: 20261028_220332
+### Commits
+e20b6db fix(pit): seat teams by identity so crews and boxes match on every circuit
+2bbb62b feat(brianza): finish pit/paddock polish, docs and report for fase 13.3
+3e3c0ef feat(brianza): populate paddock with team facilities
+d99ce21 feat(brianza): add pit entry and wall dressing
+d4e63df feat(brianza): align pit lane and garages to the straight
+93dec74 fix(brianza): keep terrain below road and support pit platform
+02a19a3 fix(brianza): drive pit gaps from circuit layout
+90e1626 docs: record Fase 13.2 Brianza pitstop and clearance polish in ROADMAP.md
+6eefe7b fix: polish Brianza pit lane and grandstand clearance
+f1cc8d7 docs: add multi-agent governance and Fase 13.1 design trilogy
+0166988 docs(brianza): complete Phase 13.1 visual verification, render budget gate and executive report
+8705c79 fix(brianza): anchor stands to real corners, layer the vista ring, keep plants off stand footprints
+6a8faf2 feat(brianza): implement distant Alpine vista ring and full bind_world lighting controller
+78b08e4 feat(brianza): implement FIA catch fencing, overhead braking gantries, and retro sponsor billboards
+ecba991 feat(brianza): overhaul Royal Park vegetation with multi-tier umbrella pines, cypresses, and undergrowth
+853e583 feat(brianza): add Rettifilo and Ascari corner grandstands with instanced crowd and live Jumbotrons
+f429669 feat(brianza): upgrade Sopraelevata into monumental 480m curved banked oval deck
+2664847 feat(brianza): implement Layer 1 ground massing and historic park perimeter wall
+9dca5ce feat(fase-13): implement Autodromo di Brianza GP circuit and 10-round calendar
+10f17de docs(fase-13): track design specs, 5 concept art visual gates, and implementation plan for Autodromo di Brianza
+5077aea feat(core): update MVP calendar to 10 rounds (8 GP + 2 Sprint)
+7cdd0e0 feat(fase-12-3): adapt CorridorTower GLBs to Day/Sunset/Night and verify 51/51 test suites
+### Uncommitted Changes
+.gitignore
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261028_220736
+### Commits
+f1866a8 docs(guide): add team-to-box contract for new circuits
+e20b6db fix(pit): seat teams by identity so crews and boxes match on every circuit
+2bbb62b feat(brianza): finish pit/paddock polish, docs and report for fase 13.3
+3e3c0ef feat(brianza): populate paddock with team facilities
+d99ce21 feat(brianza): add pit entry and wall dressing
+d4e63df feat(brianza): align pit lane and garages to the straight
+93dec74 fix(brianza): keep terrain below road and support pit platform
+02a19a3 fix(brianza): drive pit gaps from circuit layout
+90e1626 docs: record Fase 13.2 Brianza pitstop and clearance polish in ROADMAP.md
+6eefe7b fix: polish Brianza pit lane and grandstand clearance
+f1cc8d7 docs: add multi-agent governance and Fase 13.1 design trilogy
+0166988 docs(brianza): complete Phase 13.1 visual verification, render budget gate and executive report
+8705c79 fix(brianza): anchor stands to real corners, layer the vista ring, keep plants off stand footprints
+6a8faf2 feat(brianza): implement distant Alpine vista ring and full bind_world lighting controller
+78b08e4 feat(brianza): implement FIA catch fencing, overhead braking gantries, and retro sponsor billboards
+ecba991 feat(brianza): overhaul Royal Park vegetation with multi-tier umbrella pines, cypresses, and undergrowth
+853e583 feat(brianza): add Rettifilo and Ascari corner grandstands with instanced crowd and live Jumbotrons
+f429669 feat(brianza): upgrade Sopraelevata into monumental 480m curved banked oval deck
+2664847 feat(brianza): implement Layer 1 ground massing and historic park perimeter wall
+9dca5ce feat(fase-13): implement Autodromo di Brianza GP circuit and 10-round calendar
+10f17de docs(fase-13): track design specs, 5 concept art visual gates, and implementation plan for Autodromo di Brianza
+5077aea feat(core): update MVP calendar to 10 rounds (8 GP + 2 Sprint)
+7cdd0e0 feat(fase-12-3): adapt CorridorTower GLBs to Day/Sunset/Night and verify 51/51 test suites
+### Uncommitted Changes
+.gitignore
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261028_223251
+### Commits
+fa23885 docs(fase-13-3): record pit team-box fix in report
+f1866a8 docs(guide): add team-to-box contract for new circuits
+e20b6db fix(pit): seat teams by identity so crews and boxes match on every circuit
+2bbb62b feat(brianza): finish pit/paddock polish, docs and report for fase 13.3
+3e3c0ef feat(brianza): populate paddock with team facilities
+d99ce21 feat(brianza): add pit entry and wall dressing
+d4e63df feat(brianza): align pit lane and garages to the straight
+93dec74 fix(brianza): keep terrain below road and support pit platform
+02a19a3 fix(brianza): drive pit gaps from circuit layout
+90e1626 docs: record Fase 13.2 Brianza pitstop and clearance polish in ROADMAP.md
+6eefe7b fix: polish Brianza pit lane and grandstand clearance
+f1cc8d7 docs: add multi-agent governance and Fase 13.1 design trilogy
+0166988 docs(brianza): complete Phase 13.1 visual verification, render budget gate and executive report
+8705c79 fix(brianza): anchor stands to real corners, layer the vista ring, keep plants off stand footprints
+6a8faf2 feat(brianza): implement distant Alpine vista ring and full bind_world lighting controller
+78b08e4 feat(brianza): implement FIA catch fencing, overhead braking gantries, and retro sponsor billboards
+ecba991 feat(brianza): overhaul Royal Park vegetation with multi-tier umbrella pines, cypresses, and undergrowth
+853e583 feat(brianza): add Rettifilo and Ascari corner grandstands with instanced crowd and live Jumbotrons
+f429669 feat(brianza): upgrade Sopraelevata into monumental 480m curved banked oval deck
+2664847 feat(brianza): implement Layer 1 ground massing and historic park perimeter wall
+9dca5ce feat(fase-13): implement Autodromo di Brianza GP circuit and 10-round calendar
+10f17de docs(fase-13): track design specs, 5 concept art visual gates, and implementation plan for Autodromo di Brianza
+5077aea feat(core): update MVP calendar to 10 rounds (8 GP + 2 Sprint)
+### Uncommitted Changes
+.gitignore
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261028_224328
+### Commits
+fa23885 docs(fase-13-3): record pit team-box fix in report
+f1866a8 docs(guide): add team-to-box contract for new circuits
+e20b6db fix(pit): seat teams by identity so crews and boxes match on every circuit
+2bbb62b feat(brianza): finish pit/paddock polish, docs and report for fase 13.3
+3e3c0ef feat(brianza): populate paddock with team facilities
+d99ce21 feat(brianza): add pit entry and wall dressing
+d4e63df feat(brianza): align pit lane and garages to the straight
+93dec74 fix(brianza): keep terrain below road and support pit platform
+02a19a3 fix(brianza): drive pit gaps from circuit layout
+90e1626 docs: record Fase 13.2 Brianza pitstop and clearance polish in ROADMAP.md
+6eefe7b fix: polish Brianza pit lane and grandstand clearance
+f1cc8d7 docs: add multi-agent governance and Fase 13.1 design trilogy
+0166988 docs(brianza): complete Phase 13.1 visual verification, render budget gate and executive report
+8705c79 fix(brianza): anchor stands to real corners, layer the vista ring, keep plants off stand footprints
+6a8faf2 feat(brianza): implement distant Alpine vista ring and full bind_world lighting controller
+78b08e4 feat(brianza): implement FIA catch fencing, overhead braking gantries, and retro sponsor billboards
+ecba991 feat(brianza): overhaul Royal Park vegetation with multi-tier umbrella pines, cypresses, and undergrowth
+853e583 feat(brianza): add Rettifilo and Ascari corner grandstands with instanced crowd and live Jumbotrons
+f429669 feat(brianza): upgrade Sopraelevata into monumental 480m curved banked oval deck
+2664847 feat(brianza): implement Layer 1 ground massing and historic park perimeter wall
+9dca5ce feat(fase-13): implement Autodromo di Brianza GP circuit and 10-round calendar
+### Uncommitted Changes
+.gitignore
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261028_225553
+### Commits
+bc51e6c chore(git): ignore local ai-memory marker and nested studio project
+fa23885 docs(fase-13-3): record pit team-box fix in report
+f1866a8 docs(guide): add team-to-box contract for new circuits
+e20b6db fix(pit): seat teams by identity so crews and boxes match on every circuit
+2bbb62b feat(brianza): finish pit/paddock polish, docs and report for fase 13.3
+3e3c0ef feat(brianza): populate paddock with team facilities
+d99ce21 feat(brianza): add pit entry and wall dressing
+d4e63df feat(brianza): align pit lane and garages to the straight
+93dec74 fix(brianza): keep terrain below road and support pit platform
+02a19a3 fix(brianza): drive pit gaps from circuit layout
+90e1626 docs: record Fase 13.2 Brianza pitstop and clearance polish in ROADMAP.md
+6eefe7b fix: polish Brianza pit lane and grandstand clearance
+f1cc8d7 docs: add multi-agent governance and Fase 13.1 design trilogy
+0166988 docs(brianza): complete Phase 13.1 visual verification, render budget gate and executive report
+8705c79 fix(brianza): anchor stands to real corners, layer the vista ring, keep plants off stand footprints
+6a8faf2 feat(brianza): implement distant Alpine vista ring and full bind_world lighting controller
+78b08e4 feat(brianza): implement FIA catch fencing, overhead braking gantries, and retro sponsor billboards
+ecba991 feat(brianza): overhaul Royal Park vegetation with multi-tier umbrella pines, cypresses, and undergrowth
+853e583 feat(brianza): add Rettifilo and Ascari corner grandstands with instanced crowd and live Jumbotrons
+f429669 feat(brianza): upgrade Sopraelevata into monumental 480m curved banked oval deck
+2664847 feat(brianza): implement Layer 1 ground massing and historic park perimeter wall
+9dca5ce feat(fase-13): implement Autodromo di Brianza GP circuit and 10-round calendar
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261028_235948
+### Commits
+bc51e6c chore(git): ignore local ai-memory marker and nested studio project
+fa23885 docs(fase-13-3): record pit team-box fix in report
+f1866a8 docs(guide): add team-to-box contract for new circuits
+e20b6db fix(pit): seat teams by identity so crews and boxes match on every circuit
+2bbb62b feat(brianza): finish pit/paddock polish, docs and report for fase 13.3
+3e3c0ef feat(brianza): populate paddock with team facilities
+d99ce21 feat(brianza): add pit entry and wall dressing
+d4e63df feat(brianza): align pit lane and garages to the straight
+93dec74 fix(brianza): keep terrain below road and support pit platform
+02a19a3 fix(brianza): drive pit gaps from circuit layout
+90e1626 docs: record Fase 13.2 Brianza pitstop and clearance polish in ROADMAP.md
+6eefe7b fix: polish Brianza pit lane and grandstand clearance
+f1cc8d7 docs: add multi-agent governance and Fase 13.1 design trilogy
+0166988 docs(brianza): complete Phase 13.1 visual verification, render budget gate and executive report
+8705c79 fix(brianza): anchor stands to real corners, layer the vista ring, keep plants off stand footprints
+6a8faf2 feat(brianza): implement distant Alpine vista ring and full bind_world lighting controller
+78b08e4 feat(brianza): implement FIA catch fencing, overhead braking gantries, and retro sponsor billboards
+ecba991 feat(brianza): overhaul Royal Park vegetation with multi-tier umbrella pines, cypresses, and undergrowth
+853e583 feat(brianza): add Rettifilo and Ascari corner grandstands with instanced crowd and live Jumbotrons
+f429669 feat(brianza): upgrade Sopraelevata into monumental 480m curved banked oval deck
+2664847 feat(brianza): implement Layer 1 ground massing and historic park perimeter wall
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
+## Session End: 20261029_002522
+### Commits
+bc51e6c chore(git): ignore local ai-memory marker and nested studio project
+fa23885 docs(fase-13-3): record pit team-box fix in report
+f1866a8 docs(guide): add team-to-box contract for new circuits
+e20b6db fix(pit): seat teams by identity so crews and boxes match on every circuit
+2bbb62b feat(brianza): finish pit/paddock polish, docs and report for fase 13.3
+3e3c0ef feat(brianza): populate paddock with team facilities
+d99ce21 feat(brianza): add pit entry and wall dressing
+d4e63df feat(brianza): align pit lane and garages to the straight
+93dec74 fix(brianza): keep terrain below road and support pit platform
+02a19a3 fix(brianza): drive pit gaps from circuit layout
+90e1626 docs: record Fase 13.2 Brianza pitstop and clearance polish in ROADMAP.md
+6eefe7b fix: polish Brianza pit lane and grandstand clearance
+f1cc8d7 docs: add multi-agent governance and Fase 13.1 design trilogy
+0166988 docs(brianza): complete Phase 13.1 visual verification, render budget gate and executive report
+8705c79 fix(brianza): anchor stands to real corners, layer the vista ring, keep plants off stand footprints
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+scripts/gt/gt_driving.gd
+scripts/gt/gt_pit.gd
+scripts/gt/gt_types.gd
+---
+
+## Session End: 20261029_004246
+### Commits
+bc51e6c chore(git): ignore local ai-memory marker and nested studio project
+fa23885 docs(fase-13-3): record pit team-box fix in report
+f1866a8 docs(guide): add team-to-box contract for new circuits
+e20b6db fix(pit): seat teams by identity so crews and boxes match on every circuit
+2bbb62b feat(brianza): finish pit/paddock polish, docs and report for fase 13.3
+3e3c0ef feat(brianza): populate paddock with team facilities
+d99ce21 feat(brianza): add pit entry and wall dressing
+d4e63df feat(brianza): align pit lane and garages to the straight
+93dec74 fix(brianza): keep terrain below road and support pit platform
+02a19a3 fix(brianza): drive pit gaps from circuit layout
+90e1626 docs: record Fase 13.2 Brianza pitstop and clearance polish in ROADMAP.md
+6eefe7b fix: polish Brianza pit lane and grandstand clearance
+f1cc8d7 docs: add multi-agent governance and Fase 13.1 design trilogy
+0166988 docs(brianza): complete Phase 13.1 visual verification, render budget gate and executive report
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+scripts/gt/gt_driving.gd
+scripts/gt/gt_pit.gd
+scripts/gt/gt_types.gd
+---
+
+## Session End: 20261029_082205
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+scripts/gt/gt_driving.gd
+scripts/gt/gt_pit.gd
+scripts/gt/gt_types.gd
+---
+
+## Session End: 20261029_112112
+### Commits
+19b7496 fix(pit): smooth the pit queue and start service right after a car reaches its box
+### Uncommitted Changes
+production/session-logs/.session-end.hash
+production/session-logs/compaction-log.txt
+production/session-logs/session-log.md
+---
+
