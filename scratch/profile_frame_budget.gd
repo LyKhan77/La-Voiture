@@ -64,7 +64,7 @@ func _run() -> void:
 		"phys120":
 			Engine.physics_ticks_per_second = 120
 		"step_in_process":
-			world.set_physics_process(false)
+			world.set_process(false)
 	if variant == "pits":
 		# Six cars called to box at once; run fast until the lane is busy, then measure at 1x like a real stop.
 		for index: int in range(6):

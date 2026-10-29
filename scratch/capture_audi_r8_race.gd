@@ -16,7 +16,7 @@ func _initialize() -> void:
 func _run() -> void:
 	var world: Node3D = WorldScene.instantiate()
 	root.add_child(world)
-	world.set_physics_process(false)
+	world.set_process(false)
 	await process_frame
 	var race = world.race
 	race.incidents_enabled = false

@@ -33,7 +33,7 @@ func check(ok: bool, description: String) -> void:
 func _run() -> void:
 	world = WorldScene.instantiate()
 	root.add_child(world)
-	world.set_physics_process(false)
+	world.set_process(false)
 	hud = world.hud
 	race = world.race
 	race.incidents_enabled = false

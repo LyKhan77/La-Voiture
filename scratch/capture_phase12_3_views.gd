@@ -59,7 +59,7 @@ func _load_world(circuit_id: String, time_of_day: int) -> void:
 	config.race_seed = 12032026
 	world = WorldScene.instantiate()
 	root.add_child(world)
-	world.set_physics_process(false)
+	world.set_process(false)
 	world.set_process(false)
 	world.hud.hide()
 	world.gantry.set_lights(5)

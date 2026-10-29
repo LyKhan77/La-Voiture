@@ -36,7 +36,7 @@ func _run() -> void:
 	world.race_config = config
 	world.pre_grid_hold = true
 	root.add_child(world)
-	world.set_physics_process(false)
+	world.set_process(false)
 	check(world.race.laps == 3 and world.race.player_team_id == 8, "Configured laps and selected team reach the real race")
 	check(world.race.get_car(16).compound == 3 and world.race.get_car(17).compound == 4, "Independent teammate starting tires survive qualifying grid order")
 	check(world.followed_id == 16, "Initial chase camera follows the selected team's first driver")

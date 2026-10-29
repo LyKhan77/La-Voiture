@@ -190,7 +190,7 @@ func _run() -> void:
 	standalone.director_seed = 19
 	root.add_child(standalone)
 	current_scene = standalone
-	standalone.set_physics_process(false)
+	standalone.set_process(false)
 	standalone.show_podium()
 	await scene_changed
 	_key(KEY_R)

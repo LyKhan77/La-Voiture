@@ -39,6 +39,13 @@ func _run() -> void:
 		await process_frame
 		waited_ms = Time.get_ticks_msec() - begin
 	check(float(world.race.time) > before, "the race advances on process frames alone (%d ms)" % waited_ms)
+	# A frame can still reach the world after its race was disposed (a test or a scene teardown); stepping a disposed
+	# race must do nothing instead of calling into the freed driver.
+	var disposed = world.race
+	disposed.dispose()
+	var ticks_before: int = int(disposed.tick_count)
+	disposed.step()
+	check(int(disposed.tick_count) == ticks_before, "stepping a disposed race does nothing")
 	world.queue_free()
 	await process_frame
 	quit(1 if failures else 0)

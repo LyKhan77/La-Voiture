@@ -149,7 +149,7 @@ func _test_presentation() -> void:
 	var world := WorldScene.instantiate()
 	world.total_laps = 3
 	root.add_child(world)
-	world.set_physics_process(false)
+	world.set_process(false)
 	world.race.incidents_enabled = false
 	_test_smooth_motion(world)
 	world.set_time_scale(16.0)

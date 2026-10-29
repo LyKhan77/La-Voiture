@@ -116,7 +116,7 @@ func _banner_rect(cut_in: CanvasLayer) -> Rect2:
 func _test_two_way_hud() -> void:
 	var world: Node3D = WorldScene.instantiate()
 	root.add_child(world)
-	world.set_physics_process(false)
+	world.set_process(false)
 	var hud: RaceHud = world.hud
 	var race: GtRace = world.race
 	race.incidents_enabled = false

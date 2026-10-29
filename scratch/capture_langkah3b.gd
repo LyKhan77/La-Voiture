@@ -57,7 +57,7 @@ func _run() -> void:
 		out_dir = args[0]
 	world = WorldScene.instantiate()
 	root.add_child(world)
-	world.set_physics_process(false)
+	world.set_process(false)
 	await process_frame
 	var race: GtRace = world.race
 	race.incidents_enabled = false

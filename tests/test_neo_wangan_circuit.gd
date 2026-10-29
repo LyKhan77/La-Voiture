@@ -335,7 +335,7 @@ func _test_race_weekend_integration() -> void:
 	prototype.free()
 	var world = WorldScene.instantiate()
 	root.add_child(world)
-	world.set_physics_process(false)
+	world.set_process(false)
 	check(world.get_node("WorldEnvironment").environment != shared_environment, "#W40 Neo-Wangan sky owns an Environment copy and cannot mutate the shared Apex weekend resource")
 	var integrated: bool = world.active_circuit != null \
 		and world.active_circuit.circuit_id == "neo_wangan" \

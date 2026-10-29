@@ -50,7 +50,7 @@ func _run() -> void:
 	root.add_child(world)
 	current_scene = world
 	root.scaling_3d_scale = 1.0
-	world.set_physics_process(false)
+	world.set_process(false)
 	world.race.incidents_enabled = false
 	world.director._enter(world.director.State.GREEN_RACING)
 	for _i: int in range(30):

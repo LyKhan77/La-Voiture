@@ -54,7 +54,7 @@ func array_of(object: Object, name: String) -> Array:
 func _run() -> void:
 	world = WorldScene.instantiate()
 	root.add_child(world)
-	world.set_physics_process(false)
+	world.set_process(false)
 	await process_frame
 	_test_layout_gaps()
 	_test_entry_and_exit()

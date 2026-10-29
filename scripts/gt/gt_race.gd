@@ -270,6 +270,8 @@ func standings_entries() -> Array[Dictionary]:
 
 ## One fixed tick of GtTypes.TICK_DT.
 func step(dt: float = GtTypes.TICK_DT) -> void:
+	if _driving == null:
+		return # disposed: a late frame must not call into the freed driver
 	tick_count += 1
 	_tick_driver_radio_cooldowns(dt)
 	_flush_replies()

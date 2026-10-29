@@ -21,7 +21,7 @@ func _run() -> void:
 	world = WorldScene.instantiate() as RaceWeekendWorld
 	world.race_config = config
 	root.add_child(world)
-	world.set_physics_process(false)
+	world.set_process(false)
 	root.scaling_3d_scale = 1.0
 	world.race.incidents_enabled = false
 	world.director._enter(world.director.State.GREEN_RACING)

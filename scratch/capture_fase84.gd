@@ -28,7 +28,7 @@ func _run() -> void:
 	if mode.begins_with("podium"):
 		world.total_laps = 2
 	root.add_child(world)
-	world.set_physics_process(false)
+	world.set_process(false)
 	world.race.incidents_enabled = false
 	world.director._enter(DirectorScript.State.GREEN_RACING)
 	if mode == "radio":

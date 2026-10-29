@@ -71,7 +71,7 @@ func _run() -> void:
 	_test_uniform_shader_definition()
 	world = WorldScene.instantiate() as Node3D
 	root.add_child(world)
-	world.set_physics_process(false)
+	world.set_process(false)
 	await process_frame
 	_test_crew_visual_runtime()
 	await _test_animated_sole_contact()

@@ -269,7 +269,7 @@ func _test_collider_and_rules() -> void:
 func _test_race_weekend_world() -> void:
 	var world: Node3D = WorldScene.instantiate()
 	root.add_child(world)
-	world.set_physics_process(false)
+	world.set_process(false)
 	_test_grid_and_set(world)
 	await _test_start_sequence(world)
 	await _test_race_run(world)
@@ -547,7 +547,7 @@ func _test_broadcast_cameras(world: Node3D) -> void:
 func _test_dense_race() -> void:
 	var world: Node3D = WorldScene.instantiate()
 	root.add_child(world)
-	world.set_physics_process(false)
+	world.set_process(false)
 	world.race.incidents_enabled = false
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 55
@@ -586,7 +586,7 @@ func _test_dense_race() -> void:
 func _test_pit_in_world() -> void:
 	var world: Node3D = WorldScene.instantiate()
 	root.add_child(world)
-	world.set_physics_process(false)
+	world.set_process(false)
 	world.race.incidents_enabled = false
 	world.director._enter(DirectorScript.State.GREEN_RACING)
 	var race: RaceScript = world.race

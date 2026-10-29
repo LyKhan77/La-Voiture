@@ -56,7 +56,7 @@ func _run() -> void:
 	await process_frame
 	world = WorldScene.instantiate()
 	root.add_child(world)
-	world.set_physics_process(false)
+	world.set_process(false)
 	world.race.incidents_enabled = false
 	await process_frame
 	_test_flag_panels_follow_the_flag()

@@ -38,7 +38,7 @@ func check(ok: bool, description: String) -> void:
 func _run() -> void:
 	world = WorldScene.instantiate()
 	root.add_child(world)
-	world.set_physics_process(false)
+	world.set_process(false)
 	await process_frame
 	_hash_centreline()
 	_test_stage1_surface_and_kerbs()
@@ -725,7 +725,7 @@ func _world_for(time_of_day: int, weather_preset: int = 0) -> Node3D:
 	RaceConfigScript.current = config
 	var instance: Node3D = WorldScene.instantiate()
 	root.add_child(instance)
-	instance.set_physics_process(false)
+	instance.set_process(false)
 	return instance
 
 

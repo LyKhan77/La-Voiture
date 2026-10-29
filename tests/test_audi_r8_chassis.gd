@@ -96,7 +96,7 @@ func _test_wheels_flush(chassis: ModularCarAssembler) -> void:
 func _test_actor_picks_chassis_by_team() -> void:
 	var world: Node3D = WorldScene.instantiate()
 	root.add_child(world)
-	world.set_physics_process(false)
+	world.set_process(false)
 	await process_frame
 	var expected: Dictionary = {
 		0: "res://scenes/car/mercedes_amg_chassis.tscn", # Apex Racing

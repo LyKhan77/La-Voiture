@@ -96,7 +96,7 @@ func _run() -> void:
 	config.weather_preset = 0
 	var wangan_world: Node3D = WorldScene.instantiate()
 	root.add_child(wangan_world)
-	wangan_world.set_physics_process(false)
+	wangan_world.set_process(false)
 	wangan_world.set_process(false)
 	await process_frame
 	for _i: int in range(3):
@@ -119,7 +119,7 @@ func _run() -> void:
 	ConfigScript.current = null
 	var world: Node3D = WorldScene.instantiate()
 	root.add_child(world)
-	world.set_physics_process(false)
+	world.set_process(false)
 	await process_frame
 	world.step(1.0 / 60.0)
 

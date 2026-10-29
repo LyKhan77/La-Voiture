@@ -188,7 +188,7 @@ func _test_radio_ducking() -> void:
 func _test_world_audio() -> void:
 	world = WorldScene.instantiate()
 	root.add_child(world)
-	world.set_physics_process(false)
+	world.set_process(false)
 	world.race.incidents_enabled = false
 	var hud: RaceHud = world.hud
 	hud.refresh_all()
@@ -316,7 +316,7 @@ func _test_voice_coverage() -> void:
 		short_race.weather_archetype = archetype
 		short_race.race_seed = 3 + archetype
 		root.add_child(short_race)
-		short_race.set_physics_process(false)
+		short_race.set_process(false)
 		var messages: Array[Dictionary] = []
 		short_race.race.radio_message.connect(func(message: Dictionary) -> void: messages.append(message))
 		var ticks: int = 0
@@ -468,7 +468,7 @@ func _test_podium() -> void:
 	var finale: Node3D = WorldScene.instantiate()
 	finale.total_laps = 2
 	root.add_child(finale)
-	finale.set_physics_process(false)
+	finale.set_process(false)
 	finale.race.incidents_enabled = false
 	var ticks: int = 0
 	while not finale.race.is_finished() and ticks < MAX_RACE_TICKS:

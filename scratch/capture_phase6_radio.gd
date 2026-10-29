@@ -18,7 +18,7 @@ func _run() -> void:
 	var out_path: String = args[0] if args.size() > 0 else "res://scratch/phase-6-radio-overlays.png"
 	var world: Node3D = WorldScene.instantiate()
 	root.add_child(world)
-	world.set_physics_process(false)
+	world.set_process(false)
 	world.race.incidents_enabled = false
 	world.director._enter(DirectorScript.State.GREEN_RACING)
 	for _i: int in range(240):

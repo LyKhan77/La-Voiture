@@ -33,7 +33,7 @@ func _run() -> void:
 	world = WorldScene.instantiate()
 	world.race_config = config
 	root.add_child(world)
-	world.set_physics_process(false)
+	world.set_process(false)
 	world.hud.set_shown(false)
 	actor = world.actor_of(0)
 	actor.global_transform = world.pit_lane.stall_transform(0)

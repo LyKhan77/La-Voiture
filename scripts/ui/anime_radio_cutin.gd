@@ -416,9 +416,10 @@ func prewarm() -> void:
 
 func _on_prewarm_frame() -> void:
 	_prewarm_frames -= 1
-	if _prewarm_frames > 0:
+	if _prewarm_frames > 0 and is_inside_tree():
 		get_tree().process_frame.connect(_on_prewarm_frame, CONNECT_ONE_SHOT)
 		return
+	_prewarm_frames = 0 # done, or the card left the tree (the HUD is dropped at the end of a race)
 	if _present:
 		return
 	_message = String(_prewarm_kept[0])

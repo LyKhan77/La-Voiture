@@ -24,7 +24,7 @@ func _run() -> void:
 		out_dir = args[1]
 	world = WorldScene.instantiate()
 	root.add_child(world)
-	world.set_physics_process(false)
+	world.set_process(false)
 	await process_frame
 	if which == "lights" or which == "all":
 		await _lights()

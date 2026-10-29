@@ -30,7 +30,7 @@ func _run() -> void:
 	config.race_seed = 12022026
 	world = WorldScene.instantiate()
 	root.add_child(world)
-	world.set_physics_process(false)
+	world.set_process(false)
 	world.set_process(false)
 	world.hud.hide()
 	world.gantry.set_lights(5)

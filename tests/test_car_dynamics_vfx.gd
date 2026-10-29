@@ -33,7 +33,7 @@ func check(ok: bool, description: String) -> void:
 func _run() -> void:
 	world = WorldScene.instantiate()
 	root.add_child(world)
-	world.set_physics_process(false)
+	world.set_process(false)
 	world.race.incidents_enabled = false
 	world.director._enter(DirectorScript.State.GREEN_RACING)
 	for _i: int in range(30):

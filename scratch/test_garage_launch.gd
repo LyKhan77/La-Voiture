@@ -39,7 +39,7 @@ func _run() -> void:
 		print("Scene after transition wait: %s" % (current_scene.name if current_scene != null else "null"))
 		if current_scene != null and current_scene.name == "RaceWeekendWorld":
 			print("Simulating 30 frames of race...")
-			current_scene.set_physics_process(true)
+			current_scene.set_process(true)
 			current_scene.finish_grid_intro()
 			for f in range(30):
 				await physics_frame

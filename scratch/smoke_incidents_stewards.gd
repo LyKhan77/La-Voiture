@@ -92,7 +92,7 @@ func _run() -> void:
 
 func _captures() -> void:
 	_make_world(0, 2, 3, false) # dry, night: the LED panels and hazard lamps read best in the dark
-	world.set_physics_process(false)
+	world.set_process(false)
 	world.race.incidents_enabled = false
 	world.director._enter(world.director.State.GREEN_RACING)
 	for _i: int in range(60):

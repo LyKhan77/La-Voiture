@@ -35,7 +35,7 @@ func _run() -> void:
 		print("Followed ID: %d" % world.followed_id)
 		
 		# Test one frame of physics process
-		world.set_physics_process(true)
+		world.set_process(true)
 		await physics_frame
 		await process_frame
 		print("Physics frame processed successfully for Team %d." % team_id)

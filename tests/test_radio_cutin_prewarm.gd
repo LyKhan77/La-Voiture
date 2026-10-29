@@ -39,6 +39,16 @@ func _run() -> void:
 		for _i: int in range(5):
 			await process_frame
 		check(card.is_present() and card.banner.visible, "a call that arrives during the prewarm keeps the card up")
+		# A card taken out of the tree mid-prewarm (the HUD is dropped at the end of a race) ends its prewarm cleanly.
+		var leaving: CanvasLayer = RadioScene.instantiate()
+		root.add_child(leaving)
+		await process_frame
+		leaving.prewarm()
+		root.remove_child(leaving)
+		for _i: int in range(4):
+			await process_frame
+		check(int(leaving.get("_prewarm_frames")) == 0, "a prewarm cut short by leaving the tree ends cleanly")
+		leaving.free()
 	card.queue_free()
 	await process_frame
 	quit(1 if failures else 0)
