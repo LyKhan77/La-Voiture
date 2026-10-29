@@ -12,7 +12,7 @@ extends Node3D
 const Roster := preload("res://scripts/ui/garage_roster.gd")
 const Gt := preload("res://scripts/gt/gt_data.gd")
 const Liveries := preload("res://scripts/car/team_liveries.gd")
-const ToonMaterials := preload("res://scripts/world/toon_materials.gd")
+const ToonMaterials := preload("res://scripts/world/shared/toon_materials.gd")
 
 const STALL_SPACING: float = 14.0
 const STALL_HALF_WIDTH: float = 6.1

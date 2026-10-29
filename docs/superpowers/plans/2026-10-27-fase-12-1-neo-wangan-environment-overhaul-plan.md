@@ -121,7 +121,7 @@ La_Voiture/
 ### Task 3: Ground Massing, Near-Track Urban Corridor (12 m – 45 m) & Neon Billboards
 
 **Files:**
-- Modify: `scripts/world/neo_wangan_environment.gd`
+- Modify: `scripts/world/circuits/neo_wangan/neo_wangan_environment.gd`
 - Modify: `shaders/neo_wangan_skyline.gdshader`
 - Test: `tests/test_neo_wangan_circuit.gd`
 

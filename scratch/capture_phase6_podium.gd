@@ -6,7 +6,7 @@ extends SceneTree
 ## studio by itself and saves it once the departure wipe has cleared.
 
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
-const DirectorScript := preload("res://scripts/world/race_weekend_director.gd")
+const DirectorScript := preload("res://scripts/world/weekend/race_weekend_director.gd")
 const WinningStudio := preload("res://scripts/ui/winning_scene.gd")
 
 const FRAME: float = 1.0 / 60.0

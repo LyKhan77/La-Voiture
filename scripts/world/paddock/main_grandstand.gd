@@ -7,8 +7,8 @@ extends Node3D
 ## Local axes follow the ribbon at CENTRE_S: the stand is on the LEFT of travel (-X), -Z is
 ## the direction of travel. The merged structure is one cel surface (a few draw calls).
 
-const ToonMaterials := preload("res://scripts/world/toon_materials.gd")
-const MeshBatchScript := preload("res://scripts/world/mesh_batch.gd")
+const ToonMaterials := preload("res://scripts/world/shared/toon_materials.gd")
+const MeshBatchScript := preload("res://scripts/world/shared/mesh_batch.gd")
 const JumbotronScript := preload("res://scripts/world/paddock/jumbotron.gd")
 
 ## Arc distance of the middle of the stand; the scene is placed on the centreline here.

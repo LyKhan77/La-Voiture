@@ -12,7 +12,7 @@ const DataScript := preload("res://scripts/gt/gt_data.gd")
 const RngScript := preload("res://scripts/gt/gt_rng.gd")
 const WeatherScript := preload("res://scripts/gt/gt_weather.gd")
 const Types := preload("res://scripts/gt/gt_types.gd")
-const PitLaneScript := preload("res://scripts/world/pit_lane_complex.gd")
+const PitLaneScript := preload("res://scripts/world/circuits/apex_ring/apex_pit_complex.gd")
 
 const DRY: int = WeatherScript.Archetype.DRY_SUNNY
 

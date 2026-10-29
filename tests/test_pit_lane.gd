@@ -8,10 +8,10 @@ extends SceneTree
 ## Run: Godot --headless --path . -s res://tests/test_pit_lane.gd
 
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
-const PitLaneScript := preload("res://scripts/world/pit_lane_complex.gd")
-const ToonMaterialsScript := preload("res://scripts/world/toon_materials.gd")
+const PitLaneScript := preload("res://scripts/world/circuits/apex_ring/apex_pit_complex.gd")
+const ToonMaterialsScript := preload("res://scripts/world/shared/toon_materials.gd")
 const ActorScript := preload("res://scripts/car/gt_car_actor.gd")
-const DirectorScript := preload("res://scripts/world/race_weekend_director.gd")
+const DirectorScript := preload("res://scripts/world/weekend/race_weekend_director.gd")
 const Types := preload("res://scripts/gt/gt_types.gd")
 
 const ROAD_SHADER_PATH := "res://shaders/road_asphalt.gdshader"
@@ -38,7 +38,7 @@ func check(ok: bool, description: String) -> void:
 
 ## A constant the refinement adds; NAN when it does not exist yet so a missing one fails a check instead of the parse.
 func const_of(constant: String) -> float:
-	var script: Script = load("res://scripts/world/pit_lane_complex.gd")
+	var script: Script = load("res://scripts/world/circuits/apex_ring/apex_pit_complex.gd")
 	return float(script.get_script_constant_map().get(constant, NAN))
 
 

@@ -14,7 +14,7 @@ const WorldScene := preload("res://scenes/race_weekend_world.tscn")
 const WinningStudio := preload("res://scripts/ui/winning_scene.gd")
 const ConfigScript := preload("res://scripts/core/race_config_data.gd")
 const PS := preload("res://scripts/core/presentation_settings.gd")
-const PitLaneScript := preload("res://scripts/world/pit_lane_complex.gd")
+const PitLaneScript := preload("res://scripts/world/circuits/apex_ring/apex_pit_complex.gd")
 const ChoreographerScript := preload("res://scripts/car/pitstop_choreographer.gd")
 
 const HQ_SCENE := "res://scenes/main.tscn"

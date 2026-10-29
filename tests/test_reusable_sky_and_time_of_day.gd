@@ -7,7 +7,7 @@ const WanganScene := preload("res://scenes/race_world/neo_wangan_circuit.tscn")
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
 const WeatherScript := preload("res://scripts/gt/gt_weather.gd")
 const ConfigScript := preload("res://scripts/core/race_config_data.gd")
-const SharedSkyPath := "res://scripts/world/shared_cel_sky_controller.gd"
+const SharedSkyPath := "res://scripts/world/shared/shared_cel_sky_controller.gd"
 
 
 class StubRace extends RefCounted:

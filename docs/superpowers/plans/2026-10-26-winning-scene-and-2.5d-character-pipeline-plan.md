@@ -86,7 +86,7 @@
 
 ## Task 5 — Integrasi Game Loop, Automated Test Suite & Verifikasi 60 FPS
 **Files:**
-- Modifikasi: [`scripts/world/race_weekend_world.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/race_weekend_world.gd)
+- Modifikasi: [`scripts/world/weekend/race_weekend_world.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/weekend/race_weekend_world.gd)
 - Test Suite Baru: `tests/test_winning_scene_and_standee.gd`
 - Skrip Probe: `scratch/smoke_winning_scene.gd`
 - Laporan Resmi: `executor-report/reports/FASE-11-LANGKAH-7-WINNING-SCENE-REPORT.md`

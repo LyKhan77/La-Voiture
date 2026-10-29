@@ -20,7 +20,7 @@ const IMPACT_SECONDS: float = 0.08
 const IMPACT_SHADER := preload("res://shaders/winning_impact_frame.gdshader")
 const Config := preload("res://scripts/core/race_config_data.gd")
 const Settings := preload("res://scripts/core/presentation_settings.gd")
-const Toon := preload("res://scripts/world/toon_materials.gd")
+const Toon := preload("res://scripts/world/shared/toon_materials.gd")
 const POINTS: Array[int] = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1]
 const MEDALS: Array[Color] = [Color("#FFD23F"), Color("#D8DCE6"), Color("#D9803A")]
 ## Hero set: a turntable at the origin, filmed from a low three-quarter angle; P1 stands beside it.
@@ -391,7 +391,7 @@ func _restart() -> void:
 	var restart: Dictionary = results.get("restart", {})
 	if bool(restart.get("standalone", false)):
 		Config.current = null
-		var world_script: Script = load("res://scripts/world/race_weekend_world.gd")
+		var world_script: Script = load("res://scripts/world/weekend/race_weekend_world.gd")
 		world_script.pending_restart = restart.duplicate()
 		get_tree().change_scene_to_file("res://scenes/race_weekend_world.tscn")
 	else:

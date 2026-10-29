@@ -51,10 +51,10 @@ Silakan ikuti dan eksekusi tahapan demi tahapan pada rencana implementasi:
 [`docs/superpowers/plans/2026-10-22-track-environment-hybrid-procedural-plan.md`](file:///D:/Occupation/Porto/genex/La_Voiture/docs/superpowers/plans/2026-10-22-track-environment-hybrid-procedural-plan.md)
 
 ### Checklist Tahapan:
-- [ ] **Tahap 1:** Buat `shaders/road_asphalt.gdshader`, bangun generator kerb 3D bermodel sawtooth $+0.05\text{ m}$ dan zona gravel trap di `scripts/world/enhanced_track_geometry.gd`.
-- [ ] **Tahap 2:** Buat `scripts/world/trackside_furniture_builder.gd` untuk membangun MultiMesh Armco, Tecpro, marker 150/100/50m, dan 28 menara floodlight stadion.
+- [ ] **Tahap 1:** Buat `shaders/road_asphalt.gdshader`, bangun generator kerb 3D bermodel sawtooth $+0.05\text{ m}$ dan zona gravel trap di `scripts/world/shared/enhanced_track_geometry.gd`.
+- [ ] **Tahap 2:** Buat `scripts/world/shared/trackside_furniture_builder.gd` untuk membangun MultiMesh Armco, Tecpro, marker 150/100/50m, dan 28 menara floodlight stadion.
 - [ ] **Tahap 3:** Bangun hero assets pit straight di `scenes/race_world/paddock/` (gedung pit 2 lantai, tribun utama kantilever, menara kontrol balap, upgrade gantry start FIA).
-- [ ] **Tahap 4:** Tambahkan cincin siluet pegunungan anime di `scenes/race_world/mountain_vista.tscn`, scatter vegetasi anime di `scripts/world/foliage_scatter.gd`, dan sinkronkan pencahayaan `Day`, `Sunset`, `Night`.
+- [ ] **Tahap 4:** Tambahkan cincin siluet pegunungan anime di `scenes/race_world/mountain_vista.tscn`, scatter vegetasi anime di `scripts/world/shared/foliage_scatter.gd`, dan sinkronkan pencahayaan `Day`, `Sunset`, `Night`.
 - [ ] **Tahap 5:** Buat test suite headless `tests/test_track_environment.gd`, jalankan ke-20 test suite lama untuk menjamin 0 FAIL, dan lakukan verifikasi native smoke 60 FPS.
 
 ---

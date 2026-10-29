@@ -66,7 +66,7 @@ Di **Langkah 1**, Anda bertugas mengeksekusi dua perombakan besar kendaraan:
   * Pasang mesh lampu tipis emissive di `Chassis/Lamps` untuk lampu depan & lampu rem reaktif.
 * Daftarkan ke [`scripts/car/gt_car_actor.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/car/gt_car_actor.gd):
   * `CHASSIS_BY_TEAM[0] = preload("res://scenes/car/mercedes_amg_chassis.tscn")`
-* Pastikan showroom garasi di [`scripts/world/garage_environment_builder.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/garage_environment_builder.gd) memuat sasis Mercedes-AMG untuk Stall 0.
+* Pastikan showroom garasi di [`scripts/world/garage/garage_environment_builder.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/garage/garage_environment_builder.gd) memuat sasis Mercedes-AMG untuk Stall 0.
 
 ### Step 4: Rekayasa Official FIA Safety Car
 * Buat scene [`scenes/car/safety_car_chassis.tscn`](file:///D:/Occupation/Porto/genex/La_Voiture/scenes/car/safety_car_chassis.tscn):

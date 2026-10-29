@@ -3,7 +3,7 @@
 **Tanggal:** 2026-10-22  
 **Status:** VALIDATED & READY FOR IMPLEMENTATION  
 **Fitur:** Main Menu, Race Setup Configuration, 3D Pitstop Garage Team Select, and Manga Comic Race Transition  
-**Referensi:** [`PRD/01-GAME-OVERVIEW.md`](file:///D:/Occupation/Porto/genex/La_Voiture/PRD/01-GAME-OVERVIEW.md), [`DESIGN.md`](file:///D:/Occupation/Porto/genex/La_Voiture/DESIGN.md), [`DRIVER-CHARACTERIZATION-ROSTER.md`](file:///D:/Occupation/Porto/genex/La_Voiture/reference-assets/characters/DRIVER-CHARACTERIZATION-ROSTER.md), [`scripts/world/pit_lane_complex.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/pit_lane_complex.gd)
+**Referensi:** [`PRD/01-GAME-OVERVIEW.md`](file:///D:/Occupation/Porto/genex/La_Voiture/PRD/01-GAME-OVERVIEW.md), [`DESIGN.md`](file:///D:/Occupation/Porto/genex/La_Voiture/DESIGN.md), [`DRIVER-CHARACTERIZATION-ROSTER.md`](file:///D:/Occupation/Porto/genex/La_Voiture/reference-assets/characters/DRIVER-CHARACTERIZATION-ROSTER.md), [`scripts/world/circuits/apex_ring/apex_pit_complex.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/circuits/apex_ring/apex_pit_complex.gd)
 
 ---
 
@@ -134,7 +134,7 @@ var car1_starting_compound: int = 0 # ModularCarAssembler.TireCompound.SOFT
 var car2_starting_compound: int = 1 # ModularCarAssembler.TireCompound.MEDIUM
 ```
 
-### 5.2 Modifikasi pada `RaceWeekendWorld` (`scripts/world/race_weekend_world.gd`)
+### 5.2 Modifikasi pada `RaceWeekendWorld` (`scripts/world/weekend/race_weekend_world.gd`)
 * Menerima instance `RaceConfigData`.
 * Menerapkan `selected_team_id` untuk menentukan mobil mana yang dikontrol strategi taktisnya di HUD oleh pemain (bukan lagi otomatis default ke Tim 0).
 * Memasang kompon ban awal yang dipilih pemain ke mobil 1 dan mobil 2 tim tersebut saat start sequence.

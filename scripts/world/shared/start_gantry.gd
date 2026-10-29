@@ -8,8 +8,8 @@ extends Node3D
 ## face +Z toward the approaching grid. The steel is one merged cel surface (MeshBatch); the
 ## ten lamps stay separate nodes so each can swap its material.
 
-const ToonMaterials := preload("res://scripts/world/toon_materials.gd")
-const MeshBatchScript := preload("res://scripts/world/mesh_batch.gd")
+const ToonMaterials := preload("res://scripts/world/shared/toon_materials.gd")
+const MeshBatchScript := preload("res://scripts/world/shared/mesh_batch.gd")
 
 const LIGHT_PAIRS: int = 5
 ## Span over the racing surface (-SPAN/2 .. +SPAN/2); the pit wing continues it to the right.

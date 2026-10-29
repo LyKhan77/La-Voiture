@@ -3,7 +3,7 @@ extends SceneTree
 ## Native 1080p visual gates. Uses the real twenty-car weekend and authored circuit spans.
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
 const Config := preload("res://scripts/core/race_config_data.gd")
-const PitKit := preload("res://scripts/world/neo_wangan_pit_complex.gd")
+const PitKit := preload("res://scripts/world/circuits/neo_wangan/neo_wangan_pit_complex.gd")
 const Settings := preload("res://scripts/core/presentation_settings.gd")
 const SHOTS := "res://executor-report/screenshots/phases/"
 var world: Node3D

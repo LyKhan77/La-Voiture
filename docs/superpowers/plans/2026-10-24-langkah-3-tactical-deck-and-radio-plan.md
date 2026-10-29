@@ -9,7 +9,7 @@
 
 ## Task Breakdown & Order of Execution
 
-### Task 1: Core Pit Cancel Mechanics (`scripts/gt/gt_race.gd` & `scripts/world/race_weekend_world.gd`)
+### Task 1: Core Pit Cancel Mechanics (`scripts/gt/gt_race.gd` & `scripts/world/weekend/race_weekend_world.gd`)
 - [ ] Add `cancel_pit(car_id: int) -> bool` to `gt_race.gd`:
   * Resets `car.pit_request = -1` if `car.pit == null`.
   * Emits radio line: `"Stay out, stay out! Box call cancelled."` via `push_radio()`.

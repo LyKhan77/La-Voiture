@@ -9,7 +9,7 @@
 2. In `scripts/hud/race_hud.gd` and `shaders/manga_speedlines.gdshader`, hook dynamic speedlines to $>240\text{ km/h}$ and ERS Boost with camera FOV kick.
 3. In `scripts/vfx/race_vfx.gd`, add `GPUParticles3D` kerb strike sparks and 2-frame graffiti backfire flames.
 4. In `scripts/ui/main_menu.gd`, redesign the title screen with a -12° slanted stencil title, spray paint halo, and parallelogram buttons with snap hover.
-5. In `scripts/world/garage_environment_builder.gd`, apply `toon_car_paint.gdshader` and inverted-hull ink outlines to showroom cars to match in-race rendering.
+5. In `scripts/world/garage/garage_environment_builder.gd`, apply `toon_car_paint.gdshader` and inverted-hull ink outlines to showroom cars to match in-race rendering.
 
 **Tech Stack:** Godot Engine 4.7.2 stable (GDScript 2.0, Forward+ Renderer, Shading Language `.gdshader`, GPU Particles 3D).
 
@@ -24,7 +24,7 @@
 | `scripts/hud/race_hud.gd` | In-game HUD: canvas speedlines overlay and camera FOV punch during ERS Boost. |
 | `shaders/manga_speedlines.gdshader` | Full-screen radial ink speedlines canvas item shader. |
 | `scripts/ui/main_menu.gd` | Title screen: Concept 01 -12° stencil title, spray paint halo, parallelogram buttons. |
-| `scripts/world/garage_environment_builder.gd` | 10-stall paddock showroom: unified toon car paint shader and inverted-hull ink line art. |
+| `scripts/world/garage/garage_environment_builder.gd` | 10-stall paddock showroom: unified toon car paint shader and inverted-hull ink line art. |
 | `scripts/core/presentation_settings.gd` | Graphics presets synchronization (outline width, shadow distance, halftone alpha, VFX ratio). |
 | `tests/test_visual_polish_and_consistency.gd` | Headless test suite validating lighting, VFX, UI geometry, and visual pipeline consistency. |
 
@@ -212,7 +212,7 @@
 ### Task 6: Unify Visual Consistency Between Paddock Showroom & In-Game Race Cars
 
 **Files:**
-- Modify: `scripts/world/garage_environment_builder.gd`
+- Modify: `scripts/world/garage/garage_environment_builder.gd`
 - Modify: `scripts/core/presentation_settings.gd`
 
 - [ ] **Step 1: Update `garage_environment_builder.gd` to load Toon Shaded Chassis**
@@ -232,7 +232,7 @@
 
 - [ ] **Step 4: Commit showroom visual consistency**
   ```bash
-  git add scripts/world/garage_environment_builder.gd scripts/core/presentation_settings.gd
+  git add scripts/world/garage/garage_environment_builder.gd scripts/core/presentation_settings.gd
   git commit -m "feat(graphics): unify showroom cars with cel-shaded toon paint and inverted-hull ink outline"
   ```
 

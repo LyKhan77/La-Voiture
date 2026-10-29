@@ -37,7 +37,7 @@ Input yang tidak disebut spec tapi akan menimpa pemain, paling mungkin dulu; tia
 
 - Modify `scripts/gt/gt_types.gd:12` — enum `TacticMode`.
 - Modify `scripts/gt/gt_race.gd` — default mode, `cancel_pit`, jendela saran, ganti nama `_check_hybrid_tactics`, `decide_strategy` untuk pemain.
-- Modify `scripts/world/race_weekend_world.gd` — `cancel_pit` pembungkus.
+- Modify `scripts/world/weekend/race_weekend_world.gd` — `cancel_pit` pembungkus.
 - Modify `scripts/hud/tactical_deck.gd` — desk dua opsi, tombol BOX dua-state, label status desk, `cancel_box()`.
 - Modify `scripts/hud/race_hud.gd` — bar api, label waktu, keybind B/ESC/ENTER.
 - Create `tests/test_pit_deck_and_radio.gd` — suite baru (radio dua arah ditambahkan di sub-langkah 3e).
@@ -106,7 +106,7 @@ git commit -m "feat(gt): drop HYBRID desk mode, 10 s suggestion window in the si
 ### Task 2: `cancel_pit` di sim dan world
 
 **Files:**
-- Modify: `scripts/gt/gt_race.gd` (setelah `request_pit`, baris 406-410), `scripts/world/race_weekend_world.gd` (setelah `request_pit`, baris 152-165)
+- Modify: `scripts/gt/gt_race.gd` (setelah `request_pit`, baris 406-410), `scripts/world/weekend/race_weekend_world.gd` (setelah `request_pit`, baris 152-165)
 - Test: `tests/test_pit_deck_and_radio.gd`
 
 **Interfaces:**
@@ -143,7 +143,7 @@ git commit -m "feat(gt): drop HYBRID desk mode, 10 s suggestion window in the si
 - [ ] **Step 6: Commit**
 
 ```bash
-git add scripts/gt/gt_race.gd scripts/world/race_weekend_world.gd tests/test_pit_deck_and_radio.gd
+git add scripts/gt/gt_race.gd scripts/world/weekend/race_weekend_world.gd tests/test_pit_deck_and_radio.gd
 git commit -m "feat(pit): cancel_pit with no penalty and a repeat-suggestion cooldown"
 ```
 

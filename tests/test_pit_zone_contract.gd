@@ -1,9 +1,9 @@
 extends SceneTree
 
-const Zone := preload("res://scripts/world/pit_zone.gd")
-const Furniture := preload("res://scripts/world/trackside_furniture_builder.gd")
-const Director := preload("res://scripts/world/broadcast_camera_director.gd")
-const World := preload("res://scripts/world/race_weekend_world.gd")
+const Zone := preload("res://scripts/world/shared/pit_zone.gd")
+const Furniture := preload("res://scripts/world/shared/trackside_furniture_builder.gd")
+const Director := preload("res://scripts/world/weekend/broadcast_camera_director.gd")
+const World := preload("res://scripts/world/weekend/race_weekend_world.gd")
 var failures: int = 0
 
 func check(ok: bool, description: String) -> void:

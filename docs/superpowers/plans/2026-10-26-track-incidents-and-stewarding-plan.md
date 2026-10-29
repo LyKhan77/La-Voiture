@@ -48,9 +48,9 @@
 
 ## Task 2 — Trackside Digital LED Flag Panels
 **Files:**
-- Modifikasi: [`scripts/world/trackside_furniture_builder.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/trackside_furniture_builder.gd)
+- Modifikasi: [`scripts/world/shared/trackside_furniture_builder.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/shared/trackside_furniture_builder.gd)
 - Shader Baru: `shaders/digital_flag_panel.gdshader`
-- Integrasi: [`scripts/world/race_weekend_world.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/race_weekend_world.gd)
+- Integrasi: [`scripts/world/weekend/race_weekend_world.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/weekend/race_weekend_world.gd)
 
 **Langkah Pengerjaan:**
 - [ ] Buat shader emisi `digital_flag_panel.gdshader` dengan efek kisi dot-matrix LED yang mendukung status:

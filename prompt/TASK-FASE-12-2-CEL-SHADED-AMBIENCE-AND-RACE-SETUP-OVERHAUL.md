@@ -60,7 +60,7 @@ Ikuti kode lengkap pada [`docs/superpowers/plans/2026-10-28-fase-12-2-cel-shaded
 - [ ] **Task 1: Shaders Cel-Shaded & `SkyAmbienceRoot` / `WindBannersMM` di Neo-Wangan**
   - Buat `tests/test_neo_wangan_cel_ambience.gd`.
   - Buat/update ke-5 shader (`neo_wangan_skyline.gdshader`, `neo_wangan_water.gdshader`, `neo_wangan_billboard.gdshader`, `neo_wangan_clouds.gdshader`, `neo_wangan_wind_banner.gdshader`).
-  - Integrasikan `SkyAmbienceRoot` (`AnimeMoon`, `NightStars`, `AnimeNightClouds`), `WindBannersMM`, dan `apply_wind_ambience()` di `scripts/world/neo_wangan_environment.gd`.
+  - Integrasikan `SkyAmbienceRoot` (`AnimeMoon`, `NightStars`, `AnimeNightClouds`), `WindBannersMM`, dan `apply_wind_ambience()` di `scripts/world/circuits/neo_wangan/neo_wangan_environment.gd`.
   - Jalankan `test_neo_wangan_cel_ambience.gd` dan `test_neo_wangan_circuit.gd` $\rightarrow$ PASS, commit.
 - [ ] **Task 2 & 3: Overhaul `RaceConfigData`, `ChipRow`, dan `RaceSetupMenu`**
   - Buat `tests/test_race_setup_overhaul.gd`.

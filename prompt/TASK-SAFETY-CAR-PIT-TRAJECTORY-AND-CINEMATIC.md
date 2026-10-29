@@ -18,7 +18,7 @@
    * Sasis resmi Official FIA Safety Car telah tersedia di [`scenes/car/safety_car_chassis.tscn`](file:///D:/Occupation/Porto/genex/La_Voiture/scenes/car/safety_car_chassis.tscn) (berbasis sasis Porsche 911 GT3 dengan cat silver metalik, decal "SAFETY CAR" tebal di pintu dan kap mesin, strip hazard kuning, serta 3D Rooftop Lightbar dengan strobo amber 12 Hz dan LED hijau).
    * Script sasis di [`scripts/car/safety_car_chassis.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/car/safety_car_chassis.gd) mendukung enum `StrobeMode { OFF, AMBER, GREEN }`.
 2. **Geometri Pit Lane Terintegrasi:**
-   * Sirkuit memiliki kompleks pit lane di [`scripts/world/pit_lane_complex.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/pit_lane_complex.gd):
+   * Sirkuit memiliki kompleks pit lane di [`scripts/world/circuits/apex_ring/apex_pit_complex.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/circuits/apex_ring/apex_pit_complex.gd):
      * Titik Masuk (*Pit Entry Line*): $\text{ENTRY\_S} = 3900.0\text{ m}$.
      * Titik Keluar (*Pit Exit Line*): $\text{EXIT\_S} = 150.0\text{ m}$.
      * Lebar jalur Fast Lane: $\text{FAST\_LANE\_M} = 11.6\text{ m}$.
@@ -50,7 +50,7 @@ flowchart TD
 1. **Tambahkan Fungsi Trajektori Statis:**
    * Impor referensi PitLaneScript:
      ```gdscript
-     const PitLaneScript := preload("res://scripts/world/pit_lane_complex.gd")
+     const PitLaneScript := preload("res://scripts/world/circuits/apex_ring/apex_pit_complex.gd")
      ```
    * Fungsi trajektori keluar pit (*Pit Exit Merge*):
      ```gdscript
@@ -126,8 +126,8 @@ flowchart TD
 
 ### Tugas 2: Broadcast Camera Director Safety Car Mode & Cut-In
 * **File Target:**
-  * [`scripts/world/broadcast_camera_director.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/broadcast_camera_director.gd)
-  * [`scripts/world/race_weekend_world.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/race_weekend_world.gd)
+  * [`scripts/world/weekend/broadcast_camera_director.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/weekend/broadcast_camera_director.gd)
+  * [`scripts/world/weekend/race_weekend_world.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/weekend/race_weekend_world.gd)
 
 1. **Tambahkan Mode Baru di `broadcast_camera_director.gd`:**
    * Perbarui enum Mode:

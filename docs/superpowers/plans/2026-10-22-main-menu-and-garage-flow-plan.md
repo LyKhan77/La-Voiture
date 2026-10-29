@@ -58,7 +58,7 @@
 ## Tahap 3: Garasi Tim 3D, Dolly Camera, & Kartu Duo Karakter 2D
 
 ### Task 3.1: Environment Prosedural 10 Stall Garasi Pit
-* **File:** `scripts/world/garage_environment_builder.gd` & `scenes/ui/garage_team_select.tscn`
+* **File:** `scripts/world/garage/garage_environment_builder.gd` & `scenes/ui/garage_team_select.tscn`
 * **Deskripsi:**
   * Membangun 10 stall garasi pit berjajar memanjang dengan jarak antar-stall $14\text{ m}$.
   * Setiap stall memiliki lantai dark epoxy mengilap dengan pantulan bayangan, garis hazard chevron, dan nomor stall di lantai (`// STALL 0X: TEAM NAME`).
@@ -96,7 +96,7 @@
 * **Kriteria Selesai:** Animasi transisi berjalan dramatis dan konsisten dengan estetika anime neo-brutalisme.
 
 ### Task 4.2: Integrasi ke `scenes/main.tscn` & `RaceWeekendWorld`
-* **File:** `scenes/main.tscn`, `scripts/world/race_weekend_world.gd`, `scenes/ui/podium_screen.tscn`
+* **File:** `scenes/main.tscn`, `scripts/world/weekend/race_weekend_world.gd`, `scenes/ui/podium_screen.tscn`
 * **Deskripsi:**
   * `scenes/main.tscn` memuat `main_menu.tscn` secara default saat game diluncurkan.
   * `RaceWeekendWorld` membaca `RaceConfigData`:

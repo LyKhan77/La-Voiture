@@ -9,10 +9,10 @@ extends SceneTree
 
 const CircuitScene := preload("res://scenes/race_world/neo_wangan_circuit.tscn")
 const ApexScene := preload("res://scenes/race_world/track_circuit.tscn")
-const BuilderScript := preload("res://scripts/world/neo_wangan_circuit_builder.gd")
+const BuilderScript := preload("res://scripts/world/circuits/neo_wangan/neo_wangan_circuit_builder.gd")
 const RibbonScript := preload("res://scripts/car/track_ribbon.gd")
-const PitScript := preload("res://scripts/world/neo_wangan_pit_complex.gd")
-const CircuitScript := preload("res://scripts/world/neo_wangan_circuit_builder.gd")
+const PitScript := preload("res://scripts/world/circuits/neo_wangan/neo_wangan_pit_complex.gd")
+const CircuitScript := preload("res://scripts/world/circuits/neo_wangan/neo_wangan_circuit_builder.gd")
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
 const ConfigScript := preload("res://scripts/core/race_config_data.gd")
 

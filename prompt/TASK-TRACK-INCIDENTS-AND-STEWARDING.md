@@ -26,7 +26,7 @@ Sebagai kelanjutan dari keberhasilan implementasi Safety Car autentik di Langkah
    * Memastikan pemeriksaan 190 pasangan SAT tetap deterministik dan stabil tanpa lonjakan dimensi *bounding box*.
    * Menjamin tidak ada mobil yang mengalami *tunneling*, *clipping*, atau *infinite kick*.
 3. **Memasang FIA Grade 1 Digital Flag Panels di Sirkuit:**
-   * Menempatkan 8 unit panel display LED digital di pembatas sirkuit pada sektor-sektor krusial via `MultiMeshInstance3D` di [`scripts/world/trackside_furniture_builder.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/trackside_furniture_builder.gd).
+   * Menempatkan 8 unit panel display LED digital di pembatas sirkuit pada sektor-sektor krusial via `MultiMeshInstance3D` di [`scripts/world/shared/trackside_furniture_builder.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/shared/trackside_furniture_builder.gd).
    * Menampilkan status dinamis: hijau redup (GREEN), kuning berkedip 4 Hz dengan panah (YELLOW SECTOR), dan oranye/kuning berkedip `SC` (SAFETY CAR).
 4. **VFX Bangkai DNF & Evakuasi Mulus saat Safety Car In-Lap:**
    * Mobil DNF bersandar pada barrier luar dengan sudut benturan realistis ($15^\circ$–$20^\circ$).
@@ -71,10 +71,10 @@ Sebagai kelanjutan dari keberhasilan implementasi Safety Car autentik di Langkah
 
 ### Task 2: Digital Trackside Flag Panels
 1. Buat shader baru `shaders/digital_flag_panel.gdshader` yang merender dot-matrix LED emisi tinggi.
-2. Buka [`scripts/world/trackside_furniture_builder.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/trackside_furniture_builder.gd):
+2. Buka [`scripts/world/shared/trackside_furniture_builder.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/shared/trackside_furniture_builder.gd):
    - Tambahkan fungsi pembangun `_build_digital_flag_panels()` yang menempatkan 8 panel ($1.8\text{ m} \times 1.2\text{ m}$) di tiang pembatas sirkuit pada titik Turn 1, Hairpin, Chicane, dsb.
    - Gunakan `MultiMeshInstance3D` dengan custom buffer data untuk mengontrol status bendera per panel.
-3. Sinkronkan pembaruan status panel di [`scripts/world/race_weekend_world.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/race_weekend_world.gd) berdasarkan `race.race_control["flag"]` dan nomor sektor.
+3. Sinkronkan pembaruan status panel di [`scripts/world/weekend/race_weekend_world.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/weekend/race_weekend_world.gd) berdasarkan `race.race_control["flag"]` dan nomor sektor.
 
 ### Task 3: Visual DNF & Evakuasi Safety Car In-Lap
 1. Di [`scripts/vfx/race_vfx.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/vfx/race_vfx.gd):

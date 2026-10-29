@@ -8,10 +8,10 @@ extends Node
 ## the Jumbotron and braking boards at night, the mountain haze and stars, and foliage sway
 ## from the weather's wind.
 
-const ToonMaterials := preload("res://scripts/world/toon_materials.gd")
-const TracksideFurnitureScript := preload("res://scripts/world/trackside_furniture_builder.gd")
-const MountainVistaScript := preload("res://scripts/world/mountain_vista.gd")
-const FoliageScript := preload("res://scripts/world/foliage_scatter.gd")
+const ToonMaterials := preload("res://scripts/world/shared/toon_materials.gd")
+const TracksideFurnitureScript := preload("res://scripts/world/shared/trackside_furniture_builder.gd")
+const MountainVistaScript := preload("res://scripts/world/shared/mountain_vista.gd")
+const FoliageScript := preload("res://scripts/world/shared/foliage_scatter.gd")
 const GrandstandScript := preload("res://scripts/world/paddock/main_grandstand.gd")
 
 ## Emission multiplier of a fully lit (alpha 0) floodlight lens at night.

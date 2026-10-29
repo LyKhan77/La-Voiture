@@ -19,9 +19,9 @@ extends Node3D
 ##   16.0 .. 25.0   ten garages, 12 m apart on the 12 m stall pitch
 
 const TrackRibbonScript := preload("res://scripts/car/track_ribbon.gd")
-const MeshBatchScript := preload("res://scripts/world/mesh_batch.gd")
-const ApexPitScript := preload("res://scripts/world/pit_lane_complex.gd")
-const ToonMaterials := preload("res://scripts/world/toon_materials.gd")
+const MeshBatchScript := preload("res://scripts/world/shared/mesh_batch.gd")
+const ApexPitScript := preload("res://scripts/world/circuits/apex_ring/apex_pit_complex.gd")
+const ToonMaterials := preload("res://scripts/world/shared/toon_materials.gd")
 const RoadShader := preload("res://shaders/road_asphalt.gdshader")
 const PitBuildingKit := preload("res://scripts/world/paddock/pit_building.gd")
 const GrandstandKit := preload("res://scripts/world/paddock/main_grandstand.gd")

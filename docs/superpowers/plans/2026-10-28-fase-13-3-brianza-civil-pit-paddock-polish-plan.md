@@ -35,11 +35,11 @@
 
 ## File Structure
 
-- Create `scripts/world/pit_zone.gd`: hitung zona pit dari `pit_layout` (murni, tanpa preload sirkuit mana pun).
-- Create `scripts/world/brianza_pit_dressing.gd`: dressing pit concept-art (chevron, drum, pagar, cantilever, strip sponsor) agar `brianza_pit_complex.gd` tetap fokus.
-- Create `scripts/world/brianza_paddock.gd`: isi paddock (apron, jalan servis, transporter, tenda, pagar, gerbang, parkir).
-- Modify `scripts/world/trackside_furniture_builder.gd`, `track_environment_builder.gd`, `broadcast_camera_director.gd`, `race_weekend_world.gd` (kontrak zona).
-- Modify `scripts/world/brianza_environment.gd` (zona, terrain, platform, foliage keep-out) dan `brianza_pit_complex.gd` (layout v2, platform, paddock).
+- Create `scripts/world/shared/pit_zone.gd`: hitung zona pit dari `pit_layout` (murni, tanpa preload sirkuit mana pun).
+- Create `scripts/world/circuits/brianza/brianza_pit_dressing.gd`: dressing pit concept-art (chevron, drum, pagar, cantilever, strip sponsor) agar `brianza_pit_complex.gd` tetap fokus.
+- Create `scripts/world/circuits/brianza/brianza_paddock.gd`: isi paddock (apron, jalan servis, transporter, tenda, pagar, gerbang, parkir).
+- Modify `scripts/world/shared/trackside_furniture_builder.gd`, `track_environment_builder.gd`, `broadcast_camera_director.gd`, `race_weekend_world.gd` (kontrak zona).
+- Modify `scripts/world/circuits/brianza/brianza_environment.gd` (zona, terrain, platform, foliage keep-out) dan `brianza_pit_complex.gd` (layout v2, platform, paddock).
 - Create tests: `tests/test_pit_zone_contract.gd`, `tests/test_brianza_terrain_gate.gd`, `tests/test_brianza_pit_lane_v2.gd`, `tests/test_brianza_paddock.gd`.
 - Docs: `Circuit-Environment-Component-Guide.md`, `docs/AGENT-WORKFLOW.md`, `ROADMAP.md`, laporan fase.
 
@@ -48,8 +48,8 @@
 ### Task 1: Kontrak zona pit (`PitZone`) dan perbaikan armco, runoff, floodlight, kamera TV
 
 **Files:**
-- Create: `scripts/world/pit_zone.gd`
-- Modify: `scripts/world/trackside_furniture_builder.gd:12,40-41,147,195-203`, `scripts/world/track_environment_builder.gd:198-208`, `scripts/world/brianza_environment.gd:614-618,654-661`, `scripts/world/broadcast_camera_director.gd:64,246`, `scripts/world/race_weekend_world.gd:131`
+- Create: `scripts/world/shared/pit_zone.gd`
+- Modify: `scripts/world/shared/trackside_furniture_builder.gd:12,40-41,147,195-203`, `scripts/world/circuits/apex_ring/apex_environment.gd:198-208`, `scripts/world/circuits/brianza/brianza_environment.gd:614-618,654-661`, `scripts/world/weekend/broadcast_camera_director.gd:64,246`, `scripts/world/weekend/race_weekend_world.gd:131`
 - Test: `tests/test_pit_zone_contract.gd`
 
 **Interfaces:**
@@ -96,7 +96,7 @@ for path: String in ["trackside_furniture_builder", "broadcast_camera_director",
 Run: `godot --headless --path . -s res://tests/test_pit_zone_contract.gd`
 Expected: gagal (`PitZone` belum ada; setelah stub, `#Z2a` dan `#Z7` FAIL).
 
-- [ ] **Step 4: Implement `scripts/world/pit_zone.gd`** (`class_name PitZone`, `extends RefCounted`, tiga fungsi statis di atas). `outside_ranges`: zona tidak-wrap (`end <= lap`) menghasilkan `[Vector2(0, start), Vector2(end, lap)]`; zona wrap menghasilkan `[Vector2(end - lap, start)]`.
+- [ ] **Step 4: Implement `scripts/world/shared/pit_zone.gd`** (`class_name PitZone`, `extends RefCounted`, tiga fungsi statis di atas). `outside_ranges`: zona tidak-wrap (`end <= lap`) menghasilkan `[Vector2(0, start), Vector2(end, lap)]`; zona wrap menghasilkan `[Vector2(end - lap, start)]`.
 
 - [ ] **Step 5: Hubungkan konsumen**
   - `trackside_furniture_builder.gd`: simpan `_pit_zone` dari parameter baru `build(...)`; `armco_ranges_for(side)` mengembalikan `[Vector2(0, length)]` untuk sisi kiri dan `PitZone.outside_ranges(_pit_zone, length)` untuk sisi kanan; hapus preload `PitLaneScript` serta konstanta `PIT_OPEN_LEAD_M` / `PIT_OPEN_TRAIL_M` (lead/trail kini dipilih pemanggil).
@@ -113,7 +113,7 @@ Expected: semua PASS; jumlah PASS suite lama sama dengan baseline.
 - [ ] **Step 7: Commit**
 
 ```bash
-git add scripts/world/pit_zone.gd scripts/world/trackside_furniture_builder.gd scripts/world/track_environment_builder.gd scripts/world/brianza_environment.gd scripts/world/broadcast_camera_director.gd scripts/world/race_weekend_world.gd tests/test_pit_zone_contract.gd
+git add scripts/world/shared/pit_zone.gd scripts/world/shared/trackside_furniture_builder.gd scripts/world/circuits/apex_ring/apex_environment.gd scripts/world/circuits/brianza/brianza_environment.gd scripts/world/weekend/broadcast_camera_director.gd scripts/world/weekend/race_weekend_world.gd tests/test_pit_zone_contract.gd
 git commit -m "fix(brianza): drive armco, runoff, floodlight and TV-camera pit gaps from one PitZone contract"
 ```
 
@@ -122,7 +122,7 @@ git commit -m "fix(brianza): drive armco, runoff, floodlight and TV-camera pit g
 ### Task 2: Terrain: tanah selalu di bawah jalan, verge tidak melintasi jalan lain, platform pit
 
 **Files:**
-- Modify: `scripts/world/brianza_environment.gd:94-108` (konstanta), `:346-396` (`ground_y_at`, `_verge_drop`, `_field_height`), `:424-486` (`_build_field`: tone dan lantai luar), `:493-533` (`_build_verge`), `:1099` (`_foliage_blocked`); `scripts/world/brianza_pit_complex.gd` (tambah `ground_platforms()`)
+- Modify: `scripts/world/circuits/brianza/brianza_environment.gd:94-108` (konstanta), `:346-396` (`ground_y_at`, `_verge_drop`, `_field_height`), `:424-486` (`_build_field`: tone dan lantai luar), `:493-533` (`_build_verge`), `:1099` (`_foliage_blocked`); `scripts/world/circuits/brianza/brianza_pit_complex.gd` (tambah `ground_platforms()`)
 - Test: `tests/test_brianza_terrain_gate.gd`
 
 **Interfaces:**
@@ -177,7 +177,7 @@ Expected: PASS. Jika `#L1.8`/`#L4.4` gagal karena platform, perbaiki generator (
 - [ ] **Step 5: Commit**
 
 ```bash
-git add scripts/world/brianza_environment.gd scripts/world/brianza_pit_complex.gd tests/test_brianza_terrain_gate.gd
+git add scripts/world/circuits/brianza/brianza_environment.gd scripts/world/circuits/brianza/brianza_pit_complex.gd tests/test_brianza_terrain_gate.gd
 git commit -m "fix(brianza): keep every ground surface below the road, clip verge at neighbouring roads, add pit platform"
 ```
 
@@ -186,7 +186,7 @@ git commit -m "fix(brianza): keep every ground surface below the road, clip verg
 ### Task 3: Pit lane v2: layout menurut spline, geometri Apex v2, aspal jalan
 
 **Files:**
-- Modify: `scripts/world/brianza_pit_complex.gd:23-51` (konstanta), `:75-112` (`lane_lateral_at`, `sim_layout`), `:194-270` (`_build_asphalt`, `_build_markings`, `_build_pit_wall`, `_build_crash_cushion`), `:273-306` (`_build_garages`), `:342-352` (`_build_entry_sign`)
+- Modify: `scripts/world/circuits/brianza/brianza_pit_complex.gd:23-51` (konstanta), `:75-112` (`lane_lateral_at`, `sim_layout`), `:194-270` (`_build_asphalt`, `_build_markings`, `_build_pit_wall`, `_build_crash_cushion`), `:273-306` (`_build_garages`), `:342-352` (`_build_entry_sign`)
 - Test: `tests/test_brianza_pit_lane_v2.gd`
 
 **Interfaces:**
@@ -232,7 +232,7 @@ Expected: `#P1`, `#P2` (radius 88 m pada s 5555), `#P3b/c`, `#P4`, `#P7` FAIL.
 
 - [ ] **Step 3: Implement**
 
-Ubah konstanta (K1) dan port logika Apex v2 dari `scripts/world/pit_lane_complex.gd` ke `brianza_pit_complex.gd`, dengan konstanta Brianza: `lane_edges` (`:163-175`), `wall_lateral` (`:222-224`), `_build_pit_wall` termasuk cushion kedua ujung dan awal dinding saat verge >= 1,1 m (`:359-390`), `_build_markings` (`:278-353`: garis limiter kuning, garis putih, separator, stop line, kotak dan nomor box), rambu 80 / PIT LANE / PIT EXIT (`:491-527`); ganti `_build_asphalt` agar memakai `lane_edges` dan `PitLaneComplex.asphalt_material()`; buat `ApexPitScript.new()` sebagai `props_source` dan panggil `_garage_props` untuk tiap garasi (pola `neo_wangan_pit_complex.gd:435`), isi `garage_equipment`. Buang `_build_crash_cushion` lama. Isi `solid_footprints()` dari dinding dan cushion. Pertahankan guard `built` dan remap `team_ids`.
+Ubah konstanta (K1) dan port logika Apex v2 dari `scripts/world/circuits/apex_ring/apex_pit_complex.gd` ke `brianza_pit_complex.gd`, dengan konstanta Brianza: `lane_edges` (`:163-175`), `wall_lateral` (`:222-224`), `_build_pit_wall` termasuk cushion kedua ujung dan awal dinding saat verge >= 1,1 m (`:359-390`), `_build_markings` (`:278-353`: garis limiter kuning, garis putih, separator, stop line, kotak dan nomor box), rambu 80 / PIT LANE / PIT EXIT (`:491-527`); ganti `_build_asphalt` agar memakai `lane_edges` dan `PitLaneComplex.asphalt_material()`; buat `ApexPitScript.new()` sebagai `props_source` dan panggil `_garage_props` untuk tiap garasi (pola `neo_wangan_pit_complex.gd:435`), isi `garage_equipment`. Buang `_build_crash_cushion` lama. Isi `solid_footprints()` dari dinding dan cushion. Pertahankan guard `built` dan remap `team_ids`.
 
 - [ ] **Step 4: Jalankan GREEN dan regresi**
 
@@ -242,7 +242,7 @@ Expected: PASS. Jika test Brianza lama meng-hardcode `STALL_FIRST_S`/ramp lama, 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add scripts/world/brianza_pit_complex.gd tests/test_brianza_pit_lane_v2.gd
+git add scripts/world/circuits/brianza/brianza_pit_complex.gd tests/test_brianza_pit_lane_v2.gd
 git commit -m "feat(brianza): pit lane v2 layout on the straight, Apex v2 wall/cushions/markings, road asphalt, 80/90 m ramps"
 ```
 
@@ -251,8 +251,8 @@ git commit -m "feat(brianza): pit lane v2 layout on the straight, Apex v2 wall/c
 ### Task 4: Dressing pit sesuai concept art
 
 **Files:**
-- Create: `scripts/world/brianza_pit_dressing.gd`
-- Modify: `scripts/world/brianza_pit_complex.gd` (panggil dressing dari `build()` setelah dinding)
+- Create: `scripts/world/circuits/brianza/brianza_pit_dressing.gd`
+- Modify: `scripts/world/circuits/brianza/brianza_pit_complex.gd` (panggil dressing dari `build()` setelah dinding)
 - Test: `tests/test_brianza_pit_lane_v2.gd` (tambah)
 
 **Interfaces:**
@@ -278,7 +278,7 @@ check(pit.solid_footprints().any(func(f: Dictionary) -> bool: return String(f["n
 - [ ] **Step 5: Commit**
 
 ```bash
-git add scripts/world/brianza_pit_dressing.gd scripts/world/brianza_pit_complex.gd tests/test_brianza_pit_lane_v2.gd
+git add scripts/world/circuits/brianza/brianza_pit_dressing.gd scripts/world/circuits/brianza/brianza_pit_complex.gd tests/test_brianza_pit_lane_v2.gd
 git commit -m "feat(brianza): pit entry chevrons, cantilever gantry, wall fence, sponsor strip and nose drums from concept art"
 ```
 
@@ -287,8 +287,8 @@ git commit -m "feat(brianza): pit entry chevrons, cantilever gantry, wall fence,
 ### Task 5: Paddock: apron, jalan servis, transporter, tenda, pagar, gerbang, parkir
 
 **Files:**
-- Create: `scripts/world/brianza_paddock.gd`
-- Modify: `scripts/world/brianza_pit_complex.gd` (`_build_shared_paddock` memanggil paddock; `ground_platforms()` menambah platform paddock), `scripts/world/brianza_environment.gd` (`_foliage_blocked` menghormati jejak paddock)
+- Create: `scripts/world/circuits/brianza/brianza_paddock.gd`
+- Modify: `scripts/world/circuits/brianza/brianza_pit_complex.gd` (`_build_shared_paddock` memanggil paddock; `ground_platforms()` menambah platform paddock), `scripts/world/circuits/brianza/brianza_environment.gd` (`_foliage_blocked` menghormati jejak paddock)
 - Test: `tests/test_brianza_paddock.gd`
 
 **Interfaces:**
@@ -337,7 +337,7 @@ Expected: PASS; `BUDGET draw_calls` tidak melebihi 169.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add scripts/world/brianza_paddock.gd scripts/world/brianza_pit_complex.gd scripts/world/brianza_environment.gd tests/test_brianza_paddock.gd
+git add scripts/world/circuits/brianza/brianza_paddock.gd scripts/world/circuits/brianza/brianza_pit_complex.gd scripts/world/circuits/brianza/brianza_environment.gd tests/test_brianza_paddock.gd
 git commit -m "feat(brianza): fill the paddock with apron, service road, transporters, hospitality tents, fence, gate and parking"
 ```
 

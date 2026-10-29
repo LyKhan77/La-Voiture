@@ -49,7 +49,7 @@
         ...
     }
     ```
-  * Selaraskan showroom garasi di [`scripts/world/garage_environment_builder.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/garage_environment_builder.gd) agar Stall 0 memuat sasis Mercedes-AMG.
+  * Selaraskan showroom garasi di [`scripts/world/garage/garage_environment_builder.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/garage/garage_environment_builder.gd) agar Stall 0 memuat sasis Mercedes-AMG.
 
 ---
 

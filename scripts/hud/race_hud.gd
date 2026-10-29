@@ -15,7 +15,7 @@ extends CanvasLayer
 
 const UI = preload("res://scripts/ui/pit_wall_ui.gd")
 const T = preload("res://scripts/ui/ui_theme_tokens.gd")
-const DirectorScript := preload("res://scripts/world/race_weekend_director.gd")
+const DirectorScript := preload("res://scripts/world/weekend/race_weekend_director.gd")
 const TowerScene := preload("res://scenes/pit_wall/timing_tower.tscn")
 const RadarScene := preload("res://scenes/pit_wall/circuit_radar_2d.tscn")
 const RadioScene := preload("res://scenes/pit_wall/anime_radio_cutin.tscn")

@@ -10,18 +10,18 @@ extends Node3D
 ## MainGrandstand with live Jumbotron standings, and RaceControlTower.
 
 const TrackRibbonScript := preload("res://scripts/car/track_ribbon.gd")
-const MeshBatchScript := preload("res://scripts/world/mesh_batch.gd")
-const ApexPitScript := preload("res://scripts/world/pit_lane_complex.gd")
+const MeshBatchScript := preload("res://scripts/world/shared/mesh_batch.gd")
+const ApexPitScript := preload("res://scripts/world/circuits/apex_ring/apex_pit_complex.gd")
 const FigureScript := preload("res://scripts/car/pit_crew_figure.gd")
-const ToonMaterials := preload("res://scripts/world/toon_materials.gd")
+const ToonMaterials := preload("res://scripts/world/shared/toon_materials.gd")
 const RoadShader := preload("res://shaders/road_asphalt.gdshader")
 const PitBuildingKit := preload("res://scripts/world/paddock/pit_building.gd")
 const GrandstandKit := preload("res://scripts/world/paddock/main_grandstand.gd")
 const ControlTowerKit := preload("res://scripts/world/paddock/race_control_tower.gd")
 const Liveries := preload("res://scripts/car/team_liveries.gd")
 const TeamSignage := preload("res://scripts/world/paddock/team_signage.gd")
-const PitDressing := preload("res://scripts/world/brianza_pit_dressing.gd")
-const PaddockScript := preload("res://scripts/world/brianza_paddock.gd")
+const PitDressing := preload("res://scripts/world/circuits/brianza/brianza_pit_dressing.gd")
+const PaddockScript := preload("res://scripts/world/circuits/brianza/brianza_paddock.gd")
 
 const LAP_LENGTH_M: float = 5790.0
 const ENTRY_S: float = 5530.0 # 260 m before start/finish

@@ -7,9 +7,9 @@ extends Node3D
 ## All steel and concrete is one merged cel surface, the tinted lounge glass a second one,
 ## so the whole building is a handful of draw calls.
 
-const PitLaneScript := preload("res://scripts/world/pit_lane_complex.gd")
-const ToonMaterials := preload("res://scripts/world/toon_materials.gd")
-const MeshBatchScript := preload("res://scripts/world/mesh_batch.gd")
+const PitLaneScript := preload("res://scripts/world/circuits/apex_ring/apex_pit_complex.gd")
+const ToonMaterials := preload("res://scripts/world/shared/toon_materials.gd")
+const MeshBatchScript := preload("res://scripts/world/shared/mesh_batch.gd")
 const Liveries := preload("res://scripts/car/team_liveries.gd")
 const TeamSignage := preload("res://scripts/world/paddock/team_signage.gd")
 

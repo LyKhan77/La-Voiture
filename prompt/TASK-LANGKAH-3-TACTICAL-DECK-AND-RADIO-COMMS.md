@@ -31,7 +31,7 @@ Pengguna secara spesifik telah **menyetujui konsep desain visual & interaksi** y
 ## 2. Rincian Ruang Lingkup Tugas (Scope of Work)
 
 ### A. Core Pit Cancel Mechanics
-* **Files:** [`scripts/gt/gt_race.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/gt/gt_race.gd) & [`scripts/world/race_weekend_world.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/race_weekend_world.gd)
+* **Files:** [`scripts/gt/gt_race.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/gt/gt_race.gd) & [`scripts/world/weekend/race_weekend_world.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/weekend/race_weekend_world.gd)
 1. Tambahkan `cancel_pit(car_id: int) -> bool`:
    - Batalkan panggilan jika `car.pit == null` dan `car.pit_request >= 0`.
    - Kembalikan `car.pit_request = -1`.

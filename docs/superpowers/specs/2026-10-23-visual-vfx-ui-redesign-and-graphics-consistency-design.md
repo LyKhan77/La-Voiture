@@ -184,7 +184,7 @@ These floating spheres remain static in world space relative to the bumper, rend
 
 #### A. Problem Definition
 Currently:
-* In `scripts/world/garage_environment_builder.gd:346-362`:
+* In `scripts/world/garage/garage_environment_builder.gd:346-362`:
   ```gdscript
   var path: String = Roster.car_path(team) # -> assets/cars/<slug>/<slug>_full.glb
   var packed: PackedScene = load(path) as PackedScene

@@ -20,7 +20,7 @@ Berdasarkan evaluasi pasca-Fase 12.2:
 
 ## 2. Desain Arsitektur: `SharedCelSkyController` & Adaptasi `DAY / SUNSET / NIGHT`
 
-### A. Komponen Langit Reusable (`scripts/world/shared_cel_sky_controller.gd`)
+### A. Komponen Langit Reusable (`scripts/world/shared/shared_cel_sky_controller.gd`)
 `SharedCelSkyController` adalah kelas `RefCounted` / `Node` bersama yang membangun dan memperbarui `SkyAmbienceRoot` di atas titik tengah sirkuit (`TrackRibbon`) untuk **semua map**:
 
 1. **Hierarki Node di bawah `SkyAmbienceRoot`**:
@@ -41,7 +41,7 @@ Berdasarkan evaluasi pasca-Fase 12.2:
        * **`SUNSET`**: Lembayung-emas dramatis (`rim #ffb057`, `mid #bd5e7a`, `shadow #4a2c56`).
        * **`NIGHT`**: Indigo malam dengan rim perak-cyan bulan (`rim #b8e0ff`, `mid #405285`, `shadow #1f2645`).
 
-### B. Adaptasi `DAY / SUNSET / NIGHT` pada **Neo-Wangan Shuto Express** (`scripts/world/neo_wangan_environment.gd`)
+### B. Adaptasi `DAY / SUNSET / NIGHT` pada **Neo-Wangan Shuto Express** (`scripts/world/circuits/neo_wangan/neo_wangan_environment.gd`)
 `NeoWanganEnvironment` mendelegasikan langit ke `SharedCelSkyController` dan menyediakan fungsi publik `apply_time_of_day(tod: Dictionary, gloom: float = 0.0)` yang dipanggil otomatis setiap frame dari `update(delta, race)`:
 
 | Elemen Kota Neo-Wangan | Mode `DAY` (`0`) | Mode `SUNSET` (`1`) | Mode `NIGHT` (`2`) |

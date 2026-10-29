@@ -7,10 +7,10 @@ extends SceneTree
 ## Run: Godot --headless --path . -s res://tests/test_track_environment.gd
 
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
-const ToonMaterialsScript := preload("res://scripts/world/toon_materials.gd")
+const ToonMaterialsScript := preload("res://scripts/world/shared/toon_materials.gd")
 const ActorScript := preload("res://scripts/car/gt_car_actor.gd")
-const PitLaneScript := preload("res://scripts/world/pit_lane_complex.gd")
-const EnhancedGeometry := preload("res://scripts/world/enhanced_track_geometry.gd")
+const PitLaneScript := preload("res://scripts/world/circuits/apex_ring/apex_pit_complex.gd")
+const EnhancedGeometry := preload("res://scripts/world/shared/enhanced_track_geometry.gd")
 const LiveriesScript := preload("res://scripts/car/team_liveries.gd")
 
 const ROAD_SHADER_PATH := "res://shaders/road_asphalt.gdshader"
@@ -62,7 +62,7 @@ func _run() -> void:
 	quit(0 if failures == 0 else 1)
 
 
-const MESH_BATCH_PATH := "res://scripts/world/mesh_batch.gd"
+const MESH_BATCH_PATH := "res://scripts/world/shared/mesh_batch.gd"
 const PIT_CLOSED_FROM_S: float = PitLaneScript.ENTRY_S - 20.0
 const PIT_CLOSED_TO_S: float = PitLaneScript.ENTRY_S + PitLaneScript.NOMINAL_LENGTH_M + 40.0
 

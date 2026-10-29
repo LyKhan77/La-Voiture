@@ -16,8 +16,8 @@ extends Node3D
 ## lane_lateral_at() and parks them on STALL_LANE_M, so the geometry here and the car paths agree.
 
 const TrackRibbonScript := preload("res://scripts/car/track_ribbon.gd")
-const ToonMaterials := preload("res://scripts/world/toon_materials.gd")
-const MeshBatchScript := preload("res://scripts/world/mesh_batch.gd")
+const ToonMaterials := preload("res://scripts/world/shared/toon_materials.gd")
+const MeshBatchScript := preload("res://scripts/world/shared/mesh_batch.gd")
 const FigureScript := preload("res://scripts/car/pit_crew_figure.gd")
 const Liveries := preload("res://scripts/car/team_liveries.gd")
 const TeamSignage := preload("res://scripts/world/paddock/team_signage.gd")

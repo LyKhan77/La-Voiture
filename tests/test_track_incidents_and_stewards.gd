@@ -13,7 +13,7 @@ const WeatherScript := preload("res://scripts/gt/gt_weather.gd")
 const Types := preload("res://scripts/gt/gt_types.gd")
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
 const ActorScript := preload("res://scripts/car/gt_car_actor.gd")
-const ToonMaterialsScript := preload("res://scripts/world/toon_materials.gd")
+const ToonMaterialsScript := preload("res://scripts/world/shared/toon_materials.gd")
 const FRAME: float = 1.0 / 60.0
 
 const DRY: int = WeatherScript.Archetype.DRY_SUNNY

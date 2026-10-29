@@ -18,7 +18,7 @@ Membangun sirkuit Grand Prix kedua (**GP #2 — Round 03: Autodromo di Brianza**
 ## 2. Tahapan Eksekusi Rinci
 
 ### Task 1: Fondasi Geometri Spline & Ribbon Lintasan (`brianza_circuit_builder.gd`)
-* **File Target:** `scripts/world/brianza_circuit_builder.gd` & scene `scenes/race_world/brianza_circuit.tscn`.
+* **File Target:** `scripts/world/circuits/brianza/brianza_circuit_builder.gd` & scene `scenes/race_world/brianza_circuit.tscn`.
 * **Spesifikasi Teknis:**
   - `length_m`: $5,790\text{ m} \pm 20\text{ m}$.
   - Lebar koridor aspal: $14.0\text{ m}$ (lebar standar GP).

@@ -25,7 +25,7 @@ Aturan turunan:
 Bukti: probe headless `temp/probe_brianza_overlap.gd`, `temp/probe_pit_armco.gd` dan 10 screenshot diagnosis `temp/diag/*.png` (gitignored; dihasilkan ulang oleh `temp/capture_polish_diag.gd`).
 
 ### 2.1 Rumput menutupi track di akhir Sektor 2 menuju Sektor 3
-- `ParcoRealeOuterFloor` (`scripts/world/brianza_environment.gd:472-480`) adalah plane datar di y = `-GROUND_DROP_M - 0.6` = **-3,0 m**. Jalan turun sampai **-7,2 m** (`ELEVATION` di `brianza_circuit_builder.gd`; s = 3860 berada di y = -4,35 m).
+- `ParcoRealeOuterFloor` (`scripts/world/circuits/brianza/brianza_environment.gd:472-480`) adalah plane datar di y = `-GROUND_DROP_M - 0.6` = **-3,0 m**. Jalan turun sampai **-7,2 m** (`ELEVATION` di `brianza_circuit_builder.gd`; s = 3860 berada di y = -4,35 m).
 - Dari tabel elevasi, jalan berada di bawah plane pada s ≈ 3260 sampai 4030 (perkiraan; wajib diverifikasi oleh test). Plane hanya satu sisi: tidak terlihat dari bawah, menutup jalan dan mobil dari kamera chase atau TV di atasnya (`temp/diag/a-s3860-road-level.png`, `d-s3860-aerial.png`).
 - Test `#L1.8` memeriksa fungsi `ground_y_at()` (`tests/test_brianza_circuit.gd:239-250`), bukan permukaan yang dirender, sehingga lolos. Kamera `cam4` gate 13.1 kebetulan berada di bawah plane.
 - Gejala sekunder yang sama sumbernya (generator ground):

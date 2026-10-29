@@ -90,7 +90,7 @@ La_Voiture/
 ### Task 2: Geometri Spline 3D & Ribbon Lintasan Neo-Wangan (`neo_wangan_circuit_builder.gd`)
 
 **Files:**
-- Create: `scripts/world/neo_wangan_circuit_builder.gd`
+- Create: `scripts/world/circuits/neo_wangan/neo_wangan_circuit_builder.gd`
 - Create: `scenes/race_world/neo_wangan_circuit.tscn`
 - Test: `tests/test_neo_wangan_circuit.gd`
 
@@ -106,7 +106,7 @@ La_Voiture/
   Jalankan: `godot --headless --path . -s res://tests/test_neo_wangan_circuit.gd`
   Ekspektasi: FAIL.
 
-- [ ] **Step 3: Implementasi `scripts/world/neo_wangan_circuit_builder.gd`**
+- [ ] **Step 3: Implementasi `scripts/world/circuits/neo_wangan/neo_wangan_circuit_builder.gd`**
   - Rancang 12 simpul koordinat spline `Curve3D` yang merefleksikan layout resmi (Shuto Bridge Straight 950 m, T1 90°, T2/T3 esses, T4/T5 underpass tunnel descent, T6/T7 Shibuya S-Chicane, T8/T9 Harbor Concrete Hairpin 180°, T10-T12 Main Straight).
   - Bangun ekstrusi ribbon mesh 3D: permukaan aspal jalan tol (lebar 11.5 m), kerb jalan raya rendah (+0.03 m), dan garis marka jalan tol.
 
@@ -129,7 +129,7 @@ La_Voiture/
 ### Task 3: Rekayasa Sambungan Pitstop & Standar Keselamatan FIA
 
 **Files:**
-- Modify: `scripts/world/neo_wangan_circuit_builder.gd`
+- Modify: `scripts/world/circuits/neo_wangan/neo_wangan_circuit_builder.gd`
 - Create: `scenes/race_world/neo_wangan_paddock/pit_complex.tscn`
 - Modify: `scenes/race_world/neo_wangan_circuit.tscn`
 - Test: `tests/test_neo_wangan_circuit.gd` (ekspansi test suite)
@@ -166,7 +166,7 @@ La_Voiture/
 
 **Files:**
 - Create: `scripts/world/street_furniture_builder.gd`
-- Modify: `scripts/world/circuit_lighting_controller.gd`
+- Modify: `scripts/world/shared/circuit_lighting_controller.gd`
 - Modify: `scenes/race_world/neo_wangan_circuit.tscn`
 - Test: `tests/test_neo_wangan_circuit.gd`
 

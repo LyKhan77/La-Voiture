@@ -77,7 +77,7 @@ flowchart TD
 
 ### Modul 2: Digital Trackside Flag Panels (FIA Grade 1 Digital Boards)
 * **Penempatan Furnitur 3D:**
-  Di [`scripts/world/trackside_furniture_builder.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/trackside_furniture_builder.gd), pasang 8 unit panel digital di tiang pagar lintasan atau tiang lampu sirkuit pada titik-titik krusial (Turn 1, Hairpin, Dunlop curve, Chicane, Gantry Finish).
+  Di [`scripts/world/shared/trackside_furniture_builder.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/shared/trackside_furniture_builder.gd), pasang 8 unit panel digital di tiang pagar lintasan atau tiang lampu sirkuit pada titik-titik krusial (Turn 1, Hairpin, Dunlop curve, Chicane, Gantry Finish).
 * **Dimensi & Shader:**
   * Ukuran layar LED: $1.8\text{ m} \times 1.2\text{ m}$, bingkai matte hitam dengan kisi-kisi pelindung.
   * Shader emisi beresolusi rendah dengan tekstur matriks dot-matrix LED:

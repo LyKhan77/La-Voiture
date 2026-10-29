@@ -5,7 +5,7 @@ extends SceneTree
 ## Run: Godot --headless --path . -s res://tests/test_radio_and_podium.gd
 
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
-const DirectorScript := preload("res://scripts/world/race_weekend_director.gd")
+const DirectorScript := preload("res://scripts/world/weekend/race_weekend_director.gd")
 const CutInScene := preload("res://scenes/pit_wall/anime_radio_cutin.tscn")
 const Types := preload("res://scripts/gt/gt_types.gd")
 const FRAME: float = 1.0 / 60.0

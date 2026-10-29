@@ -11,22 +11,22 @@ extends Node3D
 ##
 ## This is the city set of Neo-Wangan only; the Apex Ring keeps TrackEnvironmentBuilder.
 
-const RibbonGeometry := preload("res://scripts/world/ribbon_geometry.gd")
-const MeshBatchScript := preload("res://scripts/world/mesh_batch.gd")
-const ToonMaterials := preload("res://scripts/world/toon_materials.gd")
+const RibbonGeometry := preload("res://scripts/world/shared/ribbon_geometry.gd")
+const MeshBatchScript := preload("res://scripts/world/shared/mesh_batch.gd")
+const ToonMaterials := preload("res://scripts/world/shared/toon_materials.gd")
 const RibbonScript := preload("res://scripts/car/track_ribbon.gd")
-const CircuitScript := preload("res://scripts/world/neo_wangan_circuit_builder.gd")
+const CircuitScript := preload("res://scripts/world/circuits/neo_wangan/neo_wangan_circuit_builder.gd")
 const SkylineShader := preload("res://shaders/neo_wangan_skyline.gdshader")
 const PoolShader := preload("res://shaders/neo_wangan_light_pool.gdshader")
 const SkylineOutlineShader := preload("res://shaders/neo_wangan_skyline_outline.gdshader")
 const WaterShader := preload("res://shaders/neo_wangan_water.gdshader")
 const BillboardShader := preload("res://shaders/neo_wangan_billboard.gdshader")
 const WindBannerShader := preload("res://shaders/neo_wangan_wind_banner.gdshader")
-const SharedSkyScript := preload("res://scripts/world/shared_cel_sky_controller.gd")
+const SharedSkyScript := preload("res://scripts/world/shared/shared_cel_sky_controller.gd")
 const WeatherScript := preload("res://scripts/gt/gt_weather.gd")
 const Liveries := preload("res://scripts/car/team_liveries.gd")
-const TracksideKit := preload("res://scripts/world/trackside_furniture_builder.gd")
-const PitKit := preload("res://scripts/world/neo_wangan_pit_complex.gd")
+const TracksideKit := preload("res://scripts/world/shared/trackside_furniture_builder.gd")
+const PitKit := preload("res://scripts/world/circuits/neo_wangan/neo_wangan_pit_complex.gd")
 const MODEL_DIR := "res://assets/tracks/neo_wangan/models/"
 
 const BARRIER_LATERAL_M: float = 6.35

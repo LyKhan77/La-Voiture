@@ -26,7 +26,7 @@ const TrackCircuitScene := preload("res://scenes/race_world/track_circuit.tscn")
 const GtTrackScript := preload("res://scripts/gt/gt_track.gd")
 const GtRaceScript := preload("res://scripts/gt/gt_race.gd")
 const GtTypes := preload("res://scripts/gt/gt_types.gd")
-const PitLaneScript := preload("res://scripts/world/pit_lane_complex.gd")
+const PitLaneScript := preload("res://scripts/world/circuits/apex_ring/apex_pit_complex.gd")
 
 var _checks: int = 0
 var _failures: int = 0
@@ -105,7 +105,7 @@ Expected: FAIL on `lateral > 5.0` because `gt_race.gd` currently sets `lateral =
 In `scripts/gt/gt_race.gd`:
 Add trajectory helpers and update `set_flag` and `_update_race_control`:
 ```gdscript
-const PitLaneScript := preload("res://scripts/world/pit_lane_complex.gd")
+const PitLaneScript := preload("res://scripts/world/circuits/apex_ring/apex_pit_complex.gd")
 
 ## Pit Exit trajectory: blends from FAST_LANE_M (11.6m) to EDGE_LATERAL_M (5.2m) at EXIT_S, then to 0.0m on track.
 static func sc_pit_exit_lateral(s_lap: float) -> float:
@@ -199,15 +199,15 @@ git commit -m "feat(sc): implement pit exit merge and entry peel-off trajectorie
 ### Task 2: Broadcast Camera Director Safety Car Mode & Cut-In
 
 **Files:**
-- Modify: `scripts/world/broadcast_camera_director.gd`
-- Modify: `scripts/world/race_weekend_world.gd`
+- Modify: `scripts/world/weekend/broadcast_camera_director.gd`
+- Modify: `scripts/world/weekend/race_weekend_world.gd`
 - Modify: `tests/test_safety_car_cinematic.gd`
 
 - [ ] **Step 1: Write test assertions for BroadcastCameraDirector Safety Car Mode**
 
 In `tests/test_safety_car_cinematic.gd`, add `_test_broadcast_camera_safety_car()`:
 ```gdscript
-const CameraDirectorScript := preload("res://scripts/world/broadcast_camera_director.gd")
+const CameraDirectorScript := preload("res://scripts/world/weekend/broadcast_camera_director.gd")
 
 func _test_broadcast_camera_safety_car(circuit: Node3D, track: GtTrack) -> void:
 	var director := CameraDirectorScript.new()
@@ -246,7 +246,7 @@ Expected: FAIL ("Non-existent function 'trigger_safety_car_cut' in BroadcastCame
 
 - [ ] **Step 3: Implement Mode.SAFETY_CAR and trigger_safety_car_cut in BroadcastCameraDirector**
 
-In `scripts/world/broadcast_camera_director.gd`:
+In `scripts/world/weekend/broadcast_camera_director.gd`:
 1. Add `Mode.SAFETY_CAR` to `enum Mode { CHASE, COCKPIT, HELI, TRACKSIDE_TV, PITSTOP, SAFETY_CAR }`.
 2. Add `"SAFETY CAR CAM"` to `MODE_NAMES`.
 3. Add:
@@ -281,7 +281,7 @@ func _update_safety_car(dt: float) -> void:
 	camera.global_position = camera.global_position.lerp(wanted, 1.0 if _snap else 1.0 - exp(-8.0 * dt))
 	camera.look_at(pose.origin + Vector3.UP * 0.75, Vector3.UP)
 ```
-5. In `scripts/world/race_weekend_world.gd`, listen to `race.flag_changed`:
+5. In `scripts/world/weekend/race_weekend_world.gd`, listen to `race.flag_changed`:
 When `flag == GtTypes.Flag.SC`, call:
 ```gdscript
 if vfx != null and vfx.safety_car_actor != null:
@@ -296,7 +296,7 @@ Expected: PASS with all camera assertions passing.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add scripts/world/broadcast_camera_director.gd scripts/world/race_weekend_world.gd tests/test_safety_car_cinematic.gd
+git add scripts/world/weekend/broadcast_camera_director.gd scripts/world/weekend/race_weekend_world.gd tests/test_safety_car_cinematic.gd
 git commit -m "feat(sc): add broadcast camera safety car cut-in and tracking mode"
 ```
 

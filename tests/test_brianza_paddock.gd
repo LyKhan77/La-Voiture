@@ -1,6 +1,6 @@
 extends SceneTree
 
-const Geo := preload("res://scripts/world/enhanced_track_geometry.gd")
+const Geo := preload("res://scripts/world/shared/enhanced_track_geometry.gd")
 const Liveries := preload("res://scripts/car/team_liveries.gd")
 var failures: int = 0
 

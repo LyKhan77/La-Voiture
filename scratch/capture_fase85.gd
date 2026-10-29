@@ -5,7 +5,7 @@ extends SceneTree
 ##   godot --path . --resolution 1920x1080 --script res://scratch/capture_fase85.gd -- [out_dir]
 
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
-const DirectorScript := preload("res://scripts/world/race_weekend_director.gd")
+const DirectorScript := preload("res://scripts/world/weekend/race_weekend_director.gd")
 const WeatherScript := preload("res://scripts/gt/gt_weather.gd")
 const FRAME: float = 1.0 / 60.0
 

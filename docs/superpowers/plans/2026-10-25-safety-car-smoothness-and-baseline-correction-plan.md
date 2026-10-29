@@ -26,7 +26,7 @@
 
 ## Task 1 — Tick interpolation and camera
 
-Files: `scripts/gt/gt_race.gd`, `scripts/vfx/race_vfx.gd`, `scripts/world/race_weekend_world.gd`, `tests/test_safety_car_cinematic.gd`.
+Files: `scripts/gt/gt_race.gd`, `scripts/vfx/race_vfx.gd`, `scripts/world/weekend/race_weekend_world.gd`, `tests/test_safety_car_cinematic.gd`.
 
 Interfaces: SC dictionary `prev_s`, `prev_lateral`; `RaceVfx.update(delta:float, alpha:float=1.0)` preserves direct test/capture compatibility.
 

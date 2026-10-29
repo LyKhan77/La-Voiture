@@ -132,7 +132,7 @@ Sebagai jembatan penutup siklus permainan balap (*Game Presentation Loop*) dan f
 ---
 
 ### Task 5: Integrasi Game Loop, Automated Test Suite & Verifikasi
-1. Buka [`scripts/world/race_weekend_world.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/race_weekend_world.gd):
+1. Buka [`scripts/world/weekend/race_weekend_world.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/weekend/race_weekend_world.gd):
    - Pada saat balapan finis dan selebrasi bendera finis selesai, ganti pemunculan podium lama dengan transisi menuju `scenes/ui/winning_scene.tscn`.
    - Operkan paket data hasil balapan (`order`, `winner_car`, `team_points`, `fastest_lap`).
 2. Buat test suite baru `tests/test_winning_scene_and_standee.gd`:

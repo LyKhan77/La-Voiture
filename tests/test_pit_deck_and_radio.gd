@@ -6,9 +6,9 @@ extends SceneTree
 ## Run: Godot --headless --path . -s res://tests/test_pit_deck_and_radio.gd
 
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
-const DirectorScript := preload("res://scripts/world/race_weekend_director.gd")
+const DirectorScript := preload("res://scripts/world/weekend/race_weekend_director.gd")
 const ActorScript := preload("res://scripts/car/gt_car_actor.gd")
-const PitLaneScript := preload("res://scripts/world/pit_lane_complex.gd")
+const PitLaneScript := preload("res://scripts/world/circuits/apex_ring/apex_pit_complex.gd")
 const T := preload("res://scripts/ui/ui_theme_tokens.gd")
 const FRAME: float = 1.0 / 60.0
 

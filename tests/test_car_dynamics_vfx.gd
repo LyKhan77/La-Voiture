@@ -6,7 +6,7 @@ extends SceneTree
 ## Run: Godot --headless --path . -s res://tests/test_car_dynamics_vfx.gd
 
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
-const DirectorScript := preload("res://scripts/world/race_weekend_director.gd")
+const DirectorScript := preload("res://scripts/world/weekend/race_weekend_director.gd")
 const ActorScript := preload("res://scripts/car/gt_car_actor.gd")
 const CarScript := preload("res://scripts/gt/gt_car.gd")
 const Types := preload("res://scripts/gt/gt_types.gd")

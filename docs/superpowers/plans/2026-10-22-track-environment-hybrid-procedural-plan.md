@@ -31,7 +31,7 @@ flowchart TD
    - Tambahkan input uniform untuk *Rubber Groove Intensity* yang menggelapkan area lintasan balap ideal (`AdaptiveRacingLine`).
    - Tambahkan input uniform untuk *Wetness/Puddle Mask* yang mengubah roughness dan memantulkan langit/lampu secara reflektif saat cuaca basah.
    - Tambahkan garis tepi putih tipis di tepi terluar asfal ($X = \pm \text{road\_half\_width}$).
-2. **Geometri Kerb 3D Sawtooth (`scripts/world/enhanced_track_geometry.gd`):**
+2. **Geometri Kerb 3D Sawtooth (`scripts/world/shared/enhanced_track_geometry.gd`):**
    - Buat fungsi generasi mesh kerb dengan elevasi nyata:
      - Lebar $1.2\text{ m}$, tinggi puncak $0.05\text{ m}$ di $0.4\text{ m}$ dari tepi trek, lalu melandai turun ke $0.0\text{ m}$ di sisi gravel.
      - Segmen warna merah (`#D9232E`) dan putih (`#F0F2F5`) berulang setiap $1.5\text{ m}$ dengan chamfer miring $0.5\text{ m}$.
@@ -46,7 +46,7 @@ flowchart TD
 ### Tahap 2: Trackside Safety & Furniture MultiMesh
 *Tujuan: Membangun guardrail baja detail, pembatas Tecpro, papan jarak pengereman, dan menara lampu stadion dengan biaya draw-call minimal.*
 
-1. **FIA Triple-Rib Armco & Posts (`scripts/world/trackside_furniture_builder.gd`):**
+1. **FIA Triple-Rib Armco & Posts (`scripts/world/shared/trackside_furniture_builder.gd`):**
    - Buat profil mesh baja berlekuk W-beam (tinggi $0.65\text{ m}$, tebal $0.08\text{ m}$) dengan bahan shader logam anime reflektif.
    - Buat tiang I-beam yang di-instansiasi via `MultiMeshInstance3D` setiap $4.0\text{ m}$ di sepanjang kedua sisi trek.
    - Buat celah terbuka otomatis di zona Pit Entry dan Pit Exit agar mobil pemain dan AI dapat masuk/keluar pit tanpa benturan.
@@ -77,7 +77,7 @@ flowchart TD
    - Tambahkan papan LED raksasa (*Giant Jumbotron*) yang menampilkan animasi grafis race live leaderboard.
 3. **Race Control Tower (`scenes/race_world/paddock/race_control_tower.tscn`):**
    - Bangun menara kontrol futuristik berlantai 4 di ujung pit exit dengan jendela observasi sudut 360°.
-4. **Start/Finish Gantry Upgrade (`scripts/world/start_gantry.gd`):**
+4. **Start/Finish Gantry Upgrade (`scripts/world/shared/start_gantry.gd`):**
    - Perbarui mesh gantry start dengan struktur truss ganda yang menaungi seluruh lebar trek dan jalur pit wall.
    - Sinkronisasikan dengan sistem 5 lampu merah FIA (`RaceWeekendWorld.lights_state`).
 5. **Verifikasi Tahap 3:**
@@ -91,11 +91,11 @@ flowchart TD
 1. **Stylized Low-Poly Mountain Backdrop (`scenes/race_world/mountain_vista.tscn`):**
    - Bangun cincin pegunungan bergerigi bergaya cel-shaded di radius $1500\text{ m}$ dari pusat sirkuit.
    - Gradasi warna kabut atmosferik anime (*atmospheric depth haze*) yang menyatu dengan skybox.
-2. **Anime Foliage Clusters (`scripts/world/foliage_scatter.gd`):**
+2. **Anime Foliage Clusters (`scripts/world/shared/foliage_scatter.gd`):**
    - Buat 3 jenis pohon kartun: Cedar runcing, Oak bulat bertingkat, dan Pine lereng.
    - Distribusikan menggunakan Poisson-disc sampling di luar batas pagar keamanan ($> 18\text{ m}$ dari aspal).
    - Gunakan shader ayunan angin lembut (*wind sway*) untuk menghidupkan dedaunan.
-3. **Preset Pencahayaan Lingkungan (`scripts/world/circuit_lighting_controller.gd`):**
+3. **Preset Pencahayaan Lingkungan (`scripts/world/shared/circuit_lighting_controller.gd`):**
    - Hubungkan dengan waktu balapan `RaceConfigData.time_of_day`:
      - `Day`: Matahari terik dengan bayangan tajam dan langit biru cerah anime.
      - `Sunset`: Cahaya matahari terbenam keemasan (*golden hour*), bayangan panjang, langit gradasi oranye-ungu.
@@ -127,12 +127,12 @@ flowchart TD
 | :--- | :--- | :--- |
 | **Baru** | `shaders/road_asphalt.gdshader` | Cel-shaded asphalt dengan racing rubber groove & wetness |
 | **Baru** | `shaders/wind_foliage.gdshader` | Vertex sway shader untuk pohon anime |
-| **Baru** | `scripts/world/enhanced_track_geometry.gd` | Generator kerb 3D sawtooth, runoff, dan gravel traps |
-| **Baru** | `scripts/world/trackside_furniture_builder.gd` | MultiMesh builder untuk Armco, Tecpro, marker 150/100/50m, dan floodlights |
+| **Baru** | `scripts/world/shared/enhanced_track_geometry.gd` | Generator kerb 3D sawtooth, runoff, dan gravel traps |
+| **Baru** | `scripts/world/shared/trackside_furniture_builder.gd` | MultiMesh builder untuk Armco, Tecpro, marker 150/100/50m, dan floodlights |
 | **Baru** | `scenes/race_world/paddock/pit_building_structure.tscn` | Gedung pit 2 lantai & VIP Paddock Club |
 | **Baru** | `scenes/race_world/paddock/main_grandstand.tscn` | Tribun penonton kantilever dengan Jumbotron LED |
 | **Baru** | `scenes/race_world/paddock/race_control_tower.tscn` | Menara kontrol balap di ujung pit exit |
 | **Baru** | `scenes/race_world/mountain_vista.tscn` | Backdrop pegunungan anime di horizon |
 | **Baru** | `tests/test_track_environment.gd` | Headless unit test suite untuk validasi lingkungan trek |
-| **Modifikasi** | `scripts/world/track_environment_builder.gd` | Mengorkestrasi builder baru dan mengintegrasikan hero assets |
-| **Modifikasi** | `scripts/world/start_gantry.gd` | Peningkatan visual gantry baja ganda & lampu digital FIA |
+| **Modifikasi** | `scripts/world/circuits/apex_ring/apex_environment.gd` | Mengorkestrasi builder baru dan mengintegrasikan hero assets |
+| **Modifikasi** | `scripts/world/shared/start_gantry.gd` | Peningkatan visual gantry baja ganda & lampu digital FIA |

@@ -118,7 +118,7 @@ flowchart TD
 
 ### Modul 4: Integrasi Game Loop & Siklus Hidup Scene
 * **Transisi dari Balapan:**
-  * Di [`scripts/world/race_weekend_world.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/race_weekend_world.gd), ketika balapan selesai dan mobil melintasi bendera finis:
+  * Di [`scripts/world/weekend/race_weekend_world.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/weekend/race_weekend_world.gd), ketika balapan selesai dan mobil melintasi bendera finis:
     * Transisi manga negatif snap 1-frame ([`scenes/ui/manga_race_transition.tscn`](file:///D:/Occupation/Porto/genex/La_Voiture/scenes/ui/manga_race_transition.tscn)) memicu pergantian scene ke `winning_scene.tscn`.
     * Seluruh data balap (urutan finis `order`, mobil pemenang `winner_car`, waktu lap, poin tim) dioperasikan secara utuh.
 * **Pengelolaan Memori (0 Orphan Nodes):**

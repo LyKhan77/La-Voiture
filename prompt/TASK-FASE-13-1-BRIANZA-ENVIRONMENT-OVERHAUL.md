@@ -81,7 +81,7 @@ Silakan ikuti kode lengkap dan langkah TDD di [`docs/superpowers/plans/2026-10-2
 
 - [ ] **Task 1: Ground Massing & Park Perimeter Wall (Layer 1)**
   - Tulis asersi Layer 1 di `tests/test_brianza_circuit.gd`.
-  - Implementasikan `ParcoRealeGroundMesh`, jalur kerikil, dan `MuraDelParco` di `scripts/world/brianza_environment.gd`.
+  - Implementasikan `ParcoRealeGroundMesh`, jalur kerikil, dan `MuraDelParco` di `scripts/world/circuits/brianza/brianza_environment.gd`.
   - Jalankan `test_brianza_circuit.gd` $\rightarrow$ PASS, commit.
 - [ ] **Task 2: Monumental Curved Sopraelevata High-Banked Oval Deck (Layer 2)**
   - Tulis asersi busur deck lengkung $480\text{ m}$, $28^\circ$ banking, dan 4 portal pilar di `tests/test_brianza_circuit.gd`.

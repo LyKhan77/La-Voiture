@@ -7,7 +7,7 @@ extends Node3D
 ## The overlay speaks the street-manga language of the menus and takes the selected team's
 ## livery colour as its accent (see manga/garage_style.gd).
 const ConfigScript := preload("res://scripts/core/race_config_data.gd")
-const EnvironmentScript := preload("res://scripts/world/garage_environment_builder.gd")
+const EnvironmentScript := preload("res://scripts/world/garage/garage_environment_builder.gd")
 const OrbitScript := preload("res://scripts/ui/garage_car_orbit.gd")
 const Roster := preload("res://scripts/ui/garage_roster.gd")
 const Gt := preload("res://scripts/gt/gt_data.gd")

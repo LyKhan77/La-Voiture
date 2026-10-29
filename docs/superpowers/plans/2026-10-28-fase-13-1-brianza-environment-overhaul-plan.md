@@ -51,7 +51,7 @@ La_Voiture/
 
 **Files:**
 - Modify: `tests/test_brianza_circuit.gd`
-- Modify: `scripts/world/brianza_environment.gd`
+- Modify: `scripts/world/circuits/brianza/brianza_environment.gd`
 
 - [ ] **Step 1: Tulis asersi Layer 1 pada `tests/test_brianza_circuit.gd`**
   Tambahkan asersi bahwa `BrianzaEnvironment` memuat:
@@ -83,7 +83,7 @@ La_Voiture/
 
 **Files:**
 - Modify: `tests/test_brianza_circuit.gd`
-- Modify: `scripts/world/brianza_environment.gd`
+- Modify: `scripts/world/circuits/brianza/brianza_environment.gd`
 
 - [ ] **Step 1: Tulis asersi Layer 2 pada `tests/test_brianza_circuit.gd`**
   Tambahkan asersi bahwa `HeroLandmark_Sopraelevata` memiliki:
@@ -115,7 +115,7 @@ La_Voiture/
 
 **Files:**
 - Modify: `tests/test_brianza_circuit.gd`
-- Modify: `scripts/world/brianza_environment.gd`
+- Modify: `scripts/world/circuits/brianza/brianza_environment.gd`
 
 - [ ] **Step 1: Tulis asersi Layer 3 pada `tests/test_brianza_circuit.gd`**
   Tambahkan asersi bahwa:
@@ -146,7 +146,7 @@ La_Voiture/
 
 **Files:**
 - Modify: `tests/test_brianza_circuit.gd`
-- Modify: `scripts/world/brianza_environment.gd`
+- Modify: `scripts/world/circuits/brianza/brianza_environment.gd`
 
 - [ ] **Step 1: Tulis asersi Layer 4 pada `tests/test_brianza_circuit.gd`**
   Tambahkan asersi bahwa:
@@ -177,7 +177,7 @@ La_Voiture/
 
 **Files:**
 - Modify: `tests/test_brianza_circuit.gd`
-- Modify: `scripts/world/brianza_environment.gd`
+- Modify: `scripts/world/circuits/brianza/brianza_environment.gd`
 
 - [ ] **Step 1: Tulis asersi Layer 5 pada `tests/test_brianza_circuit.gd`**
   Tambahkan asersi bahwa:
@@ -209,7 +209,7 @@ La_Voiture/
 
 **Files:**
 - Modify: `tests/test_brianza_circuit.gd`
-- Modify: `scripts/world/brianza_environment.gd`
+- Modify: `scripts/world/circuits/brianza/brianza_environment.gd`
 
 - [ ] **Step 1: Tulis asersi Layer 6 pada `tests/test_brianza_circuit.gd`**
   Tambahkan asersi bahwa:

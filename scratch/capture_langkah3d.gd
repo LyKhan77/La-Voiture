@@ -5,7 +5,7 @@ extends SceneTree
 ##   Godot --path . --resolution 1920x1080 --script res://scratch/capture_langkah3d.gd -- [out_dir]
 
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
-const DirectorScript := preload("res://scripts/world/race_weekend_director.gd")
+const DirectorScript := preload("res://scripts/world/weekend/race_weekend_director.gd")
 
 const FRAME: float = 1.0 / 60.0
 const CROP := Rect2i(980, 0, 640, 350)

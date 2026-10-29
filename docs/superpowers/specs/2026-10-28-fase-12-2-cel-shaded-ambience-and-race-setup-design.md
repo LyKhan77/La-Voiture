@@ -2,7 +2,7 @@
 
 **Tanggal:** 28 Oktober 2026  
 **Status:** Disetujui Pengguna (Opsi A — Adaptive Skill Matrix + Dynamic Weather Radar + Cel-Shaded Living Ambience)  
-**Target:** [`scripts/world/neo_wangan_environment.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/neo_wangan_environment.gd), [`scripts/ui/race_setup_menu.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/ui/race_setup_menu.gd), [`scripts/core/race_config_data.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/core/race_config_data.gd)
+**Target:** [`scripts/world/circuits/neo_wangan/neo_wangan_environment.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/circuits/neo_wangan/neo_wangan_environment.gd), [`scripts/ui/race_setup_menu.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/ui/race_setup_menu.gd), [`scripts/core/race_config_data.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/core/race_config_data.gd)
 
 ---
 

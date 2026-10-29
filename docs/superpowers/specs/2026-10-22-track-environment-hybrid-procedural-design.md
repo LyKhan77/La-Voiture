@@ -3,7 +3,7 @@
 **Tanggal:** 2026-10-22  
 **Status:** VALIDATED & READY FOR IMPLEMENTATION  
 **Fitur:** Track Environment Visual Upgrade, Procedural Trackside Systems, Hero Architectural Assets, and Cel-Shaded Motorsport Dressing  
-**Referensi:** [`PRD/01-GAME-OVERVIEW.md`](file:///D:/Occupation/Porto/genex/La_Voiture/PRD/01-GAME-OVERVIEW.md), [`DESIGN.md`](file:///D:/Occupation/Porto/genex/La_Voiture/DESIGN.md), [`scripts/world/track_environment_builder.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/track_environment_builder.gd), [`scripts/world/ribbon_geometry.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/ribbon_geometry.gd), [`scripts/world/pit_lane_complex.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/pit_lane_complex.gd), [`executor-report/FASE-9-MAIN-MENU-AND-GARAGE-FLOW-REPORT.md`](file:///D:/Occupation/Porto/genex/La_Voiture/executor-report/FASE-9-MAIN-MENU-AND-GARAGE-FLOW-REPORT.md)
+**Referensi:** [`PRD/01-GAME-OVERVIEW.md`](file:///D:/Occupation/Porto/genex/La_Voiture/PRD/01-GAME-OVERVIEW.md), [`DESIGN.md`](file:///D:/Occupation/Porto/genex/La_Voiture/DESIGN.md), [`scripts/world/circuits/apex_ring/apex_environment.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/circuits/apex_ring/apex_environment.gd), [`scripts/world/shared/ribbon_geometry.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/shared/ribbon_geometry.gd), [`scripts/world/circuits/apex_ring/apex_pit_complex.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/circuits/apex_ring/apex_pit_complex.gd), [`executor-report/FASE-9-MAIN-MENU-AND-GARAGE-FLOW-REPORT.md`](file:///D:/Occupation/Porto/genex/La_Voiture/executor-report/FASE-9-MAIN-MENU-AND-GARAGE-FLOW-REPORT.md)
 
 ---
 
@@ -65,7 +65,7 @@ flowchart TD
 
 ## 3. Spesifikasi Komponen Lingkungan
 
-### 3.1 Geometri Jalan & Kerb 3D (`scripts/world/enhanced_track_geometry.gd`)
+### 3.1 Geometri Jalan & Kerb 3D (`scripts/world/shared/enhanced_track_geometry.gd`)
 * **Asphalt Surface Shader (`shaders/road_asphalt.gdshader`):**
   - Tekstur asfal makro berbutir halus (PBR micro-roughness).
   - Lapisan *Racing Groove* dinamis: jejak karet ban gelap di garis balap ideal (`AdaptiveRacingLine`).
@@ -76,7 +76,7 @@ flowchart TD
 * **Runoff Zones & Gravel Traps:**
   - Di luar tikungan tajam (radius tikungan $< 150\text{ m}$), permukaan rumput digantikan oleh zona gravel dengan warna pasir kasar (`#A69477`) dan area asfal penahan selip (*tarmac runoff*) berwarna abu-abu terang dengan strip peringatan biru/putih.
 
-### 3.2 Trackside Safety & Furniture (`scripts/world/trackside_furniture_builder.gd`)
+### 3.2 Trackside Safety & Furniture (`scripts/world/shared/trackside_furniture_builder.gd`)
 * **FIA Triple-Rib Armco Guardrail & Posts:**
   - Bentuk rel baja berlekuk W-beam 3 baris yang akurat, dengan tiang I-beam setiap $4.0\text{ m}$.
   - Pembukaan otomatis pada area Pit Entry ($s \approx 3920\text{ m}$) dan Pit Exit ($s \approx 280\text{ m}$).
@@ -103,7 +103,7 @@ flowchart TD
 * **FIA Start/Finish Gantry Upgrade (`start_gantry.tscn`):**
   - Jembatan gantry baja ganda di atas garis start dengan 5 pasang lampu merah FIA digital, layar pencatat waktu lap, dan logo seri balap *La Voiture GT*.
 
-### 3.4 Vegetasi & Latar Belakang Lingkungan (`scripts/world/foliage_scatter.gd`)
+### 3.4 Vegetasi & Latar Belakang Lingkungan (`scripts/world/shared/foliage_scatter.gd`)
 * **Stylized Manga Trees & Foliage:**
   - 3 varian pohon anime: Japanese Cedar (runcing), Broadleaf Oak (bulat berlapis), dan Flowering Cherry/Alpine Pine.
   - Menggunakan vertex color shading dengan *soft wind sway shader* (`shaders/wind_foliage.gdshader`).

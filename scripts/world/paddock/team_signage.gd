@@ -5,7 +5,7 @@ extends RefCounted
 ## one MeshBatch surface, so a whole circuit's signs cost a single draw call instead of one Label3D each.
 
 const Gt := preload("res://scripts/gt/gt_data.gd")
-const MeshBatchScript := preload("res://scripts/world/mesh_batch.gd")
+const MeshBatchScript := preload("res://scripts/world/shared/mesh_batch.gd")
 
 const FONT_SIZE: int = 96
 const PIXEL_SIZE: float = 0.0052

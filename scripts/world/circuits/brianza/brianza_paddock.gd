@@ -1,9 +1,9 @@
 class_name BrianzaPaddock
 extends Node3D
 
-const Batch := preload("res://scripts/world/mesh_batch.gd")
-const Toon := preload("res://scripts/world/toon_materials.gd")
-const Geo := preload("res://scripts/world/enhanced_track_geometry.gd")
+const Batch := preload("res://scripts/world/shared/mesh_batch.gd")
+const Toon := preload("res://scripts/world/shared/toon_materials.gd")
+const Geo := preload("res://scripts/world/shared/enhanced_track_geometry.gd")
 const Liveries := preload("res://scripts/car/team_liveries.gd")
 const TransportersKit := preload("res://scripts/world/paddock/team_transporters.gd")
 

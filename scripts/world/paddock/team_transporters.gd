@@ -5,8 +5,8 @@ extends Node3D
 ## row goes (`lateral_m` from the circuit centre line), so the layout still follows its own spline. All trucks are one
 ## MultiMesh, the lettering one more mesh, and an optional strip of asphalt keeps them off bare grass.
 
-const Batch := preload("res://scripts/world/mesh_batch.gd")
-const Toon := preload("res://scripts/world/toon_materials.gd")
+const Batch := preload("res://scripts/world/shared/mesh_batch.gd")
+const Toon := preload("res://scripts/world/shared/toon_materials.gd")
 const Liveries := preload("res://scripts/car/team_liveries.gd")
 const TeamSignage := preload("res://scripts/world/paddock/team_signage.gd")
 

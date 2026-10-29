@@ -1,9 +1,9 @@
 [gd_scene load_steps=7 format=3]
 
-[ext_resource type="Script" path="res://scripts/world/brianza_circuit_builder.gd" id="1_builder"]
+[ext_resource type="Script" path="res://scripts/world/circuits/brianza/brianza_circuit_builder.gd" id="1_builder"]
 [ext_resource type="Script" path="res://scripts/car/track_ribbon.gd" id="2_ribbon"]
-[ext_resource type="Script" path="res://scripts/world/brianza_pit_complex.gd" id="3_pit"]
-[ext_resource type="Script" path="res://scripts/world/brianza_environment.gd" id="4_env"]
+[ext_resource type="Script" path="res://scripts/world/circuits/brianza/brianza_pit_complex.gd" id="3_pit"]
+[ext_resource type="Script" path="res://scripts/world/circuits/brianza/brianza_environment.gd" id="4_env"]
 
 [sub_resource type="Curve3D" id="Curve3D_centerline"]
 

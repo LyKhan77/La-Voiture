@@ -7,8 +7,8 @@ extends RefCounted
 ## an animated crew member is one node. Used for the crew standing by in the garages (static) and for the
 ## crew that steps out and works on the car (PitstopChoreographer).
 
-const MeshBatchScript := preload("res://scripts/world/mesh_batch.gd")
-const ToonMaterials := preload("res://scripts/world/toon_materials.gd")
+const MeshBatchScript := preload("res://scripts/world/shared/mesh_batch.gd")
+const ToonMaterials := preload("res://scripts/world/shared/toon_materials.gd")
 const Liveries := preload("res://scripts/car/team_liveries.gd")
 
 enum Role { GUNNER, HANDLER, JACK, FUELER, FIRE, LOLLIPOP, ENGINEER }

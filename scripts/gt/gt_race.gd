@@ -17,7 +17,7 @@ signal suggestion_changed(suggestion: Dictionary)
 signal steward_event(event: Dictionary)
 
 const GRID_ROW_M: float = 8.0
-const PitLaneScript := preload("res://scripts/world/pit_lane_complex.gd")
+const PitLaneScript := preload("res://scripts/world/circuits/apex_ring/apex_pit_complex.gd")
 const SC_QUEUE_GAP_M: float = 46.0
 const SC_PICKUP_GAP_M: float = 50.0
 const GRID_COLUMN_M: float = 2.5

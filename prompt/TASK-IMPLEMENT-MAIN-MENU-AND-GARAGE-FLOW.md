@@ -61,8 +61,8 @@ Silakan ikuti dan eksekusi tahapan pada rencana implementasi:
 
 1. **Tahap 1:** Buat `scripts/core/race_config_data.gd` dan `scenes/ui/settings_modal.tscn` (beserta skripnya).
 2. **Tahap 2:** Bangun `scenes/ui/main_menu.tscn` dan `scenes/ui/race_setup_menu.tscn`.
-3. **Tahap 3:** Bangun `scripts/world/garage_environment_builder.gd`, `scripts/ui/garage_car_orbit.gd`, dan scene `scenes/ui/garage_team_select.tscn`.
-4. **Tahap 4:** Bangun `scenes/ui/manga_race_transition.tscn`, hubungkan ke `scenes/main.tscn`, `scripts/world/race_weekend_world.gd`, dan `scenes/ui/podium_screen.tscn`.
+3. **Tahap 3:** Bangun `scripts/world/garage/garage_environment_builder.gd`, `scripts/ui/garage_car_orbit.gd`, dan scene `scenes/ui/garage_team_select.tscn`.
+4. **Tahap 4:** Bangun `scenes/ui/manga_race_transition.tscn`, hubungkan ke `scenes/main.tscn`, `scripts/world/weekend/race_weekend_world.gd`, dan `scenes/ui/podium_screen.tscn`.
 5. **Tahap 5:** Buat unit test `tests/test_main_menu_flow.gd` dan jalankan verifikasi headless penuh.
 
 ---

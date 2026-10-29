@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://scripts/world/pit_lane_complex.gd" id="1_pit"]
+[ext_resource type="Script" path="res://scripts/world/circuits/apex_ring/apex_pit_complex.gd" id="1_pit"]
 
 [node name="PitLaneComplex" type="Node3D"]
 script = ExtResource("1_pit")

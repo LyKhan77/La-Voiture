@@ -7,8 +7,8 @@ extends Node3D
 ## CENTRE_S: +X is right of travel (the pit side, away from the track), -Z is forward.
 ## The structure is one merged cel surface; the glass is a second, so lights can warm it at night.
 
-const ToonMaterials := preload("res://scripts/world/toon_materials.gd")
-const MeshBatchScript := preload("res://scripts/world/mesh_batch.gd")
+const ToonMaterials := preload("res://scripts/world/shared/toon_materials.gd")
+const MeshBatchScript := preload("res://scripts/world/shared/mesh_batch.gd")
 
 ## Arc distance of the tower's centre, just beyond the Pit Exit line (s = 150 m).
 const CENTRE_S: float = 195.0

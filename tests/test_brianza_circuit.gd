@@ -7,10 +7,10 @@ extends SceneTree
 
 const ScenePath := "res://scenes/race_world/brianza_circuit.tscn"
 const RegistryScript := preload("res://scripts/core/circuit_calendar_registry.gd")
-const BuilderScript := preload("res://scripts/world/brianza_circuit_builder.gd")
-const PitScript := preload("res://scripts/world/brianza_pit_complex.gd")
-const EnvScript := preload("res://scripts/world/brianza_environment.gd")
-const ToonMaterials := preload("res://scripts/world/toon_materials.gd")
+const BuilderScript := preload("res://scripts/world/circuits/brianza/brianza_circuit_builder.gd")
+const PitScript := preload("res://scripts/world/circuits/brianza/brianza_pit_complex.gd")
+const EnvScript := preload("res://scripts/world/circuits/brianza/brianza_environment.gd")
+const ToonMaterials := preload("res://scripts/world/shared/toon_materials.gd")
 
 var failures: int = 0
 var assertions: int = 0

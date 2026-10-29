@@ -9,20 +9,20 @@
 
 ## 2. Ringkasan Tugas Eksekusi
 
-### A. Ekstrak Komponen Langit Reusable (`scripts/world/shared_cel_sky_controller.gd`) & Update Shaders
-1. Buat `SharedCelSkyController` (`scripts/world/shared_cel_sky_controller.gd`) yang membangun dan mengendalikan `SkyAmbienceRoot` (`AnimeMoon`, `NightStars`, `AnimeNightClouds`) untuk semua sirkuit:
+### A. Ekstrak Komponen Langit Reusable (`scripts/world/shared/shared_cel_sky_controller.gd`) & Update Shaders
+1. Buat `SharedCelSkyController` (`scripts/world/shared/shared_cel_sky_controller.gd`) yang membangun dan mengendalikan `SkyAmbienceRoot` (`AnimeMoon`, `NightStars`, `AnimeNightClouds`) untuk semua sirkuit:
    - **`AnimeMoon` (`shaders/neo_wangan_moon.gdshader`)**: Berperan sebagai **Matahari Cel-Shaded (saat `DAY` & `SUNSET`)** dengan `crater_density = 0.0` dan **Bulan Halftone Ber-Halo (saat `NIGHT`)** dengan `crater_density = 0.34`.
    - **`NightStars` (`shaders/neo_wangan_stars.gdshader`)**: Tambahkan `uniform float star_opacity = 1.0;` agar bintang otomatis disembunyikan saat `DAY` (`visible = false`), muncul tipis saat `SUNSET`, dan penuh saat `NIGHT`.
    - **`AnimeNightClouds` (`shaders/neo_wangan_clouds.gdshader`)**: 28 gugus awan 3D cel-shaded yang berputar mengikuti `wind_speed` (`apply_wind(delta, wind_kph)`) dan otomatis berubah warna 3-step toon (`cloud_shadow`, `cloud_mid`, `cloud_rim`, `moon_dir`) sesuai mode `DAY` (putih-krem), `SUNSET` (emas-lembayung), atau `NIGHT` (indigo-perak) serta mendung hujan (`gloom`).
 
 ### B. Integrasi `DAY / SUNSET / NIGHT` di `NeoWanganEnvironment` & `TrackEnvironmentBuilder`
-1. Di `scripts/world/neo_wangan_environment.gd`:
+1. Di `scripts/world/circuits/neo_wangan/neo_wangan_environment.gd`:
    - Gunakan `SharedCelSkyController` untuk membangun `SkyAmbienceRoot`.
    - Implementasikan `apply_time_of_day(tod: Dictionary, gloom: float = 0.0)` dan panggil setiap frame dari `update(delta, race)`:
      * **`Skyline` (`shaders/neo_wangan_skyline.gdshader`)**: Tambahkan `uniform float roof_neon_energy = 2.2;`. Saat `DAY` (`mode == 0`), fasad gedung berwarna beton/baja toon (`#4a5a75` → `#788cab`) dengan kaca reflektif langit tanpa emisi (`window_energy = 0.0, roof_neon_energy = 0.0`). Saat `SUNSET` (`mode == 1`), siluet senja hangat dengan jendela mulai menyala (`window_energy = 0.95 * pulse`). Saat `NIGHT` (`mode == 2`), siluet malam gelap dengan neon penuh (`window_energy = 1.8 * pulse`).
      * **`Water` (`shaders/neo_wangan_water.gdshader`)**: Tambahkan `uniform float band_emission = 0.25;` dan `uniform float crest_emission = 0.70;`. Saat `DAY`, air biru laut Tokyo (`#124878` / `#2474b5`) dengan buih putih-cyan. Saat `SUNSET`, air lembayung-emas senja. Saat `NIGHT`, air malam pekat dengan puncak neon cyan/magenta.
      * **`StreetlightHeads` & `StreetlightPools`**: Mati saat `DAY` cerah (`StreetlightPools.visible = false`, `emission = 0.0`), menyala saat `SUNSET` / `NIGHT` atau hujan badai gelap (`gloom > 0.55`). Lampu terowongan bawah tanah (`TunnelNeon`, `TunnelNeonPools`) **tetap menyala** di semua waktu.
-2. Di `scripts/world/track_environment_builder.gd` (Apex Ring):
+2. Di `scripts/world/circuits/apex_ring/apex_environment.gd` (Apex Ring):
    - Pasang `SharedCelSkyController` (`include_stars = false` agar `MountainVista.star_instance` tetap menjadi starfield tunggal yang diuji `test_track_environment.gd`) dan perbarui di `update(delta, race)` sehingga Apex Ring juga memiliki Matahari/Bulan Cel-Shaded dan 28 Awan 3D Cel-Shaded yang bergerak mengikuti angin.
 
 ### C. Verifikasi & Dokumentasi (Definition of Done)

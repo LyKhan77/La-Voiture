@@ -29,7 +29,7 @@ In Fase 8.5, you will implement:
    - Tombol Menu: Geometri jajar genjang miring $-12^\circ$, border tinta hitam 4px, bayangan solid 6px, prefiks stencil `"/// "`. Animasi hover snap: translasi $(+6\text{px}, -2\text{px})$, inversi instan latar ke Acid Lime, teks ke hitam pekat, dan bayangan ke Anime Crimson.
    - Topologi Modal: Panel miring $-4^\circ$ beraksen tag stiker inspeksi dan bayangan tebal.
 4. **Visual Graphics Pipeline Consistency (Paddock vs Race):**
-   - Di [`scripts/world/garage_environment_builder.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/garage_environment_builder.gd), ganti pemuatan GLB mentah unshaded dengan scene sasis modular (`*_chassis.tscn`) atau terapkan `toon_car_paint.gdshader` + inverted-hull ink outline yang sama persis dengan in-game race.
+   - Di [`scripts/world/garage/garage_environment_builder.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/garage/garage_environment_builder.gd), ganti pemuatan GLB mentah unshaded dengan scene sasis modular (`*_chassis.tscn`) atau terapkan `toon_car_paint.gdshader` + inverted-hull ink outline yang sama persis dengan in-game race.
    - Pastikan preset grafis (Low s.d. Ultra) mengontrol ketebalan outline manga (0.007m s.d. 0.020m) dan halftone screentone secara seragam di garasi dan balapan.
 5. **Automated Verification:**
    - Buat test suite baru [`tests/test_visual_polish_and_consistency.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/tests/test_visual_polish_and_consistency.gd).
@@ -75,7 +75,7 @@ In Fase 8.5, you will implement:
   - Modals: Angled cards (-4° slant) with inspection badges and 4px borders.
 
 ### Step 6: Unify Visual Consistency Between Paddock Showroom & Race
-- In `scripts/world/garage_environment_builder.gd`:
+- In `scripts/world/garage/garage_environment_builder.gd`:
   - In `_instantiate_car()`: Apply `shaders/toon_car_paint.gdshader` and inverted-hull ink outline to the car meshes, matching `gt_car_actor.gd` and `scenes/car/*_chassis.tscn`.
 - In `scripts/core/presentation_settings.gd`:
   - Ensure `apply_to_tree()` propagates `OUTLINE_WIDTH[quality]` and `HALFTONE_ALPHA[quality]` across both showroom and race world scenes.

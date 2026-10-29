@@ -1,7 +1,7 @@
 extends SceneTree
 
 const CELL_M: float = 24.0
-const Geometry := preload("res://scripts/world/enhanced_track_geometry.gd")
+const Geometry := preload("res://scripts/world/shared/enhanced_track_geometry.gd")
 
 func ground_clearance(circuit: Node, sample_kind: int = 0) -> float:
 	var points: Array[Vector3] = []

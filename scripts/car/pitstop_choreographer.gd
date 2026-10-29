@@ -20,12 +20,12 @@ signal pit_gun_fired(car_id: int, corner: int, removing: bool)
 enum Phase { LIFTING, SERVICING, LOWERING, RELEASE }
 enum CrewState { STANDBY, WALKING_OUT, READY, WALKING_BACK }
 
-const PitLaneScript := preload("res://scripts/world/pit_lane_complex.gd")
+const PitLaneScript := preload("res://scripts/world/circuits/apex_ring/apex_pit_complex.gd")
 const ModularCarAssembler := preload("res://scripts/car/modular_car_assembler.gd")
-const ToonMaterials := preload("res://scripts/world/toon_materials.gd")
+const ToonMaterials := preload("res://scripts/world/shared/toon_materials.gd")
 const Liveries := preload("res://scripts/car/team_liveries.gd")
 const FigureScript := preload("res://scripts/car/pit_crew_figure.gd")
-const MeshBatchScript := preload("res://scripts/world/mesh_batch.gd")
+const MeshBatchScript := preload("res://scripts/world/shared/mesh_batch.gd")
 
 const PitCrewMasterScene := preload("res://assets/characters/pitcrew/pitcrew_master.glb")
 const PitCrewUniformShader := preload("res://shaders/pit_crew_uniform.gdshader")

@@ -18,7 +18,7 @@ Implementasikan fondasi kalender kejuaraan resmi 12 sirkuit (7 GP + 5 Sprint) se
    - Resource data `CircuitData.gd` dan registry `CircuitCalendarRegistry.gd` yang memuat ke-12 sirkuit resmi (Round 01 s.d. Round 12) dengan metadata lengkap (nama resmi, nama kanji, inspirasi nyata, panjang, jumlah tikungan, elevasi, dan peluang cuaca).
    - Integrasikan ke `RaceConfigData.gd` (`selected_circuit_id: String = "apex_ring"`).
 2. **Geometri Ribbon 3D Neo-Wangan Shuto Express:**
-   - Bangun spline loop `Curve3D` sepanjang $3.150\text{ m} \pm 25\text{ m}$ dengan 12 tikungan resmi di `scripts/world/neo_wangan_circuit_builder.gd`.
+   - Bangun spline loop `Curve3D` sepanjang $3.150\text{ m} \pm 25\text{ m}$ dengan 12 tikungan resmi di `scripts/world/circuits/neo_wangan/neo_wangan_circuit_builder.gd`.
    - Profil elevasi dinamis: dari $+6.5\text{ m}$ di atas jembatan tol layang (*Shuto Bay Bridge*) hingga $-3.2\text{ m}$ di dasar terowongan (*Underpass Tunnel*).
    - Lebar jalur balap 11.5 m dengan kerb jalan raya rendah (+0.03 m) dan shader aspal basah `road_asphalt.gdshader`.
 3. **Rekayasa Sambungan Pitstop Aman (Standar FIA):**
@@ -58,7 +58,7 @@ Silakan eksekusi langkah demi langkah sesuai urutan TDD pada rencana implementas
   - Verifikasi: Test PASS, commit.
 - [ ] **Task 2: Geometri Spline 3D & Ribbon Neo-Wangan**
   - Tulis test: `tests/test_neo_wangan_circuit.gd` (spline 3.150 m, elevasi, radius $\ge 18$ m).
-  - Buat: `scripts/world/neo_wangan_circuit_builder.gd` & scene `scenes/race_world/neo_wangan_circuit.tscn`.
+  - Buat: `scripts/world/circuits/neo_wangan/neo_wangan_circuit_builder.gd` & scene `scenes/race_world/neo_wangan_circuit.tscn`.
   - Verifikasi: Test PASS, commit.
 - [ ] **Task 3: Sambungan Pitstop Geometri & Standar FIA**
   - Tambahkan asersi pitstop pada `test_neo_wangan_circuit.gd`.

@@ -1,7 +1,7 @@
 extends RefCounted
 
-const Batch := preload("res://scripts/world/mesh_batch.gd")
-const Toon := preload("res://scripts/world/toon_materials.gd")
+const Batch := preload("res://scripts/world/shared/mesh_batch.gd")
+const Toon := preload("res://scripts/world/shared/toon_materials.gd")
 
 static func build(pit: Node3D) -> Dictionary:
 	var mat: Material = Toon.vertex_colored(false)

@@ -16,10 +16,10 @@
 Pada Fase 12, lintasan [`scenes/race_world/neo_wangan_circuit.tscn`](file:///D:/Occupation/Porto/genex/La_Voiture/scenes/race_world/neo_wangan_circuit.tscn) secara fisika/simulasi telah berjalan baik (45/45 test suite PASS), namun hasil audit visual pada [`executor-report/screenshots/phases/phase-12-smoke-03-night-city.png`](file:///D:/Occupation/Porto/genex/La_Voiture/executor-report/screenshots/phases/phase-12-smoke-03-night-city.png), [`phase-12-neo-wangan-start.png`](file:///D:/Occupation/Porto/genex/La_Voiture/executor-report/screenshots/phases/phase-12-neo-wangan-start.png), [`phase-12-neo-wangan-bridge.png`](file:///D:/Occupation/Porto/genex/La_Voiture/executor-report/screenshots/phases/phase-12-neo-wangan-bridge.png), dan [`phase-12-neo-wangan-tunnel.png`](file:///D:/Occupation/Porto/genex/La_Voiture/executor-report/screenshots/phases/phase-12-neo-wangan-tunnel.png) menunjukkan **4 cacat struktural fatal**:
 
 1. **Jalan Melayang di Atas Laut Kosong (Void Gap 70–250 m):**
-   - [`scripts/world/neo_wangan_environment.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/neo_wangan_environment.gd) menaruh `WaterPlane` di `y = -6.0` dan membatasi gedung pada `SKYLINE_MIN_RADIUS_M = 250.0` dan `SKYLINE_TRACK_CLEARANCE_M = 70.0`. Akibatnya, di kiri-kanan jalan 0–250 m hanya ada air gelap kosong tanpa pulau daratan (*urban ground slab*) atau gedung koridor jalan (*street canyon*).
+   - [`scripts/world/circuits/neo_wangan/neo_wangan_environment.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/circuits/neo_wangan/neo_wangan_environment.gd) menaruh `WaterPlane` di `y = -6.0` dan membatasi gedung pada `SKYLINE_MIN_RADIUS_M = 250.0` dan `SKYLINE_TRACK_CLEARANCE_M = 70.0`. Akibatnya, di kiri-kanan jalan 0–250 m hanya ada air gelap kosong tanpa pulau daratan (*urban ground slab*) atau gedung koridor jalan (*street canyon*).
 2. **Aset Paddock & FIA Kit Fase 10 Tidak Di-reuse:**
-   - Di Fase 10 (`Apex Ring`), kita sudah memiliki aset arsitektur 3D berkualitas tinggi: [`PitBuilding`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/paddock/pit_building.gd) (2 lantai kaca VIP + interior), [`MainGrandstand`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/paddock/main_grandstand.gd) (tribun bertingkat + kanopi + jumbotron), [`RaceControlTower`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/paddock/race_control_tower.gd) (menara observasi 26 m), dan [`StartGantry`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/start_gantry.gd).
-   - Namun [`scripts/world/neo_wangan_pit_complex.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/neo_wangan_pit_complex.gd) hanya membuat kotak hitam 1 lantai (`BoxMesh`) dengan 10 kotak cyan datar tanpa Grandstand, tanpa Race Control Tower, dan tanpa Catch Fence.
+   - Di Fase 10 (`Apex Ring`), kita sudah memiliki aset arsitektur 3D berkualitas tinggi: [`PitBuilding`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/paddock/pit_building.gd) (2 lantai kaca VIP + interior), [`MainGrandstand`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/paddock/main_grandstand.gd) (tribun bertingkat + kanopi + jumbotron), [`RaceControlTower`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/paddock/race_control_tower.gd) (menara observasi 26 m), dan [`StartGantry`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/shared/start_gantry.gd).
+   - Namun [`scripts/world/circuits/neo_wangan/neo_wangan_pit_complex.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/circuits/neo_wangan/neo_wangan_pit_complex.gd) hanya membuat kotak hitam 1 lantai (`BoxMesh`) dengan 10 kotak cyan datar tanpa Grandstand, tanpa Race Control Tower, dan tanpa Catch Fence.
 3. **Landmark Hanya Kotak `BoxMesh` Mentah Tanpa Konteks Sipil:**
    - Terowongan underpass (`_build_tunnel()`) tampak seperti kotak kardus tipis di jalan terbuka tanpa struktur jalan layang/plaza kota di atas atapnya.
    - Jembatan Shuto Bay (`_build_bridge()`) tidak memiliki menara kabel suspensi (*suspension pylons*), kabel baja diagonal (*stay cables*), maupun rangka baja samping.
@@ -35,7 +35,7 @@ Implementasikan arsitektur **6-Lapis Lingkungan Sirkuit** sesuai [`Circuit-Envir
 
 1. **Task 1 — Parameterisasi Shared FIA Paddock & Trackside Kit (Backward-Compatible dengan Apex Ring):**
    - Tambahkan `@export` terparameterisasi pada [`scripts/world/paddock/pit_building.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/paddock/pit_building.gd) (`building_length_m = 164.0`, `bay_count = 10`, `bay_stride_m = 16.0`, `accent_color`), [`scripts/world/paddock/main_grandstand.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/paddock/main_grandstand.gd) (`stand_length_m = 220.0`, `accent_color`), dan [`scripts/world/paddock/race_control_tower.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/paddock/race_control_tower.gd) (`accent_color`).
-   - Upgrade [`scripts/world/neo_wangan_pit_complex.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/neo_wangan_pit_complex.gd) agar menginstansiasi `PitBuilding` (`building_length_m = 124.0`, `bay_stride_m = 12.0`, `accent_color = Color(0.0, 0.94, 1.0)`), `MainGrandstand` (`stand_length_m = 140.0` di seberang main straight `x = +21.5 m` menghadap barat), dan `RaceControlTower` di ujung utara pit building (`z = 76.0`).
+   - Upgrade [`scripts/world/circuits/neo_wangan/neo_wangan_pit_complex.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/circuits/neo_wangan/neo_wangan_pit_complex.gd) agar menginstansiasi `PitBuilding` (`building_length_m = 124.0`, `bay_stride_m = 12.0`, `accent_color = Color(0.0, 0.94, 1.0)`), `MainGrandstand` (`stand_length_m = 140.0` di seberang main straight `x = +21.5 m` menghadap barat), dan `RaceControlTower` di ujung utara pit building (`z = 76.0`).
    - Tulis & jalankan unit test `tests/test_shared_paddock_kit.gd`.
 
 2. **Task 2 — Blender 5.2 Modular Architectural Asset Pipeline (`tools/build_neo_wangan_assets.py`):**
@@ -49,7 +49,7 @@ Implementasikan arsitektur **6-Lapis Lingkungan Sirkuit** sesuai [`Circuit-Envir
    - Tulis & jalankan unit test `tests/test_neo_wangan_glb_assets.gd`.
 
 3. **Task 3 — Ground Massing (Urban Island Slab), Street-Canyon Corridor & Landmark Placement:**
-   - Perombakan menyeluruh [`scripts/world/neo_wangan_environment.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/neo_wangan_environment.gd):
+   - Perombakan menyeluruh [`scripts/world/circuits/neo_wangan/neo_wangan_environment.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/circuits/neo_wangan/neo_wangan_environment.gd):
      * **Layer 1 (`UrbanIslandRoot`)**: Buat `UrbanGroundSlab` (pulau reklamasi beton + seawall apron di elevasi `y = -0.35 m` di bawah Sektor 1 Start/Pit, Sektor 2 Chicane/Tunnel, dan Sektor 3 Harbor Hairpin) serta `TunnelOverpassPlaza` di atas atap terowongan (`s = 1480..1660 m`, `y = +5.3 m`) sehingga terowongan benar-benar menembus kolong kota, dan hanya segmen Shuto Bay Bridge (`s = 500..1120 m`) yang melintasi air teluk terbuka.
      * **Layer 4 (`HeroLandmarksRoot`)**: Pasang 2 menara `shuto_bridge_pylon.glb` di `s = 640 m` dan `s = 980 m` lengkap dengan pagar rangka baja samping jembatan (`BridgeSideTrussMM`); pasang `tunnel_portal_overpass.glb` di portal masuk (`s = 1480 m`) dan keluar (`s = 1660 m`) terowongan; pasang 4 unit `harbor_gantry_crane.glb` di dermaga Harbor Hairpin (`s = 2250..2680 m`).
      * **Layer 5 (`MidgroundCorridorRoot` — Street Canyon 14–45 m)**: Tempatkan minimal **48 gedung koridor tepi jalan** (menggunakan mesh `skyscraper_tower_a/b/c.glb` via `MultiMeshInstance3D`) tepat di belakang pagar pembatas pada jarak `14 m .. 45 m` dari garis tengah jalan di sepanjang daratan (`s = 0..460 m`, `s = 1150..2200 m`, `s = 2650..3150 m`), ditambah **24 panel Neon Billboard** (`StreetBillboardMM`) dengan warna Cyan `#00F0FF`, Magenta `#FF1E56`, dan Acid Lime `#CCFF00` menghadap kamera lintasan.
@@ -83,7 +83,7 @@ Silakan ikuti kode lengkap dan langkah TDD di [`docs/superpowers/plans/2026-10-2
 - [ ] **Task 1: Parameterisasi Shared FIA Paddock & Trackside Kit**
   - Buat `tests/test_shared_paddock_kit.gd`.
   - Parameterisasi `scripts/world/paddock/pit_building.gd`, `main_grandstand.gd`, `race_control_tower.gd`.
-  - Integrasikan ke `scripts/world/neo_wangan_pit_complex.gd`.
+  - Integrasikan ke `scripts/world/circuits/neo_wangan/neo_wangan_pit_complex.gd`.
   - Jalankan `test_shared_paddock_kit.gd` dan `test_track_environment_upgrade.gd` $\rightarrow$ PASS, commit.
 - [ ] **Task 2: Blender 5.2 Modular Architectural Asset Pipeline**
   - Buat `tests/test_neo_wangan_glb_assets.gd`.
@@ -91,7 +91,7 @@ Silakan ikuti kode lengkap dan langkah TDD di [`docs/superpowers/plans/2026-10-2
   - Jalankan `godot --headless --path . --import` lalu `test_neo_wangan_glb_assets.gd` $\rightarrow$ PASS, commit.
 - [ ] **Task 3: Ground Massing, Street-Canyon Corridor & Landmark Placement**
   - Perbarui `tests/test_neo_wangan_circuit.gd` dengan asersi 6-layer (`UrbanIslandRoot`, `HeroLandmarksRoot`, `MidgroundCorridorRoot` $\ge 48$ gedung, light pool bounds).
-  - Rombak `scripts/world/neo_wangan_environment.gd` untuk membangun pulau kota, jembatan pylon gantung, portal terowongan beratap plaza kota, derek pelabuhan, koridor gedung 14–45 m, dan 24 neon billboards.
+  - Rombak `scripts/world/circuits/neo_wangan/neo_wangan_environment.gd` untuk membangun pulau kota, jembatan pylon gantung, portal terowongan beratap plaza kota, derek pelabuhan, koridor gedung 14–45 m, dan 24 neon billboards.
   - Jalankan `test_neo_wangan_circuit.gd` $\rightarrow$ PASS, commit.
 - [ ] **Task 4: Verifikasi 6-Camera Visual Gate, Smoke Test & Laporan Resmi**
   - Perbarui dan jalankan `scratch/capture_phase12_views.gd` (6 kamera 1920×1080).

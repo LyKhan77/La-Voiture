@@ -4,7 +4,7 @@ extends SceneTree
 ##   Godot --rendering-driver d3d12 --resolution 1920x1080 --path . -s scratch/capture_audi_r8_race.gd
 
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
-const DirectorScript := preload("res://scripts/world/race_weekend_director.gd")
+const DirectorScript := preload("res://scripts/world/weekend/race_weekend_director.gd")
 const FRAME: float = 1.0 / 60.0
 const AUDI_CAR_ID: int = 2
 

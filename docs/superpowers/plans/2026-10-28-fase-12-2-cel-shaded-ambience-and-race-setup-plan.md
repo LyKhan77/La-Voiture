@@ -21,7 +21,7 @@
 | `shaders/neo_wangan_billboard.gdshader` | Create | Procedural Japanese Kanji/Katakana block glyph + halftone screentone + comic frame shader for `StreetBillboardMM`. |
 | `shaders/neo_wangan_clouds.gdshader` | Create | Stylized 2-tone cel-shaded night cloud shader with silver/cyan rim lighting and wind-driven UV/world drift. |
 | `shaders/neo_wangan_wind_banner.gdshader` | Create | Vertex-waving vertical street banner shader whose wave frequency and amplitude scale with `wind_speed_kph`. |
-| `scripts/world/neo_wangan_environment.gd` | Modify | Build `SkyAmbienceRoot` (`AnimeMoon`, `NightStars`, `AnimeNightClouds`), `WindBannersMM`, wire the new toon water/skyline/billboard shaders, and drive cloud drift, water ripples, and banner wave from `race.weather.wind_speed` in `update(delta, race)`. |
+| `scripts/world/circuits/neo_wangan/neo_wangan_environment.gd` | Modify | Build `SkyAmbienceRoot` (`AnimeMoon`, `NightStars`, `AnimeNightClouds`), `WindBannersMM`, wire the new toon water/skyline/billboard shaders, and drive cloud drift, water ripples, and banner wave from `race.weather.wind_speed` in `update(delta, race)`. |
 | `scripts/core/race_config_data.gd` | Modify | Support `total_laps` in `[3, 5, 10, 15]`, `weather_preset = 4` (`DYNAMIC` seeded forecast weighted by `circuit.rain_probability`), `time_of_day = 3` (`RANDOM` seeded roll), `race_dynamics = 0..2` (`CLEAN`, `STANDARD`, `CHAOS`), and `reroll_seed()`. |
 | `scripts/ui/chip_row.gd` | Modify | Add `set_chip_disabled(index: int, disabled: bool)` helper so individual chips (e.g., `5/10/15` on Sprint or `3` on GP) can be locked/unlocked in the UI. |
 | `scripts/ui/race_setup_menu.gd` | Modify | Replace dual selector with Unified 12-Round Carousel, add Artwork + Track Demand Sidebar in Map Card, enforce GP vs Sprint lap locking, add `DYNAMIC` weather + `MeteoRadarStrip`, `RANDOM` time, `RACE DYNAMICS` row, and `RerollSeedButton`. |
@@ -39,7 +39,7 @@
 - Create: `shaders/neo_wangan_billboard.gdshader`
 - Create: `shaders/neo_wangan_clouds.gdshader`
 - Create: `shaders/neo_wangan_wind_banner.gdshader`
-- Modify: `scripts/world/neo_wangan_environment.gd`
+- Modify: `scripts/world/circuits/neo_wangan/neo_wangan_environment.gd`
 
 - [ ] **Step 1: Write the failing test `tests/test_neo_wangan_cel_ambience.gd`**
 
@@ -322,9 +322,9 @@ void fragment() {
 }
 ```
 
-- [ ] **Step 4: Integrate `SkyAmbienceRoot`, `WindBannersMM`, and live wind updates in `scripts/world/neo_wangan_environment.gd`**
+- [ ] **Step 4: Integrate `SkyAmbienceRoot`, `WindBannersMM`, and live wind updates in `scripts/world/circuits/neo_wangan/neo_wangan_environment.gd`**
 
-In `scripts/world/neo_wangan_environment.gd`:
+In `scripts/world/circuits/neo_wangan/neo_wangan_environment.gd`:
 1. Preload the new shaders:
    - `const WaterShader := preload("res://shaders/neo_wangan_water.gdshader")`
    - `const BillboardShader := preload("res://shaders/neo_wangan_billboard.gdshader")`

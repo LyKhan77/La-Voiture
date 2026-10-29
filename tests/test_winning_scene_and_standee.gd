@@ -207,7 +207,7 @@ func _run() -> void:
 	for i: int in range(5):
 		await process_frame
 	check(int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)) == 0, "Exit leaves zero orphan nodes")
-	load("res://scripts/world/toon_materials.gd")._cache.clear()
+	load("res://scripts/world/shared/toon_materials.gd")._cache.clear()
 	load("res://scripts/car/gt_car_actor.gd")._paint_cache.clear()
 	print("WINNING SCENE: %d assertions, %d FAIL" % [assertions, failures])
 	quit(0 if failures == 0 else 1)

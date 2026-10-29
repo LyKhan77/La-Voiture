@@ -6,10 +6,10 @@ extends SceneTree
 ## Run: Godot --headless --path . -s res://tests/test_visual_polish_and_consistency.gd
 
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
-const DirectorScript := preload("res://scripts/world/race_weekend_director.gd")
+const DirectorScript := preload("res://scripts/world/weekend/race_weekend_director.gd")
 const ActorScript := preload("res://scripts/car/gt_car_actor.gd")
-const CameraDirectorScript := preload("res://scripts/world/broadcast_camera_director.gd")
-const GarageBuilder := preload("res://scripts/world/garage_environment_builder.gd")
+const CameraDirectorScript := preload("res://scripts/world/weekend/broadcast_camera_director.gd")
+const GarageBuilder := preload("res://scripts/world/garage/garage_environment_builder.gd")
 const PS := preload("res://scripts/core/presentation_settings.gd")
 const WeatherScript := preload("res://scripts/gt/gt_weather.gd")
 const ConfigScript := preload("res://scripts/core/race_config_data.gd")

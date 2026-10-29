@@ -9,7 +9,7 @@ enum Mode { CHASE, COCKPIT, HELI, TRACKSIDE_TV, PITSTOP, SAFETY_CAR }
 const MODE_NAMES: Array[String] = ["CHASE CAM", "COCKPIT CAM", "HELI CAM", "TRACKSIDE TV", "PIT CLOSE-UP", "SAFETY CAR CAM"]
 const SC_CAM_FOV: float = 65.0
 const TrackRibbonScript := preload("res://scripts/car/track_ribbon.gd")
-const PitZoneScript := preload("res://scripts/world/pit_zone.gd")
+const PitZoneScript := preload("res://scripts/world/shared/pit_zone.gd")
 
 ## Normal C cycle; active Safety Car follows TRACKSIDE_TV. PITSTOP is automatic.
 const CYCLE: Array[int] = [Mode.CHASE, Mode.COCKPIT, Mode.HELI, Mode.TRACKSIDE_TV]

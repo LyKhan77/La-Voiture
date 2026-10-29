@@ -7,7 +7,7 @@ extends Node3D
 ## kinds share one wind-sway material (vertex alpha = sway weight), driven by the weather.
 
 const TrackRibbonScript := preload("res://scripts/car/track_ribbon.gd")
-const MeshBatchScript := preload("res://scripts/world/mesh_batch.gd")
+const MeshBatchScript := preload("res://scripts/world/shared/mesh_batch.gd")
 const WindShader := preload("res://shaders/wind_foliage.gdshader")
 
 const SEED: int = 5505

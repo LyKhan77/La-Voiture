@@ -8,7 +8,7 @@ extends SceneTree
 
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
 const RadarScene := preload("res://scenes/pit_wall/circuit_radar_2d.tscn")
-const DirectorScript := preload("res://scripts/world/race_weekend_director.gd")
+const DirectorScript := preload("res://scripts/world/weekend/race_weekend_director.gd")
 const ActorScript := preload("res://scripts/car/gt_car_actor.gd")
 const Types := preload("res://scripts/gt/gt_types.gd")
 const FRAME: float = 1.0 / 60.0

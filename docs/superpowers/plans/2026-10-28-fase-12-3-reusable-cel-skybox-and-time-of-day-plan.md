@@ -2,12 +2,12 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Unify the skybox and time-of-day ambience across circuits into a reusable `SharedCelSkyController` (`scripts/world/shared_cel_sky_controller.gd`) and upgrade `NeoWanganEnvironment` + `TrackEnvironmentBuilder` so both circuits render cohesive Cel-Shaded **Day (`0`)**, **Sunset (`1`)**, and **Night (`2`)** environments while keeping all 51 headless test suites 100% green.
+**Goal:** Unify the skybox and time-of-day ambience across circuits into a reusable `SharedCelSkyController` (`scripts/world/shared/shared_cel_sky_controller.gd`) and upgrade `NeoWanganEnvironment` + `TrackEnvironmentBuilder` so both circuits render cohesive Cel-Shaded **Day (`0`)**, **Sunset (`1`)**, and **Night (`2`)** environments while keeping all 51 headless test suites 100% green.
 
 **Architecture:**
-1. **`SharedCelSkyController` (`scripts/world/shared_cel_sky_controller.gd`)**: Builds and drives `SkyAmbienceRoot` (`AnimeMoon` acting as Cel-Shaded Sun in Day/Sunset and Halftone Moon in Night, `NightStars` fading with `stars_opacity`, and `AnimeNightClouds` 28-puff 3D cel clouds rotating with `wind_speed` and retinting for Day/Sunset/Night + storm gloom).
-2. **`NeoWanganEnvironment` (`scripts/world/neo_wangan_environment.gd`)**: Delegates sky dome creation/updates to `SharedCelSkyController` and implements `apply_time_of_day(tod: Dictionary, gloom: float = 0.0)` to adapt the ProceduralSky, Fog, `Skyline` shader (`window_energy`, `roof_neon_energy`, daytime concrete/steel palette vs sunset vs midnight), `Water` shader (`deep_color`, `band_color`, `crest_emission`), and `StreetlightHeads` / `StreetlightPools` (OFF during clear `DAY`, ON during `SUNSET`/`NIGHT` or heavy storm gloom, while underground `TunnelNeon` stays ON).
-3. **`TrackEnvironmentBuilder` (`scripts/world/track_environment_builder.gd`)**: Attaches `SharedCelSkyController` (`include_stars = false` so `MountainVista`'s existing `Stars` node remains the single starfield for `test_track_environment.gd`) and updates it from `TrackEnvironmentBuilder.update(delta, race)` so Apex Ring also gets the Cel Sun/Moon and wind-driven 3D Anime Clouds across Day, Sunset, and Night.
+1. **`SharedCelSkyController` (`scripts/world/shared/shared_cel_sky_controller.gd`)**: Builds and drives `SkyAmbienceRoot` (`AnimeMoon` acting as Cel-Shaded Sun in Day/Sunset and Halftone Moon in Night, `NightStars` fading with `stars_opacity`, and `AnimeNightClouds` 28-puff 3D cel clouds rotating with `wind_speed` and retinting for Day/Sunset/Night + storm gloom).
+2. **`NeoWanganEnvironment` (`scripts/world/circuits/neo_wangan/neo_wangan_environment.gd`)**: Delegates sky dome creation/updates to `SharedCelSkyController` and implements `apply_time_of_day(tod: Dictionary, gloom: float = 0.0)` to adapt the ProceduralSky, Fog, `Skyline` shader (`window_energy`, `roof_neon_energy`, daytime concrete/steel palette vs sunset vs midnight), `Water` shader (`deep_color`, `band_color`, `crest_emission`), and `StreetlightHeads` / `StreetlightPools` (OFF during clear `DAY`, ON during `SUNSET`/`NIGHT` or heavy storm gloom, while underground `TunnelNeon` stays ON).
+3. **`TrackEnvironmentBuilder` (`scripts/world/circuits/apex_ring/apex_environment.gd`)**: Attaches `SharedCelSkyController` (`include_stars = false` so `MountainVista`'s existing `Stars` node remains the single starfield for `test_track_environment.gd`) and updates it from `TrackEnvironmentBuilder.update(delta, race)` so Apex Ring also gets the Cel Sun/Moon and wind-driven 3D Anime Clouds across Day, Sunset, and Night.
 
 **Tech Stack:** Godot Engine 4.7.2 stable, GDScript 2.0 (strict static typing), Godot Shading Language (`.gdshader`).
 
@@ -20,9 +20,9 @@
 | `shaders/neo_wangan_stars.gdshader` | Modify | Add `uniform float star_opacity : hint_range(0.0, 1.0) = 1.0;` to fade stars in Sunset/Day |
 | `shaders/neo_wangan_skyline.gdshader` | Modify | Add `uniform float roof_neon_energy : hint_range(0.0, 4.0) = 2.2;` so roof neon turns off in Day |
 | `shaders/neo_wangan_water.gdshader` | Modify | Add `uniform float band_emission = 0.25;` and `uniform float crest_emission = 0.70;` for Day/Sunset/Night water |
-| `scripts/world/shared_cel_sky_controller.gd` | Create | Reusable Cel-Skybox builder & Day/Sunset/Night + Wind updater (`SkyAmbienceRoot`, `AnimeMoon`, `NightStars`, `AnimeNightClouds`) |
-| `scripts/world/neo_wangan_environment.gd` | Modify | Use `SharedCelSkyController` and add `apply_time_of_day(tod, gloom)` called by `update(delta, race)` |
-| `scripts/world/track_environment_builder.gd` | Modify | Attach `SharedCelSkyController` (`include_stars = false`) and update it in `update(delta, race)` |
+| `scripts/world/shared/shared_cel_sky_controller.gd` | Create | Reusable Cel-Skybox builder & Day/Sunset/Night + Wind updater (`SkyAmbienceRoot`, `AnimeMoon`, `NightStars`, `AnimeNightClouds`) |
+| `scripts/world/circuits/neo_wangan/neo_wangan_environment.gd` | Modify | Use `SharedCelSkyController` and add `apply_time_of_day(tod, gloom)` called by `update(delta, race)` |
+| `scripts/world/circuits/apex_ring/apex_environment.gd` | Modify | Attach `SharedCelSkyController` (`include_stars = false`) and update it in `update(delta, race)` |
 | `tests/test_reusable_sky_and_time_of_day.gd` | Create | Headless TDD suite verifying `SharedCelSkyController`, Neo-Wangan `DAY`/`SUNSET`/`NIGHT` transitions, and Apex Ring sky integration |
 | `scratch/capture_phase12_3_views.gd` | Create | Native 1920×1080 screenshot capture for Neo-Wangan Day, Sunset, Night, and Apex Ring Cel-Sky |
 
@@ -35,7 +35,7 @@
 - Modify: `shaders/neo_wangan_stars.gdshader`
 - Modify: `shaders/neo_wangan_skyline.gdshader`
 - Modify: `shaders/neo_wangan_water.gdshader`
-- Create: `scripts/world/shared_cel_sky_controller.gd`
+- Create: `scripts/world/shared/shared_cel_sky_controller.gd`
 
 - [ ] **Step 1: Write the failing test `tests/test_reusable_sky_and_time_of_day.gd`**
 
@@ -49,7 +49,7 @@ const WanganScene := preload("res://scenes/race_world/neo_wangan_circuit.tscn")
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
 const WeatherScript := preload("res://scripts/gt/gt_weather.gd")
 const ConfigScript := preload("res://scripts/core/race_config_data.gd")
-const SharedSkyPath := "res://scripts/world/shared_cel_sky_controller.gd"
+const SharedSkyPath := "res://scripts/world/shared/shared_cel_sky_controller.gd"
 
 
 class StubRace extends RefCounted:
@@ -195,7 +195,7 @@ And in `fragment()`:
 	EMISSION = band_color * band_emission + crest_col * crest_line * dash * crest_emission;
 ```
 
-- [ ] **Step 4: Create `scripts/world/shared_cel_sky_controller.gd`**
+- [ ] **Step 4: Create `scripts/world/shared/shared_cel_sky_controller.gd`**
 
 ```gdscript
 class_name SharedCelSkyController
@@ -419,12 +419,12 @@ static func _cloud_mesh() -> ArrayMesh:
 ## Task 2: Wire `SharedCelSkyController` & `DAY / SUNSET / NIGHT` into `NeoWanganEnvironment` and `TrackEnvironmentBuilder`
 
 **Files:**
-- Modify: `scripts/world/neo_wangan_environment.gd`
-- Modify: `scripts/world/track_environment_builder.gd`
+- Modify: `scripts/world/circuits/neo_wangan/neo_wangan_environment.gd`
+- Modify: `scripts/world/circuits/apex_ring/apex_environment.gd`
 
-- [ ] **Step 1: Update `scripts/world/neo_wangan_environment.gd` to use `SharedCelSkyController` and implement `apply_time_of_day(tod, gloom)`**
+- [ ] **Step 1: Update `scripts/world/circuits/neo_wangan/neo_wangan_environment.gd` to use `SharedCelSkyController` and implement `apply_time_of_day(tod, gloom)`**
 
-1. Preload `const SharedSkyScript := preload("res://scripts/world/shared_cel_sky_controller.gd")` and `const WeatherScript := preload("res://scripts/gt/gt_weather.gd")`.
+1. Preload `const SharedSkyScript := preload("res://scripts/world/shared/shared_cel_sky_controller.gd")` and `const WeatherScript := preload("res://scripts/gt/gt_weather.gd")`.
 2. Add `var sky_controller: SharedSkyScript` and `var streetlight_pools_instance: MultiMeshInstance3D` and `var _street_pool_material: ShaderMaterial` and `var _current_tod: Dictionary = {}` and `var _current_gloom: float = 0.0`.
 3. In `_build_light_pools()`, store `_street_pool_material = material` and `streetlight_pools_instance = _multimesh("StreetlightPools", quad, pools, material, laterals)`.
 4. Replace `_build_sky_ambience()`, `_build_moon()`, `_build_stars()`, `_build_clouds()`, and `_cloud_mesh()` with delegating to `sky_controller`:
@@ -513,10 +513,10 @@ func apply_time_of_day(tod: Dictionary, gloom: float = 0.0) -> void:
 ```
 And implement `_apply_sky_for_tod(mode: int, night_factor: float, gloom: float)` so `_world_environment` and `_sun` cleanly reflect `DAY` (`#2673d6` / `#99d6ff`), `SUNSET` (`#2d1b4e` / `#ff6b3d`), or `NIGHT` (`#060a18` / `#2a1a3e`).
 
-- [ ] **Step 2: Attach `SharedCelSkyController` in `scripts/world/track_environment_builder.gd` (Apex Ring)**
+- [ ] **Step 2: Attach `SharedCelSkyController` in `scripts/world/circuits/apex_ring/apex_environment.gd` (Apex Ring)**
 
-In `scripts/world/track_environment_builder.gd`:
-1. Preload `const SharedSkyScript := preload("res://scripts/world/shared_cel_sky_controller.gd")`.
+In `scripts/world/circuits/apex_ring/apex_environment.gd`:
+1. Preload `const SharedSkyScript := preload("res://scripts/world/shared/shared_cel_sky_controller.gd")`.
 2. Add `var sky_controller: SharedSkyScript` and `var sky_ambience_root: Node3D`.
 3. In `build(p_ribbon, p_line)` after `_build_vista()`:
 ```gdscript

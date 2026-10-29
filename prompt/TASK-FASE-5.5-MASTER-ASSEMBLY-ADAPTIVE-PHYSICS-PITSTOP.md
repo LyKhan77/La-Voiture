@@ -33,7 +33,7 @@ Executor Agent ditugaskan untuk menyelesaikan **Master Assembly 3D dan Fisika Ba
    - Bounding-box contact ($|\Delta s| < 4.6\text{m}$, $|\Delta d| < 1.9\text{m}$) dengan gaya tolak repulsi lateral elastis (100% *zero ghosting / anti-clipping*).
    - Regulasi FIA GT: One-move defending, kewajiban menyisakan ruang balap $1.8\text{m}$, dan penyerahan jalan bendera biru (*blue flags*).
 4. **Race Weekend Flow & 5-Red-Lights Gantry:**
-   - Script [`scripts/world/race_weekend_director.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/race_weekend_director.gd) (Grid formation $\to$ 5 Red Lights countdown $\to$ Lights Out! $\to$ Racing $\to$ Finish).
+   - Script [`scripts/world/weekend/race_weekend_director.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/weekend/race_weekend_director.gd) (Grid formation $\to$ 5 Red Lights countdown $\to$ Lights Out! $\to$ Racing $\to$ Finish).
    - Scene [`scenes/race_world/start_gantry.tscn`](file:///D:/Occupation/Porto/genex/La_Voiture/scenes/race_world/start_gantry.tscn) dengan jembatan rangka baja metal melintang dan 5 pasang lampu merah start resmi FIA.
 5. **Pit Lane Complex & Koreografi Pitstop 3D:**
    - Scene [`scenes/race_world/pit_lane_complex.tscn`](file:///D:/Occupation/Porto/genex/La_Voiture/scenes/race_world/pit_lane_complex.tscn) (Jalur pit lane paralel terpisah, garis pembatas pit limiter 80 km/jam, dan 10 boks garasi tim).
@@ -44,12 +44,12 @@ Executor Agent ditugaskan untuk menyelesaikan **Master Assembly 3D dan Fisika Ba
      * Rambu lollipop diangkat, mobil turun ke aspal, dan melesat keluar.
      * Antrean double-stacking jika 2 mobil satu tim masuk pit bersamaan.
 6. **3D Trackside Environment Low-Poly:**
-   - Script [`scripts/world/track_environment_builder.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/track_environment_builder.gd):
+   - Script [`scripts/world/circuits/apex_ring/apex_environment.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/circuits/apex_ring/apex_environment.gd):
      * Kerb tikungan merah-putih bergerigi di setiap apex tikungan tajam.
      * Guardrail Armco dan catch fence pembatas sirkuit.
      * MultiMesh pohon kartun low-poly di perimeter sirkuit.
 7. **Broadcast Multi-Camera Director:**
-   - Script [`scripts/world/broadcast_camera_director.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/broadcast_camera_director.gd) dengan 5 mode kamera:
+   - Script [`scripts/world/weekend/broadcast_camera_director.gd`](file:///D:/Occupation/Porto/genex/La_Voiture/scripts/world/weekend/broadcast_camera_director.gd) dengan 5 mode kamera:
      * `Chase Cam` (aksi belakang mobil).
      * `Cockpit Cam` (sudut pandang helm dalam mobil).
      * `Heli Cam` (kamera udara helikopter melayang).
@@ -79,7 +79,7 @@ Jika $|\Delta s_{\text{signed}}| < 4.6\text{m}$ dan $|\Delta d| < 1.9\text{m}$, 
 $$a_{\text{repulse}} = \text{sign}(\Delta d) \times (1.9 - |\Delta d|) \times 12.0\text{ m/s}^2$$
 Pastikan tidak ada dua mobil yang saling tumpang tindih (*zero overlapping boxes*).
 
-### C. 5-Red-Lights Start Sequence (`scripts/world/race_weekend_director.gd`)
+### C. 5-Red-Lights Start Sequence (`scripts/world/weekend/race_weekend_director.gd`)
 - `GRID_LINEUP`: Mobil berhenti di petak start masing-masing.
 - `LIGHTS_COUNTDOWN`: Lampu 1, 2, 3, 4, 5 menyala bertahap setiap $1.0\text{s}$.
 - `LIGHTS_HOLD`: Seluruh 5 lampu menyala penuh selama jeda acak $0.5\text{s} \dots 2.0\text{s}$.

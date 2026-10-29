@@ -40,7 +40,7 @@
 
 ### Tahap 4: Audio Feedback pada Antarmuka (HUD & Gantry)
 - [x] Pasang umpan balik audio klik taktil pada `scripts/hud/tactical_deck.gd`, `timing_tower.gd`, dan `telemetry_drawer.gd`.
-- [x] Hubungkan countdown 5 lampu merah di `scripts/world/start_gantry.gd` dengan nada `start_beep.wav` dan nada `lights_out.wav` saat lampu padam serentak.
+- [x] Hubungkan countdown 5 lampu merah di `scripts/world/shared/start_gantry.gd` dengan nada `start_beep.wav` dan nada `lights_out.wav` saat lampu padam serentak.
 - [x] Hubungkan aksi pit stop di `scripts/car/pitstop_choreographer.gd` dengan suara `pit_gun.wav` saat roda dicopot/dipasang.
 
 ### Tahap 5: Layar Podium Selebrasi Juara (Race Weekend Finale)
@@ -50,7 +50,7 @@
   - Tampilkan cap grafiti ungu `FASTEST LAP +1 PT` untuk pencetak rekor putaran tercepat.
   - Tabel poin kejuaraan konstruktor FIA GT3 (25, 18, 15, 12, 10, 8, 6, 4, 2, 1).
   - Tombol aksi `RESTART` dan `EXIT TO HQ`.
-- [x] Sambungkan pemicu kemunculan podium ke event `CHEQUERED_FLAG` di `scripts/world/race_weekend_world.gd`.
+- [x] Sambungkan pemicu kemunculan podium ke event `CHEQUERED_FLAG` di `scripts/world/weekend/race_weekend_world.gd`.
 
 ### Tahap 6: Automated Testing & Verification
 - [x] Buat dan jalankan test suite `tests/test_audio_and_race_weekend.gd`:

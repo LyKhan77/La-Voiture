@@ -1,12 +1,12 @@
 [gd_scene load_steps=11 format=3]
 
-[ext_resource type="Script" path="res://scripts/world/race_weekend_world.gd" id="1_world"]
+[ext_resource type="Script" path="res://scripts/world/weekend/race_weekend_world.gd" id="1_world"]
 [ext_resource type="PackedScene" path="res://scenes/race_world/track_circuit.tscn" id="2_track"]
-[ext_resource type="Script" path="res://scripts/world/track_environment_builder.gd" id="3_env"]
+[ext_resource type="Script" path="res://scripts/world/circuits/apex_ring/apex_environment.gd" id="3_env"]
 [ext_resource type="PackedScene" path="res://scenes/race_world/start_gantry.tscn" id="4_gantry"]
 [ext_resource type="PackedScene" path="res://scenes/race_world/pit_lane_complex.tscn" id="5_pit"]
 [ext_resource type="Script" path="res://scripts/car/pitstop_choreographer.gd" id="6_choreo"]
-[ext_resource type="Script" path="res://scripts/world/broadcast_camera_director.gd" id="7_cameras"]
+[ext_resource type="Script" path="res://scripts/world/weekend/broadcast_camera_director.gd" id="7_cameras"]
 [ext_resource type="Script" path="res://scripts/vfx/race_vfx.gd" id="8_vfx"]
 [ext_resource type="Script" path="res://scripts/hud/race_hud.gd" id="9_hud"]
 
