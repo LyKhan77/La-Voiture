@@ -126,6 +126,6 @@ Sebelum sirkuit dinyatakan selesai, jalankan:
    - **Cam 6 (Player Chase Cam Action):** Koridor dekat (8 m – 45 m) padat, cel-shading & outline tegas.
    - **Day / Sunset / Night Verification:** Pastikan tangkapan layar pada mode `DAY`, `SUNSET`, dan `NIGHT` menampilkan transisi langit, awan, air, dan lampu bangunan yang akurat.
 3. **Performance Budget Gate:**
-   - **Draw Calls Sirkuit:** $\le 160$ draw calls per kamera (dan $< 180$ total scene).
+   - **Draw Calls Sirkuit:** $\le 160$ draw calls per kamera (dan $< 180$ total scene). Ukur native dengan `scratch/measure_env_draw_calls.gd -- <sirkuit>` (kamera tiap 150 m, bagian environment di dalam frame, bayangan termasuk; gagal bila view terburuk > 180). Hitungan statis `env.stats()` tidak melihat biaya shadow pass. MultiMesh yang batasnya seluruh sirkuit (pohon) wajib `cast_shadow` off kecuali sudah diukur.
    - **Triangles Lingkungan:** $\le 320.000$ triangles.
    - **Frame Time:** $\le 16,66\text{ ms}$ (60 FPS locked pada 1080p High dengan 20 mobil GT3).

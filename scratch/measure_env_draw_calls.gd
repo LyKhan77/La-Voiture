@@ -10,6 +10,9 @@ extends SceneTree
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
 const Config := preload("res://scripts/core/race_config_data.gd")
 const Settings := preload("res://scripts/core/presentation_settings.gd")
+## The track budget is < 180 draw calls (AGENTS.md section 6). The gate is the environment's share at its worst
+## fly-through view, shadow passes included; exit code 1 when a circuit goes over.
+const ENV_CALL_LIMIT: int = 180
 
 
 var world: Node3D
@@ -72,10 +75,11 @@ func _run() -> void:
 		world.environment.visible = true
 		sun.shadow_enabled = true
 		rows.append(row)
-	_report(circuit, rows)
+	var worst: int = _report(circuit, rows)
 	world.free()
 	camera.free()
-	quit(0)
+	print("%s ENVCALLS %s worst view %d draw calls (limit %d)" % ["PASS" if worst <= ENV_CALL_LIMIT else "FAIL", circuit, worst, ENV_CALL_LIMIT])
+	quit(0 if worst <= ENV_CALL_LIMIT else 1)
 
 
 ## Which part of the environment owns the draw calls at one view: every direct child hidden in turn (shadows on).
@@ -229,7 +233,9 @@ func _calls() -> int:
 	return int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
 
 
-func _report(circuit: String, rows: Array[Dictionary]) -> void:
+## Returns the environment's worst view (shadows on).
+func _report(circuit: String, rows: Array[Dictionary]) -> int:
+	var worst_view: int = 0
 	for key: String in ["env_shadows", "env_noshadow", "frame_total"]:
 		var values: Array[int] = []
 		var total: int = 0
@@ -237,6 +243,8 @@ func _report(circuit: String, rows: Array[Dictionary]) -> void:
 			values.append(int(row[key]))
 			total += int(row[key])
 		values.sort()
+		if key == "env_shadows":
+			worst_view = values[values.size() - 1]
 		print("ENVCALLS %s %-13s views=%d mean %.0f p95 %d max %d" % [circuit, key, values.size(), float(total) / float(values.size()), values[clampi(int(float(values.size()) * 0.95), 0, values.size() - 1)], values[values.size() - 1]])
 	var sorted: Array[Dictionary] = rows.duplicate()
 	sorted.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a["env_shadows"]) > int(b["env_shadows"]))
@@ -244,3 +252,4 @@ func _report(circuit: String, rows: Array[Dictionary]) -> void:
 	for row: Dictionary in sorted.slice(0, 6):
 		worst.append("s=%.0f %d (no shadows %d)" % [float(row["s"]), int(row["env_shadows"]), int(row["env_noshadow"])])
 	print("ENVCALLS %s worst views: %s" % [circuit, ", ".join(worst)])
+	return worst_view

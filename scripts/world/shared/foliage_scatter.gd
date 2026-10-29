@@ -179,6 +179,8 @@ func _add_kind(node_name: String, mesh: ArrayMesh, transforms: Array) -> MultiMe
 	var instance := MultiMeshInstance3D.new()
 	instance.name = node_name
 	instance.multimesh = multimesh
+	# Circuit-wide batches land in every shadow split: casting cost ~200 draw calls at the worst Apex view.
+	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(instance)
 	return instance
 

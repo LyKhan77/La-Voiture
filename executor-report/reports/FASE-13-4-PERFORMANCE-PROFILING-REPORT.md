@@ -45,6 +45,20 @@ Seluruh `tests/test_*.gd` headless lulus (64 suite: 61 sebelumnya ditambah `test
 
 ## Gate terbuka
 
-- Draw call environment Brianza: sampel 171–191 (batas rencana 169, batas `AGENTS.md` < 180). Angka ini bergantung posisi kamera pada saat sampel, jadi perlu sampel pada titik kamera tetap (enam kamera gate) untuk keputusan; tidak dioptimalkan di fase ini. Apex dan Wangan di bawah 165.
+- ~~Draw call environment Brianza: sampel 171–191~~ — ditutup di Fase 14.1: angka itu berasal dari kamera race yang berubah-ubah, bukan ukuran tetap (lihat bagian di bawah).
+
+## Gate draw call environment (Fase 14.1)
+
+`scratch/measure_env_draw_calls.gd -- <sirkuit> [langkah_m]` menaruh kamera tiap 150 m di sepanjang lap, membaca `RENDER_TOTAL_DRAW_CALLS_IN_FRAME` dengan environment tampil dan tersembunyi (selisihnya = bagian environment, termasuk shadow pass), dan lulus bila view terburuk ≤ 180 (exit code 1 bila lewat). Hasil (bayangan matahari menyala, 1080p High):
+
+| Sirkuit | Mean | p95 | Max | Sebelum |
+|---|---|---|---|---|
+| Apex Ring | 55 | 65 | 67 | 125 / 267 / 270 |
+| Neo-Wangan | 92 | 138 | 155 | tidak berubah |
+| Brianza | 75 | 97 | 100 | tidak berubah |
+
+- Apex terberat karena 3 MultiMesh pohon (±1.100 pohon) berbatas seluruh sirkuit: satu jenis pohon saja menambah ±190 call, tak peduli jumlah instance, dan `cast_shadow` off pada pohon memangkas ±209 di view terburuk. `FoliageScatter` sekarang tidak melempar bayangan (pohon ≥ 18 m dari aspal, jadi bayangannya jarang jatuh ke trek).
+- Dicoba dan dibatalkan: memecah pohon jadi chunk MultiMesh 100 m. View terburuk turun ±160, tetapi mean Apex naik 125 → 187 dan max 270 → 349.
+- Mekanisme pasti kenapa satu batch sebesar itu mahal belum dipahami; hitungan statis `env.stats()` dan estimasi `test_track_environment` (satu call per surface) tidak melihatnya, jadi gate sebenarnya adalah skrip ukur native ini.
 - Mean 59,7–60,0 FPS karena batas 60 FPS; layar 144 Hz tidak dipakai untuk lock vsync (vsync di mode jendela tidak mengunci ke 60).
 - Kebisingan sistem (throttle termal GPU, aplikasi lain) masih mengubah hasil per-run beberapa persen; ulangi pengukuran bila angkanya menyimpang.
