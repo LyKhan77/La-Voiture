@@ -34,7 +34,11 @@ func _run() -> void:
 	config.selected_circuit_id = circuit
 	config.selected_team_id = 4
 	config.total_laps = 3
+	# An optional "tod=N" argument (0 DAY, 1 SUNSET, 2 NIGHT) measures another time of day.
 	config.time_of_day = 0
+	for arg: String in args:
+		if arg.begins_with("tod="):
+			config.time_of_day = int(arg.substr(4))
 	config.weather_preset = 0
 	config.race_seed = 19220903
 	world = WorldScene.instantiate()

@@ -588,10 +588,16 @@ func _test_race_setup_hero_map() -> void:
 	var apex := setup.find_child("CarouselCard0", true, false) as Button
 	var neo := setup.find_child("CarouselCard1", true, false) as Button
 	var brianza := setup.find_child("CarouselCard2", true, false) as Button
-	var unbuilt := setup.find_child("CarouselCard3", true, false) as Button
-	check(apex != null and neo != null and brianza != null and unbuilt != null and apex.text.contains("APEX RING") and neo.text.contains("NEO-WANGAN")
-		and brianza.text.contains("BRIANZA") and unbuilt.text.contains("IN PREPARATION") and not apex.disabled and not unbuilt.disabled,
-		"race setup C: the carousel opens on Round 01 Apex Ring with Neo-Wangan and Brianza playable and unbuilt rounds marked in preparation")
+	var monte := setup.find_child("CarouselCard3", true, false) as Button
+	check(apex != null and neo != null and brianza != null and monte != null and apex.text.contains("APEX RING") and neo.text.contains("NEO-WANGAN")
+		and brianza.text.contains("BRIANZA") and monte.text.contains("MONTE AZURE") and not monte.text.contains("IN PREPARATION") and not apex.disabled,
+		"race setup C: the carousel opens on Round 01 Apex Ring with Neo-Wangan, Brianza and Monte Azure playable")
+	# The carousel pages four rounds at a time: Round 05 turns to the next page, where unbuilt rounds say so.
+	setup.select_circuit("ardennes")
+	var unbuilt := setup.find_child("CarouselCard0", true, false) as Button
+	check(unbuilt != null and unbuilt.text.contains("ARDENNES") and unbuilt.text.contains("IN PREPARATION") and not unbuilt.disabled,
+		"race setup C: the second carousel page opens on Round 05 Ardennes, marked in preparation")
+	setup.select_circuit("apex_ring")
 	var next := setup.get("continue_button") as Button
 	check(next != null and next.text.contains("CONTINUE") and _skew_of(next, "normal") > 0.1, "race setup C: the continue button is a skewed street plate")
 	setup.queue_free()

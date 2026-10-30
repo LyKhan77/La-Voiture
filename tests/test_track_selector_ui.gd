@@ -113,17 +113,28 @@ func _test_reserved_rounds_and_wrap() -> void:
 	check(brianza_ok,
 		"#S4 Round 03, Autodromo di Brianza is now fully built and playable (GP, 5.79 km, Continue enabled)")
 
-	# Step 2: Round 04, Monte Azure Marina is a reserved round that is not built yet.
+	# Step 2: Round 04, Monte Azure Marina is built (FASE 15): a 2.85 km Sprint street circuit.
 	_press("TrackNextButton")
 	await process_frame
-	var reserved_ok: bool = _label("CircuitNameLabel") == "Monte Azure Marina" \
+	var monte_ok: bool = _label("CircuitNameLabel") == "Monte Azure Marina" \
 		and _label("CircuitTypeLabel") == "SPRINT" \
-		and float(radar.stats()["length_m"]) == 0.0 and radar.circuit_id == "monte_azure" \
+		and absf(float(radar.stats()["length_m"]) - 2850.0) <= 25.0 and radar.circuit_id == "monte_azure" \
+		and not continue_button.disabled
+	check(monte_ok,
+		"#S4b Round 04, Monte Azure Marina is fully built and playable (Sprint, 2.85 km, Continue enabled)")
+
+	# Step 3: Round 05, Ardennes Valley Ring is a reserved round that is not built yet.
+	_press("TrackNextButton")
+	await process_frame
+	var reserved_ok: bool = _label("CircuitNameLabel") == "Ardennes Valley Ring" \
+		and _label("CircuitTypeLabel") == "GRAND PRIX" \
+		and float(radar.stats()["length_m"]) == 0.0 and radar.circuit_id == "ardennes" \
 		and continue_button.disabled and continue_button.text.contains("IN PREPARATION")
 	check(reserved_ok,
-		"#S4b a round whose layout is not built yet (Round 04, Monte Azure) says so: the map is empty and Continue is disabled")
+		"#S4c a round whose layout is not built yet (Round 05, Ardennes) says so: the map is empty and Continue is disabled")
 
 	# Return to Apex Ring
+	_press("TrackPrevButton")
 	_press("TrackPrevButton")
 	_press("TrackPrevButton")
 	_press("TrackPrevButton")

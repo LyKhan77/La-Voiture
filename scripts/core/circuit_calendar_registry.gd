@@ -27,7 +27,7 @@ const TABLE: Array[Array] = [
 	["brianza", "MAR", "Autodromo di Brianza", "", "Autodromo Nazionale Monza", "ITA", 0, 5.79, 11, true, 12.0,
 		"res://scenes/race_world/circuits/brianza/brianza_circuit.tscn", 0.35, "Temple of speed, Variante chicanes, slipstream war."],
 	["monte_azure", "APR", "Monte Azure Marina", "", "Circuit de Monaco / Macau", "MCO", 1, 2.85, 19, true, 42.0,
-		"res://scenes/race_world/monte_azure_circuit.tscn", 0.40, "Yacht harbor streets, zero margin for error."],
+		"res://scenes/race_world/circuits/monte_azure/monte_azure_circuit.tscn", 0.40, "Yacht harbor streets, zero margin for error."],
 	["ardennes", "MAY", "Ardennes Valley Ring", "", "Spa-Francorchamps", "BEL", 0, 5.40, 20, true, 104.0,
 		"res://scenes/race_world/ardennes_circuit.tscn", 0.75, "Eau Rouge compression climb, micro-climate rain."],
 	["stoke_crown", "JUN", "Stoke Crown Circuit", "", "Silverstone Circuit", "GBR", 0, 5.20, 18, true, 12.0,

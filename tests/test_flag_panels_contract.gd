@@ -10,7 +10,7 @@ const Config := preload("res://scripts/core/race_config_data.gd")
 const Types := preload("res://scripts/gt/gt_types.gd")
 const WanganCircuit := preload("res://scripts/world/circuits/neo_wangan/neo_wangan_circuit_builder.gd")
 const WanganEnvironment := preload("res://scripts/world/circuits/neo_wangan/neo_wangan_environment.gd")
-const CIRCUITS: Array[String] = ["apex_ring", "neo_wangan", "brianza"]
+const CIRCUITS: Array[String] = ["apex_ring", "neo_wangan", "brianza", "monte_azure"]
 ## Panels closer than this to each other along the lap read as one.
 const MIN_PANEL_GAP_M: float = 60.0
 

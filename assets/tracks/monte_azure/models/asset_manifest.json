@@ -1,0 +1,42 @@
+[
+  {
+    "file": "casino_palace.glb",
+    "triangles": 708,
+    "surfaces": 4,
+    "origin": "centre of the footprint; glTF node lifts it 0.75 m (MonteAzureLandmarks seats the lowest vertex on the ground)",
+    "unit": "metre",
+    "source": "mapgen-circuit builds/monte_azure make_landmarks.py (Blender), massing level"
+  },
+  {
+    "file": "fairmont_hairpin_hotel.glb",
+    "triangles": 628,
+    "surfaces": 4,
+    "origin": "centre of the footprint; glTF node lifts it 3.5 m (MonteAzureLandmarks seats the lowest vertex on the ground)",
+    "unit": "metre",
+    "source": "mapgen-circuit builds/monte_azure make_landmarks.py (Blender), massing level"
+  },
+  {
+    "file": "azure_cliff_tunnel.glb",
+    "triangles": 832,
+    "surfaces": 4,
+    "origin": "190 m long along x; the 15 m x 7.4 m bore is the dark surface (MonteAzureLandmarks centres the bore on the road and scales the length to 150 m)",
+    "unit": "metre",
+    "source": "mapgen-circuit builds/monte_azure make_landmarks.py (Blender), massing level"
+  },
+  {
+    "file": "superyacht_luxury_pack.glb",
+    "triangles": 1880,
+    "surfaces": 5,
+    "origin": "centre of a 240 m x 60 m pontoon; glTF node lifts it 0.55 m (MonteAzureLandmarks floats it at the sea)",
+    "unit": "metre",
+    "source": "mapgen-circuit builds/monte_azure make_landmarks.py (Blender), massing level"
+  },
+  {
+    "file": "harbor_pedestrian_skybridge.glb",
+    "triangles": 120,
+    "surfaces": 4,
+    "origin": "centre of a 23 m span along x; glTF node lifts it 4.3 m (MonteAzureLandmarks seats the pylon feet on the ground)",
+    "unit": "metre",
+    "source": "mapgen-circuit builds/monte_azure make_landmarks.py (Blender), massing level"
+  }
+]
