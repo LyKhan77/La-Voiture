@@ -21,8 +21,8 @@ func _run() -> void:
 	check(layout.entry_s == 5530.0 and layout.exit_s == 150.0 and layout.lane_length_m == 410.0 and layout.lane_ramp_in_m == 80.0 and layout.lane_ramp_out_m == 90.0 and layout.edge_lateral_m == 5.2 and layout.stall_first_s == 5600.0, "pit simulation uses K1 layout")
 	check(is_equal_approx(pit.lane_lateral(0.0), 5.2) and is_equal_approx(pit.lane_lateral(80.0), 11.6) and is_equal_approx(pit.lane_lateral(410.0), 5.2), "pit path uses 80/90 metre ramps")
 	var minimum_radius: float = INF
-	for s: int in range(5596, 5745, 4):
-		minimum_radius = minf(minimum_radius, circuit.ribbon.get_radius_at(float(s)))
+	for s: int in range(5596, 5782, 4): # the last box is at 5780; the lap closure bends from 5784
+		minimum_radius = minf(minimum_radius, circuit.ribbon.get_radius_at(fposmod(float(s), 5790.0)))
 	check(minimum_radius >= 250.0, "pit building sits on the straight (minimum %.1f m)" % minimum_radius)
 	var asphalt: MeshInstance3D = pit.get_node("PitAsphalt")
 	check(asphalt.material_override is ShaderMaterial and (asphalt.material_override as ShaderMaterial).shader == load("res://shaders/road_asphalt.gdshader"), "pit uses road asphalt shader")

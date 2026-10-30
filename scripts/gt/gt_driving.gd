@@ -907,7 +907,8 @@ func _pit_logic(car: GtCar, dt: float) -> void:
 	var rel: float = car.s - pit.start_s
 	var dist_to_box: float = pit.box_s - car.s
 	for other: GtCar in race.cars:
-		if other != car and other.team_id == car.team_id and other.pit != null and other.s >= car.s \
+		# A teammate a whole lap ahead (its s is one lap more) is not in the lane ahead of this car, so it is no queue partner.
+		if other != car and other.team_id == car.team_id and other.pit != null and other.s >= car.s and other.s - car.s <= pit_length() + 120.0 \
 				and (other.pit.phase == GtTypes.PitPhase.ENTRY or other.pit.phase == GtTypes.PitPhase.IN or other.pit.phase == GtTypes.PitPhase.BOX):
 			_teammate_ahead = other
 			break

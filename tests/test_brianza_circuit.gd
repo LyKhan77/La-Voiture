@@ -94,7 +94,7 @@ func _run() -> void:
 			check(pit.garages[0].get_node_or_null("StandbyCrew") != null, "#B13 garage contains standby crew")
 		check(layout["entry_s"] == 5530.0 and layout["exit_s"] == 150.0 and layout["lane_length_m"] == 410.0,
 			"#B12 sim_layout() defines 410 m GP lane (entry=5530m, exit=150m)")
-		check(layout["stalls"] == 10 and layout["stall_pitch_m"] == 14.0, "#B13 10 stalls at 14.0 m pitch")
+		check(layout["stalls"] == 10 and layout["stall_pitch_m"] == 20.0, "#B13 10 stalls at 20.0 m pitch")
 		
 		var sockets_ok: bool = true
 		for s_i: int in range(10):

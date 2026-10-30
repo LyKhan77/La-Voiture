@@ -3,7 +3,7 @@ extends "res://scripts/world/circuits/base/circuit_pit_complex.gd"
 
 ## Standard GP Pit Complex for Autodromo di Brianza (Round 03, FASE 13): a 410 m FIA-standard pit lane
 ## running along the right side of the main straight. Peels off at s = 5 530 m (260 m before the line),
-## serves 10 GT3 team garages (14 m pitch), and rejoins at s = 150 m.
+## serves 10 GT3 team garages (20 m pitch: a double-stacked box needs two car lengths plus the queue gap), and rejoins at s = 150 m.
 ##
 ## Includes the 10 team pit sockets (Socket_PitStall_0..9) for pitstop choreography, pit wall with
 ## safety debris fence and crash cushion, team garages with liveries, the 2-storey PitBuilding, the
@@ -28,7 +28,7 @@ const LANE_LENGTH_M: float = 410.0
 const SPEED_LIMIT_MPS: float = 80.0 / 3.6
 
 const STALL_COUNT: int = 10
-const STALL_PITCH_M: float = 14.0
+const STALL_PITCH_M: float = 20.0
 const STALL_FIRST_S: float = 5600.0
 const GARAGE_ZONE_M: float = 140.0
 
@@ -44,7 +44,7 @@ const BOX_LATERAL_M: float = 17.0
 const GARAGE_FRONT_M: float = 20.6
 const GARAGE_DEPTH_M: float = 9.0
 const GARAGE_HEIGHT_M: float = 4.2
-const GARAGE_WIDTH_M: float = 12.4
+const GARAGE_WIDTH_M: float = 16.4
 const ENTRY_BLEND_M: float = 80.0
 const EXIT_BLEND_M: float = 90.0
 
@@ -437,7 +437,7 @@ func _build_shared_paddock() -> void:
 	# PitBuilding
 	var building := PitBuildingKit.new()
 	building.name = "PitBuilding"
-	building.building_length_m = 148.0
+	building.building_length_m = 200.0
 	building.bay_count = STALL_COUNT
 	building.bay_stride_m = STALL_PITCH_M
 	building.front_x = 18.0
@@ -459,7 +459,7 @@ func _build_shared_paddock() -> void:
 	tower.name = "RaceControlTower"
 	tower.accent_color = MONZA_RED
 	tower.transform = pose
-	tower.position += pose.basis.z * -85.0
+	tower.position += pose.basis.z * -116.0
 	add_child(tower)
 
 

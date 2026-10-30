@@ -311,4 +311,4 @@ Hasil `test_monte_azure_pit_flood` (kereta 30 m, rapat 20 m, menyebar, lapangan 
 | Waktu diam terlama di luar kotak | 18,8 / 18,8 / 15,0 / 20,1 dtk | 16,3 / 14,7 / 7,4 / 14,1 dtk |
 | Lane kosong setelah panggilan pertama | 101 / 122 dtk (kereta, rapat) | 86 / 85 dtk |
 
-Sisa menunggu (10–16 dtk) adalah aturan yang disengaja: mobil yang selesai dilayani menunggu sampai lajur cepat di belakangnya bebas dari mobil yang melaju (§ rilis aman). Pada aliran 20 mobil yang rapat tidak ada celah, sehingga menunggu sampai aliran lewat. Sirkuit lain (Apex 14 m, Brianza 14 m, Neo-Wangan 12 m) memakai pitch sempit yang sama; angkanya belum diukur dengan tes tumpang tindih per sirkuit.
+Sisa menunggu (10–16 dtk) adalah aturan yang disengaja: mobil yang selesai dilayani menunggu sampai lajur cepat di belakangnya bebas dari mobil yang melaju (§ rilis aman). Pada aliran 20 mobil yang rapat tidak ada celah, sehingga menunggu sampai aliran lewat. Sirkuit lain diukur di Fase 15.1 (`FASE-15-1-PIT-PITCH-OTHER-CIRCUITS-REPORT.md`): Brianza dan Neo-Wangan dinaikkan ke pitch 20 m, Apex tetap 14 m karena lurusan pit-nya hanya ±145 m.

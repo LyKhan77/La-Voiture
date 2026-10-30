@@ -1,8 +1,8 @@
 class_name NeoWanganPitComplex
 extends "res://scripts/world/circuits/base/circuit_pit_complex.gd"
 
-## The FIA pit connection of the Neo-Wangan street circuit: a 200 m fast lane
-## hanging off the right-hand edge of the last straight, ten 12 m team boxes, a concrete pit wall
+## The FIA pit connection of the Neo-Wangan street circuit: a 400 m fast lane
+## hanging off the right-hand edge of the last straight, ten 20 m team boxes, a concrete pit wall
 ## with an orange impact attenuator on its nose, and a pit exit that runs on the inside of Turn 1
 ## behind an 80 m solid blend line — so a car leaving the pits can never meet a car on the racing
 ## line T-bone first.
@@ -16,7 +16,7 @@ extends "res://scripts/world/circuits/base/circuit_pit_complex.gd"
 ##   6.00        pit wall (0.5 thick, 1.2 high); its nose carries the crash cushion
 ##   6.25 .. 10.75  fast lane, 4.5 m, cars run down its middle at 8.5
 ##   10.75 .. 16.0  working lane, the box car stops at 13.0
-##   16.0 .. 25.0   ten garages, 12 m apart on the 12 m stall pitch
+##   16.0 .. 25.0   ten garages, 20 m apart on the 20 m stall pitch
 
 const MeshBatchScript := preload("res://scripts/world/shared/mesh_batch.gd")
 const ToonMaterials := preload("res://scripts/world/shared/toon_materials.gd")
@@ -31,8 +31,10 @@ const FigureScript := preload("res://scripts/car/pit_crew_figure.gd")
 ## The circuit's homologated lap (see NeoWanganCircuitBuilder.LENGTH_M; repeated here so this
 ## script stays free of a circular preload with the builder).
 const LAP_LENGTH_M: float = 3150.0
-const ENTRY_RUNUP_M: float = 60.0
-const ENTRY_S: float = 3075.0 - ENTRY_RUNUP_M # 135 m before the start/finish line
+## From the Pit Entry line to the first box a car called late (fast, 9 m/s2 limiter braking) needs about 200 m to stop;
+## at 12 m / 60 m run-up it overshot its box by up to 140 m and was snapped back onto it.
+const ENTRY_RUNUP_M: float = 260.0
+const ENTRY_S: float = 3075.0 - ENTRY_RUNUP_M # 335 m before the start/finish line, on the straight
 const EXIT_S: float = 65.0 # 65 m after the line, at the entry to Turn 1
 const LANE_LENGTH_M: float = 140.0 + ENTRY_RUNUP_M
 const BYPASS_MERGE_S: float = 145.0 # rejoin past Turn 1 (apex at 120)
@@ -41,8 +43,8 @@ const BLEND_LINE_M: float = 80.0 # from the pit exit to the merge
 const SPEED_LIMIT_MPS: float = 80.0 / 3.6
 
 const STALL_COUNT: int = 10
-const STALL_PITCH_M: float = 12.0
-const STALL_FIRST_OFFSET_M: float = 8.0 + ENTRY_RUNUP_M # keep existing garage positions
+const STALL_PITCH_M: float = 20.0
+const STALL_FIRST_OFFSET_M: float = 200.0 # boxes stand at s 3015 to 3195, as before (the garages used to start at 3083)
 const GARAGE_ZONE_M: float = 140.0
 
 const ENTRY_LATERAL_M: float = 5.2 # the pit entry trigger, on the right edge of the road
@@ -60,7 +62,7 @@ const GARAGE_HEIGHT_M: float = 4.4
 ## Where the transporter row stands, measured from the circuit centre line: on the deck behind the pit building.
 const TRANSPORTER_LATERAL_M: float = 40.0
 const GARAGE_PITCH_M: float = STALL_PITCH_M
-const GARAGE_WIDTH_M: float = 11.4
+const GARAGE_WIDTH_M: float = 16.4
 const ENTRY_BLEND_M: float = 20.0
 const EXIT_BLEND_M: float = 80.0
 const ROAD_EDGE_M: float = 5.75 # half of the circuit's 11.5 m road
@@ -112,7 +114,7 @@ static func s_from_u(u: float) -> float:
 	return fposmod(ENTRY_S + u, LAP_LENGTH_M)
 
 
-## u of the pit exit trigger (the end of the 200 m lane).
+## u of the pit exit trigger (the end of the 400 m lane).
 static func exit_u() -> float:
 	return LANE_LENGTH_M
 
@@ -170,7 +172,7 @@ func _on_teams_assigned() -> void:
 
 
 ## The layout the GT sim drives this pit lane with (see GtRace.default_pit_layout for the Apex
-## version): entry at Pit Entry, exit at the merge past Turn 1, ten 12 m boxes, and a 20 m / 80 m
+## version): entry at Pit Entry, exit at the merge past Turn 1, ten 20 m boxes, and a 20 m / 80 m
 ## lateral blend. RaceWeekendWorld hands this to GtRace for a Neo-Wangan race.
 func sim_layout() -> Dictionary:
 	return {
@@ -421,7 +423,7 @@ func _build_shared_paddock() -> void:
 	var pose: Transform3D = get_pit_transform(centre_u, 0.0)
 	var building := PitBuildingKit.new()
 	building.name = "PitBuilding"
-	building.building_length_m = 124.0
+	building.building_length_m = 204.0
 	building.bay_count = STALL_COUNT
 	building.bay_stride_m = STALL_PITCH_M
 	building.front_x = 15.5
@@ -433,7 +435,7 @@ func _build_shared_paddock() -> void:
 	add_child(building)
 	var stand := GrandstandKit.new()
 	stand.name = "MainGrandstand"
-	stand.stand_length_m = 140.0
+	stand.stand_length_m = 200.0
 	stand.accent_color = building.accent_color
 	stand.transform = pose
 	# Shared stand front is local -19 m; shift to the street's opposite edge at -21.5 m.
@@ -443,7 +445,7 @@ func _build_shared_paddock() -> void:
 	tower.name = "RaceControlTower"
 	tower.accent_color = building.accent_color
 	tower.transform = pose
-	tower.position += pose.basis.z * -76.0
+	tower.position += pose.basis.z * -116.0
 	add_child(tower)
 	var props := MeshBatchScript.new()
 	PitKit.garage_props(props, ToonMaterials.vertex_colored(false), Liveries.color_for(0))

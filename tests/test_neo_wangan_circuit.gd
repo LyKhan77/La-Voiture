@@ -155,7 +155,7 @@ func _test_pit_connection() -> void:
 	var entry_lateral: float = float(entry.get_meta(&"lateral_m", 0.0)) if entry != null else 0.0
 	var exit_s: float = float(exit.get_meta(&"arc_s", -1.0)) if exit != null else -1.0
 	var lane_length: float = fposmod(exit_s - entry_s, ribbon.length_m)
-	check(entry != null and exit != null and absf(entry_s - (ribbon.length_m - 135.0)) <= 0.5 \
+	check(entry != null and exit != null and absf(entry_s - (ribbon.length_m - 335.0)) <= 0.5 \
 			and absf(entry_lateral - 5.2) < 0.001 and absf(lane_length - PitScript.LANE_LENGTH_M) < 0.5,
 		"#W10 Pit Entry sits %.0f m before the line at +%.1f m on the right, and the lane runs %.1f m to Pit Exit" % [ribbon.length_m - entry_s, entry_lateral, lane_length])
 
@@ -170,9 +170,9 @@ func _test_pit_connection() -> void:
 		lateral_ok = lateral_ok and absf(float(pit.stalls[index]["lateral"]) - PitScript.BOX_LATERAL_M) < 0.001
 	var pitch_ok: bool = true
 	for index: int in range(1, pitches.size()):
-		pitch_ok = pitch_ok and absf(fposmod(pitches[index] - pitches[index - 1], ribbon.length_m) - 12.0) < 0.01
+		pitch_ok = pitch_ok and absf(fposmod(pitches[index] - pitches[index - 1], ribbon.length_m) - 20.0) < 0.01
 	check(names_ok and lateral_ok and pitch_ok,
-		"#W11 ten team boxes Socket_PitStall_0..9 stand 12 m apart outside the fast lane at +%.1f m" % PitScript.BOX_LATERAL_M)
+		"#W11 ten team boxes Socket_PitStall_0..9 stand 20 m apart outside the fast lane at +%.1f m" % PitScript.BOX_LATERAL_M)
 
 	var wall: MeshInstance3D = pit.get_node_or_null("PitWall")
 	var cushion: MeshInstance3D = pit.get_node_or_null("CrashCushion")
@@ -209,8 +209,8 @@ func _test_pit_connection() -> void:
 func _test_pit_polish() -> void:
 	var pit: Node3D = circuit.get_node("PitLane")
 	var first_u: float = float(pit.stalls[0]["u"])
-	check(first_u >= 60.0 and first_u - PitScript.ENTRY_BLEND_M - 18.0 >= 24.0 and is_equal_approx(float(pit.stalls[0]["s"]), 3083.0),
-		"#W41 first stall has at least 24 m of straight fast lane after entry blend and before pull-in; existing garages stay at s=3083 m")
+	check(first_u >= 60.0 and first_u - PitScript.ENTRY_BLEND_M - 18.0 >= 24.0 and is_equal_approx(float(pit.stalls[0]["s"]), 3015.0),
+		"#W41 first stall has at least 24 m of straight fast lane after entry blend and before pull-in; the boxes stand at s=3015 to 3195 m")
 	var apron: bool = true
 	for stall: Dictionary in pit.stalls:
 		apron = apron and pit._surface_right(float(stall["u"])) >= PitScript.BOX_LATERAL_M + 1.2
@@ -231,7 +231,7 @@ func _test_pit_polish() -> void:
 	check(leds != null and leds.multimesh.instance_count == 20 and floors != null and floors.multimesh.instance_count == 10 and entries.size() == 2 and pit.has_node("PitEntrySign"),
 		"#W44 instanced ceiling strips, garage floors, two entry lights and an 80 km/h entry sign complete the lit pit approach")
 	var environment: Node3D = circuit.get_node("Environment")
-	check(is_equal_approx(PitScript.ENTRY_S, 3015.0) and environment._in_pit_gap(PitScript.ENTRY_S - 10.0),
+	check(is_equal_approx(PitScript.ENTRY_S, 2815.0) and environment._in_pit_gap(PitScript.ENTRY_S - 10.0),
 		"#W45 roadside barriers and streetlights leave the extended pit entry mouth clear")
 	var apron_lights: Array = lighting.find_children("ApronLight*", "SpotLight3D", true, false) if lighting != null else []
 	var apron_lit: bool = apron_lights.size() == 10
@@ -344,8 +344,8 @@ func _test_race_weekend_integration() -> void:
 		and is_equal_approx(world.road_width_m, 11.5) \
 		and world.actors.size() == 20 \
 		and world.pit_lane.has_method("sim_layout") \
-		and is_equal_approx(float(world.race.pit_layout["entry_s"]), 3015.0) \
-		and is_equal_approx(float(world.race.pit_layout["stall_pitch_m"]), 12.0)
+		and is_equal_approx(float(world.race.pit_layout["entry_s"]), 2815.0) \
+		and is_equal_approx(float(world.race.pit_layout["stall_pitch_m"]), 20.0)
 	check(integrated,
 		"#W21 a Neo-Wangan race weekend loads the street scene: %.0f m ribbon, %.1f m wide, %d cars, and the sim pits on the street layout" % [world.ribbon.length_m, world.road_width_m, world.actors.size()])
 
