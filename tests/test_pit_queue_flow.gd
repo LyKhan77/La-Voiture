@@ -23,6 +23,8 @@ const OVERLAP_MAX_M: float = 1.0
 const DEEP_OVERLAP_TICKS_MAX: int = 20
 const HOLD_MAX_S: float = 100.0
 const ARRIVAL_WAIT_MAX_S: float = 1.0
+## A serviced car waits for the fast lane at most this long in its box.
+const RELEASE_WAIT_MAX_S: float = Types.PIT_RELEASE_HARD_CAP_S + 0.1
 const SERVICE_DEADLINE_S: float = 420.0
 
 var failures: int = 0
@@ -80,6 +82,7 @@ func _scenario(label: String, spacing: float, speed: float, weather: int) -> voi
 	var since: Dictionary = {}
 	var arrived: Dictionary = {}
 	var worst_arrival_wait: float = 0.0
+	var worst_release_wait: float = 0.0
 	var ticks: int = 0
 	while ticks < int(SERVICE_DEADLINE_S / dt):
 		var before: Dictionary = {}
@@ -91,6 +94,7 @@ func _scenario(label: String, spacing: float, speed: float, weather: int) -> voi
 			if car.pit == null:
 				since.erase(car.id)
 				continue
+			worst_release_wait = maxf(worst_release_wait, car.pit.release_wait_s)
 			if not since.has(car.id):
 				since[car.id] = race.time
 			worst_hold = maxf(worst_hold, race.time - float(since[car.id]))
@@ -124,10 +128,11 @@ func _scenario(label: String, spacing: float, speed: float, weather: int) -> voi
 	var serviced: int = 0
 	for car: CarScript in race.cars:
 		serviced += 1 if car.stops >= 1 and car.pit == null else 0
-	print("  [%s] serviced=%d/20 time=%.0fs decel=%.1f teleport=%.2f gap=%.2f hold=%.0fs" % [label, serviced, race.time, max_decel, max_teleport, min_gap, worst_hold])
+	print("  [%s] serviced=%d/20 time=%.0fs decel=%.1f teleport=%.2f gap=%.2f hold=%.0fs release_wait=%.1fs" % [label, serviced, race.time, max_decel, max_teleport, min_gap, worst_hold, worst_release_wait])
 	check(serviced == race.cars.size(), "%s: every car is serviced and released" % label)
 	check(worst_hold <= HOLD_MAX_S, "%s: no car holds the pit lane longer than %.0f s" % [label, HOLD_MAX_S])
 	check(worst_arrival_wait <= ARRIVAL_WAIT_MAX_S, "%s: service starts right after a car reaches its box (%.2f s)" % [label, worst_arrival_wait])
+	check(worst_release_wait <= RELEASE_WAIT_MAX_S, "%s: no serviced car waits in its box longer than %.0f s for the lane (%.1f s)" % [label, Types.PIT_RELEASE_HARD_CAP_S, worst_release_wait])
 	check(max_decel <= LANE_DECEL_MAX, "%s: lane braking stays comfortable (%.1f m/s2)" % [label, max_decel])
 	check(max_teleport <= TELEPORT_MAX_M, "%s: no car is pushed or teleported (%.2f m)" % [label, max_teleport])
 	check(deep_overlap_ticks <= DEEP_OVERLAP_TICKS_MAX, "%s: no car drives into another: %d car-pair ticks overlap by more than %.1f m (deepest %.2f m, closest bumper gap %.2f m)" % [label, deep_overlap_ticks, OVERLAP_MAX_M, deepest_overlap, min_gap])

@@ -1085,8 +1085,11 @@ func _service_car(car: GtCar, pit: GtPit, dt: float) -> void:
 	else:
 		pit.lift_y = minf(0.15, maxf(0.0, (pit.duration - pit.timer) * 0.45))
 	if pit.timer >= pit.duration:
-		if (_pit_exit_blocked(car, car.s - pit.start_s) and pit.release_wait_s < GtTypes.PIT_RELEASE_WAIT_MAX_S) or _pit_merge_unsafe(car, car.s - pit.start_s):
+		var blocked: bool = _pit_exit_blocked(car, car.s - pit.start_s) and pit.release_wait_s < GtTypes.PIT_RELEASE_WAIT_MAX_S
+		# The unsafe-merge check has no cap of its own: past the hard cap the car goes, so a serviced car never sits in its box for good.
+		if (blocked or _pit_merge_unsafe(car, car.s - pit.start_s)) and pit.release_wait_s < GtTypes.PIT_RELEASE_HARD_CAP_S:
 			pit.release_wait_s += dt
+			pit.holding_release = true
 			pit.lift_y = 0.0
 			return
 		car.compound = pit.compound
@@ -1104,5 +1107,6 @@ func _service_car(car: GtCar, pit: GtPit, dt: float) -> void:
 		car.stops += 1
 		pit.lift_y = 0.0
 		pit.wheel_swap_progress = 1.0
+		pit.holding_release = false
 		pit.phase = GtTypes.PitPhase.OUT
 		race.push_radio(car, "engineer", "Good stop: %.1fs.%s Out now, watch pit exit." % [pit.timer, " Wing replaced," if had_damage else ""])

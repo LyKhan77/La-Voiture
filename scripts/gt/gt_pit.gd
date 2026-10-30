@@ -21,6 +21,8 @@ var penalty_taken: bool = false
 var elapsed: float = 0.0
 ## Seconds the finished stop waited for the fast lane behind to clear before the car pulled out.
 var release_wait_s: float = 0.0
+## True while the finished stop waits in the box for the lane to clear: the crew holds the lollipop red.
+var holding_release: bool = false
 ## Seconds the car sat still with nothing but traffic to blame; past the failsafe it stops yielding.
 var stalled_s: float = 0.0
 ## Seconds a car pulling out held its line for a car passing on the fast lane.

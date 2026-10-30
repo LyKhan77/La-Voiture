@@ -65,6 +65,8 @@ const PIT_GAP_RECOVERY_GAIN: float = 1.5
 ## A box release waits at most this long for the fast lane behind to clear; a car held still this long
 ## by traffic stops yielding to it (nothing may keep a pit scene stuck).
 const PIT_RELEASE_WAIT_MAX_S: float = 12.0
+## Nothing holds a serviced car in its box longer than this, not even a stream of cars on the fast lane.
+const PIT_RELEASE_HARD_CAP_S: float = 20.0
 ## A car pulling out waits this long, outside the fast lane's band, for the cars on it to pass before it merges anyway.
 const PIT_MERGE_WAIT_MAX_S: float = 12.0
 const PIT_STALL_FAILSAFE_S: float = 15.0

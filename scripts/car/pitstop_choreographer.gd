@@ -17,7 +17,8 @@ signal job_finished(car_id: int)
 ## A mechanic's wheel gun runs: once as a wheel comes off, once as the new one goes on.
 signal pit_gun_fired(car_id: int, corner: int, removing: bool)
 
-enum Phase { LIFTING, SERVICING, LOWERING, RELEASE }
+## HOLD: the stop is done but the lane is not clear, so the board stays down (red) and nobody works.
+enum Phase { LIFTING, SERVICING, LOWERING, RELEASE, HOLD }
 enum CrewState { STANDBY, WALKING_OUT, READY, WALKING_BACK }
 
 const PitKit := preload("res://scripts/world/shared/pit_kit.gd")
@@ -606,7 +607,7 @@ func _wait_or_work(crew: Crew, delta: float, working: bool) -> void:
 ## on the box, lifts it, swaps tyres on its stop timer), the crew only acts it out.
 ## `progress` is the sim's wheel_swap_progress 0..1, `lift_m` its jack height. Call every
 ## frame for a car in its box; call with in_service = false once it has left.
-func present(car_id: int, team: int, actor: Node3D, compound: int, in_service: bool, progress: float, lift_m: float) -> void:
+func present(car_id: int, team: int, actor: Node3D, compound: int, in_service: bool, progress: float, lift_m: float, holding: bool = false) -> void:
 	var job: Job = get_job(car_id)
 	if not in_service:
 		if job != null:
@@ -619,7 +620,9 @@ func present(car_id: int, team: int, actor: Node3D, compound: int, in_service: b
 	job.lift_m = lift_m
 	if job.chassis != null:
 		job.chassis.position.y = lift_m
-	if progress < 0.09:
+	if holding:
+		job.phase = Phase.HOLD
+	elif progress < 0.09:
 		job.phase = Phase.LIFTING
 	elif progress < 0.86:
 		job.phase = Phase.SERVICING
@@ -629,6 +632,8 @@ func present(car_id: int, team: int, actor: Node3D, compound: int, in_service: b
 		job.phase = Phase.RELEASE
 	if job.phase == Phase.SERVICING:
 		_service_wheels_at(job, clampf((progress - 0.09) / 0.77, 0.0, 1.0))
+	elif job.phase == Phase.HOLD:
+		_animate_lollipop(job, 0.0)
 	elif job.phase == Phase.RELEASE:
 		_animate_lollipop(job, clampf((progress - 0.94) / 0.06, 0.0, 1.0))
 	elif job.phase == Phase.LIFTING:

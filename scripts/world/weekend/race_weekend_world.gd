@@ -338,7 +338,7 @@ func _present_pit(actor: ActorScript) -> void:
 	var car: CarScript = actor.car
 	var in_box: bool = car.pit != null and car.pit.phase == Types.PitPhase.BOX and car.v < 0.8 and car.pit.timer > 0.0
 	if in_box:
-		choreographer.present(car.id, car.team_id, actor, car.pit.compound, true, car.pit.wheel_swap_progress, car.pit.lift_y)
+		choreographer.present(car.id, car.team_id, actor, car.pit.compound, true, car.pit.wheel_swap_progress, car.pit.lift_y, car.pit.holding_release)
 	elif choreographer.get_job(car.id) != null:
 		choreographer.present(car.id, car.team_id, actor, car.compound, false, 1.0, 0.0)
 
