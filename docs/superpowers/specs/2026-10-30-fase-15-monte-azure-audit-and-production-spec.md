@@ -288,3 +288,25 @@ Perbedaan antara SPEC di atas dan kode yang dikirim, dengan alasannya. Setiap bu
 | 11 | §4.4.3: zona strip tidak punya objek paddock | gudang rata 4,5–8 m di zona paddock | Dataran kosong 1.100 m terbaca sebagai lahan parkir raksasa pada Cam 1 dan 6 |
 | 12 | — | shader baru `shaders/monte_azure_facade.gdshader` | `neo_wangan_skyline` hanya menyalakan jendela malam; Monte butuh dinding, kerai, kornis, atap dan jendela siang |
 | 13 | — | `tests/test_monte_azure_terrain_gate.gd` #G14: normal terrain menghadap atas | Terrain pertama terbungkus ke bawah (tidak tampak); tes mesh biasa tidak melihatnya karena `get_faces()` tidak peduli sisi |
+
+### 9b. Putaran uji main developer (2026-10-30, setelah commit def3826)
+
+Tiga temuan dari uji main; semuanya direproduksi dengan tes yang merah dahulu, lalu diperbaiki di akar masalah. Butir 14–18 mengubah angka §4.3 (lane 320 → 420 m, kotak 12 → 20 m, entry lateral 5,2 → 4,6).
+
+| # | SPEC / paket | Dikirim | Alasan dan bukti |
+|---|---|---|---|
+| 14 | §4.4.5: GLB terowongan dipakai apa adanya | Dua slab `dark` yang menyumbat mulut dan dua blok portal beton (3,5 m × 23 m × 10 m) dibuang; tiap mulut diganti rangka (dua pilar dan lintel) di sekeliling bore 15 × 7,4 m; permukaan yang menghadap ke bore (reveal, dinding samping) memakai liner gelap tanpa kontur tinta | Paket memodelkan bukaan sebagai pelat gelap yang dicat, dan di belakangnya blok beton menutup seluruh muka. Tes `test_monte_azure_landmarks` #L8c (40 sinar sepanjang jalan, dua arah, tinggi 0,6–5 m): 40/40 terblokir sebelum, 0/40 sesudah; mutasi (pembuka dimatikan) membuatnya merah lagi di s=1.255 dan s=1.405 |
+| 15 | §4.3: kotak pitch 12 m, lane 320 m, ramp 40/80 m | Kotak **20 m**, lane **420 m** (exit s=360, 260 m sebelum Sainte Devote), ramp 60 m masuk dan 100 m keluar; gedung pit 204 m, garasi 16,4 m, menara kontrol 116 m dari tengah gedung, tribun 200 m berpusat di s=95 | Pit macet bukan karena lebar lajur (jalur cepat 4,5 m + lajur kerja 5,3 m cukup) tetapi karena pitch: dua mobil satu tim ditumpuk (yang kedua menunggu 8 m di belakang yang pertama), dan pada 12 m mobil antrean untuk kotak berikutnya berdiri bumper ke bumper dengan mobil di kotak ini. Mobil hanya bisa keluar dari kotak terdepan lebih dulu (urutan terbalik) dan mobil saling menembus: `test_monte_azure_pit_flood` melaporkan 523 dan 465 tick tumpang tindih (batas 20) pada skenario kereta 30 m dan rapat 20 m |
+| 16 | — | `GtDriving._queue_behind_teammate`: mobil antrean berhenti di belakang mobil yang ditahan di merge di lajur kotak, bukan masuk ke atasnya | Dengan pitch 20 m mobil yang ditahan merayap sampai tempat antrean kotak berikutnya, dan antrean masuk ke atasnya (skenario menyebar: 97 tick tumpang tindih). Satu-satunya perubahan sim bersama. `test_pit_queue_flow` (Apex) 0/17/0/12 → 0/17/0/0 tick; semua 13 suite `pit` lulus |
+| 17 | §4.3: lateral mulut 5,2 | **4,6** | Pada 5,2 sisi luar mobil (6,24) menembus muka dalam barrier beton (5,925) sejauh 0,3 m di sepanjang pendekatan. Tes #P23 |
+| 18 | §4.3: aspal lane mulai di u=0 dan berakhir di u=LANE, tepi sirkuit di 6,25 | Aspal tumbuh dari tepi jalan 45 m sebelum entry dan memudar 55 m setelah exit; tepi sisi sirkuit selalu bersama dengan tepi jalan (tidak ada jalur dek polos di antara jalan dan lane); celah barrier mengikuti ekor itu; atenuator oranye di dua ujung barrier | Tampilan sebelumnya: aspal lane mulai mendadak di garis entry dan runcing di ujung exit, dengan celah 0,3–0,4 m antara tepi jalan dan aspal lane sepanjang ramp. Tes #P20–#P23 (aspal membawa lebar mobil di seluruh lane dan ekor, jalur tanpa tekukan, mobil bebas dari barrier); mutasi: lateral 5,2 membuat #P2 #P8 #P20 #P23 merah |
+
+Hasil `test_monte_azure_pit_flood` (kereta 30 m, rapat 20 m, menyebar, lapangan yang dibalap):
+
+| Metrik | Sebelum (12 m) | Sesudah (20 m + perbaikan antrean) |
+|---|---|---|
+| Tick tumpang tindih > 1 m (batas 20) | 523 / 465 / 0 / 2 | 14 / 11 / 7 / 2 |
+| Waktu diam terlama di luar kotak | 18,8 / 18,8 / 15,0 / 20,1 dtk | 16,3 / 14,7 / 7,4 / 14,1 dtk |
+| Lane kosong setelah panggilan pertama | 101 / 122 dtk (kereta, rapat) | 86 / 85 dtk |
+
+Sisa menunggu (10–16 dtk) adalah aturan yang disengaja: mobil yang selesai dilayani menunggu sampai lajur cepat di belakangnya bebas dari mobil yang melaju (§ rilis aman). Pada aliran 20 mobil yang rapat tidak ada celah, sehingga menunggu sampai aliran lewat. Sirkuit lain (Apex 14 m, Brianza 14 m, Neo-Wangan 12 m) memakai pitch sempit yang sama; angkanya belum diukur dengan tes tumpang tindih per sirkuit.

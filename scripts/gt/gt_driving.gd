@@ -1007,6 +1007,12 @@ func _queue_behind_teammate(car: GtCar, pit: GtPit, rel: float, steer: bool = tr
 	var deepest: float = float(race.pit_layout["stall_pitch_m"]) - GtTypes.CAR_LENGTH_M - 0.5
 	var queue_gap: float = maxf(minf(float(race.pit_layout["queue_gap_m"]), deepest), minf(GtTypes.CAR_LENGTH_M + 0.5, deepest))
 	var stop_s: float = minf(pit.box_s - queue_gap, _teammate_ahead.s - GtTypes.PIT_TEAMMATE_GAP_M)
+	# A car held at the merge stands in the stall lane ahead of the queue spot (it pulled out of the previous box and waits
+	# for the fast lane): the queue stops short of its tail instead of easing in on top of it.
+	for other: GtCar in race.cars:
+		if other != car and other.pit != null and other.pit.phase == GtTypes.PitPhase.OUT and other.s > car.s and other.s < stop_s + GtTypes.CAR_LENGTH_M \
+				and absf(other.lateral - float(race.pit_layout["stall_lane_m"])) < PIT_LANE_BAND_M:
+			stop_s = minf(stop_s, other.s - GtTypes.CAR_LENGTH_M - GtTypes.PIT_FOLLOW_GAP_M)
 	var room: float = stop_s - car.s
 	# Swing onto the working lane only once abreast of the box, never while the previous box is still alongside.
 	var join: float = 1.0 - clampf((pit.box_s - car.s - 7.0) / 3.5, 0.0, 1.0)

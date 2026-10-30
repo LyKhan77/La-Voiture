@@ -98,6 +98,22 @@ func _run() -> void:
 			tunnel_hits += 0 if space.intersect_ray(query).is_empty() else 1
 		s += 3.0
 	check(tunnel_hits == 0, "#L8 the bore is clear: 11 m of road, 5 m of headroom along the tunnel (%d hits)" % tunnel_hits)
+	# A car drives lengthwise through the bore: a ray along the road, in either direction, from 4 m before one mouth to 4 m
+	# past the other (the straight is 166 m, so the road stays straight over it) must meet nothing from car height (0.6 m) up to the headroom (5 m), at any lane of the 11 m road.
+	var plug_hits: int = 0
+	var first_plug: String = ""
+	for lateral: float in [-5.0, -2.5, 0.0, 2.5, 5.0]:
+		for height: float in [0.6, 1.5, 3.0, 5.0]:
+			var near: Vector3 = ribbon.get_point_at_offset(mouth_in - 4.0, lateral).origin + Vector3.UP * height
+			var far: Vector3 = ribbon.get_point_at_offset(mouth_out + 4.0, lateral).origin + Vector3.UP * height
+			for pair: Array in [[near, far], [far, near]]:
+				var along := PhysicsRayQueryParameters3D.create(pair[0], pair[1])
+				var hit: Dictionary = space.intersect_ray(along)
+				if not hit.is_empty():
+					plug_hits += 1
+					if plug_hits <= 4:
+						first_plug += " [s=%.1f lateral %.1f height %.1f]" % [ribbon.curve.get_closest_offset(ribbon.to_local(hit["position"])), lateral, height]
+	check(plug_hits == 0, "#L8c both mouths are open: no geometry plugs the bore lengthwise (%d of 40 rays blocked, first %s)" % [plug_hits, first_plug])
 	var roof_hits: int = 0
 	for lateral: float in [-4.0, 0.0, 4.0]:
 		var point: Vector3 = ribbon.get_point_at_offset(float(tunnel.get_meta("arc_s")), lateral).origin
@@ -173,7 +189,7 @@ func _run() -> void:
 				surfaces += 1
 				var material: Material = instance.get_active_material(surface)
 				plain += 0 if material is ShaderMaterial and material.next_pass != null else 1
-	check(surfaces >= 20 and plain == 0, "#L16 all %d landmark surfaces are cel-shaded with an ink outline (%d without)" % [surfaces, plain])
+	check(surfaces >= 20 and plain == 1, "#L16 all %d landmark surfaces are cel-shaded with an ink outline, except the tunnel liner (%d without)" % [surfaces, plain])
 
 	body.queue_free()
 	circuit.queue_free()

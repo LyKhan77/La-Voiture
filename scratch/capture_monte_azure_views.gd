@@ -66,6 +66,10 @@ func _run() -> void:
 			await _pit_set(suffix)
 		"fly":
 			await _fly_set(suffix)
+		"tunnel":
+			await _tunnel_set(suffix)
+		"pitjoin":
+			await _pit_join_set(suffix)
 	world.free()
 	camera.free()
 	quit(1 if failures else 0)
@@ -102,6 +106,36 @@ func _pit_set(suffix: String) -> void:
 		await _capture("%s-%s" % [shot[0], suffix], _look(shot))
 
 
+## Both tunnel mouths from outside, from the side, and from inside looking out.
+func _tunnel_set(suffix: String) -> void:
+	for shot: Array in [
+		["tunnel-in-near", 1225.0, 0.0, 2.0, 1300.0, 0.0, 2.5],
+		["tunnel-in-side", 1215.0, 16.0, 4.0, 1262.0, -2.0, 3.0],
+		["tunnel-out-near", 1435.0, 0.0, 2.0, 1360.0, 0.0, 2.5],
+		["tunnel-out-side", 1445.0, -16.0, 4.0, 1398.0, 2.0, 3.0],
+		["tunnel-inside-out", 1280.0, 0.0, 1.6, 1405.0, 0.0, 3.0],
+		["tunnel-inside-in", 1380.0, 0.0, 1.6, 1255.0, 0.0, 3.0],
+	]:
+		await _capture("%s-%s" % [shot[0], suffix], _look(shot))
+
+
+## Where the pit lane leaves and rejoins the track: entry from the track (behind and beside), exit from the lane and from above.
+func _pit_join_set(suffix: String) -> void:
+	for shot: Array in [
+		["join-entry-approach", 2700.0, 0.0, 3.2, 2800.0, 7.0, 1.0],
+		["join-entry-top", 2760.0, 14.0, 45.0, 2800.0, 7.0, 0.0],
+		["join-entry-lane", 2775.0, 6.0, 2.2, 2840.0, 9.0, 1.0],
+		["join-exit-lane", 190.0, 9.0, 2.2, 290.0, 4.0, 1.0],
+		["join-exit-top", 250.0, 14.0, 45.0, 280.0, 3.0, 0.0],
+		["join-exit-track", 230.0, 0.0, 3.2, 330.0, 0.0, 1.0],
+	]:
+		await _capture("%s-%s" % [shot[0], suffix], _look(shot))
+	# Plans: the mouth of the lane and the 120 m around it, straight down.
+	await _plan("plan-entry-%s" % suffix, 2800.0, 8.0, 85.0)
+	await _plan("plan-exit-%s" % suffix, 260.0, 8.0, 85.0)
+	await _plan("plan-exit-late-%s" % suffix, 320.0, 8.0, 85.0)
+
+
 func _fly_set(suffix: String) -> void:
 	var count: int = ceili(world.ribbon.length_m / 150.0)
 	for direction: int in [1, -1]:
@@ -135,3 +169,11 @@ func _hide_canvas_layers(node: Node) -> void:
 		node.visible = false
 	for child: Node in node.get_children():
 		_hide_canvas_layers(child)
+
+
+## Straight down on a road station, the road's heading up the screen, to read a layout as a plan.
+func _plan(name: String, s: float, lateral: float, height: float) -> void:
+	var pose: Transform3D = world.ribbon.get_point_at_offset(s, lateral)
+	var forward: Vector3 = -pose.basis.z
+	var origin: Vector3 = pose.origin + Vector3.UP * height
+	await _capture(name, Transform3D(Basis.looking_at(Vector3.DOWN, forward), origin))

@@ -313,11 +313,11 @@ func _on_skybridge(s: float, margin: float = 0.0) -> bool:
 	return absf(s - SKYBRIDGE_S) <= SKYBRIDGE_HALF_M + margin
 
 
-## The right-hand run is open for the pit entry, the pit wall and the exit merge: a car leaving the lane is still on the
-## road's edge at the exit mouth (lateral 5.2), so the barrier resumes 40 m after it.
+## The right-hand run is open for the pit entry, the pit wall and the exit merge, exactly as far as the pit asphalt runs on past
+## the mouths (TAIL_IN_M before the entry, TAIL_OUT_M after the exit): a car leaving the lane is still on the road's edge there.
 func _in_pit_gap(s: float) -> bool:
-	var from: float = PitComplex.ENTRY_S - 25.0
-	var until: float = PitComplex.EXIT_S + 40.0
+	var from: float = PitComplex.ENTRY_S - PitComplex.TAIL_IN_M
+	var until: float = PitComplex.EXIT_S + PitComplex.TAIL_OUT_M
 	return fposmod(s - from, ribbon.length_m) <= fposmod(until - from, ribbon.length_m)
 
 

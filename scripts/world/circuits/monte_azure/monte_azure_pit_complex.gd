@@ -1,10 +1,10 @@
 class_name MonteAzurePitComplex
 extends "res://scripts/world/circuits/base/circuit_pit_complex.gd"
 
-## The FIA pit connection of Monte Azure Marina (Round 04, FASE 15): a 320 m fast lane on the quay side of the start
-## straight, ten 12 m team boxes, a concrete pit wall with an orange impact attenuator on its nose, and the paddock
+## The FIA pit connection of Monte Azure Marina (Round 04, FASE 15): a 420 m fast lane on the quay side of the start
+## straight, ten 20 m team boxes, a concrete pit wall with an orange impact attenuator on its nose, and the paddock
 ## (pit building, race control tower, team transporters) behind it. The main grandstand stands across the road on the
-## harbour side. It peels off 60 m before the line (s=2790) and rejoins 260 m after it, before Sainte Devote.
+## harbour side. It peels off 60 m before the line (s=2790) and rejoins 360 m after it, 260 m before Sainte Devote.
 ##
 ## Laterals are metres right of the racing line. The street road is 11 m wide, so the whole lane is the compact Neo-Wangan
 ## cross-section moved 0.25 m in; both circuits publish the same offsets between wall, fast lane, boxes and garages:
@@ -12,9 +12,14 @@ extends "res://scripts/world/circuits/base/circuit_pit_complex.gd"
 ##   5.75           pit wall (0.5 thick, 1.2 high); its nose carries the crash cushion
 ##   6.25 .. 10.75  fast lane, 4.5 m, cars run down its middle at 8.5
 ##   10.75 .. 16.0  working lane, the box car stops at 13.0
-##   16.0 .. 25.0   ten garages on the 12 m pitch; the pit building front stands at 15.5
-## The lane ramps out and back inside its own 320 m (40 m in, 80 m out), as Brianza's does, so the exit mouth is
-## already on the circuit's edge (lateral 5.2) at s=260.
+##   16.0 .. 25.0   ten garages on the 20 m pitch; the pit building front stands at 15.5
+## A box is 20 m because a team's two cars double-stack: the second waits 8 m behind the first, and a car leaving its box
+## needs room to swing out past the car queued for the next one. On the 12 m pitch it had none: the queued car stood nose
+## to tail against the box car, boxes could only release last box first, and cars drove through each other.
+## The lane ramps out and back inside its own 420 m (60 m in, 100 m out) and runs on as asphalt past both mouths (45 m
+## before the entry, 55 m after the exit) sharing the road's edge, so it grows out of the road and fades back into it
+## with no hard start. The cars' path leaves the road along its edge at lateral 4.6: a car there is 0.3 m clear of the
+## concrete barrier.
 
 const MeshBatchScript := preload("res://scripts/world/shared/mesh_batch.gd")
 const ToonMaterials := preload("res://scripts/world/shared/toon_materials.gd")
@@ -27,18 +32,23 @@ const FigureScript := preload("res://scripts/car/pit_crew_figure.gd")
 
 const LAP_LENGTH_M: float = 2850.0
 const ENTRY_S: float = 2790.0 # 60 m before the start/finish line
-const EXIT_S: float = 260.0 # 260 m after it, 360 m before Sainte Devote
-const LANE_LENGTH_M: float = 320.0
+const EXIT_S: float = ENTRY_S + LANE_LENGTH_M - LAP_LENGTH_M # 360 m after the line, 260 m before Sainte Devote
+const LANE_LENGTH_M: float = 420.0
 const SPEED_LIMIT_MPS: float = 80.0 / 3.6
 
 const STALL_COUNT: int = 10
-const STALL_PITCH_M: float = 12.0
-## The first box stands at s=46 (lane middle s=100, the ten boxes span s 40..160).
+const STALL_PITCH_M: float = 20.0
+## The first box stands at s=46 (the ten boxes span s 36..226, the lane middle is s=136).
 const STALL_FIRST_S: float = 46.0
 const STALL_FIRST_OFFSET_M: float = STALL_FIRST_S + LAP_LENGTH_M - ENTRY_S
 
 const ROAD_EDGE_M: float = 5.5 # half of the circuit's 11 m road
-const ENTRY_LATERAL_M: float = 5.2 # both mouths, on the right edge of the road
+const ENTRY_LATERAL_M: float = 4.6 # both mouths: along the road's right edge, a car's outer side 0.3 m clear of the barrier
+## The asphalt runs on past the mouths so the lane grows out of the road and fades back into it; the barrier gap matches.
+const TAIL_IN_M: float = 45.0
+const TAIL_OUT_M: float = 55.0
+## Where the street barrier runs (MonteAzureEnvironment.BARRIER_LATERAL_M, which the layout test holds equal).
+const STREET_BARRIER_LATERAL_M: float = 6.2
 const PIT_WALL_M: float = 5.75
 const FAST_LANE_M: float = 8.5
 const FAST_LANE_HALF_M: float = 2.25
@@ -46,9 +56,9 @@ const BOX_LATERAL_M: float = 13.0
 const GARAGE_FRONT_M: float = 16.0
 const GARAGE_DEPTH_M: float = 9.0
 const GARAGE_HEIGHT_M: float = 4.4
-const GARAGE_WIDTH_M: float = 11.4
-const ENTRY_BLEND_M: float = 40.0
-const EXIT_BLEND_M: float = 80.0
+const GARAGE_WIDTH_M: float = 16.4
+const ENTRY_BLEND_M: float = 60.0
+const EXIT_BLEND_M: float = 100.0
 const WALL_HALF_THICKNESS_M: float = 0.25
 const WALL_HEIGHT_M: float = 1.2
 ## The wall stands only where the cars are on the fast lane: after the entry blend, before the exit blend.
@@ -56,13 +66,13 @@ const WALL_START_U: float = ENTRY_BLEND_M - 2.0
 const WALL_END_U: float = LANE_LENGTH_M - EXIT_BLEND_M - 2.0
 ## Where the transporter row stands, measured from the circuit centre line: on the deck behind the pit building.
 const TRANSPORTER_LATERAL_M: float = 40.0
-## The main grandstand's front, on the harbour side of the road, and its length (centred on s=75).
+## The main grandstand's front, on the harbour side of the road, and its length (centred on s=95, across from the boxes).
 const STAND_FRONT_M: float = 21.5
-const STAND_LENGTH_M: float = 160.0
-const STAND_CENTRE_S: float = 75.0
-## The control tower stands 76 m beyond the building's middle, 14 m clear of the 124 m building's end.
-const BUILDING_LENGTH_M: float = 124.0
-const TOWER_OFFSET_M: float = 76.0
+const STAND_LENGTH_M: float = 200.0
+const STAND_CENTRE_S: float = 95.0
+## The control tower stands 116 m beyond the building's middle, 14 m clear of the 204 m building's end.
+const BUILDING_LENGTH_M: float = 204.0
+const TOWER_OFFSET_M: float = 116.0
 
 const SURFACE_Y: float = 0.015
 const LINE_Y: float = 0.03
@@ -171,6 +181,7 @@ func build(p_ribbon: TrackRibbonScript, team_ids: Array[int] = []) -> void:
 	_build_markings()
 	_build_pit_wall()
 	_build_crash_cushion()
+	_build_barrier_terminals()
 	_build_garages()
 	_build_team_transporters()
 	_build_shared_paddock()
@@ -220,16 +231,19 @@ func _build_stalls() -> void:
 		})
 
 
-## The pit asphalt: entry mouth, 4.5 m fast lane, working lane in front of the garages and the exit mouth.
+## The pit asphalt: the tail that grows out of the road before the entry, the entry mouth, the 4.5 m fast lane, the working
+## lane in front of the garages, the exit mouth and the tail that fades back into the road after it.
 func _build_asphalt() -> void:
 	asphalt = MeshInstance3D.new()
 	asphalt.name = "PitAsphalt"
 	var batch := MeshBatchScript.new()
 	var material: Material = ToonMaterials.vertex_colored(false)
-	var steps: int = ceili(LANE_LENGTH_M / STEP_M)
+	var from_u: float = -TAIL_IN_M
+	var span: float = LANE_LENGTH_M + TAIL_OUT_M - from_u
+	var steps: int = ceili(span / STEP_M)
 	for index: int in range(steps):
-		var ua: float = LANE_LENGTH_M * float(index) / float(steps)
-		var ub: float = LANE_LENGTH_M * float(index + 1) / float(steps)
+		var ua: float = from_u + span * float(index) / float(steps)
+		var ub: float = from_u + span * float(index + 1) / float(steps)
 		batch.quad(material, ASPHALT_COLOR,
 			_at(ua, _surface_left(ua), SURFACE_Y), _at(ub, _surface_left(ub), SURFACE_Y),
 			_at(ub, _surface_right(ub), SURFACE_Y), _at(ua, _surface_right(ua), SURFACE_Y), Vector3.UP)
@@ -238,22 +252,33 @@ func _build_asphalt() -> void:
 	add_child(asphalt)
 
 
-## The asphalt's circuit-side edge: on the road's edge at the mouths, the fast lane's inner edge between.
-func _surface_left(u: float) -> float:
-	var inner: float = FAST_LANE_M - FAST_LANE_HALF_M
-	if u <= ENTRY_BLEND_M:
-		return lerpf(ROAD_EDGE_M, inner, smoothstep(0.0, ENTRY_BLEND_M, u))
-	return lerpf(inner, ROAD_EDGE_M, smoothstep(LANE_LENGTH_M - EXIT_BLEND_M, LANE_LENGTH_M, u))
+## The asphalt's circuit-side edge: shared with the road, 0.1 m under its edge so no seam shows, along the whole lane and
+## both tails. The pit wall and the fast lane's yellow line stand on it; there is never a strip of bare deck between the
+## road and the lane for a car's wheels to cross.
+func _surface_left(_u: float) -> float:
+	return ROAD_EDGE_M - 0.1
 
 
-## The asphalt's outer edge: the fast lane's, pushed out to the garage fronts along the ten boxes.
+## The asphalt's outer edge: at each mouth it is as wide as a car's path needs, the fast lane's edge between, pushed out
+## to the garage fronts along the ten boxes, and zero-width at the far ends of the tails (the road's own edge).
 func _surface_right(u: float) -> float:
+	var mouth: float = ENTRY_LATERAL_M + FAST_LANE_HALF_M
+	if u < 0.0:
+		return lerpf(ROAD_EDGE_M, mouth, smoothstep(-TAIL_IN_M, -TAIL_IN_M * 0.4, u))
+	if u > LANE_LENGTH_M:
+		return lerpf(mouth, ROAD_EDGE_M, smoothstep(LANE_LENGTH_M + TAIL_OUT_M * 0.6, LANE_LENGTH_M + TAIL_OUT_M, u))
 	var fast_edge: float = FAST_LANE_M + FAST_LANE_HALF_M
-	var base: float = lerpf(ENTRY_LATERAL_M + FAST_LANE_HALF_M, fast_edge, smoothstep(0.0, ENTRY_BLEND_M, u))
-	base = lerpf(base, ROAD_EDGE_M, smoothstep(LANE_LENGTH_M - EXIT_BLEND_M, LANE_LENGTH_M, u))
+	var base: float = lerpf(mouth, fast_edge, smoothstep(0.0, ENTRY_BLEND_M, u))
+	base = lerpf(base, mouth, smoothstep(LANE_LENGTH_M - EXIT_BLEND_M, LANE_LENGTH_M, u))
 	var last_box: float = STALL_FIRST_OFFSET_M + STALL_PITCH_M * float(STALL_COUNT - 1)
 	var apron: float = smoothstep(STALL_FIRST_OFFSET_M - 24.0, STALL_FIRST_OFFSET_M - 8.0, u) * (1.0 - smoothstep(last_box + 12.0, last_box + 32.0, u))
 	return lerpf(base, GARAGE_FRONT_M, apron)
+
+
+## The pit asphalt's two edges (lateral, left then right) at `u` metres from Pit Entry; `u` runs from -TAIL_IN_M to
+## LANE_LENGTH_M + TAIL_OUT_M.
+func asphalt_edges(u: float) -> Vector2:
+	return Vector2(_surface_left(u), _surface_right(u))
 
 
 func _at(u: float, lateral_m: float, y: float) -> Vector3:
@@ -273,7 +298,7 @@ func _build_markings() -> void:
 				_at(ua, left.call(ua), y), _at(ub, left.call(ub), y),
 				_at(ub, right.call(ub), y), _at(ua, right.call(ua), y), Vector3.UP)
 	# The fast lane's two limits: yellow on the pit wall side, white on the working lane side.
-	add_band.call(WALL_START_U, WALL_END_U, func(u: float) -> float: return _surface_left(u) + 0.25, func(u: float) -> float: return _surface_left(u) + 0.55, PAINT_YELLOW, LINE_Y)
+	add_band.call(WALL_START_U, WALL_END_U, func(_u: float) -> float: return FAST_LANE_M - FAST_LANE_HALF_M + 0.25, func(_u: float) -> float: return FAST_LANE_M - FAST_LANE_HALF_M + 0.55, PAINT_YELLOW, LINE_Y)
 	add_band.call(ENTRY_BLEND_M, LANE_LENGTH_M - EXIT_BLEND_M, func(_u: float) -> float: return FAST_LANE_M + FAST_LANE_HALF_M - 0.55, func(_u: float) -> float: return FAST_LANE_M + FAST_LANE_HALF_M - 0.25, PAINT_WHITE, LINE_Y)
 	# Yellow limiter lines across the lane at Pit Entry and Pit Exit.
 	add_band.call(0.0, 1.2, func(u: float) -> float: return _surface_left(u), func(u: float) -> float: return _surface_right(u), PAINT_YELLOW, LINE_Y + 0.004)
@@ -339,7 +364,25 @@ func _build_crash_cushion() -> void:
 	_solid_footprints.append({"name": "cushion", "u0": WALL_START_U - 2.4, "u1": WALL_START_U, "lat0": PIT_WALL_M - 0.55, "lat1": PIT_WALL_M + 0.55})
 
 
-## Ten team garages on the 12 m stall pitch, each an open-mouthed box with a glowing frontage.
+## The same attenuator on the street barrier's two ends, where the right-hand barrier stops for the pit lane: its end
+## faces the cars on the entry run and the cars merging back after the exit, which a bare concrete end would not forgive.
+func _build_barrier_terminals() -> void:
+	var batch := MeshBatchScript.new()
+	var orange: Material = ToonMaterials.vertex_colored(false)
+	for u: float in [-TAIL_IN_M + 1.4, LANE_LENGTH_M + TAIL_OUT_M - 1.4]:
+		var pose: Transform3D = get_pit_transform(u, STREET_BARRIER_LATERAL_M)
+		pose.origin += Vector3.UP * 0.55
+		batch.box(orange, CUSHION_ORANGE, Transform3D(pose.basis, pose.origin), Vector3(0.9, 1.1, 2.4))
+		for band: int in range(3):
+			var offset: Vector3 = pose.basis.z * (0.55 - float(band) * 0.55)
+			batch.box(orange, CUSHION_WHITE, Transform3D(pose.basis, pose.origin + offset), Vector3(0.94, 1.16, 0.22))
+	var terminals := MeshInstance3D.new()
+	terminals.name = "BarrierTerminals"
+	terminals.mesh = batch.commit()
+	add_child(terminals)
+
+
+## Ten team garages on the 20 m stall pitch, each an open-mouthed box with a glowing frontage.
 func _build_garages() -> void:
 	garages.clear()
 	var batch := MeshBatchScript.new()
@@ -417,7 +460,7 @@ func _build_shared_paddock() -> void:
 	stand.name = "MainGrandstand"
 	stand.stand_length_m = STAND_LENGTH_M
 	stand.accent_color = ACCENT
-	# Across the road on the harbour side, centred on s=75; the kit's own front is at local -19 m.
+	# Across the road on the harbour side, centred on s=95; the kit's own front is at local -19 m.
 	var stand_pose: Transform3D = get_pit_transform(u_from_s(STAND_CENTRE_S), 0.0)
 	stand_pose.origin -= stand_pose.basis.x * (STAND_FRONT_M - 19.0)
 	stand.transform = stand_pose
@@ -503,7 +546,7 @@ func _build_pit_lighting() -> void:
 		fill.position = _at(STALL_FIRST_OFFSET_M + (float(pair) * 2.0 + 0.5) * STALL_PITCH_M, 18.0, 3.8)
 		fill.light_color = Color("#d5e5ff")
 		fill.light_energy = 8.0
-		fill.omni_range = 17.0
+		fill.omni_range = 22.0
 		fill.omni_attenuation = 1.5
 		fill.shadow_enabled = false
 		fill.set_meta(&"no_shadow", true)
