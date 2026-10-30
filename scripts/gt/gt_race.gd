@@ -17,7 +17,6 @@ signal suggestion_changed(suggestion: Dictionary)
 signal steward_event(event: Dictionary)
 
 const GRID_ROW_M: float = 8.0
-const PitLaneScript := preload("res://scripts/world/circuits/apex_ring/apex_pit_complex.gd")
 const SC_QUEUE_GAP_M: float = 46.0
 const SC_PICKUP_GAP_M: float = 50.0
 const GRID_COLUMN_M: float = 2.5
@@ -77,20 +76,9 @@ var _driving: GtDriving
 var pit_layout: Dictionary = {}
 
 
-## The Apex Ring pit lane, exactly as ApexPitComplex builds it.
+## The pit lane a race uses when its circuit publishes none (see GtPitLayout).
 static func default_pit_layout() -> Dictionary:
-	return {
-		"entry_s": PitLaneScript.ENTRY_S,
-		"exit_s": PitLaneScript.EXIT_S,
-		"stall_first_s": PitLaneScript.STALL_FIRST_S,
-		"stall_pitch_m": PitLaneScript.STALL_PITCH_M,
-		"stall_lane_m": PitLaneScript.STALL_LANE_M,
-		"fast_lane_m": PitLaneScript.FAST_LANE_M,
-		"edge_lateral_m": PitLaneScript.EDGE_LATERAL_M,
-		"queue_gap_m": PitLaneScript.QUEUE_GAP_M,
-		"lane_ramp_in_m": PitLaneScript.RAMP_IN_M,
-		"lane_ramp_out_m": PitLaneScript.RAMP_OUT_M,
-	}
+	return GtPitLayout.default_layout()
 
 
 ## Lateral of the pit path at `u` metres from Pit Entry: off the right edge, onto the fast lane, and

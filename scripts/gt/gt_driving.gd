@@ -6,7 +6,6 @@ extends RefCounted
 ## blue flag, racing room, side-by-side breaker), the pit lane, lateral steering and
 ## the chassis angles the 3D car shows. Reads and writes GtCar; rules live in GtRace.
 
-const PitLaneScript := preload("res://scripts/world/circuits/apex_ring/apex_pit_complex.gd")
 ## Loss of control: damped slip-angle swing (rad, 1/s, rad/s) and the speed a sliding car keeps (m/s).
 const SLIDE_MAX_SLIP: float = 0.45
 const SLIDE_DAMPING: float = 1.15

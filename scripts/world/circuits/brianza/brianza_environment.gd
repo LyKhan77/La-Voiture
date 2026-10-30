@@ -130,8 +130,7 @@ var vista_ring: MeshInstance3D
 var _world_environment: WorldEnvironment
 var _sun: DirectionalLight3D
 var _camera: Camera3D
-var _runtime_environment: Environment
-var _sky_material: ProceduralSkyMaterial
+var _sky_rig := WorldSkyRig.new()
 var _vista_materials: Array[ShaderMaterial] = []
 var _current_tod: Dictionary = {"mode": 0, "floodlights": 0.0, "stars_opacity": 0.0}
 var _current_gloom: float = 0.0
@@ -149,6 +148,8 @@ var _field_y: PackedFloat32Array = PackedFloat32Array()
 
 func _init() -> void:
 	circuit_id = "brianza"
+	_sky_rig.aces_tonemap = true
+	_sky_rig.fog_sky_affect = 0.15
 
 
 func build(p_ribbon: TrackRibbonScript, p_builder: Variant = null) -> void:
@@ -235,37 +236,9 @@ func apply_time_of_day(tod: Dictionary, gloom: float = 0.0) -> void:
 		material.set_shader_parameter("haze_strength", lerpf(1.0, 0.8, night))
 
 
-## Sky, ambient, fog and sun for the mode. The shared Environment is duplicated once so the
-## runtime sky never leaks into the PackedScene resource.
+## Sky, ambient, fog and sun for the mode (see WorldSkyRig).
 func _apply_sky_and_sun(profile: Dictionary, gloom: float) -> void:
-	if _world_environment == null or _world_environment.environment == null:
-		return
-	if _world_environment.environment != _runtime_environment:
-		_runtime_environment = _world_environment.environment.duplicate() as Environment
-		_sky_material = ProceduralSkyMaterial.new()
-		_sky_material.sun_angle_max = 0.0
-		var sky := Sky.new()
-		sky.sky_material = _sky_material
-		_runtime_environment.background_mode = Environment.BG_SKY
-		_runtime_environment.sky = sky
-		_runtime_environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-		_runtime_environment.tonemap_mode = Environment.TONE_MAPPER_ACES
-		_runtime_environment.glow_enabled = true
-		_runtime_environment.fog_enabled = true
-		_runtime_environment.fog_sky_affect = 0.15
-		_world_environment.environment = _runtime_environment
-	_sky_material.sky_top_color = (profile["sky_top"] as Color).lerp(STORM_GREY.darkened(0.3), gloom * 0.6)
-	_sky_material.sky_horizon_color = (profile["sky_horizon"] as Color).lerp(STORM_GREY, gloom * 0.6)
-	_sky_material.ground_horizon_color = _sky_material.sky_horizon_color
-	_sky_material.ground_bottom_color = profile["ground"]
-	_runtime_environment.ambient_light_color = profile["ambient"]
-	_runtime_environment.ambient_light_energy = profile["ambient_energy"]
-	_runtime_environment.fog_light_color = (profile["fog"] as Color).lerp(STORM_GREY, gloom * 0.5)
-	_runtime_environment.fog_density = float(profile["fog_density"]) * (1.0 + gloom)
-	if _sun != null:
-		_sun.rotation_degrees = Vector3(-float(profile["sun_pitch"]), float(profile["sun_yaw"]), 0.0)
-		_sun.light_color = profile["sun"]
-		_sun.light_energy = float(profile["sun_energy"]) * (1.0 - gloom * 0.4)
+	_sky_rig.apply(_world_environment, _sun, profile, gloom, STORM_GREY)
 
 
 ## Layer 6: three silhouette layers (forest line, Montevecchia hills, Alps) 4.3 - 4.55 km out,

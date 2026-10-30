@@ -24,30 +24,30 @@ const TransportersKit := preload("res://scripts/world/paddock/team_transporters.
 const EngineScript := preload("res://scripts/core/race_sim_engine.gd")
 const RoadShader := preload("res://shaders/road_asphalt.gdshader")
 
-const ENTRY_S: float = 3900.0
-const EXIT_S: float = 150.0 # on the lap after the start line
+const ENTRY_S: float = GtPitLayout.ENTRY_S
+const EXIT_S: float = GtPitLayout.EXIT_S # on the lap after the start line
 const NOMINAL_LENGTH_M: float = 410.0
 const SPEED_LIMIT_MPS: float = 80.0 / 3.6
 const TEAM_COUNT: int = 10
-const STALL_FIRST_S: float = 3925.0
-const STALL_PITCH_M: float = 14.0
-const QUEUE_GAP_M: float = 8.0 # a teammate waits this far behind the stall
+const STALL_FIRST_S: float = GtPitLayout.STALL_FIRST_S
+const STALL_PITCH_M: float = GtPitLayout.STALL_PITCH_M
+const QUEUE_GAP_M: float = GtPitLayout.QUEUE_GAP_M # a teammate waits this far behind the stall
 
 ## Where cars leave and rejoin the circuit: the right half of the track, never the racing line.
-const EDGE_LATERAL_M: float = 5.2
+const EDGE_LATERAL_M: float = GtPitLayout.EDGE_LATERAL_M
 const PIT_WALL_M: float = 8.5
 const WALL_HALF_THICKNESS_M: float = 0.25
 const WALL_HEIGHT_M: float = 1.1
 ## Fast lane: centre of the cars' path and half the asphalt width.
-const FAST_LANE_M: float = 11.6
+const FAST_LANE_M: float = GtPitLayout.FAST_LANE_M
 const LANE_HALF_WIDTH_M: float = 2.3
 ## Pit box: where the car stops, and how far the garage front stands from the racing line.
-const STALL_LANE_M: float = 17.0
-const GARAGE_FRONT_M: float = 20.6
+const STALL_LANE_M: float = GtPitLayout.STALL_LANE_M
+const GARAGE_FRONT_M: float = GtPitLayout.GARAGE_FRONT_M
 ## The fascia face stands this far in front of the garage origin.
 const FASCIA_SETBACK_M: float = 0.55
-const RAMP_IN_M: float = 80.0
-const RAMP_OUT_M: float = 90.0
+const RAMP_IN_M: float = GtPitLayout.RAMP_IN_M
+const RAMP_OUT_M: float = GtPitLayout.RAMP_OUT_M
 ## The asphalt strip starts under the circuit's own surface (left edge) and at its edge (right edge).
 const STRIP_START_LEFT_M: float = 6.0
 const STRIP_START_RIGHT_M: float = 7.2

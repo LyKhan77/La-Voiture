@@ -88,6 +88,16 @@ const BANNER_HEIGHT_M: float = 6.2
 const BANNER_COLORS: Array[Color] = [Color("#00f0ff"), Color("#ff2d78"), Color("#ccff00")]
 const DEFAULT_WIND_KPH: float = 14.0
 const DEFAULT_WIND_DIR_RAD: float = 0.6
+const STORM_GREY := Color("#4a5260")
+## Per time-of-day (DAY, SUNSET, NIGHT): sky, fog and sun for WorldSkyRig.
+const SKY_PROFILES: Array[Dictionary] = [
+	{"sky_top": Color("#2673d6"), "sky_horizon": Color("#99d6ff"), "ground": Color("#6f8aa6"), "fog": Color("#a9d2f5"),
+		"fog_density": 0.00022, "ambient_energy": 1.0, "sun_energy": 1.1, "sun": Color("#fff4dc")},
+	{"sky_top": Color("#2d1b4e"), "sky_horizon": Color("#ff6b3d"), "ground": Color("#3a2236"), "fog": Color("#7a4a6e"),
+		"fog_density": 0.00032, "ambient_energy": 0.9, "sun_energy": 0.8, "sun": Color("#ff9a5c")},
+	{"sky_top": Color("#060a18"), "sky_horizon": Color("#2a1a3e"), "ground": Color("#05070d"), "fog": Color("#232c4a"),
+		"fog_density": 0.00055, "ambient_energy": 0.85, "sun_energy": 0.5, "sun": Color("#9db4ff")},
+]
 
 const NEON_CYAN := Color("#00f0ff")
 const NEON_MAGENTA := Color("#ff2d78")
@@ -132,8 +142,7 @@ var _corridor_detail_material: ShaderMaterial
 var _water_shader_mat: ShaderMaterial
 var _banner_shader_mat: ShaderMaterial
 var _street_pool_material: ShaderMaterial
-var _runtime_environment: Environment
-var _sky_material: ProceduralSkyMaterial
+var _sky_rig := WorldSkyRig.new()
 var _current_tod: Dictionary = {}
 var _current_gloom: float = 0.0
 ## Live wind from race.weather, in km/h; the ambience (clouds, water, banners) follows it.
@@ -1111,71 +1120,11 @@ static func _set_params(material: ShaderMaterial, values: Dictionary) -> void:
 		material.set_shader_parameter(key, values[key])
 
 
-## The WorldEnvironment's sky, fog and sun follow the time of day. The Environment is duplicated once
-## (runtime sky/lighting stay out of the shared PackedScene resource) and then only its values change.
+## The WorldEnvironment's sky, fog and sun follow the time of day (see WorldSkyRig).
 func _apply_sky_for_tod(mode: int, gloom: float) -> void:
 	var owner_environment: WorldEnvironment = null
 	if _world_environment != null and _world_environment.environment != null:
 		owner_environment = _world_environment
 	elif get_parent() != null and get_parent().get_node_or_null("WorldEnvironment") != null:
 		owner_environment = get_parent().get_node("WorldEnvironment") as WorldEnvironment
-	if owner_environment == null or owner_environment.environment == null:
-		return
-	if owner_environment.environment != _runtime_environment:
-		_runtime_environment = owner_environment.environment.duplicate() as Environment
-		_sky_material = ProceduralSkyMaterial.new()
-		_sky_material.sun_angle_max = 0.0
-		var sky := Sky.new()
-		sky.sky_material = _sky_material
-		_runtime_environment.background_mode = Environment.BG_SKY
-		_runtime_environment.sky = sky
-		_runtime_environment.fog_enabled = true
-		_runtime_environment.glow_enabled = true
-		owner_environment.environment = _runtime_environment
-	var storm_grey := Color("#4a5260")
-	var top: Color
-	var horizon: Color
-	var ground: Color
-	var fog_light: Color
-	var fog_density: float
-	var ambient: float
-	var sun_energy: float
-	var sun_color: Color
-	match mode:
-		0:
-			top = Color("#2673d6")
-			horizon = Color("#99d6ff")
-			ground = Color("#6f8aa6")
-			fog_light = Color("#a9d2f5")
-			fog_density = 0.00022
-			ambient = 1.0
-			sun_energy = 1.1
-			sun_color = Color("#fff4dc")
-		1:
-			top = Color("#2d1b4e")
-			horizon = Color("#ff6b3d")
-			ground = Color("#3a2236")
-			fog_light = Color("#7a4a6e")
-			fog_density = 0.00032
-			ambient = 0.9
-			sun_energy = 0.8
-			sun_color = Color("#ff9a5c")
-		_:
-			top = Color("#060a18")
-			horizon = Color("#2a1a3e")
-			ground = Color("#05070d")
-			fog_light = Color("#232c4a")
-			fog_density = 0.00055
-			ambient = 0.85
-			sun_energy = 0.5
-			sun_color = Color("#9db4ff")
-	_sky_material.sky_top_color = top.lerp(storm_grey.darkened(0.3), gloom * 0.6)
-	_sky_material.sky_horizon_color = horizon.lerp(storm_grey, gloom * 0.6)
-	_sky_material.ground_horizon_color = _sky_material.sky_horizon_color
-	_sky_material.ground_bottom_color = ground
-	_runtime_environment.ambient_light_energy = ambient
-	_runtime_environment.fog_light_color = fog_light.lerp(storm_grey, gloom * 0.5)
-	_runtime_environment.fog_density = fog_density * (1.0 + gloom)
-	if _sun != null:
-		_sun.light_energy = sun_energy * (1.0 - gloom * 0.4)
-		_sun.light_color = sun_color
+	_sky_rig.apply(owner_environment, _sun, SKY_PROFILES[mode], gloom, STORM_GREY)

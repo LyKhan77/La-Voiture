@@ -20,7 +20,6 @@ signal pit_gun_fired(car_id: int, corner: int, removing: bool)
 enum Phase { LIFTING, SERVICING, LOWERING, RELEASE }
 enum CrewState { STANDBY, WALKING_OUT, READY, WALKING_BACK }
 
-const PitLaneScript := preload("res://scripts/world/circuits/apex_ring/apex_pit_complex.gd")
 const PitKit := preload("res://scripts/world/shared/pit_kit.gd")
 const ModularCarAssembler := preload("res://scripts/car/modular_car_assembler.gd")
 const ToonMaterials := preload("res://scripts/world/shared/toon_materials.gd")
@@ -411,7 +410,7 @@ func _make_member(crew: Crew, role: int, index: int, slot: int, color: Color) ->
 	# The garage mouth is where the lane's own geometry puts it, so a street circuit's shallower
 	# working lane walks the crew out over its own apron, not the Apex Ring's.
 	var door_garage: Vector3 = pit_lane.crew_spot(slot) if pit_lane != null else PitKit.standby_spot(slot)
-	var setback: float = (float(pit_lane.garage_front_m) - float(pit_lane.stall_lane_m)) if pit_lane != null else (PitLaneScript.GARAGE_FRONT_M - PitLaneScript.STALL_LANE_M)
+	var setback: float = (float(pit_lane.garage_front_m) - float(pit_lane.stall_lane_m)) if pit_lane != null else (GtPitLayout.GARAGE_FRONT_M - GtPitLayout.STALL_LANE_M)
 	var home := Vector3(door_garage.x + setback, 0.0, door_garage.z)
 	member.route = _route(home, spot, role)
 	for leg: int in range(member.route.size() - 1):
