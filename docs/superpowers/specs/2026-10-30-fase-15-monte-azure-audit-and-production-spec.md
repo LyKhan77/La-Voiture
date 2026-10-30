@@ -129,6 +129,8 @@ Registri: `scene_path` → `res://scenes/race_world/circuits/monte_azure/monte_a
 
 ### 4.3 Pit complex
 
+> **Diperbarui setelah uji main (§9b butir 15, 17, 18):** angka berikut adalah rancangan awal. Yang dikirim: kotak pitch **20 m** (bukan 12 m), lane **420 m** dengan exit di s=360 (bukan 320 m dan s=260), ramp 60 m masuk dan 100 m keluar (bukan 40 dan 80), lateral mulut **4,6** (bukan 5,2), gedung pit 204 m, garasi 16,4 m, dan aspal lane yang tumbuh dari tepi jalan (ekor 45 m sebelum entry, 55 m sesudah exit) dengan celah barrier yang mengikutinya. Penampang melintang (lateral tembok, jalur cepat, kotak, garasi) tidak berubah.
+
 Satu penampang melintang, jarak dari garis tengah ke kanan (m):
 
 | Lateral | Elemen |
