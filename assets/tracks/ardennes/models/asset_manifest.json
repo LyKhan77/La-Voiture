@@ -1,0 +1,42 @@
+[
+  {
+    "file": "valley_arch_viaduct.glb",
+    "triangles": 2304,
+    "surfaces": 5,
+    "origin": "x runs along the 120 m deck (-4.5..124.5), z across 28 m, the arch feet at y=0 (ArdennesLandmarks seats them 2 m under the river's surface, 55 m left of the road at s=680, the deck across the valley)",
+    "unit": "metre",
+    "source": "mapgen-circuit builds/ardennes tools/build_landmarks.gd (Godot ModelBuilder), regenerated with clockwise faces 2026-10-31"
+  },
+  {
+    "file": "kemmel_pedestrian_flyover.glb",
+    "triangles": 1220,
+    "surfaces": 6,
+    "origin": "x spans the carriageway (-32.2..13), z 9.4 m, the deck 9.6 m up; the node's origin is on the road's centre line (ArdennesLandmarks seats it at s=1400, 0.16 m under the road)",
+    "unit": "metre",
+    "source": "mapgen-circuit builds/ardennes tools/build_landmarks.gd (Godot ModelBuilder), regenerated with clockwise faces 2026-10-31"
+  },
+  {
+    "file": "acoustic_canopy_tunnel.glb",
+    "triangles": 712,
+    "surfaces": 6,
+    "origin": "one 6 m bay, 24 m wide, 12.3 m high, the bore open (no portal slabs); ArdennesLandmarks sweeps thirty of them along the road around s=2750 and merges them into three meshes",
+    "unit": "metre",
+    "source": "mapgen-circuit builds/ardennes tools/build_landmarks.gd (Godot ModelBuilder), regenerated with clockwise faces 2026-10-31"
+  },
+  {
+    "file": "glass_terrace_grandstand.glb",
+    "triangles": 12444,
+    "surfaces": 9,
+    "origin": "222 m long along z, 35 m deep along x, the facade at x=0 and the seating rising away from it; ArdennesLandmarks seats it 30 m left of the road at s=5280, local +X away from the road",
+    "unit": "metre",
+    "source": "mapgen-circuit builds/ardennes tools/build_landmarks.gd (Godot ModelBuilder), regenerated with clockwise faces 2026-10-31"
+  },
+  {
+    "file": "futuristic_pit_building.glb",
+    "triangles": 4060,
+    "surfaces": 22,
+    "origin": "ten garage bays on a 14 m pitch (z -63..63), the facade at x=0, 18 m deep; ArdennesPitBuilding re-spaces the bays to the circuit's 20 m pitch and merges the surfaces into the structure, the team strips and the glass",
+    "unit": "metre",
+    "source": "mapgen-circuit builds/ardennes tools/build_landmarks.gd (Godot ModelBuilder), regenerated with clockwise faces 2026-10-31"
+  }
+]

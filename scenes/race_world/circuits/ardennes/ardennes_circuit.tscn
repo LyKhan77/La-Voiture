@@ -1,0 +1,35 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/circuits/ardennes/ardennes_circuit_builder.gd" id="1_builder"]
+[ext_resource type="Script" path="res://scripts/car/track_ribbon.gd" id="2_ribbon"]
+[ext_resource type="Script" path="res://scripts/world/circuits/ardennes/ardennes_pit_complex.gd" id="3_pit"]
+[ext_resource type="Script" path="res://scripts/world/circuits/ardennes/ardennes_environment.gd" id="4_env"]
+
+[sub_resource type="Curve3D" id="Curve3D_centerline"]
+
+[sub_resource type="Environment" id="Environment_ardennes"]
+background_mode = 1
+background_color = Color(0.46, 0.62, 0.78, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.8, 0.88, 0.95, 1)
+ambient_light_energy = 0.8
+fog_enabled = true
+fog_light_color = Color(0.7, 0.8, 0.88, 1)
+fog_density = 0.0004
+
+[node name="ArdennesCircuit" type="Node3D"]
+script = ExtResource("1_builder")
+
+[node name="TrackRibbon" type="Path3D" parent="."]
+curve = SubResource("Curve3D_centerline")
+script = ExtResource("2_ribbon")
+road_half_width_m = 7.0
+
+[node name="PitLane" type="Node3D" parent="."]
+script = ExtResource("3_pit")
+
+[node name="Environment" type="Node3D" parent="."]
+script = ExtResource("4_env")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_ardennes")

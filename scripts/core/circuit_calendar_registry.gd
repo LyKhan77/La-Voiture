@@ -29,7 +29,7 @@ const TABLE: Array[Array] = [
 	["monte_azure", "APR", "Monte Azure Marina", "", "Circuit de Monaco / Macau", "MCO", 1, 2.85, 19, true, 42.0,
 		"res://scenes/race_world/circuits/monte_azure/monte_azure_circuit.tscn", 0.40, "Yacht harbor streets, zero margin for error."],
 	["ardennes", "MAY", "Ardennes Valley Ring", "", "Spa-Francorchamps", "BEL", 0, 5.40, 20, true, 104.0,
-		"res://scenes/race_world/ardennes_circuit.tscn", 0.75, "Eau Rouge compression climb, micro-climate rain."],
+		"res://scenes/race_world/circuits/ardennes/ardennes_circuit.tscn", 0.75, "Eau Rouge compression climb, micro-climate rain."],
 	["stoke_crown", "JUN", "Stoke Crown Circuit", "", "Silverstone Circuit", "GBR", 0, 5.20, 18, true, 12.0,
 		"res://scenes/race_world/stoke_crown_circuit.tscn", 0.65, "Maggotts-Becketts high-G aero sweepers."],
 	["pacific_corkscrew", "JUL", "Pacific Coast Corkscrew", "", "WeatherTech Raceway Laguna Seca", "USA", 0, 4.10, 11, true, 30.0,
