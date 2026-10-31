@@ -24,6 +24,12 @@ const BASELINE_PROFILE_LAP_S: Dictionary = {
 const CALIBRATION_ANCHORS: Array[String] = ["apex_ring", "neo_wangan"]
 const PROFILE_LAP_TOLERANCE: float = 0.04
 const PROFILE_KINK_GAIN_MAX: float = 0.20
+## A circuit without a pre-FASE-18 lap is held to a GT3 average speed on its profile (km/h).
+const PROFILE_AVG_KMH_MIN: float = 130.0
+const PROFILE_AVG_KMH_MAX: float = 230.0
+## Single-sample kinks in the centreline (a curvature spike with straight road 8 m either side): a new circuit has none,
+## the three built before FASE 18 may not gain any.
+const LEGACY_KINKS: Dictionary = {"brianza": 15, "monte_azure": 4, "ardennes": 1}
 ## A real line turns around about twice per corner (wide - apex - wide); allow some linked-corner slack.
 const REVERSALS_PER_TURN_MAX: float = 3.0
 const REVERSAL_SWING_M: float = 0.4
@@ -138,6 +144,24 @@ func _test_line_shape(circuit: Resource, ribbon: RibbonScript) -> void:
 	check(build_ms <= BUILD_BUDGET_MS, "%s: track + line build in %d ms (budget %d ms)" % [id, build_ms, BUILD_BUDGET_MS])
 	_check_outside_apex_outside(id, line, ribbon.length_m)
 	_check_pace(id, track, line)
+	_check_kinks(id, line)
+
+
+## A kink is a curvature peak above 0.01 1/m with less than a quarter of it 8 m either side: a spline vertex, not
+## a corner. The racing line straightens it, but kerbs, runoff, boards and corner grip still read the centreline.
+func _check_kinks(id: String, line: LineScript) -> void:
+	var kinks: int = 0
+	var last: float = -100.0
+	var s: float = 0.0
+	while s < line.length_m:
+		var k: float = absf(line.curvature_at(s))
+		if k > 0.01 and k >= absf(line.curvature_at(s - 2.0)) and k >= absf(line.curvature_at(s + 2.0)) \
+				and absf(line.curvature_at(s - 8.0)) < 0.25 * k and absf(line.curvature_at(s + 8.0)) < 0.25 * k and s - last > 20.0:
+			kinks += 1
+			last = s
+		s += 1.0
+	var cap: int = int(LEGACY_KINKS.get(id, 0))
+	check(kinks <= cap, "%s: %d centreline kinks (cap %d)" % [id, kinks, cap])
 
 
 ## Every real corner (one-direction run of |kappa| > 0.008 turning more than 25 degrees; single-sample kinks in
@@ -198,6 +222,11 @@ func _check_pace(id: String, track: TrackScript, line: LineScript) -> void:
 		x += 1.0
 	check(line_sum < 0.9 * centre_sum,
 		"%s: the line opens the corners (curvature %.0f%% of the centreline's)" % [id, 100.0 * line_sum / maxf(1.0e-6, centre_sum)])
+	if not BASELINE_PROFILE_LAP_S.has(id):
+		var avg_kmh: float = track.length / lap_s * 3.6
+		check(avg_kmh >= PROFILE_AVG_KMH_MIN and avg_kmh <= PROFILE_AVG_KMH_MAX,
+			"%s: profile lap %.2f s averages %.0f km/h (GT3 band %.0f-%.0f)" % [id, lap_s, avg_kmh, PROFILE_AVG_KMH_MIN, PROFILE_AVG_KMH_MAX])
+		return
 	var baseline: float = BASELINE_PROFILE_LAP_S[id]
 	if CALIBRATION_ANCHORS.has(id):
 		check(absf(lap_s / baseline - 1.0) <= PROFILE_LAP_TOLERANCE,
@@ -223,11 +252,18 @@ func _groove_max_alpha(node: Node) -> float:
 ## The Apex Ring's set lives in race_weekend_world.tscn, not its circuit scene: test_track_environment #S9 covers it.
 func _test_groove_everywhere(alpha: Dictionary) -> void:
 	var all_have: bool = true
-	for id: String in ["neo_wangan", "brianza", "monte_azure", "ardennes"]:
-		all_have = all_have and float(alpha.get(id, 0.0)) > 0.0
+	var permanent: float = INF
+	var street: float = 0.0
+	for id: String in alpha:
+		if id == "apex_ring":
+			continue
+		var a: float = float(alpha[id])
+		all_have = all_have and a > 0.0
+		if Registry.get_circuit(id).is_sprint():
+			street = maxf(street, a)
+		else:
+			permanent = minf(permanent, a)
 	check(all_have, "groove: every circuit set lays rubber on its line %s" % str(alpha))
-	var permanent: float = minf(float(alpha.get("brianza", 0.0)), float(alpha.get("ardennes", 0.0)))
-	var street: float = maxf(float(alpha.get("neo_wangan", 0.0)), float(alpha.get("monte_azure", 0.0)))
 	check(street > 0.0 and street <= SPRINT_GROOVE_RATIO_MAX * permanent,
 		"groove: street (Sprint) rubber is fainter than a permanent circuit's (%.2f vs %.2f)" % [street, permanent])
 
