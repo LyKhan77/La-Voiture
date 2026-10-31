@@ -51,9 +51,44 @@ func _run() -> void:
 	_scenario("whole field boxes bunched", 20.0, 12.0, WeatherScript.Archetype.DRY_SUNNY)
 	_scenario("late field calls in a wet race", 25.0, 8.0, WeatherScript.Archetype.LATE_MONSOON)
 	_scenario("field spread around the lap boxes on the same lap", track.length / 20.0, 20.0, WeatherScript.Archetype.DRY_SUNNY)
+	_late_call()
 	ribbon.queue_free()
 	await process_frame
 	quit(1 if failures else 0)
+
+
+## FASE 18 regression: a box call 12 m before Pit Entry at 70 m/s cannot brake to the limiter by the line. Committed
+## anyway, the car ran 54 m past its box and was snapped back (Neo-Wangan raced flood); it now boxes next lap.
+func _late_call() -> void:
+	# Arrange: one car flat out just short of the entry, everyone else parked far behind.
+	var race := RaceScript.new(track, 12, 31, WeatherScript.Archetype.DRY_SUNNY)
+	race.incidents_enabled = false
+	var entry: float = float(race.pit_layout["entry_s"])
+	var car: CarScript = race.cars[0]
+	for index: int in range(1, race.cars.size()):
+		race.cars[index].s = -600.0 - float(index) * 30.0
+		race.cars[index].prev_s = race.cars[index].s
+	car.s = entry - 12.0 + track.length
+	car.prev_s = car.s
+	car.v = 70.0
+	car.lap = 1
+	var start_s: float = car.s
+	race.request_pit(car.id, Types.Compound.MEDIUM)
+	# Act: run until the car has been serviced (or two laps).
+	var committed_at: float = -1.0
+	var worst_jump: float = 0.0
+	var ticks: int = 0
+	while car.stops < 1 and car.s < start_s + track.length * 2.0 and ticks < 6000:
+		var before_s: float = car.s
+		race.step()
+		ticks += 1
+		if car.pit != null and committed_at < 0.0:
+			committed_at = car.s - start_s
+		worst_jump = maxf(worst_jump, absf((car.s - before_s) - car.v * Types.TICK_DT))
+	# Assert
+	check(committed_at > track.length * 0.5 and car.stops == 1 and worst_jump <= TELEPORT_MAX_M,
+		"late box call: too fast for the entry, the car stays out and boxes next lap (committed %.0f m on), serviced %d, no snap (%.2f m)" % [committed_at, car.stops, worst_jump])
+	race.dispose()
 
 
 ## Puts all 20 cars in a train `spacing` metres apart ahead of Pit Entry and asks each to box.

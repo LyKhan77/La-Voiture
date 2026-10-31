@@ -20,6 +20,8 @@ const Landmarks := preload("res://scripts/world/circuits/monte_azure/monte_azure
 const Districts := preload("res://scripts/world/circuits/monte_azure/monte_azure_districts.gd")
 const Foliage := preload("res://scripts/world/circuits/monte_azure/monte_azure_foliage.gd")
 const PitComplex := preload("res://scripts/world/circuits/monte_azure/monte_azure_pit_complex.gd")
+const SurfaceGeometry := preload("res://scripts/world/shared/enhanced_track_geometry.gd")
+const AdaptiveLineScript := preload("res://scripts/car/adaptive_racing_line.gd")
 const WaterShader := preload("res://shaders/neo_wangan_water.gdshader")
 const PoolShader := preload("res://shaders/neo_wangan_light_pool.gdshader")
 
@@ -136,6 +138,7 @@ func build(p_ribbon: TrackRibbonScript, p_builder: Variant = null) -> void:
 	_build_sea()
 	_build_barriers()
 	_build_kerbs()
+	add_child(SurfaceGeometry.groove_instance(ribbon, AdaptiveLineScript.new(ribbon), SurfaceGeometry.GROOVE_STREET_SCALE))
 	_build_streetlights()
 	_build_tunnel_lamps()
 	_build_braking_boards()

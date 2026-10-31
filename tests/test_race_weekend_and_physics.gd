@@ -107,18 +107,25 @@ func _test_racing_line() -> void:
 		and is_equal_approx(LineScript.signed_curvature(ahead, right, 6.0), -LineScript.signed_curvature(ahead, left, 6.0)),
 		"#1 kappa = (t1 x t0).y / ds is signed: + for a right turn, - for a left turn")
 
-	var inside_target: float = line.target_offset(corner_s)
-	var expected: float = clampf((0.4 * line.curvature_at(corner_s) + 0.6 * line.curvature_at(corner_s + 25.0)) * 180.0, -3.2, 3.2)
-	var entry_s: float = corner_s - 40.0
-	var found_entry: bool = false
-	while entry_s < corner_s:
-		if absf(line.curvature_at(entry_s)) < 0.003 and absf(line.target_offset(entry_s)) > 0.5:
-			found_entry = true
-			break
-		entry_s += 1.0
-	check(is_equal_approx(inside_target, expected) and signf(inside_target) == signf(corner_kappa) and absf(inside_target) > 2.0 and absf(inside_target) <= 3.2
-		and absf(line.target_offset(straight_s)) < 0.05 and found_entry and is_equal_approx(LineScript.step_offset(0.0, 3.2, 1.0), 1.8),
-		"#2 d_target hugs the inside of the apex (%.2f m, clamp 3.2), starts 25 m early, is 0 on the straight, lateral rate 1.8 m/s" % inside_target)
+	# FASE 18: the line is a minimum-curvature solve, wide - apex - wide (shape on every circuit: test_racing_line).
+	var side: float = signf(corner_kappa)
+	var inside_target: float = -INF
+	var entry_outside: float = INF
+	var x: float = -20.0
+	while x <= 20.0:
+		inside_target = maxf(inside_target, line.target_offset(corner_s + x) * side)
+		x += 1.0
+	x = 30.0
+	while x <= 160.0:
+		entry_outside = minf(entry_outside, line.target_offset(corner_s - x) * side)
+		x += 2.0
+	var within: bool = true
+	s = 0.0
+	while s < ribbon.length_m:
+		within = within and absf(line.target_offset(s)) <= line.line_limit_m + 1.0e-4
+		s += 2.0
+	check(inside_target > 0.4 * line.line_limit_m and entry_outside < 0.0 and within and is_equal_approx(LineScript.step_offset(0.0, 3.2, 1.0), 1.8),
+		"#2 d_target clips the inside of the tightest corner (%.2f m), comes in from the outside (%.2f m), stays within +-%.2f m, lateral rate 1.8 m/s" % [inside_target, entry_outside, line.line_limit_m])
 
 	var worst_excess: float = -INF
 	s = 0.0

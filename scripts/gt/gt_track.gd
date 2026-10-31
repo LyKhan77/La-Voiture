@@ -9,7 +9,9 @@ const TrackRibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const LineScript := preload("res://scripts/car/adaptive_racing_line.gd")
 
 const SAMPLE_SPACING_M: float = 5.0
-const LATERAL_ACCEL: float = 19.5 # m/s2, a GT3 with downforce
+## m/s2, a GT3 with downforce, on the racing line's radius. FASE 18 calibration: 19.5 on the centreline radius
+## became 14.0 on the (wider) line radius, keeping the kink-free Apex Ring and Neo-Wangan laps within 3 %.
+const LATERAL_ACCEL: float = 14.0
 const BRAKE_DECEL: float = 15.0
 const ACCEL: float = 7.0
 const V_MAX: float = 76.0
@@ -52,7 +54,7 @@ func curvature_at(s: float) -> float:
 	return line.curvature_at(s)
 
 
-## Racing line offset: hugs the inside of a corner, centred on straights, +-3.2 m.
+## Racing line offset: wide on entry, inside at the apex, wide on exit, within the asphalt.
 func ideal_lateral_at(s: float) -> float:
 	return line.target_offset(s)
 
@@ -95,7 +97,8 @@ func _build_profile() -> PackedFloat32Array:
 	var profile := PackedFloat32Array()
 	profile.resize(count)
 	for i: int in range(count):
-		var kappa: float = maxf(absf(curvature_at(float(i) * spacing)), 1.0e-4)
+		# The car drives the racing line, so the corner speed comes from the line's radius, not the centreline's.
+		var kappa: float = maxf(absf(line.line_curvature_at(float(i) * spacing)), 1.0e-4)
 		profile[i] = minf(V_MAX, sqrt(LATERAL_ACCEL / kappa))
 	# Braking: look ahead around the loop, two laps so the start line converges.
 	for k: int in range(2 * count):

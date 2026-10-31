@@ -266,42 +266,41 @@ func _test_stage1_runoff_and_groove() -> void:
 	var groove_vertices: PackedVector3Array = vertices_of(groove)
 	var follows: bool = groove_vertices.size() > 0
 	var checked: int = 0
+	var worst_edge: float = 0.0
+	var line = world.track.line
 	for kerb: Dictionary in environment.kerbs:
 		var mid: float = (float(kerb["s0"]) + float(kerb["s1"])) * 0.5
-		var pose: Transform3D = world.ribbon.get_point_at_offset(mid, 0.0)
-		# The two groove edge vertices of the slice closest to mid share an arc distance; compare their mean to the line there.
-		var slice: Array[Vector2] = [] # (|along|, lateral), forward distance in y
-		var forward_of: Dictionary = {}
+		var on_line: Vector3 = world.ribbon.get_point_at_offset(mid, line.target_offset(mid)).origin
+		# Each groove vertex sits on the cross-section of its own arc distance: find it, then the vertex must be one
+		# half-width either side of the line there (the line can sit 5 m off centre at an apex, so no fixed frame).
+		var near: int = 0
 		for vertex: Vector3 in groove_vertices:
-			var offset: Vector3 = vertex - pose.origin
-			if offset.length() < 6.0:
-				slice.append(Vector2(absf(offset.dot(pose.basis.z)), offset.dot(pose.basis.x)))
-				forward_of[slice.size() - 1] = -offset.dot(pose.basis.z)
-		var order: Array = range(slice.size())
-		if order.is_empty():
-			follows = false
-			continue
-		order.sort_custom(func(a: int, b: int) -> bool: return slice[a].x < slice[b].x)
-		# Group the vertices that share the nearest slice (same arc distance, within 0.3 m of "along").
-		var lateral_sum: float = 0.0
-		var forward_sum: float = 0.0
-		var grouped: int = 0
-		for index: int in order:
-			if absf(slice[index].x - slice[order[0]].x) < 0.3 and signf(float(forward_of[index])) == signf(float(forward_of[order[0]])):
-				lateral_sum += slice[index].y
-				forward_sum += float(forward_of[index])
-				grouped += 1
-		var lateral: float = lateral_sum / float(grouped)
-		var expected: float = world.track.line.target_offset(mid + forward_sum / float(grouped))
-		follows = follows and grouped >= 2 and absf(lateral - expected) < 0.35
+			if vertex.distance_to(on_line) > 8.0:
+				continue
+			var best_s: float = mid
+			var best_along: float = INF
+			var t: float = mid - 14.0
+			while t <= mid + 14.0:
+				var probe: Transform3D = world.ribbon.get_point_at_offset(t, 0.0)
+				var along: float = absf((vertex - probe.origin).dot(probe.basis.z))
+				if along < best_along:
+					best_along = along
+					best_s = t
+				t += 0.1
+			var section: Transform3D = world.ribbon.get_point_at_offset(best_s, 0.0)
+			var lateral: float = (vertex - section.origin).dot(section.basis.x)
+			worst_edge = maxf(worst_edge, absf(absf(lateral - line.target_offset(best_s)) - EnhancedGeometry.GROOVE_HALF_WIDTH_M))
+			near += 1
+		follows = follows and near >= 2
 		checked += 1
+	follows = follows and worst_edge < 0.35
 	var groove_y: float = INF
 	var groove_top: float = -INF
 	for vertex: Vector3 in groove_vertices:
 		groove_y = minf(groove_y, vertex.y)
 		groove_top = maxf(groove_top, vertex.y)
 	check(follows and checked > 0 and groove_y > 0.0 and groove_top < 0.02,
-		"#S9 the rubber groove follows the adaptive racing line through %d corners, a hair above the asphalt (%.3f..%.3f m)" % [checked, groove_y, groove_top])
+		"#S9 the rubber groove follows the adaptive racing line through %d corners (worst edge %.3f m off), a hair above the asphalt (%.3f..%.3f m)" % [checked, worst_edge, groove_y, groove_top])
 
 # --- stage 2: mesh batch and trackside furniture ------------------------------------------
 

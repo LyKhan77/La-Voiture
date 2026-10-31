@@ -26,6 +26,8 @@ const SharedSkyScript := preload("res://scripts/world/shared/shared_cel_sky_cont
 const WeatherScript := preload("res://scripts/gt/gt_weather.gd")
 const TracksideKit := preload("res://scripts/world/shared/trackside_furniture_builder.gd")
 const PitKit := preload("res://scripts/world/circuits/neo_wangan/neo_wangan_pit_complex.gd")
+const SurfaceGeometry := preload("res://scripts/world/shared/enhanced_track_geometry.gd")
+const AdaptiveLineScript := preload("res://scripts/car/adaptive_racing_line.gd")
 const MODEL_DIR := "res://assets/tracks/neo_wangan/models/"
 
 const BARRIER_LATERAL_M: float = 6.35
@@ -171,6 +173,7 @@ func build(p_ribbon: TrackRibbonScript, p_circuit: Variant = null) -> void:
 	_build_urban_island()
 	_build_barriers()
 	_build_kerbs()
+	add_child(SurfaceGeometry.groove_instance(ribbon, AdaptiveLineScript.new(ribbon), SurfaceGeometry.GROOVE_STREET_SCALE))
 	_build_streetlights()
 	_build_gantry_signs()
 	_build_braking_boards()

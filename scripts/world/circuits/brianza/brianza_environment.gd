@@ -641,19 +641,7 @@ func _build_tier_a_surface() -> void:
 		gravel_inst.mesh = gravel_m
 		surface_root.add_child(gravel_inst)
 		
-	var groove_mat := StandardMaterial3D.new()
-	groove_mat.vertex_color_use_as_albedo = true
-	groove_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	groove_mat.roughness = 0.7
-	groove_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	var groove_m: ArrayMesh = SurfaceGeometry.groove_mesh(ribbon, line)
-	if groove_m != null:
-		groove_m.surface_set_material(0, groove_mat)
-		var groove_inst := MeshInstance3D.new()
-		groove_inst.name = "RubberGroove"
-		groove_inst.mesh = groove_m
-		groove_inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		surface_root.add_child(groove_inst)
+	surface_root.add_child(SurfaceGeometry.groove_instance(ribbon, line))
 
 
 func _build_tier_a_furniture() -> void:

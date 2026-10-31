@@ -347,16 +347,7 @@ func _build_surface() -> void:
 	if gravel_mesh != null and gravel_mesh.get_surface_count() >= 1:
 		gravel_mesh.surface_set_material(0, ToonMaterials.make(SurfaceGeometry.GRAVEL_COLOR))
 		_add_mesh(surface_root, "GravelTraps", gravel_mesh)
-	var groove_material := StandardMaterial3D.new()
-	groove_material.vertex_color_use_as_albedo = true
-	groove_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	groove_material.roughness = 0.7
-	groove_material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	var groove_mesh: ArrayMesh = SurfaceGeometry.groove_mesh(ribbon, line)
-	if groove_mesh != null:
-		groove_mesh.surface_set_material(0, groove_material)
-		var groove: MeshInstance3D = _add_mesh(surface_root, "RubberGroove", groove_mesh)
-		groove.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	surface_root.add_child(SurfaceGeometry.groove_instance(ribbon, line))
 
 
 func _add_mesh(parent: Node3D, node_name: String, mesh: ArrayMesh) -> MeshInstance3D:

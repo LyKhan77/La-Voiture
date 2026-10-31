@@ -61,10 +61,14 @@ const GROOVE_HALF_WIDTH_M: float = 0.9
 const GROOVE_Y: float = 0.012
 const GROOVE_STEP_M: float = 3.0
 const GROOVE_COLOR := Color(0.015, 0.015, 0.02)
-## Rubber alpha on a straight and in a full-grip corner (|kappa| >= GROOVE_FULL_KAPPA).
+## Rubber alpha on a straight and in a full-grip corner (racing line |kappa| >= GROOVE_FULL_KAPPA).
 const GROOVE_ALPHA_STRAIGHT: float = 0.16
 const GROOVE_ALPHA_CORNER: float = 0.42
-const GROOVE_FULL_KAPPA: float = 0.02
+const GROOVE_FULL_KAPPA: float = 0.015
+## Rubber goes down where cars brake and turn: a slice reads the line's curvature this far ahead, fading with distance.
+const GROOVE_BRAKE_LOOKAHEAD_M: float = 60.0
+## A street circuit is public road outside the race weekend: fainter rubber.
+const GROOVE_STREET_SCALE: float = 0.55
 
 
 # --- kerbs -----------------------------------------------------------------------
@@ -300,8 +304,24 @@ static func other_road_distance(cells: Dictionary, ribbon: TrackRibbonScript, s:
 
 # --- rubber groove ---------------------------------------------------------------------
 
-## Dark rubber band along the adaptive racing line; vertex alpha deepens through corners.
-static func groove_mesh(ribbon: TrackRibbonScript, line: AdaptiveLineScript) -> ArrayMesh:
+## The groove as a ready MeshInstance3D named RubberGroove (alpha_scale GROOVE_STREET_SCALE on a street circuit).
+static func groove_instance(ribbon: TrackRibbonScript, line: AdaptiveLineScript, alpha_scale: float = 1.0) -> MeshInstance3D:
+	var material := StandardMaterial3D.new()
+	material.vertex_color_use_as_albedo = true
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.roughness = 0.7
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	var mesh: ArrayMesh = groove_mesh(ribbon, line, alpha_scale)
+	mesh.surface_set_material(0, material)
+	var instance := MeshInstance3D.new()
+	instance.name = "RubberGroove"
+	instance.mesh = mesh
+	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return instance
+
+
+## Dark rubber band along the adaptive racing line; vertex alpha deepens into braking zones and apexes.
+static func groove_mesh(ribbon: TrackRibbonScript, line: AdaptiveLineScript, alpha_scale: float = 1.0) -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	st.set_normal(Vector3.UP)
@@ -313,11 +333,22 @@ static func groove_mesh(ribbon: TrackRibbonScript, line: AdaptiveLineScript) -> 
 		var alphas: Array[float] = []
 		for s: float in [sa, sb]:
 			var centre: float = line.target_offset(s)
+			var alpha: float = lerpf(GROOVE_ALPHA_STRAIGHT, GROOVE_ALPHA_CORNER, clampf(_groove_load(line, s) / GROOVE_FULL_KAPPA, 0.0, 1.0)) * alpha_scale
 			for lateral: float in [centre - GROOVE_HALF_WIDTH_M, centre + GROOVE_HALF_WIDTH_M]:
 				corners.append(ribbon.get_point_at_offset(s, lateral).origin + Vector3.UP * GROOVE_Y)
-				alphas.append(lerpf(GROOVE_ALPHA_STRAIGHT, GROOVE_ALPHA_CORNER, clampf(absf(line.curvature_at(s)) / GROOVE_FULL_KAPPA, 0.0, 1.0)))
+				alphas.append(alpha)
 		# corners: left_a, right_a, left_b, right_b
 		for slot: int in [0, 2, 3, 0, 3, 1]:
 			st.set_color(Color(GROOVE_COLOR, alphas[slot]))
 			st.add_vertex(corners[slot])
 	return st.commit()
+
+
+## Strongest line curvature over the braking lookahead, nearer corners counting more.
+static func _groove_load(line: AdaptiveLineScript, s: float) -> float:
+	var load: float = 0.0
+	var x: float = 0.0
+	while x <= GROOVE_BRAKE_LOOKAHEAD_M:
+		load = maxf(load, absf(line.line_curvature_at(s + x)) * (1.0 - 0.5 * x / GROOVE_BRAKE_LOOKAHEAD_M))
+		x += 6.0
+	return load

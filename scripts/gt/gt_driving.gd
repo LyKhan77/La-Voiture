@@ -34,7 +34,22 @@ const PIT_CROSSING_M: float = 21.0
 ## pulling out from rest clears the crossing in about 2.5 s).
 const PIT_ARRIVING_LOOKAHEAD_S: float = 3.0
 const PIT_AHEAD_SLOW_MPS: float = 8.0
+## Each driver wanders this far at most either side of the racing line (a consistent driver less), with a fresh
+## turn-in every DRIVER_LINE_CELL_M: twenty cars do not ride one rail.
+const DRIVER_LINE_SPREAD_M: float = 0.45
+const DRIVER_LINE_CELL_M: float = 80.0
+## Heavy rain: the rubbered line turns slippery, so drivers take the corners this far towards the outside and a car
+## left on the rubber loses this share of its cornering grip. Fades in over 30..55 % water and out with a drying line.
+const RAIN_LINE_SHIFT_M: float = 1.4
+const RAIN_GROOVE_GRIP_LOSS: float = 0.06
+const RAIN_GROOVE_HALF_WIDTH_M: float = 1.0
+## Following on a straight inside the tow, a car moves this share of the way into the wake of the car ahead.
+const TOW_TUCK: float = 0.8
+const TOW_STRAIGHT_KAPPA: float = 0.004
+## Cars closer than this sideways share a corridor: the one behind must be able to stop behind the one ahead.
+const CORRIDOR_M: float = 2.05
 
+var _target_lateral_rate: float = 0.0
 var _teammate_ahead: GtCar = null
 var _blue_flagged: bool = false
 
@@ -45,8 +60,8 @@ func _init(p_race: GtRace) -> void:
 
 # --- traffic context -----------------------------------------------------------
 
-## For every racing car: the nearest car ahead within 65 m, the nearest behind within
-## 18 m, and the cars alongside (within 4.4 m longitudinally and 3.6 m laterally).
+## For every racing car: the nearest car ahead within 65 m, the nearest ahead in its own corridor (lane_lead), the
+## nearest behind within 18 m, and the cars alongside (within 4.4 m longitudinally and 3.6 m laterally).
 func build_contexts(racing: Array[GtCar]) -> Dictionary:
 	var contexts: Dictionary = {}
 	var length: float = race.track.length
@@ -54,6 +69,8 @@ func build_contexts(racing: Array[GtCar]) -> Dictionary:
 		var s_a: float = fposmod(car.s, length)
 		var closest: float = INF
 		var lead_car: GtCar = null
+		var closest_in_lane: float = INF
+		var lane_car: GtCar = null
 		var closest_behind: float = INF
 		var behind_car: GtCar = null
 		var side: Array[Dictionary] = []
@@ -74,6 +91,9 @@ func build_contexts(racing: Array[GtCar]) -> Dictionary:
 			if dist_ahead > 0.01 and dist_ahead < closest and dist_ahead < 65.0:
 				closest = dist_ahead
 				lead_car = other
+			if dist_ahead > 0.01 and dist_ahead < closest_in_lane and dist_ahead < 65.0 and absf(other.lateral - car.lateral) < CORRIDOR_M:
+				closest_in_lane = dist_ahead
+				lane_car = other
 			var dist_behind: float = s_a - s_b
 			if dist_behind < 0.0:
 				dist_behind += length
@@ -87,7 +107,8 @@ func build_contexts(racing: Array[GtCar]) -> Dictionary:
 		var behind: Dictionary = {}
 		if behind_car != null:
 			behind = {"car": behind_car, "dist": closest_behind, "lapping_us": (behind_car.s - car.s) > length - 40.0}
-		contexts[car] = {"lead": lead, "behind": behind, "side": side}
+		var lane_lead: Dictionary = {} if lane_car == null else {"car": lane_car, "dist": closest_in_lane}
+		contexts[car] = {"lead": lead, "behind": behind, "side": side, "lane_lead": lane_lead}
 	return contexts
 
 
@@ -143,7 +164,41 @@ func water_grip(car: GtCar) -> float:
 				mult = 1.08 + (car.wet_skill - 0.9) * 0.25
 			else:
 				mult = 0.94
+	var wet_line: float = rain_line_weight()
+	if wet_line > 0.0 and off_line < RAIN_GROOVE_HALF_WIDTH_M:
+		mult *= 1.0 - RAIN_GROOVE_GRIP_LOSS * wet_line
 	return mult
+
+
+## 0..1: how strongly heavy rain makes the rubbered racing line the slippery one.
+func rain_line_weight() -> float:
+	var weather: GtWeather = race.weather
+	return smoothstep(30.0, 55.0, weather.track_water_pct) * (1.0 - clampf(weather.drying_line_pct / 25.0, 0.0, 1.0))
+
+
+## The line this driver aims for: the circuit's racing line, a personal wander that tightens with consistency, and in
+## heavy rain the corners taken off the rubber towards the outside.
+func race_line_for(car: GtCar, s: float) -> float:
+	var track: GtTrack = race.track
+	var line: float = track.ideal_lateral_at(s) + driver_wander(car.id, car.consistency, s)
+	var wet: float = rain_line_weight()
+	if wet > 0.0:
+		var kappa: float = track.line.line_curvature_at(s)
+		line -= signf(kappa) * RAIN_LINE_SHIFT_M * wet * smoothstep(0.004, 0.012, absf(kappa))
+	return line
+
+
+## Smooth per-driver offset from the racing line; pure in (car, s) so it never draws from the race rng.
+static func driver_wander(car_id: int, consistency: float, s: float) -> float:
+	var u: float = s / DRIVER_LINE_CELL_M
+	var cell: int = floori(u)
+	var amp: float = DRIVER_LINE_SPREAD_M * clampf(0.35 + (1.0 - consistency) * 6.5, 0.0, 1.0)
+	return amp * lerpf(_hash_unit(car_id, cell), _hash_unit(car_id, cell + 1), smoothstep(0.0, 1.0, u - float(cell)))
+
+
+## Deterministic value in [-1, 1] for an (a, b) pair.
+static func _hash_unit(a: int, b: int) -> float:
+	return fposmod(sin(float(a) * 78.233 + float(b) * 12.9898) * 43758.5453, 1.0) * 2.0 - 1.0
 
 
 ## The whole tyre: its own grip times what the water does to this compound.
@@ -158,10 +213,12 @@ func update_car(car: GtCar, ctx: Variant, dt: float) -> void:
 	var lead: Dictionary = {}
 	var behind: Dictionary = {}
 	var side_cars: Array = []
+	var lane_lead: Dictionary = {}
 	if ctx != null:
 		lead = ctx["lead"]
 		behind = ctx["behind"]
 		side_cars = ctx["side"]
+		lane_lead = ctx.get("lane_lead", {})
 	var finish_s: float = float(race.laps) * track.length
 
 	car.prev_s = car.s
@@ -285,7 +342,7 @@ func update_car(car: GtCar, ctx: Variant, dt: float) -> void:
 		var water_slowdown: float = maxf(0.70, 1.0 - (race.weather.track_water_pct - 40.0) * 0.004)
 		_target *= lerpf(1.0, water_slowdown, lerpf(0.35, 1.0, corner_weight))
 
-	var ideal_lateral: float = track.ideal_lateral_at(car.s)
+	var ideal_lateral: float = race_line_for(car, car.s)
 	_target_lateral = ideal_lateral
 	_blue_flagged = false
 	var off_line: float = absf(car.lateral - ideal_lateral)
@@ -321,6 +378,9 @@ func update_car(car: GtCar, ctx: Variant, dt: float) -> void:
 					_target_lateral = candidate
 				else:
 					other.target_lateral = track.clamp_to_width(_target_lateral - push_dir * 2.25)
+	if car.pit == null and not lane_lead.is_empty():
+		_hold_corridor(lane_lead)
+	_target_lateral_rate = (_target_lateral - car.target_lateral) / maxf(dt, 1.0e-4)
 	car.target_lateral = _target_lateral
 	if car.finished_at >= 0.0:
 		_target = minf(_target, 30.0)
@@ -566,6 +626,28 @@ func _defend_and_race(car: GtCar, lead: Dictionary, behind: Dictionary, curv_now
 				car.overtake_phase = GtTypes.Overtake.NONE
 	elif car.defend_timer <= 0.0:
 		car.overtake_phase = GtTypes.Overtake.NONE
+	_tuck_into_tow(car, ahead, gap)
+
+
+## Whatever the racecraft, keep a speed from which this car can still stop behind the nearest car ahead in its own
+## corridor if that car brakes as hard: v <= sqrt(v_ahead^2 + 2 BRAKE room). The nearest car ahead overall can be
+## alongside in another lane and hide it (a tow at 6 m into a braking zone ran into the car beyond).
+func _hold_corridor(lane_lead: Dictionary) -> void:
+	var ahead: GtCar = lane_lead["car"]
+	if ahead.pit != null:
+		return
+	var room: float = maxf(0.0, float(lane_lead["dist"]) - GtTypes.CAR_LENGTH_M - 1.0)
+	_target = minf(_target, sqrt(ahead.v * ahead.v + 2.0 * GtTypes.BRAKE * room))
+
+
+## Following on a straight inside the tow: move into the wake of the car ahead instead of holding the line.
+func _tuck_into_tow(car: GtCar, ahead: GtCar, gap: float) -> void:
+	if car.overtake_phase != GtTypes.Overtake.NONE or gap < 4.0 or gap > 25.0:
+		return
+	var track: GtTrack = race.track
+	if absf(track.curvature_at(car.s)) > TOW_STRAIGHT_KAPPA or absf(track.curvature_at(car.s + 60.0)) > TOW_STRAIGHT_KAPPA:
+		return
+	_target_lateral = lerpf(_target_lateral, ahead.lateral, TOW_TUCK)
 
 
 ## Calls after a completed pass: the engineer praises the player's car (rarely), then the driver
@@ -749,7 +831,15 @@ func _steer_laterally(car: GtCar, dt: float) -> void:
 	elif car.overtake_phase == GtTypes.Overtake.ATTACKING:
 		max_steer = 5.2
 	var steer_gain: float = 10.0 if car.pit != null else 6.0
-	var desired: float = clampf(d_lat * steer_gain, -max_steer, max_steer)
+	# Feed-forward: the racing line itself crosses the road (a chicane at speed asks well over max_steer), so the
+	# car rides the drift of its target and max_steer caps only the moves away from it. Capped at the line's own
+	# drift: a target that jumps (a pass, a defence) is steered to, not teleported to; one that stands still
+	# (a defended line, the track edge) gets no drift at all.
+	var feed: float = 0.0
+	if car.pit == null:
+		var line_drift: float = absf(track.ideal_lateral_at(car.s + 1.0) - track.ideal_lateral_at(car.s - 1.0)) * 0.5 * car.v
+		feed = clampf(_target_lateral_rate, -line_drift, line_drift)
+	var desired: float = feed + clampf(d_lat * steer_gain, -max_steer, max_steer)
 	car.v_lat += (desired - car.v_lat) * minf(1.0, 15.0 * dt)
 	car.lateral += car.v_lat * dt
 	if car.pit == null:
@@ -879,6 +969,19 @@ func enter_pit_lane(car: GtCar, compound: int = -1) -> void:
 	car.pit_request = -1
 
 
+## A car on its way into the lane (ENTRY or IN) alongside this one: within a car length and a half either way and
+## not yet a lane apart. Level cars resolve by id so exactly one of the pair yields.
+func _pit_entry_abreast(car: GtCar) -> GtCar:
+	for other: GtCar in race.cars:
+		if other == car or other.pit == null or other.is_dnf:
+			continue
+		if other.pit.phase != GtTypes.PitPhase.ENTRY and other.pit.phase != GtTypes.PitPhase.IN:
+			continue
+		if absf(other.s - car.s) < GtTypes.CAR_LENGTH_M * 1.5 and absf(other.lateral - car.lateral) < GtTypes.CAR_WIDTH_M + 0.6:
+			return other
+	return null
+
+
 ## Reference `beginPitStop`.
 func begin_pit_stop(car: GtCar, compound: int) -> void:
 	car.pit_request = compound
@@ -894,7 +997,10 @@ func _pit_logic(car: GtCar, dt: float) -> void:
 			if other != car and other.team_id == car.team_id and other.pit != null and other.s > car.s - 10.0 and other.s - car.s < 16.0:
 				_target = minf(_target, maxf(12.0, other.v * 0.85))
 		if u >= -120.0 and u < 0.0:
-			enter_pit_lane(car)
+			# A call that comes too late to brake to the limiter by the line is taken next lap, like a driver
+			# who missed the entry: committing anyway overshoots the box and snaps the car back.
+			if car.v <= sqrt(GtTypes.PIT_SPEED * GtTypes.PIT_SPEED + 2.0 * GtTypes.BRAKE * -u) + 2.0:
+				enter_pit_lane(car)
 		elif u >= -300.0 and u < -120.0:
 			car.pass_timer = 0.0
 			car.overtake_phase = GtTypes.Overtake.NONE
@@ -923,6 +1029,13 @@ func _pit_logic(car: GtCar, dt: float) -> void:
 			else:
 				_queue_behind_teammate(car, pit, rel, false)
 			_target_lateral = float(race.pit_layout["edge_lateral_m"])
+			# Two cars committing abreast both swing for the same edge, and the contact solver leaves pit cars
+			# alone: both hold their lines until a car length clear, and the one behind lifts to fall in behind.
+			var abreast: GtCar = _pit_entry_abreast(car)
+			if abreast != null:
+				_target_lateral = car.lateral
+				if abreast.s > car.s or (abreast.s == car.s and abreast.id < car.id):
+					_target = minf(_target, abreast.v * 0.85)
 			if rel >= 0.0:
 				pit.phase = GtTypes.PitPhase.IN
 		GtTypes.PitPhase.IN:

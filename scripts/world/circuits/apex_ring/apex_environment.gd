@@ -169,15 +169,8 @@ func _build_runoff() -> void:
 
 ## Rubber laid down along the adaptive racing line, darker through the corners.
 func _build_groove() -> void:
-	var material := StandardMaterial3D.new()
-	material.vertex_color_use_as_albedo = true
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.roughness = 0.7
-	material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	var mesh: ArrayMesh = SurfaceGeometry.groove_mesh(ribbon, line)
-	mesh.surface_set_material(0, material)
-	groove_instance = _add_mesh("RubberGroove", mesh)
-	groove_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	groove_instance = SurfaceGeometry.groove_instance(ribbon, line)
+	add_child(groove_instance)
 
 
 func _add_mesh(node_name: String, mesh: Mesh) -> MeshInstance3D:

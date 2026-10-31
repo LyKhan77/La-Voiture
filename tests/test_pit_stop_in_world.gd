@@ -40,13 +40,15 @@ func _initialize() -> void:
 func _run() -> void:
 	await _scenario("apex_ring", "one car", func(cars: Array) -> Array: return [cars[0].id], false)
 	await _scenario("apex_ring", "two teammates share a box", func(cars: Array) -> Array: return _teammates(cars), false)
-	await _scenario("apex_ring", "six cars box at once", func(cars: Array) -> Array: return [cars[0].id, cars[3].id, cars[6].id, cars[9].id, cars[12].id, cars[15].id], true)
-	await _scenario("neo_wangan", "six cars box at once", func(cars: Array) -> Array: return [cars[0].id, cars[3].id, cars[6].id, cars[9].id, cars[12].id, cars[15].id], true)
-	await _scenario("brianza", "six cars box at once", func(cars: Array) -> Array: return [cars[0].id, cars[3].id, cars[6].id, cars[9].id, cars[12].id, cars[15].id], true)
 	# Six cars running nose to tail: since Fase 17 a release waits only for a car really in the way, and the spread pick
-	# (every third car) no longer forces a hold on Monte Azure's lane.
+	# (every third car) no longer forces a hold on Monte Azure's lane, nor (Fase 18 racing-line pace) on these three;
+	# on the Apex Ring every second car does (probed: 11 held frames; nose to tail gives none there).
+	await _scenario("apex_ring", "six cars box at once", func(cars: Array) -> Array: return [cars[0].id, cars[2].id, cars[4].id, cars[6].id, cars[8].id, cars[10].id], true)
+	await _scenario("neo_wangan", "six cars box at once", func(cars: Array) -> Array: return [cars[0].id, cars[1].id, cars[2].id, cars[3].id, cars[4].id, cars[5].id], true)
+	await _scenario("brianza", "six cars box at once", func(cars: Array) -> Array: return [cars[0].id, cars[1].id, cars[2].id, cars[3].id, cars[4].id, cars[5].id], true)
 	await _scenario("monte_azure", "six cars box at once", func(cars: Array) -> Array: return [cars[0].id, cars[1].id, cars[2].id, cars[3].id, cars[4].id, cars[5].id], true)
-	await _scenario("ardennes", "six cars box at once", func(cars: Array) -> Array: return [cars[0].id, cars[3].id, cars[6].id, cars[9].id, cars[12].id, cars[15].id], true)
+	# Every third car held 0-1 frames here (frame timing makes the world run vary); nose to tail holds ~11.
+	await _scenario("ardennes", "six cars box at once", func(cars: Array) -> Array: return [cars[0].id, cars[1].id, cars[2].id, cars[3].id, cars[4].id, cars[5].id], true)
 	quit(1 if failures else 0)
 
 

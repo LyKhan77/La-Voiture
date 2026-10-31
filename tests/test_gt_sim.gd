@@ -128,12 +128,12 @@ func _test_track() -> void:
 	while s < track.length:
 		tightest = minf(tightest, track.speed_limit_at(s))
 		fastest = maxf(fastest, track.speed_limit_at(s))
-		ideal_ok = ideal_ok and absf(track.ideal_lateral_at(s)) <= 3.2 + 1.0e-6
+		ideal_ok = ideal_ok and absf(track.ideal_lateral_at(s)) <= track.line.line_limit_m + 1.0e-6 and track.line.line_limit_m < 5.4
 		s += 5.0
 	check(avg > 30.0 and avg < 76.0 and tightest < 35.0 and fastest > 70.0,
 		"track: speed profile averages %.1f m/s, slowest %.1f m/s in the hairpin, fastest %.1f m/s" % [avg, tightest, fastest])
 	check(ideal_ok and is_equal_approx(track.clamp_to_width(99.0), 5.4) and is_equal_approx(track.clamp_to_width(-99.0), -5.4),
-		"track: racing line within +-3.2 m, lateral clamps to the usable 5.4 m")
+		"track: racing line within +-%.1f m, inside the usable 5.4 m lateral clamp" % track.line.line_limit_m)
 	check(track.drs_zones.size() == 2 and not track.drs_zone_at(500.0).is_empty() and track.drs_zone_at(2000.0).is_empty(),
 		"track: two DRS zones, one on the start straight")
 
