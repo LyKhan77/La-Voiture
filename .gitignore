@@ -46,3 +46,6 @@ output/
 .ai-memory.toml
 studio.json
 Untitled game/
+
+# Active task board for agents (AGENTS.md 12.5): local, overwritten every task
+todo.md

@@ -266,4 +266,9 @@ Sebelum suatu tugas atau fase dinyatakan **SELESAI**, agen wajib memenuhi seluru
    Executor wajib bekerja di branch khusus (`fase-*`), menerapkan siklus TDD (Red $\rightarrow$ Green), mengambil tangkapan layar 6-kamera 1080p, dan memastikan Zero Regression test sebelum menyatakan pekerjaan selesai.
 4. **Local Control Plane (`ai-memory`):**
    Seluruh agen wajib menjaga kontinuitas memori melalui server lokal `ai-memory` di `http://127.0.0.1:49374/` (Web UI di `/web`). Sesi baru dan proses compacting secara otomatis disinkronkan oleh hook lifecycle.
+5. **Papan Tugas Aktif — [`todo.md`](todo.md) (WAJIB):**
+   - **Sebelum mulai tugas baru**, baca `todo.md`. Jika masih ada item `- [ ]` (belum dicentang), agen **WAJIB berhenti dan konfirmasi ke developer**: selesaikan/tambal item tersebut dulu, atau izinkan overwrite. Dilarang menimpa daftar yang belum tuntas tanpa izin eksplisit.
+   - **Saat mulai tugas baru** (setelah daftar lama tuntas atau overwrite diizinkan), **timpa** `todo.md` dengan tugas baru: judul, tanggal, agen, branch, lalu checklist langkah kerja.
+   - **Selama bekerja**, centang `- [x]` tiap langkah segera setelah selesai dan terverifikasi. Langkah yang dilewati atau tertunda tetap `- [ ]` dengan alasan singkat — jangan dicentang palsu.
+   - **Sebelum menyatakan tugas selesai**, pastikan seluruh checklist tercentang (termasuk test via `tools/run_tests.ps1`, laporan, dan commit bila diminta).
 
