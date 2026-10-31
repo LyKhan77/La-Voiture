@@ -108,7 +108,7 @@ Catatan visual: mulut terowongan kini berlubang; dinding samping dan reveal port
 - Jarak kamera TV: baris fasad kota mulai 26 m dari tepi jalan agar kamera generik (20 m, tinggi 2,4 m) bersih. Jika kamera Monte dipindah lebih jauh, baris itu bisa dirapatkan.
 - Sampel draw call terburuk saat balapan SUNSET 171 (kamera balap) di bawah 180 tetapi di atas target 160 per kamera; DAY dan NIGHT ≤ 140.
 - Bukti visual diambil lewat `scratch/capture_monte_azure_views.gd` dan dinilai dengan mata; tidak ada tes otomatis yang membandingkan gambar.
-- Pit pada sirkuit lain (Apex 14 m, Brianza 14 m, Neo-Wangan 12 m) diukur dan diperbaiki di Fase 15.1 (`FASE-15-1-PIT-PITCH-OTHER-CIRCUITS-REPORT.md`): Brianza dan Neo-Wangan kini 20 m; Apex tetap 14 m karena lurusan pit-nya tidak muat.
+- Pit pada sirkuit lain (Apex 14 m, Brianza 14 m, Neo-Wangan 12 m) diukur dan diperbaiki di Fase 15.1 (`FASE-15-1-PIT-PITCH-OTHER-CIRCUITS-REPORT.md`): Brianza dan Neo-Wangan kini 20 m; Apex 20 m di lurusan start/finish (Fase 15.2, `FASE-15-2-APEX-PIT-ON-START-STRAIGHT-REPORT.md`).
 - Sisa menunggu 10–16 dtk di lane Monte saat seluruh lapangan masuk bersamaan adalah gerbang rilis aman yang disengaja (mobil yang selesai menunggu lajur cepat bebas dari mobil melaju); pada aliran yang rapat tidak ada celah. Lane kosong 85–86 dtk (sebelumnya 101–122) pada skenario rapat.
 - Tinjauan akhir dilakukan sendiri oleh executor (tanpa subagen), jadi bukan pemeriksa baru yang independen.
 

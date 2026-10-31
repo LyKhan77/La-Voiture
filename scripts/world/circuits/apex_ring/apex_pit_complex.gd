@@ -1,9 +1,9 @@
 class_name ApexPitComplex
 extends "res://scripts/world/circuits/base/circuit_pit_complex.gd"
 
-## Pit lane beside the start straight (FASE 5.5, refined after the FASE 10 feedback): a separate 410 m
-## lane that peels off the right edge of the circuit at s = 3900 m, passes ten team garages and rejoins the
-## same edge at s = 150 m after the line. Positions come from the ribbon, so the pit lane is described by
+## Pit lane beside the start straight (FASE 5.5, refined after the FASE 10 feedback, boxes moved onto the straight in FASE 15.2): a separate 459 m
+## lane that peels off the right edge of the circuit at s = 4000 m, passes ten team garages (20 m apart, s 31..211 after the line) and rejoins the
+## same edge at s = 300 m after the line. Positions come from the ribbon, so the pit lane is described by
 ## `u`, the arc distance from the Pit Entry line, and a lateral offset (+ = right of travel).
 ## Across the lane, from the circuit outward (all lateral, metres; the circuit edge is at 7.0):
 ##   7.0 ..  8.25  verge        pit wall (concrete, between the circuit and the fast lane) at 8.5
@@ -26,7 +26,7 @@ const RoadShader := preload("res://shaders/road_asphalt.gdshader")
 
 const ENTRY_S: float = GtPitLayout.ENTRY_S
 const EXIT_S: float = GtPitLayout.EXIT_S # on the lap after the start line
-const NOMINAL_LENGTH_M: float = 410.0
+const NOMINAL_LENGTH_M: float = 458.75
 const SPEED_LIMIT_MPS: float = 80.0 / 3.6
 const TEAM_COUNT: int = 10
 const STALL_FIRST_S: float = GtPitLayout.STALL_FIRST_S
@@ -52,7 +52,7 @@ const RAMP_OUT_M: float = GtPitLayout.RAMP_OUT_M
 const STRIP_START_LEFT_M: float = 6.0
 const STRIP_START_RIGHT_M: float = 7.2
 
-const GARAGE_WIDTH_M: float = 12.4
+const GARAGE_WIDTH_M: float = 16.4
 const GARAGE_DEPTH_M: float = 9.0
 const GARAGE_HEIGHT_M: float = 4.2
 ## Where the transporter row stands, measured from the circuit centre line: clear of the pit building and its terrace.

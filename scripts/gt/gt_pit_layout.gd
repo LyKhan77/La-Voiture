@@ -2,13 +2,16 @@ class_name GtPitLayout
 extends RefCounted
 
 ## The pit lane layout a GtRace is raced with when its circuit does not publish one, plus the garage setback the pit
-## crew choreography falls back on. These are the Apex Ring's own 410 m lane: ApexPitComplex builds its lane from these
+## crew choreography falls back on. These are the Apex Ring's own 459 m lane: ApexPitComplex builds its lane from these
 ## constants, so the sim never has to know a circuit's scripts.
 
-const ENTRY_S: float = 3900.0
-const EXIT_S: float = 150.0
-const STALL_FIRST_S: float = 3925.0
-const STALL_PITCH_M: float = 14.0
+## The boxes stand on the start straight (it runs from the lap seam at 4158.75 on): the straight before the line is only
+## ~145 m between two 90 degree bends, too short for ten 20 m boxes. STALL_FIRST_S is unwrapped (the sim measures it from the
+## entry), 190 m after the entry line so a late-called car can stop at its box.
+const ENTRY_S: float = 4000.0
+const EXIT_S: float = 300.0
+const STALL_FIRST_S: float = 4190.0
+const STALL_PITCH_M: float = 20.0
 const STALL_LANE_M: float = 17.0
 const FAST_LANE_M: float = 11.6
 const EDGE_LATERAL_M: float = 5.2

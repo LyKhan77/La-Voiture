@@ -49,7 +49,7 @@ func _run() -> void:
 	check(is_equal_approx(apex.start_s, 3880.0) and is_equal_approx(apex.length_m, 470.0), "Apex pit gap preserves its original margins")
 	var world := World.new()
 	var camera_default: Dictionary = world._camera_pit_zone(4158.75)
-	check(is_equal_approx(float(camera_default.get("length_m", 0.0)), 470.0), "Apex camera exclusion preserves nominal lane length")
+	check(is_equal_approx(float(camera_default.get("length_m", 0.0)), 518.75), "Apex camera exclusion preserves nominal lane length")
 	world.free()
 	for script_name: String in ["trackside_furniture_builder", "broadcast_camera_director", "foliage_scatter", "enhanced_track_geometry"]:
 		var source: String = FileAccess.get_file_as_string("res://scripts/world/%s.gd" % script_name)

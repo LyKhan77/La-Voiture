@@ -29,9 +29,6 @@ var trace_overlaps: bool = false
 ## The raced-field scenario: seed and the lap count the leader has run when everyone boxes (probe scripts vary them).
 var race_seed: int = 31
 var live_laps: int = 2
-## A circuit whose pit straight cannot hold 20 m boxes with a run-up (Apex) sets its own measured limits and says why.
-var flush_max_s: float = FLUSH_MAX_S
-var teleport_max_m: float = TELEPORT_MAX_M
 var failures: int = 0
 var track: TrackScript
 var layout: Dictionary = {}
@@ -180,9 +177,9 @@ func _measure(label: String, race: RaceScript, bound_flush: bool, still_max: flo
 	check(serviced == race.cars.size(), "%s: every car is serviced and back on the circuit" % label)
 	check(longest_still <= still_max, "%s: no car stands still outside its box for more than %.0f s at a time (%.1f s)" % [label, still_max, longest_still])
 	if bound_flush:
-		check(flushed_at > 0.0 and flushed_at <= flush_max_s, "%s: the lane is clear within %.0f s of the first call (%.0f s)" % [label, flush_max_s, flushed_at])
+		check(flushed_at > 0.0 and flushed_at <= FLUSH_MAX_S, "%s: the lane is clear within %.0f s of the first call (%.0f s)" % [label, FLUSH_MAX_S, flushed_at])
 	check(max_decel <= LANE_DECEL_MAX, "%s: lane braking stays comfortable (%.1f m/s2)" % [label, max_decel])
-	check(max_teleport <= teleport_max_m, "%s: no car is pushed or teleported by more than %.2f m (%.2f m)" % [label, teleport_max_m, max_teleport])
+	check(max_teleport <= TELEPORT_MAX_M, "%s: no car is pushed or teleported (%.2f m)" % [label, max_teleport])
 	check(deep_overlap_ticks <= DEEP_OVERLAP_TICKS_MAX, "%s: no car drives into another: %d car-pair ticks overlap by more than %.1f m (deepest %.2f m)" % [label, deep_overlap_ticks, OVERLAP_MAX_M, deepest_overlap])
 
 

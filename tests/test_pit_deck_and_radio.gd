@@ -163,7 +163,8 @@ func _test_cancel_pit() -> void:
 	for _step: int in range(8):
 		race.step_ticks(10)
 		peak = maxf(peak, car.v)
-	check(held and peak > 45.0 and car.pit == null and car.pit_request == -1,
+	# The 90 degree bend before the Apex pit entry (s 3790..3920) caps the speed near 41 m/s, so leaving the 38 m/s cap is the signal.
+	check(held and peak > 40.0 and car.pit == null and car.pit_request == -1,
 		"pit: after cancelling, the car leaves the 38 m/s pit approach pace (peak %.1f m/s) and drives past the pit entry with no penalty" % peak)
 
 	var radio_count: int = race.radio_history.size()

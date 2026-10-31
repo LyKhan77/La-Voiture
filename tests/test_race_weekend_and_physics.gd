@@ -336,8 +336,8 @@ func _test_grid_and_set(world: Node3D) -> void:
 			pitch_ok = pitch_ok and is_equal_approx(float(stall["s"]) - float(world.pit_lane.stalls[team - 1]["s"]), PitLaneScript.STALL_PITCH_M)
 	var pit_length: float = world.pit_lane.length_m
 	check(gantry.global_position.distance_to(start.origin) < 0.01 and gantry.lamps.size() == 10 and gantry.BEAM_HEIGHT_M > 6.0 and gantry.SPAN_M > 2.0 * world.ribbon.road_half_width_m
-		and garages_ok and pitch_ok and PitLaneScript.ENTRY_S == 3900.0 and PitLaneScript.EXIT_S == 150.0 and absf(pit_length - 410.0) < 5.0,
-		"#24 the gantry (5 pairs of lamps) stands on the start line and the 10 garages along the pit lane (%.1f m, entry 3900, exit 150)" % pit_length)
+		and garages_ok and pitch_ok and PitLaneScript.ENTRY_S == 4000.0 and PitLaneScript.EXIT_S == 300.0 and absf(pit_length - 458.75) < 5.0,
+		"#24 the gantry (5 pairs of lamps) stands on the start line and the 10 garages along the pit lane (%.1f m, entry 4000, exit 300)" % pit_length)
 
 
 ## #13..#15: lights come on one by one, go out together, nobody moves before.

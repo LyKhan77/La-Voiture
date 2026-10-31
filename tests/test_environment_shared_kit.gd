@@ -74,7 +74,7 @@ func _test_pit_layout() -> void:
 		and is_equal_approx(float(layout["edge_lateral_m"]), ApexPit.EDGE_LATERAL_M) and is_equal_approx(float(layout["queue_gap_m"]), ApexPit.QUEUE_GAP_M)
 		and is_equal_approx(float(layout["lane_ramp_in_m"]), ApexPit.RAMP_IN_M) and is_equal_approx(float(layout["lane_ramp_out_m"]), ApexPit.RAMP_OUT_M)
 		and is_equal_approx(GtPitLayout.GARAGE_FRONT_M, ApexPit.GARAGE_FRONT_M), "pit layout: the Apex lane is built from the same numbers")
-	check(layout["entry_s"] == 3900.0 and layout["fast_lane_m"] == 11.6, "pit layout: values are unchanged from the Apex Ring's lane")
+	check(layout["entry_s"] == 4000.0 and layout["fast_lane_m"] == 11.6, "pit layout: values are those of the Apex Ring's lane")
 	var coupled: Array[String] = []
 	for dir_path: String in ["res://scripts/gt", "res://scripts/car"]:
 		for file_name: String in DirAccess.get_files_at(dir_path):

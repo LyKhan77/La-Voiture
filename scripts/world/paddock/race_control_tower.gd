@@ -10,8 +10,8 @@ extends Node3D
 const ToonMaterials := preload("res://scripts/world/shared/toon_materials.gd")
 const MeshBatchScript := preload("res://scripts/world/shared/mesh_batch.gd")
 
-## Arc distance of the tower's centre, just beyond the Pit Exit line (s = 150 m).
-const CENTRE_S: float = 195.0
+## Arc distance of the tower's centre, just beyond the Pit Exit line (s = 300 m).
+const CENTRE_S: float = 345.0
 ## Lateral distance of the tower's centre from the racing line.
 const CENTRE_X_M: float = 24.0
 ## Floor tops, ground to roof. The lobby is tall so nothing hangs below 6 m over the cars' corridor.

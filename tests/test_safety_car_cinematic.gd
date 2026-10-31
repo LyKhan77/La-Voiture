@@ -36,12 +36,12 @@ func _run() -> void:
 		var lateral: float = float(race.safety_car["lateral"])
 		monotonic = monotonic and lateral <= previous + 0.01
 		previous = lateral
-		if float(race.safety_car["s"]) >= 219.0:
+		if float(race.safety_car["s"]) >= 369.0:
 			break
 	check(monotonic, "Pit exit merge decreases monotonically")
 	check(previous < 0.5, "SC reaches track center after merge")
 	_prepare_withdrawal(race, 3700.0)
-	race.safety_car["s"] = 3860.0
+	race.safety_car["s"] = 3960.0
 	race._update_race_control(0.0)
 	check(float(race.safety_car["lateral"]) > 2.0, "SC peels toward pit on in-lap")
 	_test_trajectory_boundaries(race, track)
@@ -60,7 +60,7 @@ func _run() -> void:
 
 func _test_trajectory_boundaries(race: GtRace, track: GtTrack) -> void:
 	check(not bool(race.safety_car["lights_on"]), "In-lap disables amber strobes")
-	race.safety_car["s"] = 3960.0
+	race.safety_car["s"] = 4060.0
 	race._update_race_control(0.0)
 	check(is_equal_approx(float(race.safety_car["lateral"]), 11.6), "Peel-off reaches fast lane")
 	race.race_control["timer"] = 0.0
@@ -69,9 +69,9 @@ func _test_trajectory_boundaries(race: GtRace, track: GtTrack) -> void:
 	race.safety_car["s"] = track.length + 10.0
 	race._update_race_control(0.0)
 	check(is_equal_approx(float(race.safety_car["lateral"]), 11.6), "Pit lateral survives lap wrap")
-	race.safety_car["s"] = track.length + 150.0
+	race.safety_car["s"] = track.length + 300.0
 	race._update_race_control(0.0)
-	check(float(race.safety_car["s"]) <= track.length + 90.0, "Withdrawn SC waits inside pit before exit ramp")
+	check(float(race.safety_car["s"]) <= track.length + 240.0, "Withdrawn SC waits inside pit before exit ramp")
 	check(is_zero_approx(float(race.safety_car["v"])), "Withdrawn SC stops while awaiting distant leader restart")
 	race.set_flag(Types.Flag.YELLOW, 1, "YELLOW", 1.0)
 	check(int(race.race_control["flag"]) == Types.Flag.SC, "SC retains flag priority throughout in-lap")
@@ -82,7 +82,7 @@ func _test_trajectory_boundaries(race: GtRace, track: GtTrack) -> void:
 	check(not bool(race.safety_car["active"]), "SC hidden only after peel-off and restart")
 	race.set_flag(Types.Flag.SC)
 	_prepare_withdrawal(race, 3700.0)
-	race.safety_car["s"] = 3960.0
+	race.safety_car["s"] = 4060.0
 	race._update_race_control(0.0)
 	race.race_control["timer"] = 0.0
 	for index: int in range(race.cars.size()):
@@ -92,7 +92,7 @@ func _test_trajectory_boundaries(race: GtRace, track: GtTrack) -> void:
 	race._update_race_control(0.0)
 	check(int(race.race_control["flag"]) == Types.Flag.GREEN, "Finishing leader still releases restart at the line")
 	race.cars[0].finished_at = -1.0
-	for leader_s: float in [0.0, 100.0, 219.0, 500.0, track.length + 500.0]:
+	for leader_s: float in [0.0, 100.0, 369.0, 500.0, track.length + 500.0]:
 		race.set_flag(Types.Flag.GREEN)
 		for car: GtCar in race.cars:
 			car.s = leader_s - float(car.id) * 15.0
@@ -102,14 +102,14 @@ func _test_trajectory_boundaries(race: GtRace, track: GtTrack) -> void:
 	if not race.has_method("sc_pit_exit_lateral"):
 		check(false, "Trajectory helpers available")
 		return
-	for fixture: Array in [[90.0, 11.6], [120.0, 8.4], [150.0, 5.2], [185.0, 2.6], [220.0, 0.0]]:
+	for fixture: Array in [[240.0, 11.6], [270.0, 8.4], [300.0, 5.2], [335.0, 2.6], [370.0, 0.0]]:
 		check(absf(float(race.call("sc_pit_exit_lateral", fixture[0])) - float(fixture[1])) < 0.001, "Exit spline matches hand-calculated s=%.0f" % fixture[0])
-	for fixture: Array in [[3820.0, 0.0], [3860.0, 2.6], [3900.0, 5.2], [3930.0, 8.4], [3960.0, 11.6]]:
+	for fixture: Array in [[3920.0, 0.0], [3960.0, 2.6], [4000.0, 5.2], [4030.0, 8.4], [4060.0, 11.6]]:
 		check(absf(float(race.call("sc_pit_entry_lateral", fixture[0])) - float(fixture[1])) < 0.001, "Entry spline matches hand-calculated s=%.0f" % fixture[0])
 
 
 func _test_renewed_caution(race: GtRace, track: GtTrack) -> void:
-	for entry_s: float in [3700.0, 3920.0]:
+	for entry_s: float in [3700.0, 4020.0]:
 		race.set_flag(Types.Flag.GREEN)
 		for index: int in range(race.cars.size()):
 			race.cars[index].s = entry_s - 50.0 - float(index) * 15.0
@@ -119,8 +119,8 @@ func _test_renewed_caution(race: GtRace, track: GtTrack) -> void:
 		race._update_race_control(0.0)
 		race.set_flag(Types.Flag.SC, 1, "NEW INCIDENT", 10.0)
 		check(int(race.safety_car["phase"]) == Types.SafetyCarPhase.DEPLOYED and bool(race.safety_car["lights_on"]), "Renewed caution restores amber at s=%.0f" % entry_s)
-		if entry_s < 3820.0:
-			race.safety_car["s"] = 3960.0
+		if entry_s < 3920.0:
+			race.safety_car["s"] = 4060.0
 			race._update_race_control(0.0)
 			check(float(race.safety_car["lateral"]) < 2.0, "Renewed caution before pit entry cancels withdrawal")
 		else:
@@ -130,14 +130,14 @@ func _test_renewed_caution(race: GtRace, track: GtTrack) -> void:
 			race._update_race_control(0.0)
 			check(int(race.race_control["flag"]) == Types.Flag.SC, "Renewed caution after entry cannot release green")
 			check(is_equal_approx(float(race.safety_car["lateral"]), 11.6), "Renewed caution remains in pit lane until exit")
-			race.safety_car["s"] = track.length + 185.0
+			race.safety_car["s"] = track.length + 335.0
 			race._update_race_control(0.0)
 			check(absf(float(race.safety_car["lateral"]) - 2.6) < 0.001, "Renewed SC merges through upcoming pit exit")
 	race.set_flag(Types.Flag.GREEN)
 	for index: int in range(race.cars.size()):
-		race.cars[index].s = 3800.0 - float(index) * 15.0
+		race.cars[index].s = 3900.0 - float(index) * 15.0
 	race.set_flag(Types.Flag.SC)
-	race.safety_car["s"] = 3930.0
+	race.safety_car["s"] = 4030.0
 	race.safety_car["lateral"] = 0.0
 	race.race_control["sc_laps_remaining"] = 0
 	race._update_race_control(0.0)
@@ -258,11 +258,11 @@ func _test_smooth_motion(world: RaceWeekendWorld) -> void:
 		check(forward.dot(track_pose.basis.x) < -0.01, "SC heading follows leftward pit merge at %dHz" % hz)
 
 
-func _place_queue(race: GtRace, sc_s: float) -> void:
+func _place_queue(race: GtRace, sc_s: float, gap_m: float = 14.0) -> void:
 	race.safety_car["s"] = sc_s
 	for index: int in range(race.cars.size()):
 		var car: GtCar = race.cars[index]
-		car.s = sc_s - 14.0 - float(index) * 14.0
+		car.s = sc_s - 14.0 - float(index) * gap_m
 		car.prev_s = car.s
 		car.v = 25.0
 		car.lap = floori(car.s / race.track.length)
@@ -271,9 +271,9 @@ func _place_queue(race: GtRace, sc_s: float) -> void:
 		car.pit_request = -1
 
 
-func _prepare_withdrawal(race: GtRace, sc_s: float) -> void:
-	_place_queue(race, sc_s)
-	race.safety_car["exit_end_s"] = floorf(sc_s / race.track.length) * race.track.length + 220.0
+func _prepare_withdrawal(race: GtRace, sc_s: float, gap_m: float = 14.0) -> void:
+	_place_queue(race, sc_s, gap_m)
+	race.safety_car["exit_end_s"] = floorf(sc_s / race.track.length) * race.track.length + 370.0
 	race.race_control["timer"] = 0.0
 	race.race_control["sc_laps_remaining"] = 0
 	race._update_race_control(0.0)
@@ -302,7 +302,7 @@ func _test_baseline_rules(track: GtTrack) -> void:
 	check(int(race.safety_car["phase"]) == Types.SafetyCarPhase.IN_THIS_LAP, "Safe track and collected queue allow withdrawal")
 	race.set_flag(Types.Flag.GREEN)
 	race.set_flag(Types.Flag.SC, 1, "SC", 0.0)
-	_place_queue(race, 3930.0)
+	_place_queue(race, 4030.0)
 	race.race_control["sc_laps_remaining"] = 0
 	race._update_race_control(0.0)
 	check(int(race.safety_car["phase"]) == Types.SafetyCarPhase.DEPLOYED, "Late call does not announce IN THIS LAP after approach passed")
@@ -326,7 +326,7 @@ func _test_baseline_rules(track: GtTrack) -> void:
 	race.race_control["sc_laps_remaining"] = 0
 	race._update_race_control(0.0)
 	check(not bool(race.safety_car.get("wave_by", true)), "Green pickup signal goes off after leader collected")
-	race.safety_car["s"] = track.length + 3960.0
+	race.safety_car["s"] = track.length + 4060.0
 	race._update_race_control(0.0)
 	race.cars[0].s = track.length * 2.0 + 1.0
 	race.cars[1].s = track.length * 2.0 - 15.0
@@ -339,7 +339,7 @@ func _test_baseline_rules(track: GtTrack) -> void:
 	_place_queue(race, track.length * 4.0 + 500.0)
 	race.race_control["sc_laps_remaining"] = 0
 	race._update_race_control(0.0)
-	race.safety_car["s"] = track.length * 4.0 + 3960.0
+	race.safety_car["s"] = track.length * 4.0 + 4060.0
 	race._update_race_control(0.0)
 	race.cars[0].s = track.length * 5.0 + 1.0
 	race._update_race_control(0.0)
@@ -391,7 +391,8 @@ func _test_review_regressions(track: GtTrack) -> void:
 	var race := Race.new(track, 5, 61, 0, 20)
 	race.incidents_enabled = false
 	race.set_flag(Types.Flag.SC, 1, "SC", 0.0)
-	_prepare_withdrawal(race, track.length + 230.0)
+	# The pit exit ends at s=370, so a 20 car queue 14 m apart no longer reaches back over the line: space it 22 m.
+	_prepare_withdrawal(race, track.length + 380.0, 22.0)
 	var tail: GtCar = race.cars[-1]
 	check(absf(tail.sc_restart_line_s - track.length * 2.0) < 0.01, "Queue spanning control line retains actual withdrawal restart lap")
 	tail.s = track.length + 1.0
@@ -441,7 +442,7 @@ func _test_review_regressions(track: GtTrack) -> void:
 	race.safety_car["v"] = 18.0
 	race._update_race_control(0.05)
 	check(float(race.safety_car["v"]) - 18.0 <= 3.0 * 0.05 + 0.0001, "Pickup acceleration stays within 3m/s² without velocity kick")
-	_prepare_withdrawal(race, 3805.0)
+	_prepare_withdrawal(race, 3905.0)
 	check(int(race.safety_car["phase"]) == Types.SafetyCarPhase.DEPLOYED, "Late withdrawal waits until complete racing-line alignment is available")
 	race.dispose()
 

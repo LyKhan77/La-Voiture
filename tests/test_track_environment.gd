@@ -557,14 +557,14 @@ func _test_stage3_architecture() -> void:
 	check(instanced, "#H1 the paddock holds the pit building, main grandstand and race control tower, each instanced from its own scene")
 
 	var pit: Node3D = paddock.get_node_or_null("PitBuilding") if paddock != null else null
-	var pit_box: Dictionary = footprint(world_vertices(pit), 3988.0)
+	var pit_box: Dictionary = footprint(world_vertices(pit), 4280.0)
 	var glass_ok: bool = false
 	if pit != null:
 		for instance: Node in pit.find_children("*", "MeshInstance3D", true, false):
 			for surface: int in range((instance as MeshInstance3D).mesh.get_surface_count()):
 				var material := (instance as MeshInstance3D).mesh.surface_get_material(surface) as StandardMaterial3D
 				glass_ok = glass_ok or (material != null and material.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED)
-	check(pit != null and pit_box["s_max"] - pit_box["s_min"] >= 136.0 and pit_box["s_min"] >= 3905.0 and pit_box["s_max"] <= 4070.0
+	check(pit != null and pit_box["s_max"] - pit_box["s_min"] >= 196.0 and pit_box["s_min"] >= 4167.0 and pit_box["s_max"] <= 4393.0
 		and pit_box["lat_min"] >= 16.0 and pit_box["lat_max"] <= 31.5 and pit_box["y_max"] >= 8.4 and glass_ok and pit_box["low_in_corridor"] >= CORRIDOR_CLEARANCE_M,
 		"#H2 the two-storey pit building spans all ten stalls (%.0f m, lateral %.1f..%.1f, top %.1f m) with a tinted glass lounge, behind the working lane (nothing over the car corridor lower than %.1f m)" % [
 			pit_box["s_max"] - pit_box["s_min"], pit_box["lat_min"], pit_box["lat_max"], pit_box["y_max"], pit_box["low_in_corridor"]])
@@ -587,8 +587,8 @@ func _test_stage3_architecture() -> void:
 			stand_box["s_max"] - stand_box["s_min"], tiers.size(), stand_box["y_max"], stand_box["low_in_corridor"], crowd.multimesh.instance_count if crowd != null else 0, screen_ok])
 
 	var tower: Node3D = paddock.get_node_or_null("RaceControlTower") if paddock != null else null
-	var tower_box: Dictionary = footprint(world_vertices(tower), 195.0)
-	check(tower != null and int(prop(tower, "floor_count")) == 4 and tower_box["y_max"] >= 16.0 and tower_box["s_min"] >= 120.0 and tower_box["s_max"] <= 290.0
+	var tower_box: Dictionary = footprint(world_vertices(tower), 345.0)
+	check(tower != null and int(prop(tower, "floor_count")) == 4 and tower_box["y_max"] >= 16.0 and tower_box["s_min"] >= 270.0 and tower_box["s_max"] <= 440.0
 		and tower_box["lat_min"] >= 15.0 and tower_box["low_in_corridor"] >= CORRIDOR_CLEARANCE_M,
 		"#H4 the four-floor race control tower stands beyond Pit Exit (s %.0f..%.0f, lateral %.1f..%.1f, %.1f m tall) clear of the car corridor" % [
 			tower_box["s_min"], tower_box["s_max"], tower_box["lat_min"], tower_box["lat_max"], tower_box["y_max"]])
@@ -711,7 +711,7 @@ func _test_stage4_vista_and_foliage() -> void:
 			spacing = minf(spacing, Vector2(positions[index].x - positions[other].x, positions[index].z - positions[other].z).length())
 		var frame: Vector2 = ribbon_frame(positions[index], 4)
 		var in_stand: bool = frame.y < 0.0 and frame.y > -110.0 and frame.x > 0.0 and frame.x < 250.0
-		var in_pit: bool = frame.y > 0.0 and frame.y < 60.0 and (frame.x > 3880.0 or frame.x < 250.0)
+		var in_pit: bool = frame.y > 0.0 and frame.y < 60.0 and (frame.x > 3990.0 or frame.x < 380.0)
 		keep_out_hits += 1 if (in_stand or in_pit) else 0
 	check(positions.size() > 500 and nearest_road >= half + 18.0 and spacing >= 6.0 and keep_out_hits == 0,
 		"#T2 trees are Poisson-disc spaced (closest pair %.1f m), >= 18 m off the asphalt edge (%.1f m from a centreline) and keep clear of the pit complex, grandstand and tower (%d inside)" % [spacing, nearest_road, keep_out_hits])
