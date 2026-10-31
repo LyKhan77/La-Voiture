@@ -47,6 +47,11 @@ const GARAGE_HEIGHT_M: float = 4.2
 const GARAGE_WIDTH_M: float = 16.4
 const ENTRY_BLEND_M: float = 80.0
 const EXIT_BLEND_M: float = 90.0
+## The race control tower beyond the building's end, seated on the ribbon: the straight bends here, so a
+## straight-line offset from the building put its track face over the pit lane. Its track face (centre - 7.75 m)
+## stands 2.35 m outside the lane edge (13.9 m).
+const TOWER_S: float = 30.0
+const TOWER_CENTRE_LATERAL_M: float = 24.0
 
 const SURFACE_Y: float = 0.015
 const LINE_Y: float = 0.03
@@ -458,8 +463,7 @@ func _build_shared_paddock() -> void:
 	var tower := ControlTowerKit.new()
 	tower.name = "RaceControlTower"
 	tower.accent_color = MONZA_RED
-	tower.transform = pose
-	tower.position += pose.basis.z * -116.0
+	tower.transform = ribbon.get_point_at_offset(TOWER_S, TOWER_CENTRE_LATERAL_M - ControlTowerKit.CENTRE_X_M)
 	add_child(tower)
 
 

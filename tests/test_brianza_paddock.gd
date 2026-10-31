@@ -45,6 +45,19 @@ func _run() -> void:
 			for box: AABB in boxes:
 				clear = clear and not box.grow(3.0).has_point((entry.pose as Transform3D).origin)
 		check(clear, "transporters clear the race control tower")
+		# Every point of the pit lane asphalt, taken into the tower's own frame, stays 1 m clear of its structure.
+		var tower_mesh: MeshInstance3D = pit.get_node("RaceControlTower/Structure")
+		var to_tower: Transform3D = tower_mesh.global_transform.affine_inverse()
+		var tower_box: AABB = tower_mesh.get_aabb().grow(1.0)
+		var on_lane: int = 0
+		for step: int in range(int(pit.LANE_LENGTH_M) + 1):
+			var edges: Vector2 = pit.lane_edges(float(step))
+			var lateral: float = edges.x
+			while lateral <= edges.y:
+				if tower_box.has_point(to_tower * (pit.get_pit_transform(float(step), lateral).origin + Vector3.UP)):
+					on_lane += 1
+				lateral += 0.5
+		check(on_lane == 0, "the race control tower stands clear of the pit lane (%d lane points inside it)" % on_lane)
 		var surfaces: int = 0
 		for child: Node in paddock.get_children() + paddock.transporters.get_children():
 			if child is MeshInstance3D and child.mesh != null:
