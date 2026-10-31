@@ -49,3 +49,6 @@ Untitled game/
 
 # Active task board for agents (AGENTS.md 12.5): local, overwritten every task
 todo.md
+
+# Agent session logs written by lifecycle hooks: local only
+production/session-logs/
