@@ -23,6 +23,13 @@ const DEEP_OVERLAP_TICKS_MAX: int = 20
 const DEADLINE_S: float = 420.0
 ## Two cars both still on their way to a box and both rolling are arriving together; a car standing in a queue is not.
 const ARRIVING_MIN_MPS: float = 3.0
+## Race traffic (cars box one by one, a few seconds apart): a serviced car waits on average at most RELEASE_MEAN_MAX_S in
+## its box for the lane (red board), never longer than RELEASE_MAX_S (a burst of cars passing on the fast lane), and stands
+## at most MERGE_STILL_MAX_S pulling out. Every second of it is race time lost. Before Fase 17 the release windows held a car
+## 4.7-6.3 s on average and up to 16-19 s, and a car stopped half way out held the next box in turn.
+const RELEASE_MEAN_MAX_S: float = 1.5
+const RELEASE_MAX_S: float = 7.0
+const MERGE_STILL_MAX_S: float = 4.0
 
 ## Diagnostics: print every deep overlap tick (probe scripts switch this on).
 var trace_overlaps: bool = false
@@ -63,6 +70,26 @@ func run_synthetic(circuit_name: String) -> void:
 
 func run_live() -> void:
 	_live_scenario("raced field, everyone boxes together", live_laps)
+	_staggered_scenario("raced field, cars box 3-9 s apart", live_laps)
+
+
+## The real field boxing one car at a time, 3-9 s apart in a seeded order: no car loses time to the release.
+func _staggered_scenario(label: String, laps: int) -> void:
+	var race := RaceScript.new(track, 12, race_seed, WeatherScript.Archetype.DRY_SUNNY, 20, layout)
+	race.incidents_enabled = false
+	var guard: int = 0
+	while guard < int(900.0 / Types.TICK_DT) and race.standings()[0].s < track.length * float(laps) + 300.0:
+		race.step()
+		guard += 1
+	var rng := RandomNumberGenerator.new()
+	rng.seed = race_seed
+	var calls: Array = []
+	var at: float = race.time
+	for car: CarScript in race.cars:
+		at += rng.randf_range(3.0, 9.0)
+		calls.append([at, car.id])
+	_measure(label, race, false, RAISED_STILL_MAX_S, calls)
+	race.dispose()
 
 
 func _scenario(label: String, spacing: float, speed: float, bound_flush: bool = true) -> void:
@@ -98,7 +125,11 @@ func _live_scenario(label: String, laps: int) -> void:
 	race.dispose()
 
 
-func _measure(label: String, race: RaceScript, bound_flush: bool, still_max: float = STILL_MAX_S) -> void:
+## `calls` ([race time, car id] in time order) boxes cars during the run and bounds each serviced car's release wait.
+func _measure(label: String, race: RaceScript, bound_flush: bool, still_max: float = STILL_MAX_S, calls: Array = []) -> void:
+	var bound_release: bool = not calls.is_empty()
+	var release_wait: Dictionary = {}
+	var merge_still: Dictionary = {}
 	var dt: float = Types.TICK_DT
 	var asked: float = race.time
 	var max_decel: float = 0.0
@@ -119,6 +150,9 @@ func _measure(label: String, race: RaceScript, bound_flush: bool, still_max: flo
 		var before: Dictionary = {}
 		for car: CarScript in race.cars:
 			before[car.id] = [car.v, car.s]
+		while not calls.is_empty() and race.time >= float(calls[0][0]):
+			race.request_pit(int(calls[0][1]), Types.Compound.MEDIUM)
+			calls.pop_front()
 		race.step()
 		ticks += 1
 		for car: CarScript in race.cars:
@@ -126,6 +160,10 @@ func _measure(label: String, race: RaceScript, bound_flush: bool, still_max: flo
 				still_for.erase(car.id)
 				continue
 			var parked: bool = car.pit.phase == Types.PitPhase.BOX and absf(car.pit.box_s - car.s) <= 0.5
+			if parked and car.pit.holding_release:
+				release_wait[car.id] = float(release_wait.get(car.id, 0.0)) + dt
+			elif car.pit.phase == Types.PitPhase.OUT and car.v < 0.3:
+				merge_still[car.id] = float(merge_still.get(car.id, 0.0)) + dt
 			if car.v < 0.3 and not parked:
 				still_for[car.id] = float(still_for.get(car.id, 0.0)) + dt
 				longest_still = maxf(longest_still, float(still_for[car.id]))
@@ -133,7 +171,7 @@ func _measure(label: String, race: RaceScript, bound_flush: bool, still_max: flo
 						var mate_info: String = "-"
 						for mate: CarScript in race.cars:
 							if mate != car and mate.team_id == car.team_id and mate.pit != null:
-								mate_info = "mate %d ph %d s %.1f v %.1f rel_wait %.1f merge_wait %.1f hold %s" % [mate.id, mate.pit.phase, mate.s, mate.v, mate.pit.release_wait_s, mate.pit.merge_wait_s, str(mate.pit.holding_release)]
+								mate_info = "mate %d ph %d s %.1f v %.1f rel_wait %.1f hold %s" % [mate.id, mate.pit.phase, mate.s, mate.v, mate.pit.release_wait_s, str(mate.pit.holding_release)]
 						var near: String = ""
 						for o: CarScript in race.cars:
 							if o != car and o.pit != null and absf(o.s - car.s) < 90.0:
@@ -181,6 +219,19 @@ func _measure(label: String, race: RaceScript, bound_flush: bool, still_max: flo
 	check(max_decel <= LANE_DECEL_MAX, "%s: lane braking stays comfortable (%.1f m/s2)" % [label, max_decel])
 	check(max_teleport <= TELEPORT_MAX_M, "%s: no car is pushed or teleported (%.2f m)" % [label, max_teleport])
 	check(deep_overlap_ticks <= DEEP_OVERLAP_TICKS_MAX, "%s: no car drives into another: %d car-pair ticks overlap by more than %.1f m (deepest %.2f m)" % [label, deep_overlap_ticks, OVERLAP_MAX_M, deepest_overlap])
+	if bound_release:
+		var longest_release: float = 0.0
+		var total_release: float = 0.0
+		var longest_merge: float = 0.0
+		for wait: float in release_wait.values():
+			longest_release = maxf(longest_release, wait)
+			total_release += wait
+		for wait: float in merge_still.values():
+			longest_merge = maxf(longest_merge, wait)
+		var mean_release: float = total_release / float(race.cars.size())
+		check(mean_release <= RELEASE_MEAN_MAX_S, "%s: a serviced car waits on average at most %.1f s in its box for the lane (%.2f s)" % [label, RELEASE_MEAN_MAX_S, mean_release])
+		check(longest_release <= RELEASE_MAX_S, "%s: a serviced car waits at most %.0f s in its box for the lane (%.1f s)" % [label, RELEASE_MAX_S, longest_release])
+		check(longest_merge <= MERGE_STILL_MAX_S, "%s: a car pulling out stands at most %.0f s before the fast lane (%.1f s)" % [label, MERGE_STILL_MAX_S, longest_merge])
 
 
 static func _pair_key(a: CarScript, b: CarScript) -> int:

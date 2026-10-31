@@ -16,6 +16,8 @@ const GUARD_FRAMES: int = 12000
 const JOB_OPEN_MAX_S: float = 1.0
 ## The job closes within this long of the car leaving its box.
 const JOB_CLOSE_MAX_S: float = 1.0
+## The crew meets the car: when it halts on its marks (penalty served) the crew stands at least this far toward its working spots.
+const CREW_AT_CAR_MIN: float = 0.9
 const CREW_HOME_MAX_S: float = 90.0
 const WHEELS_PER_STOP: int = 4
 const HOLD_RED := Color("#e0212e")
@@ -41,7 +43,9 @@ func _run() -> void:
 	await _scenario("apex_ring", "six cars box at once", func(cars: Array) -> Array: return [cars[0].id, cars[3].id, cars[6].id, cars[9].id, cars[12].id, cars[15].id], true)
 	await _scenario("neo_wangan", "six cars box at once", func(cars: Array) -> Array: return [cars[0].id, cars[3].id, cars[6].id, cars[9].id, cars[12].id, cars[15].id], true)
 	await _scenario("brianza", "six cars box at once", func(cars: Array) -> Array: return [cars[0].id, cars[3].id, cars[6].id, cars[9].id, cars[12].id, cars[15].id], true)
-	await _scenario("monte_azure", "six cars box at once", func(cars: Array) -> Array: return [cars[0].id, cars[3].id, cars[6].id, cars[9].id, cars[12].id, cars[15].id], true)
+	# Six cars running nose to tail: since Fase 17 a release waits only for a car really in the way, and the spread pick
+	# (every third car) no longer forces a hold on Monte Azure's lane.
+	await _scenario("monte_azure", "six cars box at once", func(cars: Array) -> Array: return [cars[0].id, cars[1].id, cars[2].id, cars[3].id, cars[4].id, cars[5].id], true)
 	await _scenario("ardennes", "six cars box at once", func(cars: Array) -> Array: return [cars[0].id, cars[3].id, cars[6].id, cars[9].id, cars[12].id, cars[15].id], true)
 	quit(1 if failures else 0)
 
@@ -104,11 +108,13 @@ func _scenario(circuit: String, label: String, pick: Callable, expect_hold: bool
 		check(int(wheel_swaps.get(id, 0)) == WHEELS_PER_STOP, "%s: car %d gets %d wheels swapped (%d)" % [tag, id, WHEELS_PER_STOP, int(wheel_swaps.get(id, 0))])
 		check(float(r["closed"]) - float(r["out"]) <= JOB_CLOSE_MAX_S, "%s: car %d: the job closes within %.1f s of the car leaving its box (%.2f s)" % [tag, id, JOB_CLOSE_MAX_S, float(r["closed"]) - float(r["out"])])
 		check(float(r["release_wait"]) <= Types.PIT_RELEASE_HARD_CAP_S + 0.1, "%s: car %d is never held in its box past %.0f s (%.1f s)" % [tag, id, Types.PIT_RELEASE_HARD_CAP_S, float(r["release_wait"])])
+		check(float(r.get("crew_at_car", -1.0)) >= CREW_AT_CAR_MIN, "%s: car %d: the crew has stepped to the car by the time it stops (%.2f of the way)" % [tag, id, float(r.get("crew_at_car", -1.0))])
+		check(int(r.get("penalty_wrong", 0)) == 0, "%s: car %d: a penalty hold shows a red board with the crew kept back (%d of %d frames off)" % [tag, id, int(r.get("penalty_wrong", 0)), int(r.get("penalty_frames", 0))])
 		check(int(r["hold_wrong"]) == 0 and int(r["green_while_held"]) == 0, "%s: car %d: while held the job is in HOLD with a red board (%d frames off, %d green)" % [tag, id, int(r["hold_wrong"]), int(r["green_while_held"])])
 	if expect_hold:
 		check(total_holds > 0, "%s: at least one serviced car had to wait for the lane (%d held frames), so the hold animation was exercised" % [tag, total_holds])
 	check(choreographer.jobs.is_empty(), "%s: no job is left open" % tag)
-	check(choreographer.finished_ids.size() == ids.size(), "%s: every stop is recorded as finished (%d of %d)" % [tag, choreographer.finished_ids.size(), ids.size()])
+	check(choreographer.finished_ids.size() == ids.size(), "%s: every stop is recorded as finished (%d of %d: %s for %s)" % [tag, choreographer.finished_ids.size(), ids.size(), str(choreographer.finished_ids), str(ids)])
 	check(_crews_home(ids), "%s: every crew is back in its garage" % tag)
 	world.queue_free()
 	for _i: int in range(5):
@@ -123,6 +129,13 @@ func _sample(r: Dictionary, id: int, t: float, choreographer: PitstopChoreograph
 		var sitting: bool = pit.phase == Types.PitPhase.BOX and car.v < 0.1 and pit.penalty_taken and pit.penalty_hold_s <= 0.0
 		if sitting and float(r["ready"]) < 0.0:
 			r["ready"] = t
+			# After a penalty hold the crew steps in only now, by design; only a car stopping straight into service is measured.
+			r["crew_at_car"] = _crew_blend(car.team_id) if int(r.get("penalty_frames", 0)) == 0 else 1.0
+		# A steward stop-and-hold shows a red board with the crew kept back, never an idle box.
+		if pit.penalty_hold_s > 0.0 and pit.penalty_taken:
+			r["penalty_frames"] = int(r.get("penalty_frames", 0)) + 1
+			if job == null or not job.hands_off or job.phase != PitstopChoreographer.Phase.HOLD or _crew_blend(car.team_id) > 0.5:
+				r["penalty_wrong"] = int(r.get("penalty_wrong", 0)) + 1
 		if pit.phase == Types.PitPhase.OUT and float(r["out"]) < 0.0:
 			r["out"] = t
 		r["release_wait"] = maxf(float(r["release_wait"]), pit.release_wait_s)
@@ -141,6 +154,22 @@ func _sample(r: Dictionary, id: int, t: float, choreographer: PitstopChoreograph
 		r["job"] = t
 	if float(r["job"]) >= 0.0 and job == null and float(r["closed"]) < 0.0:
 		r["closed"] = t
+
+
+## 0 = the team's crew at its waiting spots, 1 = at its working spots beside the car; -1 while it is in the garage.
+## Whoever works in the arriving car's path (the rear jack man) waits for it to stop by design, so is left out.
+func _crew_blend(team: int) -> float:
+	var crews: Dictionary = world.choreographer._crews
+	if not crews.has(team):
+		return -1.0
+	var total: float = 0.0
+	var counted: int = 0
+	for member in crews[team].members:
+		if PitstopChoreographer._in_arrival_path(member.work):
+			continue
+		total += member.work_blend
+		counted += 1
+	return total / float(maxi(counted, 1))
 
 
 func _crews_home(ids: Array) -> bool:

@@ -575,6 +575,8 @@ func refresh() -> void:
 		box_button.text = "RETIRED"
 	elif car.finished_at >= 0.0:
 		box_button.text = "CHEQUERED"
+	elif car.pit != null and car.pit.penalty_hold_s > 0.0:
+		box_button.text = "PENALTY HOLD  %.1f s  //  CREW HANDS OFF" % car.pit.penalty_hold_s
 	elif car.pit != null:
 		box_button.text = "IN THE PIT LANE"
 	elif cancelling:

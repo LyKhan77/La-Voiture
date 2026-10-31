@@ -66,6 +66,8 @@ const WORK_SPOTS: Dictionary = {
 }
 ## Seconds-to-1 rate at which the crew steps from its waiting spot to its working spot (about 0.6 s).
 const WORK_STEP_RATE: float = 1.6
+## Half the car's width plus a clearance: who works inside this strip behind the box waits until the arriving car has stopped.
+const ARRIVAL_PATH_HALF_WIDTH_M: float = 1.45
 ## The crew walks around the nose or the tail of the box, never across it.
 const FRONT_CORRIDOR_Z: float = -5.4
 const REAR_CORRIDOR_Z: float = 4.9
@@ -117,6 +119,8 @@ class Job extends RefCounted:
 	var lollipop: Node3D
 	var lollipop_disc: MeshInstance3D
 	var carried: Array[Node3D] = [null, null, null, null]
+	## Steward stop-and-hold: the board stays red and the crew keeps back at its waiting spots.
+	var hands_off: bool = false
 
 ## One person of a team's crew: the animated node plus the way between the garage and the box.
 class Member extends RefCounted:
@@ -160,6 +164,7 @@ var gun_shots: int = 0
 
 var _crews: Dictionary = {} # team -> Crew; only teams whose crew is out of its garage
 var _wanted: Dictionary = {} # team -> true
+var _arriving: Dictionary = {} # team -> true while its car rolls onto its marks
 var _tyre_meshes: Dictionary = {}
 var _clock: float = 0.0
 var _gun_players: Array[AudioStreamPlayer3D] = []
@@ -206,6 +211,14 @@ func set_ready_teams(teams: Array) -> void:
 			_wanted[int(team)] = true
 
 
+## Teams whose car is rolling the last metres onto its marks: the crew steps in to meet it, so the stop starts the
+## instant the car halts instead of after it.
+func set_arriving_teams(teams: Array) -> void:
+	_arriving.clear()
+	for team: Variant in teams:
+		_arriving[int(team)] = true
+
+
 ## Walks the crews between their garages and the working lane; `delta` is game time.
 func advance(delta: float) -> void:
 	_clock += delta
@@ -240,7 +253,8 @@ func advance(delta: float) -> void:
 				if home:
 					_dismiss(crew)
 			CrewState.READY:
-				_wait_or_work(crew, delta, _has_job_of_team(team))
+				var engaged: bool = _crew_engaged(team)
+				_wait_or_work(crew, delta, engaged, engaged and not _has_working_job(team))
 
 
 func crew_state(team: int) -> int:
@@ -261,6 +275,23 @@ func _has_job_of_team(team: int) -> bool:
 		if job.team == team:
 			return true
 	return false
+
+
+## The crew stands at its working spots: its car is arriving, or in the box with the crew allowed to touch it.
+func _crew_engaged(team: int) -> bool:
+	return _arriving.has(team) or _has_working_job(team)
+
+
+func _has_working_job(team: int) -> bool:
+	for job: Job in jobs:
+		if job.team == team and not job.hands_off:
+			return true
+	return false
+
+
+## A working spot behind the box within the car's width lies in the path of the car still rolling onto its marks.
+static func _in_arrival_path(spot: Vector3) -> bool:
+	return spot.z > 0.0 and absf(spot.x) < ARRIVAL_PATH_HALF_WIDTH_M
 
 
 ## The crew leaves its garage: the standing crew is hidden and the same people start walking.
@@ -582,13 +613,15 @@ func _stepping_out_of_work(crew: Crew) -> bool:
 
 ## A crew that is out turns to the car. While it waits it shifts its weight; once the car has stopped
 ## (a job runs) it steps in from its waiting spot to its working spot, and steps back when the car is gone.
-func _wait_or_work(crew: Crew, delta: float, working: bool) -> void:
+## `arriving`: the car is still rolling in, so whoever works in its path (the rear jack man) keeps waiting.
+func _wait_or_work(crew: Crew, delta: float, working: bool, arriving: bool = false) -> void:
 	var servicing: bool = false
 	for job: Job in jobs:
 		if job.team == crew.team:
 			servicing = job.phase == Phase.SERVICING
 	for member: Member in crew.members:
-		member.work_blend = move_toward(member.work_blend, 1.0 if working else 0.0, delta * WORK_STEP_RATE)
+		var steps_in: bool = working and not (arriving and _in_arrival_path(member.work))
+		member.work_blend = move_toward(member.work_blend, 1.0 if steps_in else 0.0, delta * WORK_STEP_RATE)
 		member.service_blend = move_toward(member.service_blend, 1.0 if servicing else 0.0, delta / ANIMATION_BLEND_S)
 		var spot: Vector3 = member.ready.lerp(member.work, smoothstep(0.0, 1.0, member.work_blend))
 		member.node.position.x = spot.x
@@ -607,7 +640,8 @@ func _wait_or_work(crew: Crew, delta: float, working: bool) -> void:
 ## on the box, lifts it, swaps tyres on its stop timer), the crew only acts it out.
 ## `progress` is the sim's wheel_swap_progress 0..1, `lift_m` its jack height. Call every
 ## frame for a car in its box; call with in_service = false once it has left.
-func present(car_id: int, team: int, actor: Node3D, compound: int, in_service: bool, progress: float, lift_m: float, holding: bool = false) -> void:
+## `hands_off` is a steward stop-and-hold: HOLD with a red board while the crew keeps back.
+func present(car_id: int, team: int, actor: Node3D, compound: int, in_service: bool, progress: float, lift_m: float, holding: bool = false, hands_off: bool = false) -> void:
 	var job: Job = get_job(car_id)
 	if not in_service:
 		if job != null:
@@ -617,6 +651,7 @@ func present(car_id: int, team: int, actor: Node3D, compound: int, in_service: b
 		if not _has_box(team):
 			return
 		job = _open_job(car_id, team, actor, compound)
+	job.hands_off = hands_off
 	job.lift_m = lift_m
 	if job.chassis != null:
 		job.chassis.position.y = lift_m

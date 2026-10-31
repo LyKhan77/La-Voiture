@@ -684,6 +684,10 @@ func _tower_right_text(entry: Dictionary) -> void:
 	elif bool(entry["is_finished"]):
 		text = "FIN"
 		tint = T.ACCENT_ACID_LIME
+	elif float(entry.get("penalty_hold_s", 0.0)) > 0.0:
+		# Stop-and-hold in the box: the crew waits on the stewards' clock, not stuck.
+		text = "PEN %.1f" % float(entry["penalty_hold_s"])
+		tint = T.ACCENT_ANIME_CRIMSON
 	elif bool(entry["in_pit"]):
 		text = "PIT"
 		tint = T.ACCENT_ELECTRIC_CYAN

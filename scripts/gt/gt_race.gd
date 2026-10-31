@@ -250,7 +250,7 @@ func standings_entries() -> Array[Dictionary]:
 			"driver_name": car.driver_name, "code": car.code, "number": car.number, "compound": car.compound,
 			"lap_number": maxi(car.lap, 0), "last_lap_time": maxf(car.last_lap, 0.0), "best_lap_time": maxf(car.best_lap, 0.0),
 			"gap_s": gap_s, "interval_s": interval_s, "wear_avg": car.wear, "fuel_kg": car.fuel,
-			"in_pit": car.pit != null, "is_dnf": car.is_dnf, "is_finished": car.finished_at >= 0.0 and not car.is_dnf,
+			"in_pit": car.pit != null, "penalty_hold_s": car.pit.penalty_hold_s if car.pit != null else 0.0, "is_dnf": car.is_dnf, "is_finished": car.finished_at >= 0.0 and not car.is_dnf,
 			"drs": car.drs_active, "sector_colors": car.sector_colors.duplicate(), "speed_kmh": car.v * 3.6,
 		})
 	return entries

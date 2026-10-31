@@ -25,5 +25,3 @@ var release_wait_s: float = 0.0
 var holding_release: bool = false
 ## Seconds the car sat still with nothing but traffic to blame; past the failsafe it stops yielding.
 var stalled_s: float = 0.0
-## Seconds a car pulling out held its line for a car passing on the fast lane.
-var merge_wait_s: float = 0.0

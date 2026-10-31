@@ -39,6 +39,8 @@ const AUDIBLE_MAX_TIME_SCALE: float = 2.0
 ## The podium comes up this long after the chequered flag falls, so the cars get over the line first.
 const PODIUM_REVEAL_S: float = 2.5
 const MAX_TICKS_PER_FRAME: int = 40
+## The crew steps from its waiting spots toward the car once it is this close to its marks (it rolls the last metres in ~0.8 s).
+const CREW_STEP_IN_M: float = 2.5
 const ROAD_WIDTH_M: float = 14.0
 const SKY_TOP := Color(0.36, 0.58, 0.9)
 const SKY_HORIZON := Color(0.78, 0.86, 0.95)
@@ -319,10 +321,14 @@ func _run_ticks(delta: float) -> void:
 ## car has left the box. Cheap: one pass over the cars.
 func _update_pit_crews(delta: float) -> void:
 	var teams: Array[int] = []
+	var arriving: Array[int] = []
 	for car: CarScript in race.cars:
 		var coming: bool = false
 		if car.pit != null:
 			coming = car.pit.phase == Types.PitPhase.ENTRY or car.pit.phase == Types.PitPhase.IN or car.pit.phase == Types.PitPhase.BOX
+			# Rolling onto its marks with no penalty to serve: the crew steps in to meet it.
+			if car.pit.phase == Types.PitPhase.BOX and absf(car.pit.box_s - car.s) < CREW_STEP_IN_M and car.pit.timer <= 0.0 and car.penalty_owed_s <= 0.0 and car.pit.penalty_hold_s <= 0.0:
+				arriving.append(car.team_id)
 		elif car.pit_request >= 0 and car.finished_at < 0.0:
 			var entry_s: float = float(race.pit_layout["entry_s"])
 			var u: float = fposmod(car.s - entry_s + 300.0, ribbon.length_m) - 300.0
@@ -330,15 +336,19 @@ func _update_pit_crews(delta: float) -> void:
 		if coming and not teams.has(car.team_id):
 			teams.append(car.team_id)
 	choreographer.set_ready_teams(teams)
+	choreographer.set_arriving_teams(arriving)
 	choreographer.advance(delta * clampf(time_scale, 1.0, 8.0))
 
 
 ## The sim runs the stop; the crew acts out its timer, jack height and tyre swap.
 func _present_pit(actor: ActorScript) -> void:
 	var car: CarScript = actor.car
-	var in_box: bool = car.pit != null and car.pit.phase == Types.PitPhase.BOX and car.v < 0.8 and car.pit.timer > 0.0
+	# A steward stop-and-hold shows as a held stop (red board, crew back), not as an idle box.
+	var penalty: bool = car.pit != null and car.pit.penalty_hold_s > 0.0
+	# penalty_taken is set the tick the car parks and stays set, so the job never drops for the tick between hold and service.
+	var in_box: bool = car.pit != null and car.pit.phase == Types.PitPhase.BOX and car.v < 0.8 and car.pit.penalty_taken
 	if in_box:
-		choreographer.present(car.id, car.team_id, actor, car.pit.compound, true, car.pit.wheel_swap_progress, car.pit.lift_y, car.pit.holding_release)
+		choreographer.present(car.id, car.team_id, actor, car.pit.compound, true, car.pit.wheel_swap_progress, car.pit.lift_y, car.pit.holding_release or penalty, penalty)
 	elif choreographer.get_job(car.id) != null:
 		choreographer.present(car.id, car.team_id, actor, car.compound, false, 1.0, 0.0)
 
