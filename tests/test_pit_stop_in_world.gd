@@ -42,6 +42,7 @@ func _run() -> void:
 	await _scenario("neo_wangan", "six cars box at once", func(cars: Array) -> Array: return [cars[0].id, cars[3].id, cars[6].id, cars[9].id, cars[12].id, cars[15].id], true)
 	await _scenario("brianza", "six cars box at once", func(cars: Array) -> Array: return [cars[0].id, cars[3].id, cars[6].id, cars[9].id, cars[12].id, cars[15].id], true)
 	await _scenario("monte_azure", "six cars box at once", func(cars: Array) -> Array: return [cars[0].id, cars[3].id, cars[6].id, cars[9].id, cars[12].id, cars[15].id], true)
+	await _scenario("ardennes", "six cars box at once", func(cars: Array) -> Array: return [cars[0].id, cars[3].id, cars[6].id, cars[9].id, cars[12].id, cars[15].id], true)
 	quit(1 if failures else 0)
 
 
