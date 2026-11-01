@@ -59,7 +59,7 @@ func _run() -> void:
 	retired.is_dnf = true
 	check(_panel(2, retired, "DNF").result_label.text == "DNF // 0 PTS", "A retired finisher shows DNF and zero points")
 	check(_panel(2, _entry(8, "T. Kade", 0), "RUNNING").result_label.text == "RUNNING // 0 PTS", "A running finisher shows RUNNING")
-	check(p2.name_label.text == "M. ITO", "Name tag uppercases the driver")
+	check(p2.name_label.text == "#03 M. ITO", "Name tag carries the car number and the uppercased driver")
 	var long_name: WinningPanel = _panel(1, _entry(2, "MAXIMILIAN-ALEXANDER FEATHERSTONEHAUGH", 18), "+1.700s")
 	check(long_name.name_label.size.x <= WinningPanel.NAME_MAX_WIDTH, "A very long name still fits the tag (%.0f px)" % long_name.name_label.size.x)
 	check(float(p1.standee.material.get_shader_parameter("outline_px")) > 0.0 and float(p1.car.material.get_shader_parameter("outline_px")) > 0.0,

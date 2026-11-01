@@ -24,6 +24,11 @@ const CAR_MAX_WIDTH: float = 760.0
 const CAR_FLOOR_GAP: float = 34.0
 const STANDEE_HEIGHT: float = 640.0
 const BUBBLE_PX: float = 230.0
+## The standee stands left of centre so the name tag, right-aligned under the bubble, does not cover its face.
+const STANDEE_CENTER_FRACTION: float = 0.40
+const KANJI_FONT_PX: int = 46
+const NAME_LEFT_LIMIT: float = 230.0
+const EPITHET_Y: float = 436.0
 const OUTLINE_PX: float = 5.0
 const STICKER_PAD_PX: float = 40.0
 const BREATH_PERIOD: float = 2.4
@@ -66,6 +71,10 @@ var dim_amount: float = 0.0:
 		if background != null:
 			background.modulate = Color(level, level, level, 1.0)
 
+## Extra inset for details anchored to the right edge: the triptych sets it on the panel whose right edge bleeds
+## past the screen.
+var right_inset: float = 0.0
+
 var _animate: bool = false
 var _breath: Tween
 var _fill: Polygon2D
@@ -100,7 +109,7 @@ func setup(finisher_place: int, entry: Dictionary, gap_text: String, fastest_bon
 		add_child(crown)
 
 	_name_tag_color = color
-	name_label = Kit.spray_tag(String(entry.driver_name).to_upper(), color, NAME_MAX_WIDTH, NAME_FONT_PX, animate)
+	name_label = Kit.spray_tag("#%02d %s" % [int(entry.number), String(entry.driver_name).to_upper()], color, NAME_MAX_WIDTH, NAME_FONT_PX, animate)
 	name_label.pivot_offset = name_label.size * 0.5
 	name_label.rotation_degrees = -4.0
 	add_child(name_label)
@@ -140,32 +149,38 @@ func relayout(panel_size: Vector2) -> void:
 	var closed: PackedVector2Array = polygon.duplicate()
 	closed.append(polygon[0])
 	_ink.points = closed
-	_ghost.position = Vector2(110.0, panel_size.y - 470.0)
+	_ghost.position = Vector2(110.0, panel_size.y - 520.0)
 	background.size = panel_size
 	(background as PanelBackground).polygon = polygon
 
 	rank_label.position = Vector2(140.0, 6.0)
 	_kanji_box.position = Vector2(150.0, 190.0)
-	var bubble_at := Vector2(panel_size.x - 64.0 - BUBBLE_PX, 22.0)
+	var bubble_at := Vector2(panel_size.x - right_inset - 64.0 - BUBBLE_PX, 22.0)
 	for layer: Control in _bubble_layers:
 		layer.position = bubble_at + layer.get_meta(&"offset", Vector2.ZERO) as Vector2
 
 	if standee.texture != null:
 		var standee_size := Vector2(STANDEE_HEIGHT * _aspect(standee.texture), STANDEE_HEIGHT)
-		_fit_sticker(standee, standee_size, Vector2((panel_size.x - standee_size.x) * 0.5, panel_size.y - STANDEE_HEIGHT))
+		_fit_sticker(standee, standee_size, Vector2(panel_size.x * STANDEE_CENTER_FRACTION - standee_size.x * 0.5, panel_size.y - STANDEE_HEIGHT))
 		standee.pivot_offset = Vector2(standee_size.x * 0.5, standee_size.y)
 	if car.texture != null:
 		var car_width: float = minf(panel_size.x * CAR_WIDTH_FRACTION, CAR_MAX_WIDTH)
 		var car_size := Vector2(car_width, car_width / _aspect(car.texture))
 		_fit_sticker(car, car_size, Vector2((panel_size.x - car_width) * 0.5, panel_size.y - CAR_FLOOR_GAP - car_size.y))
 	if crown != null:
-		crown.position = Vector2(panel_size.x * 0.5 - 40.0 - crown.size.x * 0.5 + 40.0, panel_size.y - STANDEE_HEIGHT - crown.size.y + 24.0)
+		crown.position = Vector2(standee.position.x + standee.size.x * 0.5 - crown.size.x * 0.5, panel_size.y - STANDEE_HEIGHT - crown.size.y + 24.0)
 
-	name_label.position = Vector2(panel_size.x - 36.0 - name_label.size.x, 262.0)
+	var right_edge: float = panel_size.x - right_inset
+	name_label.position = Vector2(right_edge - 36.0 - name_label.size.x, 262.0)
+	# A narrow (dimmed) panel shrinks the tag towards its right edge instead of running it over the kanji box.
+	var room: float = right_edge - 36.0 - NAME_LEFT_LIMIT
+	var shrink: float = clampf(room / maxf(name_label.size.x, 1.0), 0.6, 1.0)
+	name_label.pivot_offset = Vector2(name_label.size.x, name_label.size.y * 0.5)
+	name_label.scale = Vector2(shrink, shrink)
 	result_label.position = Vector2(120.0, panel_size.y - 70.0)
-	epithet_box.position = Vector2(130.0, 410.0)
-	engine_plate.position = Vector2(panel_size.x - 30.0 - engine_plate.size.x, 352.0)
-	sfx_label.position = Vector2(panel_size.x - 44.0 - sfx_label.size.x, 450.0)
+	epithet_box.position = Vector2(130.0, EPITHET_Y)
+	engine_plate.position = Vector2(right_edge - 30.0 - engine_plate.size.x, 352.0)
+	sfx_label.position = Vector2(right_edge - 44.0 - sfx_label.size.x, 450.0)
 
 
 ## The slanted panel shape in panel space: top edge inset by the slant on the left, bottom edge on the right.
@@ -226,7 +241,7 @@ func _build_background(color: Color) -> void:
 	burst.set_shader_parameter("ray_color", TINT[place])
 	_fill.material = burst
 	background.add_child(_fill)
-	_ghost = Kit.stencil_numeral(str(place + 1), color, 560)
+	_ghost = Kit.stencil_numeral(str(place + 1), color, 440)
 	_ghost.label_settings.outline_size = 0
 	_ghost.label_settings.shadow_size = 0
 	_ghost.modulate = Color(1.0, 1.0, 1.0, 0.2)
@@ -251,7 +266,7 @@ func _build_kanji_box(color: Color) -> void:
 	kanji_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	kanji_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	kanji_label.add_theme_font_override("font", KANJI_FONT)
-	kanji_label.add_theme_font_size_override("font_size", 52)
+	kanji_label.add_theme_font_size_override("font_size", KANJI_FONT_PX)
 	kanji_label.add_theme_color_override("font_color", INK)
 	kanji_label.add_theme_constant_override("line_spacing", -4)
 	var box := StyleBoxFlat.new()
