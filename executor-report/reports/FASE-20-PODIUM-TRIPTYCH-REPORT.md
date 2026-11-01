@@ -41,6 +41,8 @@ Musik: semua musik sudah lewat satu bus `Music` dan satu slider. Tiga celah ditu
 | `test_radio_and_podium` | 35 | 0 FAIL |
 | Filter `winning` (4 suite), `podium` (5), `radio` (4), `main_menu` (1), `audio_and_race` (1, 245 dtk, dijalankan di Task 1) | | 0 failing |
 
+**Suite penuh, 93 suite, `tools/run_tests.ps1` dalam lima irisan di latar depan: 0 failing.** Irisan 0–19 (459 dtk), 20–39 (121 dtk), 40–59 (430 dtk) dijalankan sebelum perbaikan lebar tag; irisan 60–74 (281 dtk) dan 75–92 (152 dtk) sesudahnya. Perbaikan itu hanya menyentuh `winning_panel.gd`, yang hanya dipakai suite di irisan 60–92. Satu kegagalan sempat muncul di irisan 60–74 (`test_radio_and_podium`, #28): 15 dari 26 nama pengemudi nyata terpotong elipsis di tag (batas 380 px), akibat perbaikan elipsis yang saya tambahkan sendiri belakangan. Test baru memeriksa semua `GtData.DRIVER_NAMES`, lebar tag jadi 640 px dengan penskalaan ke ruang yang tersedia, lalu irisan itu hijau.
+
 Test merah dulu (diamati gagal karena alasan yang benar) untuk tiap task; satu temuan nyata dari gerbang: sprite hasil bake pertama ditolak `PodiumSpriteChecks` karena margin bawah.
 
 ### 3.2 Native 1080p High (RTX 3050 Laptop, `scratch/smoke_winning_scene.gd`, tanpa `--race`)
@@ -55,6 +57,8 @@ Dua kali jalan. Jalan kedua: 0 FAIL, semua state 60,003 FPS dan p95 <= 16,71 ms.
 | Fokus P3 | 60,003 | 16,695 / 16,685 | 87 |
 | Tower terbuka | 60,003 | 16,693 / 16,685 | 107 |
 | Linimasa INTRO ke FINAL (6,2 dtk) | 60,004 | 16,701 / 16,703 | 87 |
+
+Jalan ketiga (`-- --race`: 3 lap, 20 mobil, malam badai, High) mengulang pengukuran studio dengan hasil sama (semua state 60,002–60,003 FPS, p95 <= 16,70 ms), lalu mengukur balapan itu sendiri: **RACE 1X HIGH 60,040 FPS, p95 16,839 ms (ambang 16,8; selisih 0,039 ms), maks 20,8 ms, 1144 draw call**. Itu pelanggaran ambang di dunia balapan, kode yang tidak disentuh cabang ini (Fase 19 mencatat p95 <= 16,81 ms untuk pengukuran yang sama). Alur balapan nyata sampai podium lalu HQ lulus: studio dicapai, dunia balapan dibebaskan, wipe keberangkatan berjalan lewat frame antara, 20 hasil bertahan, kembali ke HQ dengan 0 orphan node.
 
 Jalan pertama punya satu pelanggaran ambang (FINAL sama lebar, p95 16,829 ms terhadap batas 16,8 ms, maks 17,4 ms). Itu pengukuran pertama setelah tangkapan layar (jeda OS yang sama dengan yang dicatat di spec Fase 11) dan tidak muncul lagi di jalan kedua. Waktu proses per frame 1,2 sampai 2,5 ms. ESC dari studio kembali ke HQ dengan 0 orphan node. Pada jalan pertama Godot melaporkan 7 RID tekstur bocor saat keluar (peringatan penutupan proses, belum diselidiki).
 
@@ -82,9 +86,11 @@ Jalan pertama punya satu pelanggaran ambang (FINAL sama lebar, p95 16,829 ms ter
 
 ## 5. Yang tersisa untuk keputusan pemilik proyek
 
-1. **Suite penuh belum dijalankan.** Proses suite penuh di latar belakang dihentikan sistem karena RAM kritis (sisa sekitar 2,6 GB dari 16 GB) sebelum satu suite pun selesai. Saya tidak menjalankannya ulang. Yang berjalan hanya suite yang disebut di 3.1. Suite lain belum dibuktikan hijau pada branch ini, terutama yang memakai `PresentationSettings`, `AudioManager`, `GarageRoster` (yang hanya ditambah member) dan test pit atau race yang tidak menyentuh podium. Jalankan `powershell -File tools/run_tests.ps1` dalam irisan (`-From 0 -To 24`, dan seterusnya) dari terminal biasa.
-2. **Smoke test `-- --race`** (3 lap, 20 mobil, wipe keberangkatan nyata, kembali ke menu) tidak dijalankan karena alasan memori yang sama. Alur race ke podium ke HQ dan restart ke grid nyata dicakup test headless `test_winning_scene_and_standee`, tetapi tanpa pengukuran FPS di dalam balapan.
-3. **Kode yang tidak lagi dipakai**, dibiarkan: `scripts/ui/winning_wall_cut.gd`, `winning_hero_callouts.gd`, `winning_final_hud.gd`, `kinetic_standee_3d.gd` dan `shaders/kinetic_standee.gdshader` (tanpa pemakai); `shaders/winning_impact_frame.gdshader` dan `winning_concrete.gdshader` (hanya dirujuk `tests/test_graffiti_kit.gd`); `winning_marble` dan `winning_stage_print` (sudah tanpa pemakai sebelumnya).
-4. **Tekstur Mercedes `_full`** diimpor tanpa kompresi (RGB8, sekitar 128 MB) dan memengaruhi balapan, bukan lagi podium. Reimpor dengan kompresi VRAM seperti Aston menurunkannya ke sekitar 32 MB. Setting impor milik pemilik proyek, tidak diubah.
-5. **File `.import` yang berubah di working tree** (suara radio, tekstur Mercedes, aset Ardennes) berasal dari reimpor Godot (perbedaan akhir baris), bukan dari pekerjaan ini. Tidak di-commit.
-6. **Konfeti 3D** hilang. Menambahkan konfeti 2D adalah pekerjaan kecil bila diminta.
+1. **RACE 1X HIGH p95 16,839 ms** (ambang 16,8) di dunia balapan pada jalan `--race`: selisih 0,039 ms, kode balapan tidak diubah di cabang ini. Perlu dibandingkan dengan `main` bila ingin dipastikan bukan regresi.
+2. **Kode yang tidak lagi dipakai**, dibiarkan: `scripts/ui/winning_wall_cut.gd`, `winning_hero_callouts.gd`, `winning_final_hud.gd`, `kinetic_standee_3d.gd` dan `shaders/kinetic_standee.gdshader` (tanpa pemakai); `shaders/winning_impact_frame.gdshader` dan `winning_concrete.gdshader` (hanya dirujuk `tests/test_graffiti_kit.gd`); `winning_marble` dan `winning_stage_print` (sudah tanpa pemakai sebelumnya).
+3. **Tekstur Mercedes `_full`** diimpor tanpa kompresi (RGB8, sekitar 128 MB) dan memengaruhi balapan, bukan lagi podium. Reimpor dengan kompresi VRAM seperti Aston menurunkannya ke sekitar 32 MB. Setting impor milik pemilik proyek, tidak diubah.
+4. **File `.import` yang berubah di working tree** (suara radio, tekstur Mercedes, aset Ardennes) berasal dari reimpor Godot (perbedaan akhir baris), bukan dari pekerjaan ini. Tidak di-commit.
+5. **Konfeti 3D** hilang. Menambahkan konfeti 2D adalah pekerjaan kecil bila diminta.
+6. **Art standee Marco Bellini** (`assets/characters/standees/marco_bellini.png`) memuat sosok kedua dan sisa artefak di sampingnya (terlihat di `e-longest-real-names.png`). Itu aset yang sudah ada, tidak diubah.
+7. `AudioManager.set_bus_volume` adalah API publik tanpa pemanggil yang bisa melewati konfigurasi Music.
+8. Godot melaporkan 7 RID tekstur bocor saat keluar pada beberapa jalan smoke native (peringatan penutupan proses, belum diselidiki).
