@@ -122,5 +122,13 @@ func _run() -> void:
 	studio.skip_cuts()
 	await create_timer(1.6).timeout
 	await _save("d-dnf-p3-and-long-name")
+	# The longest real driver names (R. Takahashi, M. Bellini, H. Kazama), equal and with the tower open.
+	await _open(_results([25, 20, 24]))
+	studio.skip_cuts()
+	await create_timer(1.6).timeout
+	await _save("e-longest-real-names")
+	_key(KEY_TAB)
+	await create_timer(0.6).timeout
+	await _save("e-longest-real-names-with-tower")
 	print("CAPTURES: %d FAIL" % failures)
 	quit(0 if failures == 0 else 1)

@@ -63,6 +63,13 @@ func _run() -> void:
 	var long_name: WinningPanel = _panel(1, _entry(2, "MAXIMILIAN-ALEXANDER FEATHERSTONEHAUGH", 18), "+1.700s")
 	check(long_name.name_label.size.x <= WinningPanel.NAME_MAX_WIDTH and long_name.name_label.size.y < 140.0 and long_name.name_label.text.ends_with("…") and long_name.name_label.text.begins_with("#03 M"),
 		"A very long name is trimmed with an ellipsis onto one line (%s, %.0fx%.0f px)" % [long_name.name_label.text, long_name.name_label.size.x, long_name.name_label.size.y])
+	var trimmed: Array[String] = []
+	for slot: int in range(GtData.DRIVER_NAMES.size()):
+		var real: WinningPanel = _panel(0, _entry(slot, GtData.DRIVER_NAMES[slot], 10), "+1.000s")
+		if real.name_label.text.ends_with("…") or not real.name_label.text.contains(GtData.DRIVER_NAMES[slot].to_upper()):
+			trimmed.append(real.name_label.text)
+		real.queue_free()
+	check(trimmed.is_empty(), "Every real driver name fits the tag untrimmed (trimmed: %s)" % str(trimmed))
 	check(float(p1.standee.material.get_shader_parameter("outline_px")) > 0.0 and float(p1.car.material.get_shader_parameter("outline_px")) > 0.0,
 		"Standee and car carry the die-cut outline")
 	check(p1.bubble.texture == shared.portrait and p1.standee.texture == shared.standee and p1.car.texture == shared.car,
