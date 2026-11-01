@@ -91,7 +91,6 @@ var _ink: Line2D
 var _ghost: Label
 var _bubble_layers: Array[Control] = []
 var _kanji_box: Control
-var _name_tag_color: Color
 
 
 ## `textures` holds "standee", "car" and "portrait" (any may be null: that element is simply not drawn).
@@ -121,7 +120,6 @@ func setup(finisher_place: int, entry: Dictionary, gap_text: String, fastest_bon
 		crown.rotation_degrees = 5.0
 		_content.add_child(crown)
 
-	_name_tag_color = color
 	name_label = Kit.spray_tag(_tag_text(entry), color, NAME_MAX_WIDTH, NAME_FONT_PX, animate)
 	name_label.pivot_offset = name_label.size * 0.5
 	name_label.rotation_degrees = -4.0
