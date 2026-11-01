@@ -105,11 +105,15 @@ func apply_to_race(race: GtRace) -> void:
 	apply_weather(weather)
 	race.incidents_enabled = race_dynamics != 0
 	race.incident_rate = CHAOS_INCIDENT_RATE if race_dynamics == 2 else 1.0
-	# Rivals read the radar too: a wet grid (any preset, including a DYNAMIC wet start) rolls on wets or inters.
-	if weather.track_water_pct > 15.0:
+	# Rivals read the radar too: every wall picks its start tyre with its own strategist, so a marginal grid splits.
+	if weather.track_water_pct > 0.0 or is_wet_preset():
 		for car: GtCar in race.cars:
-			if car.team_id != selected_team_id:
-				car.compound = GtTypes.Compound.WET if weather.track_water_pct > 50.0 else GtTypes.Compound.INTERMEDIATE
+			if car.team_id == selected_team_id:
+				continue
+			var pick: int = GtStrategy.start_compound(weather, total_laps, car, race.strategy_profile(car.team_id))
+			# A slick call keeps the grid's own slick choice; only the wet/dry decision is the wall's.
+			if not (GtTypes.is_slick(pick) and GtTypes.is_slick(car.compound)):
+				car.compound = pick
 
 func make_weather() -> GtWeather:
 	var weather := Weather.new(total_laps, race_seed, weather_archetype(race_seed))
@@ -127,6 +131,8 @@ func apply_weather(weather: GtWeather) -> void:
 			entry["water_pct"] = lerpf(72.0, 95.0, progress) if weather_preset == 3 else lerpf(20.0, 55.0, progress)
 			entry["cloud_cover"] = 1.0 if weather_preset == 3 else 0.88
 			entry["wind_speed"] = 40.0 if weather_preset == 3 else 18.0
+		# The live weather follows GtWeather.truth: a reshaped forecast must become the outlook the truth strays from.
+		weather.rebase_outlook()
 	elif weather_preset == 1 and weather.archetype == Weather.Archetype.DRY_SUNNY:
 		# An overcast but genuinely dry 40% branch; no archetype-driven squalls.
 		for entry: Dictionary in weather.forecast:
@@ -134,6 +140,7 @@ func apply_weather(weather: GtWeather) -> void:
 			entry["water_pct"] = 0.0
 			entry["cloud_cover"] = 0.8
 			entry["wind_speed"] = 20.0
+		weather.rebase_outlook()
 	var first: Dictionary = weather.forecast[0]
 	weather.rain_intensity = first["rain_intensity"]
 	weather.track_water_pct = first["water_pct"]

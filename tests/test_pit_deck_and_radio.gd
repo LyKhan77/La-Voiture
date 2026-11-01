@@ -98,10 +98,8 @@ func _test_desk_modes_and_suggestion_window() -> void:
 
 	car = _reset(GtTypes.TacticMode.AUTO)
 	_suggest_box(car)
-	race.time += GtRace.SUGGESTION_WINDOW_S + 0.1
-	race.step()
 	check(car.pit_request == GtTypes.Compound.HARD and race.latest_suggestion.is_empty(),
-		"suggestion: in AUTO the card locks and executes at 0.0 s")
+		"suggestion: in AUTO the engineer executes the call at once, with no decision card")
 
 	car = _reset(GtTypes.TacticMode.AUTO)
 	car.pit_request = GtTypes.Compound.SOFT
@@ -119,18 +117,23 @@ func _test_desk_modes_and_suggestion_window() -> void:
 		"suggestion: a replacement card restarts the 10 s window")
 
 	car = _reset(GtTypes.TacticMode.AUTO)
-	_suggest_box(car)
-	race.time += 9.9
 	var radio_before: int = race.radio_history.size()
-	race.accept_suggestion()
-	race.time += 0.3
+	_suggest_box(car)
+	race.time += GtRace.SUGGESTION_WINDOW_S + 0.3
 	race.step()
 	var box_calls: int = 0
 	for index: int in range(radio_before, race.radio_history.size()):
 		if String(race.radio_history[index]["text"]).begins_with("Box this lap"):
 			box_calls += 1
 	check(car.pit_request == GtTypes.Compound.HARD and race.latest_suggestion.is_empty() and box_calls == 1,
-		"suggestion: accepting at 9.9 s calls the stop once, the window end does not call it again (box calls: %d)" % box_calls)
+		"suggestion: AUTO calls the stop once, and nothing calls it again later (box calls: %d)" % box_calls)
+
+	car = _reset(GtTypes.TacticMode.MANUAL)
+	race.coach_enabled = false
+	_suggest_box(car)
+	var silent: bool = race.latest_suggestion.is_empty() and car.pit_request < 0
+	race.coach_enabled = true
+	check(silent, "suggestion: MANUAL without COACH raises no decision card and calls nothing")
 
 
 # --- cancelling a box call --------------------------------------------------------------------------------
@@ -297,7 +300,7 @@ func _test_burn_bar_and_keys() -> void:
 # --- final review fix: an explicit cancel beats a still-open BOX card -----------------------------------------------
 
 func _test_cancel_closes_the_box_card() -> void:
-	var car: GtCar = _reset(GtTypes.TacticMode.AUTO)
+	var car: GtCar = _reset(GtTypes.TacticMode.MANUAL)
 	car.pit = null
 	_suggest_box(car)
 	race.time += 2.0
@@ -305,10 +308,12 @@ func _test_cancel_closes_the_box_card() -> void:
 	race.time += 2.0
 	var cancelled: bool = world.cancel_pit(car.id)
 	var card_closed: bool = race.latest_suggestion.is_empty()
+	race.set_tactic_mode(GtTypes.TacticMode.AUTO) # switching to AUTO must not re-box the cancelled car either
 	race.time += GtRace.SUGGESTION_WINDOW_S
+	_suggest_box(car)
 	race.step()
 	check(cancelled and card_closed and car.pit_request == -1,
-		"pit: in AUTO an explicit cancel closes the open BOX card, so the window end cannot re-box the car")
+		"pit: an explicit cancel closes the open BOX card and holds: AUTO does not re-box the car straight away")
 
 
 # --- Langkah 3e: the engineer answers the driver ----------------------------------------------------------

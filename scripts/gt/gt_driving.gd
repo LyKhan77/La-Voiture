@@ -48,6 +48,18 @@ const TOW_TUCK: float = 0.8
 const TOW_STRAIGHT_KAPPA: float = 0.004
 ## Cars closer than this sideways share a corridor: the one behind must be able to stop behind the one ahead.
 const CORRIDOR_M: float = 2.05
+## Below this track water a rain tyre scrubs on a dry line and wears several times faster.
+const WET_ON_DRY_WATER_PCT: float = 15.0
+## A car on a flat tyre limps at up to ~100 km/h on the straights (GT3 punctures cost about a minute, not five).
+const LIMP_SPEED_MPS: float = 27.8
+## Share of its grip a car keeps on a flat tyre. It scales the corner speeds directly, so 0.22 left cars crawling
+## through corners at 8-25 km/h and a puncture cost several minutes.
+const PUNCTURE_GRIP: float = 0.6
+## Floor, brake duct and suspension damage the flailing tyre does per km at the limp speed (scales with speed²):
+## a lap home is survivable for most cars, a fragile one far from the pit breaks.
+const PUNCTURE_DAMAGE_PER_KM: float = 20.0
+## Damage at which the suspension gives up and the punctured car retires.
+const PUNCTURE_FAILURE_DAMAGE: float = 90.0
 
 var _target_lateral_rate: float = 0.0
 var _teammate_ahead: GtCar = null
@@ -116,19 +128,52 @@ func build_contexts(racing: Array[GtCar]) -> Dictionary:
 
 ## Grip of the rubber itself: compound, wear, puncture and temperature, before any water.
 func tyre_grip(car: GtCar) -> float:
-	var w: float = car.wear
-	var cliff: float = 0.0
-	if w > GtTypes.TYRE_CLIFF_WEAR:
-		cliff = pow((w - GtTypes.TYRE_CLIFF_WEAR) / (1.0 - GtTypes.TYRE_CLIFF_WEAR), 1.8) * 0.55
-	var base: float = GtTypes.COMPOUND_GRIP[car.compound] * (1.0 - 0.25 * w * w - maxf(0.0, w - 0.7) * 0.6 - cliff)
+	var base: float = worn_grip(car.compound, car.wear)
 	if car.is_punctured:
-		base *= 0.22
+		# The flat sets the limp pace, not the worn-rubber cliff that usually caused it (that left 13 % grip: a crawl).
+		base = GtTypes.COMPOUND_GRIP[car.compound] * PUNCTURE_GRIP
 	base = maxf(0.10, base)
 	if car.tyre_temp < 78.0:
 		base *= 0.94
 	elif car.tyre_temp > 112.0:
 		base *= maxf(0.85, 1.0 - (car.tyre_temp - 112.0) / 25.0 * 0.15)
 	return base
+
+
+## Grip of a compound at a wear level: the gentle fade, the 70 % drop and the 75 % cliff.
+static func worn_grip(compound: int, w: float) -> float:
+	var cliff: float = 0.0
+	if w > GtTypes.TYRE_CLIFF_WEAR:
+		cliff = pow((w - GtTypes.TYRE_CLIFF_WEAR) / (1.0 - GtTypes.TYRE_CLIFF_WEAR), 1.8) * 0.55
+	return GtTypes.COMPOUND_GRIP[compound] * (1.0 - 0.25 * w * w - maxf(0.0, w - 0.7) * 0.6 - cliff)
+
+
+## Cornering grip multiplier of a compound at a track water level (the table `water_grip` applies).
+static func compound_water_mult(compound: int, water: float, wet_skill: float = 0.9) -> float:
+	match compound:
+		GtTypes.Compound.SOFT, GtTypes.Compound.MEDIUM, GtTypes.Compound.HARD:
+			if water > 12.0:
+				# 35 % less cornering grip from 40 % water on (the weather's own slowdown adds the rest).
+				return maxf(0.65, 1.0 - (water - 12.0) / 28.0 * 0.35)
+			return 1.0
+		GtTypes.Compound.INTERMEDIATE:
+			if water < 12.0:
+				return 0.86
+			if water <= 55.0:
+				return 1.05 + (wet_skill - 0.9) * 0.18
+			return maxf(0.68, 1.0 - (water - 55.0) / 45.0 * 0.38)
+	if water < 22.0:
+		return 0.78
+	if water >= 45.0:
+		return 1.08 + (wet_skill - 0.9) * 0.25
+	return 0.94
+
+
+## Wear multiplier of a rain tyre scrubbing on a dry line (below 15 % water); 1.0 otherwise.
+static func water_wear_mult(compound: int, water: float) -> float:
+	if water >= WET_ON_DRY_WATER_PCT or GtTypes.is_slick(compound):
+		return 1.0
+	return 5.0 if compound == GtTypes.Compound.WET else 3.5
 
 
 ## What the water on the track does to this compound: slicks lose their bite as it deepens, wets
@@ -144,26 +189,7 @@ func water_grip(car: GtCar) -> float:
 			water = maxf(0.0, water * (1.0 - weather.drying_line_pct / 100.0 * 0.32))
 		elif off_line > 1.85:
 			water = minf(100.0, water * 1.10)
-	var mult: float = 1.0
-	match car.compound:
-		GtTypes.Compound.SOFT, GtTypes.Compound.MEDIUM, GtTypes.Compound.HARD:
-			if water > 12.0:
-				# 35 % less cornering grip from 40 % water on (the weather's own slowdown adds the rest).
-				mult = maxf(0.65, 1.0 - (water - 12.0) / 28.0 * 0.35)
-		GtTypes.Compound.INTERMEDIATE:
-			if water < 12.0:
-				mult = 0.86
-			elif water <= 55.0:
-				mult = 1.05 + (car.wet_skill - 0.9) * 0.18
-			else:
-				mult = maxf(0.68, 1.0 - (water - 55.0) / 45.0 * 0.38)
-		_:
-			if water < 22.0:
-				mult = 0.78
-			elif water >= 45.0:
-				mult = 1.08 + (car.wet_skill - 0.9) * 0.25
-			else:
-				mult = 0.94
+	var mult: float = compound_water_mult(car.compound, water, car.wet_skill)
 	var wet_line: float = rain_line_weight()
 	if wet_line > 0.0 and off_line < RAIN_GROOVE_HALF_WIDTH_M:
 		mult *= 1.0 - RAIN_GROOVE_GRIP_LOSS * wet_line
@@ -186,6 +212,11 @@ func race_line_for(car: GtCar, s: float) -> float:
 		var kappa: float = track.line.line_curvature_at(s)
 		line -= signf(kappa) * RAIN_LINE_SHIFT_M * wet * smoothstep(0.004, 0.012, absf(kappa))
 	return line
+
+
+## How hard this flat tyre beats up the car, 0.6..1.5: pure in (seed, car, stop count) so it never draws from the race rng.
+func _puncture_fragility(car: GtCar) -> float:
+	return lerpf(0.6, 1.5, _hash_unit(race.race_seed * 31 + car.id, car.stops + 977) * 0.5 + 0.5)
 
 
 ## Smooth per-driver offset from the racing line; pure in (car, s) so it never draws from the race rng.
@@ -336,7 +367,7 @@ func update_car(car: GtCar, ctx: Variant, dt: float) -> void:
 	elif car.fuel_stage == GtTypes.FuelStage.SPUTTER:
 		_target *= 0.75
 	if car.is_punctured:
-		_target = minf(_target, 15.2)
+		_target = minf(_target, LIMP_SPEED_MPS)
 	if race.weather.track_water_pct > 40.0:
 		# Spray and standing water slow the corners in full and the straights only a little.
 		var water_slowdown: float = maxf(0.70, 1.0 - (race.weather.track_water_pct - 40.0) * 0.004)
@@ -730,10 +761,10 @@ func _wear_and_fuel(car: GtCar, ds: float, wear_rate_mult: float, fuel_burn_mult
 	if car.tyre_temp > 115.0:
 		blister_rate += (car.tyre_temp - 115.0) * 0.35 * dt
 		wear_inc *= 3.5
-	var wet_on_dry: bool = (car.compound == GtTypes.Compound.INTERMEDIATE or car.compound == GtTypes.Compound.WET) and weather.track_water_pct < 15.0
+	var wet_on_dry: bool = water_wear_mult(car.compound, weather.track_water_pct) > 1.0
 	if wet_on_dry:
 		blister_rate += 1.2 * dt
-		wear_inc *= 5.0 if car.compound == GtTypes.Compound.WET else 3.5
+		wear_inc *= water_wear_mult(car.compound, weather.track_water_pct)
 	if car.tyre_temp > 112.0:
 		wear_inc *= 1.4
 	car.wear = minf(1.0, car.wear + wear_inc)
@@ -773,18 +804,26 @@ func _wear_and_fuel(car: GtCar, ds: float, wear_rate_mult: float, fuel_burn_mult
 			car.punctured_wheel = GtTypes.Wheel.FL if curv_now > 0.0 else GtTypes.Wheel.FR
 			car.puncture_distance_driven = 0.0
 			race.push_radio(car, "driver", "Puncture! The tyre has delaminated!", true)
+			var sector: int = car.current_sector + 1
 			if car.v > 45.0 and race.rng.next() < 0.75:
 				car.start_spin(1.8)
 				race.push_radio(car, "driver", "I'm spinning! Tyre blew out on the high speed section!", true)
+				race.set_flag(GtTypes.Flag.VSC, sector, "VIRTUAL SAFETY CAR - TYRE DEBRIS IN SECTOR %d" % sector, 18.0)
+			else:
+				race.set_flag(GtTypes.Flag.YELLOW, sector, "YELLOW FLAG (SEC %d) - CAR #%d PUNCTURE" % [sector, car.number], 10.0)
+			race.box_for_puncture(car)
 	if car.is_punctured:
 		car.puncture_distance_driven += ds
-		if car.puncture_distance_driven > track.length and not car.is_dnf:
+		var speed_share: float = car.v / LIMP_SPEED_MPS
+		car.damage = minf(100.0, car.damage + ds / 1000.0 * PUNCTURE_DAMAGE_PER_KM * speed_share * speed_share * _puncture_fragility(car))
+		if car.damage >= PUNCTURE_FAILURE_DAMAGE and not car.is_dnf:
 			car.is_dnf = true
 			car.dnf_reason = "Suspension Failure"
 			car.finished_at = race.time
+			car.pit_request = -1
 			race.push_radio(car, "driver", "Suspension has snapped from the flat tyre! I can't steer, retiring the car!", true)
 			var sector: int = car.current_sector + 1
-			race.set_flag(GtTypes.Flag.YELLOW, sector, "YELLOW FLAG (SEC %d) - CAR #%d STOPPED (SUSPENSION FAILURE)" % [sector, car.number], 18.0)
+			race.set_flag(GtTypes.Flag.VSC, sector, "VIRTUAL SAFETY CAR - CAR #%d STOPPED (SUSPENSION FAILURE)" % car.number, 25.0)
 
 	var track_offset: float = (weather.track_temp - 30.0) * 0.35
 	var wet_on_dry_heat: float = 0.0

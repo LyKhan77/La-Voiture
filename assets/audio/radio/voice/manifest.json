@@ -154,6 +154,13 @@
 		"spoken": "Track is drying fast. Suggest box this lap for soft tyres."
 	},
 	{
+		"id": "eng_strat_drying_medium",
+		"speaker": "engineer",
+		"pattern": "^Track drying rapidly \\(\\d+% water\\)\\. Suggest box this lap for MEDIUM tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_strat_drying_medium.wav",
+		"spoken": "Track is drying fast. Suggest box this lap for medium tyres."
+	},
+	{
 		"id": "eng_strat_wear_hard",
 		"speaker": "engineer",
 		"pattern": "^Tyre wear critical \\(\\d+%\\)\\. Suggest box this lap for HARD tyres\\.$",
@@ -175,6 +182,34 @@
 		"spoken": "Tyre wear is critical. Suggest box this lap for soft tyres."
 	},
 	{
+		"id": "eng_strat_wear_intermediate",
+		"speaker": "engineer",
+		"pattern": "^Tyre wear critical \\(\\d+%\\)\\. Suggest box this lap for INTERMEDIATE tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_strat_wear_intermediate.wav",
+		"spoken": "Tyre wear is critical. Suggest box this lap for intermediate tyres."
+	},
+	{
+		"id": "eng_strat_wear_wet",
+		"speaker": "engineer",
+		"pattern": "^Tyre wear critical \\(\\d+%\\)\\. Suggest box this lap for WET tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_strat_wear_wet.wav",
+		"spoken": "Tyre wear is critical. Suggest box this lap for wet tyres."
+	},
+	{
+		"id": "eng_strat_easing_inter",
+		"speaker": "engineer",
+		"pattern": "^Rain easing \\(\\d+% water\\)\\. Suggest box this lap for INTERMEDIATE tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_strat_easing_inter.wav",
+		"spoken": "The rain is easing. Suggest box this lap for intermediate tyres."
+	},
+	{
+		"id": "eng_strat_cooking",
+		"speaker": "engineer",
+		"pattern": "^The (INTERMEDIATE|WET) tyres are cooking on the dry line\\. Box now for \\w+ tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_strat_cooking.wav",
+		"spoken": "The rain tyres are cooking on the dry line. Box now, box now!"
+	},
+	{
 		"id": "eng_tactic_sc_hard",
 		"speaker": "engineer",
 		"pattern": "^Safety Car deployed! Cheap pit stop window open\\. Suggest box for HARD tyres\\.$",
@@ -182,11 +217,109 @@
 		"spoken": "Safety car deployed! Cheap pit stop window open. Suggest box for hard tyres."
 	},
 	{
+		"id": "eng_tactic_vsc_hard",
+		"speaker": "engineer",
+		"pattern": "^Virtual Safety Car deployed! Cheap pit stop window open\\. Suggest box for HARD tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_tactic_vsc_hard.wav",
+		"spoken": "Virtual safety car deployed! Cheap pit stop window open. Suggest box for hard tyres."
+	},
+	{
 		"id": "eng_tactic_sc_soft",
 		"speaker": "engineer",
 		"pattern": "^Safety Car deployed! Cheap pit stop window open\\. Suggest box for SOFT tyres\\.$",
 		"file": "res://assets/audio/radio/voice/eng_tactic_sc_soft.wav",
 		"spoken": "Safety car deployed! Cheap pit stop window open. Suggest box for soft tyres."
+	},
+	{
+		"id": "eng_tactic_vsc_soft",
+		"speaker": "engineer",
+		"pattern": "^Virtual Safety Car deployed! Cheap pit stop window open\\. Suggest box for SOFT tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_tactic_vsc_soft.wav",
+		"spoken": "Virtual safety car deployed! Cheap pit stop window open. Suggest box for soft tyres."
+	},
+	{
+		"id": "eng_tactic_sc_medium",
+		"speaker": "engineer",
+		"pattern": "^Safety Car deployed! Cheap pit stop window open\\. Suggest box for MEDIUM tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_tactic_sc_medium.wav",
+		"spoken": "Safety car deployed! Cheap pit stop window open. Suggest box for medium tyres."
+	},
+	{
+		"id": "eng_tactic_vsc_medium",
+		"speaker": "engineer",
+		"pattern": "^Virtual Safety Car deployed! Cheap pit stop window open\\. Suggest box for MEDIUM tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_tactic_vsc_medium.wav",
+		"spoken": "Virtual safety car deployed! Cheap pit stop window open. Suggest box for medium tyres."
+	},
+	{
+		"id": "eng_tactic_sc_intermediate",
+		"speaker": "engineer",
+		"pattern": "^Safety Car deployed! Cheap pit stop window open\\. Suggest box for INTERMEDIATE tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_tactic_sc_intermediate.wav",
+		"spoken": "Safety car deployed! Cheap pit stop window open. Suggest box for intermediate tyres."
+	},
+	{
+		"id": "eng_tactic_vsc_intermediate",
+		"speaker": "engineer",
+		"pattern": "^Virtual Safety Car deployed! Cheap pit stop window open\\. Suggest box for INTERMEDIATE tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_tactic_vsc_intermediate.wav",
+		"spoken": "Virtual safety car deployed! Cheap pit stop window open. Suggest box for intermediate tyres."
+	},
+	{
+		"id": "eng_tactic_sc_wet",
+		"speaker": "engineer",
+		"pattern": "^Safety Car deployed! Cheap pit stop window open\\. Suggest box for WET tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_tactic_sc_wet.wav",
+		"spoken": "Safety car deployed! Cheap pit stop window open. Suggest box for wet tyres."
+	},
+	{
+		"id": "eng_tactic_vsc_wet",
+		"speaker": "engineer",
+		"pattern": "^Virtual Safety Car deployed! Cheap pit stop window open\\. Suggest box for WET tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_tactic_vsc_wet.wav",
+		"spoken": "Virtual safety car deployed! Cheap pit stop window open. Suggest box for wet tyres."
+	},
+	{
+		"id": "eng_info_weather",
+		"speaker": "engineer",
+		"pattern": "^Track water \\d+%, forecast \\d+% next lap\\.$",
+		"file": "res://assets/audio/radio/voice/eng_info_weather.wav",
+		"spoken": "Weather update. Track water and the forecast are on your screen."
+	},
+	{
+		"id": "eng_info_wear",
+		"speaker": "engineer",
+		"pattern": "^Tyre wear at \\d+%\\.$",
+		"file": "res://assets/audio/radio/voice/eng_info_wear.wav",
+		"spoken": "Tyre wear is high."
+	},
+	{
+		"id": "eng_info_temps",
+		"speaker": "engineer",
+		"pattern": "^Tyre temps at \\d+ C\\.$",
+		"file": "res://assets/audio/radio/voice/eng_info_temps.wav",
+		"spoken": "Tyre temps are high."
+	},
+	{
+		"id": "eng_info_wing",
+		"speaker": "engineer",
+		"pattern": "^Front wing aero damage at \\d+%\\.$",
+		"file": "res://assets/audio/radio/voice/eng_info_wing.wav",
+		"spoken": "Front wing aero damage."
+	},
+	{
+		"id": "eng_info_sc",
+		"speaker": "engineer",
+		"pattern": "^Safety Car deployed\\. Tyre wear \\d+%\\.$",
+		"file": "res://assets/audio/radio/voice/eng_info_sc.wav",
+		"spoken": "Safety car deployed."
+	},
+	{
+		"id": "eng_info_vsc",
+		"speaker": "engineer",
+		"pattern": "^Virtual Safety Car deployed\\. Tyre wear \\d+%\\.$",
+		"file": "res://assets/audio/radio/voice/eng_info_vsc.wav",
+		"spoken": "Virtual safety car deployed."
 	},
 	{
 		"id": "eng_tactic_wing",
@@ -278,6 +411,20 @@
 		"pattern": "^Dry racing line has formed \\(.+\\)\\. Slick crossover window is OPEN!$",
 		"file": "res://assets/audio/radio/voice/eng_weather_dry_line.wav",
 		"spoken": "Dry racing line has formed. Slick crossover window is open!"
+	},
+	{
+		"id": "eng_weather_incoming_info",
+		"speaker": "engineer",
+		"pattern": "^Radar update: rain front approaching in about 1 lap \\(wind \\d+ km/h\\)\\.$",
+		"file": "res://assets/audio/radio/voice/eng_weather_incoming_info.wav",
+		"spoken": "Radar update: rain front approaching in about one lap."
+	},
+	{
+		"id": "eng_weather_dry_line_info",
+		"speaker": "engineer",
+		"pattern": "^Dry racing line has formed \\(.+\\)\\.$",
+		"file": "res://assets/audio/radio/voice/eng_weather_dry_line_info.wav",
+		"spoken": "Dry racing line has formed."
 	},
 	{
 		"id": "eng_yellow_contact_1",

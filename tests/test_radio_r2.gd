@@ -57,19 +57,31 @@ func _test_card() -> void:
 	var cut_in: CanvasLayer = await _cut_in(0)
 	cut_in.play_radio(3, "Box this lap, confirm WET tyres.")
 	await process_frame
-	var size := Vector2(218.0, 80.0)
-	var outer: PackedVector2Array = cut_in.balloon_polygon(size, 0.0)
-	var inner: PackedVector2Array = cut_in.balloon_polygon(size, 4.0)
-	var inside: bool = true
-	for point: Vector2 in outer:
-		inside = inside and Rect2(Vector2.ZERO, size).grow(0.01).has_point(point)
-	var nested: bool = true
-	for point: Vector2 in inner:
-		nested = nested and Rect2(Vector2(4.0, 4.0), size - Vector2(8.0, 8.0)).grow(0.01).has_point(point)
+	# Koma Strip: a portrait panel and a speech panel side by side, split by a slanted gutter, inside the strip, and an
+	# SFX panel breaking out above the frame's far corner.
+	var size := Vector2(cut_in.BANNER_WIDTH, cut_in.BANNER_MIN_HEIGHT)
+	var panels: Array = cut_in.koma_panels(size)
+	var portrait: Rect2 = Rect2(panels[0][0], Vector2.ZERO)
+	var speech_box: Rect2 = Rect2(panels[1][0], Vector2.ZERO)
+	var sfx_box: Rect2 = Rect2(panels[2][0], Vector2.ZERO)
+	for point: Vector2 in panels[0]:
+		portrait = portrait.expand(point)
+	for point: Vector2 in panels[1]:
+		speech_box = speech_box.expand(point)
+	for point: Vector2 in panels[2]:
+		sfx_box = sfx_box.expand(point)
+	var slanted: bool = not is_equal_approx(panels[0][1].x, panels[0][2].x)
+	var apart: bool = Geometry2D.intersect_polygons(panels[0], panels[1]).is_empty()
+	var strip: Rect2 = Rect2(Vector2.ZERO, size).grow(0.01)
 	check(cut_in.speech.text == "Box this lap, confirm WET tyres." and cut_in.rich.text.contains("[bgcolor=") and cut_in.rich.text.contains(" THIS LAP, CONFIRM ")
-			and cut_in.rich.get_theme_font_size("normal_font_size") == 16 and outer.size() >= 24 and inside and nested and inner.size() == outer.size(),
-		"radio r2: the balloon has a jagged ink outline (%d points) with the paper inset inside it, and a highlighted headline" % outer.size())
-	check(cut_in.BANNER_WIDTH <= 264.0 and cut_in.BANNER_MIN_HEIGHT <= 96.0 and cut_in.WAVE_BARS == 8,
+			and cut_in.rich.get_theme_font_size("normal_font_size") == 16 and panels.size() == 3 and slanted and apart
+			and strip.encloses(portrait) and strip.encloses(speech_box) and portrait.end.x < speech_box.end.x and sfx_box.position.y < cut_in.FRAME_TOP and sfx_box.get_center().x > speech_box.get_center().x,
+		"radio r2: the koma strip has a portrait panel and a speech panel split by a slanted gutter, an SFX panel breaking out of the top corner, and a highlighted headline")
+	var engineer_cut_in: CanvasLayer = await _cut_in(1)
+	var mirrored: Array = engineer_cut_in.koma_panels(size)
+	engineer_cut_in.queue_free()
+	check(mirrored[0][0].x > size.x * 0.5, "radio r2: the engineer's strip is mirrored, the portrait at the right end")
+	check(cut_in.BANNER_WIDTH <= 264.0 and cut_in.BANNER_MIN_HEIGHT <= 108.0 and cut_in.WAVE_BARS == 8,
 		"radio r2: the banner is compact (%.0fx%.0f, was 470x190)" % [cut_in.BANNER_WIDTH, cut_in.BANNER_MIN_HEIGHT])
 	check(cut_in.sfx_text() == "ザザッ" and cut_in._sfx.text == "ザザッ" and not cut_in.sweating,
 		"radio r2: a routine call carries the static SFX and no sweat")

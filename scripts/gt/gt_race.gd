@@ -35,6 +35,9 @@ var speed_trap_max: Dictionary = {}
 var radio_history: Array[Dictionary] = []
 var latest_radio: Dictionary = {}
 var tactic_mode: int = GtTypes.TacticMode.MANUAL
+## MANUAL only: with COACH the engineer raises decision cards and gives advice; without it he reports the facts
+## and the player makes every call. AUTO ignores it: the engineer makes the calls himself.
+var coach_enabled: bool = true
 var player_team_id: int = 0
 var active_teams: Array[int] = []
 var race_seed: int = 1
@@ -67,6 +70,8 @@ var _radio_counter: int = 0
 var _pending_replies: Array[Dictionary] = [] # {"due", "car_id", "reply_to", "driver_text"}
 var _flood_called: Dictionary = {} # car id -> true while a flood episode has been called
 var _suggestion_cooldowns: Dictionary = {} # "car-type" -> time
+var _strategy_profiles: Dictionary = {} # team id -> GtStrategy.profile
+var _strategy_votes: Dictionary = {} # car id -> sector calls in a row that wanted the same stop
 var contacts: GtContacts
 var stewards: GtStewards
 
@@ -316,10 +321,11 @@ func _step_weather(dt: float) -> void:
 	weather.step(dt, time, float(moving) / float(maxi(1, cars.size())), continuous_lap, laps)
 
 
-func _on_weather_advisory(text: String) -> void:
+func _on_weather_advisory(info: String, advice: String) -> void:
 	var target: GtCar = _player_car()
 	if target != null:
-		push_radio(target, "engineer", text, true)
+		var coached: bool = advice != "" and (tactic_mode == GtTypes.TacticMode.AUTO or coach_enabled)
+		push_radio(target, "engineer", "%s %s" % [info, advice] if coached else info, true)
 
 
 func _player_car() -> GtCar:
@@ -778,11 +784,23 @@ func set_ers_mode(car_id: int, mode: int) -> void:
 		car.ers_mode = clampi(mode, 0, GtTypes.ErsMode.OVERTAKE)
 
 
-func suggest_tactic(car: GtCar, type: int, action_value: int, action_label: String, description: String) -> void:
+## The engineer's call for a player car, by desk mode: AUTO executes it at once and says so; MANUAL + COACH raises
+## a decision card with `description` (the advice); MANUAL without COACH only reports `info`, the facts behind it.
+func suggest_tactic(car: GtCar, type: int, action_value: int, action_label: String, description: String, info: String = "") -> void:
 	var key: String = "%d-%d" % [car.id, type]
 	if time < float(_suggestion_cooldowns.get(key, 0.0)):
 		return
 	_suggestion_cooldowns[key] = time + 25.0
+	if tactic_mode == GtTypes.TacticMode.AUTO:
+		if type == GtTypes.TacticType.PIT and (car.pit != null or car.pit_request >= 0):
+			return
+		_apply_tactic(car, type, action_value)
+		push_radio(car, "engineer", "Affirmative, executing %s." % action_label, true)
+		return
+	if not coach_enabled:
+		if info != "":
+			push_radio(car, "engineer", info, true)
+		return
 	_radio_counter += 1
 	latest_suggestion = {
 		"id": _radio_counter, "car_id": car.id, "code": car.code, "type": type,
@@ -820,19 +838,23 @@ func accept_suggestion() -> void:
 	var suggestion: Dictionary = latest_suggestion
 	var car: GtCar = get_car(int(suggestion["car_id"]))
 	if car != null:
-		match int(suggestion["type"]):
-			GtTypes.TacticType.PIT:
-				request_pit(car.id, int(suggestion["action_value"]))
-			GtTypes.TacticType.PACE:
-				set_pace_mode(car.id, int(suggestion["action_value"]))
-			GtTypes.TacticType.FUEL:
-				set_fuel_mode(car.id, int(suggestion["action_value"]))
-			GtTypes.TacticType.ERS:
-				set_ers_mode(car.id, int(suggestion["action_value"]))
+		_apply_tactic(car, int(suggestion["type"]), int(suggestion["action_value"]))
 		push_radio(car, "engineer", "Affirmative, executing %s." % suggestion["action_label"], true)
 	_suggestion_cooldowns["%d-%d" % [suggestion["car_id"], suggestion["type"]]] = time + 40.0
 	latest_suggestion = {}
 	suggestion_changed.emit(latest_suggestion)
+
+
+func _apply_tactic(car: GtCar, type: int, value: int) -> void:
+	match type:
+		GtTypes.TacticType.PIT:
+			request_pit(car.id, value)
+		GtTypes.TacticType.PACE:
+			set_pace_mode(car.id, value)
+		GtTypes.TacticType.FUEL:
+			set_fuel_mode(car.id, value)
+		GtTypes.TacticType.ERS:
+			set_ers_mode(car.id, value)
 
 
 func dismiss_suggestion() -> void:
@@ -843,38 +865,67 @@ func dismiss_suggestion() -> void:
 	suggestion_changed.emit(latest_suggestion)
 
 
-## Strategy desk: at a lap line, rivals decide pit calls themselves; the player's calls become suggestion
-## cards (MANUAL closes the card when its window ends, AUTO executes it).
+## The strategist of a team (GtStrategy.profile), made once per race.
+func strategy_profile(team_id: int) -> Dictionary:
+	if not _strategy_profiles.has(team_id):
+		_strategy_profiles[team_id] = GtStrategy.profile(race_seed, team_id)
+	return _strategy_profiles[team_id]
+
+
+## Strategy desk, at every sector line: the rivals' walls make their own tyre calls (GtStrategy), acting once their
+## strategist has seen the same call `reaction_sectors` times running; the player's call goes to the desk
+## (suggest_tactic: AUTO executes it, MANUAL + COACH raises a card, MANUAL alone reports the facts).
 func decide_strategy(car: GtCar) -> void:
-	if car.pit != null or car.finished_at >= 0.0:
+	if car.pit != null or car.finished_at >= 0.0 or car.is_dnf or car.pit_request >= 0 or car.is_punctured:
 		return
-	var laps_left: int = laps - car.lap
-	if laps_left <= 0:
-		return
-	var is_player: bool = car.team_id == player_team_id
-	var water: float = weather.track_water_pct
-	var slick: bool = GtTypes.is_slick(car.compound)
-	var target: int = -1
-	var reason: String = ""
-	if water > 45.0 and car.compound != GtTypes.Compound.WET:
-		target = GtTypes.Compound.WET
-		reason = "Heavy rain on track (%d%% water)." % roundi(water)
-	elif water > 18.0 and slick:
-		target = GtTypes.Compound.INTERMEDIATE
-		reason = "Track is damp (%d%% water)." % roundi(water)
-	elif water < 12.0 and not slick:
-		target = GtTypes.Compound.HARD if laps_left > 8 else GtTypes.Compound.SOFT
-		reason = "Track drying rapidly (%d%% water)." % roundi(water)
-	elif car.wear > 0.62 and laps_left > 2 and car.pit_request < 0:
-		target = GtTypes.Compound.HARD if laps_left > 12 else (GtTypes.Compound.MEDIUM if laps_left > 6 else GtTypes.Compound.SOFT)
-		reason = "Tyre wear critical (%d%%)." % roundi(car.wear * 100.0)
+	var prof: Dictionary = strategy_profile(car.team_id)
+	var call: Dictionary = GtStrategy.plan(self, car, prof)
+	var target: int = int(call["compound"])
 	if target < 0:
+		_strategy_votes.erase(car.id)
 		return
-	if is_player:
-		suggest_tactic(car, GtTypes.TacticType.PIT, target, "BOX FOR %s" % GtTypes.COMPOUND_NAME[target],
-			"%s Suggest box this lap for %s tyres." % [reason, GtTypes.COMPOUND_NAME[target]])
-	else:
+	if car.team_id == player_team_id:
+		var info: String = "Tyre wear at %d%%." % roundi(car.wear * 100.0) if call["kind"] == "wear" \
+			else "Track water %d%%, forecast %d%% next lap." % [roundi(weather.track_water_pct), roundi(GtStrategy._forecast_water(self, 1))]
+		suggest_tactic(car, GtTypes.TacticType.PIT, target, "BOX FOR %s" % GtTypes.COMPOUND_NAME[target], _strategy_call_text(car, call), info)
+		return
+	var key: String = "%d-%d" % [car.id, target]
+	var votes: int = int(_strategy_votes.get(car.id, {}).get(key, 0)) + 1
+	_strategy_votes[car.id] = {key: votes}
+	if bool(call["urgent"]) or votes > int(prof["reaction_sectors"]):
 		car.pit_request = target
+		_strategy_votes.erase(car.id)
+
+
+## The engineer's words for a strategist call: one fixed sentence per kind, so every call has its recorded voice
+## (tools/audio/radio_lines.mjs).
+func _strategy_call_text(car: GtCar, call: Dictionary) -> String:
+	var water: int = roundi(weather.track_water_pct)
+	var tyre: String = GtTypes.COMPOUND_NAME[int(call["compound"])]
+	match String(call["kind"]):
+		"cooking":
+			return "The %s tyres are cooking on the dry line. Box now for %s tyres." % [GtTypes.COMPOUND_NAME[car.compound], tyre]
+		"dry":
+			return "Track drying rapidly (%d%% water). Suggest box this lap for %s tyres." % [water, tyre]
+		"easing":
+			return "Rain easing (%d%% water). Suggest box this lap for %s tyres." % [water, tyre]
+		"damp":
+			return "Track is damp (%d%% water). Suggest box this lap for %s tyres." % [water, tyre]
+		"rain":
+			return "Heavy rain on track (%d%% water). Suggest box this lap for %s tyres." % [water, tyre]
+	return "Tyre wear critical (%d%%). Suggest box this lap for %s tyres." % [roundi(car.wear * 100.0), tyre]
+
+
+## A puncture boxes the car at once (the driver's own call, in every desk mode), except on the final lap where it
+## limps to the flag.
+func box_for_puncture(car: GtCar) -> void:
+	if car.pit != null or car.lap >= laps - 1 or car.finished_at >= 0.0:
+		return
+	var compound: int = GtForecast.auto_compound(car, weather.track_water_pct)
+	if car.team_id == player_team_id:
+		request_pit(car.id, compound)
+	else:
+		car.pit_request = compound
 
 
 ## The engineer watches the player's cars in every desk mode and raises suggestion cards.
@@ -889,38 +940,28 @@ func _check_advisor_tactics() -> void:
 	for car: GtCar in cars:
 		if car.team_id != player_team_id or car.finished_at >= 0.0 or car.pit != null or car.is_dnf or car.lap < 0:
 			continue
-		var slick: bool = GtTypes.is_slick(car.compound)
+		# Weather tyre calls are the strategist's, at the sector lines (decide_strategy); these are the rest.
+		var fresh: int = GtStrategy.best_fresh_compound(car, [water], laps_left, car.best_lap if car.best_lap > 0.0 else track.length / 45.0)
 		if (flag == GtTypes.Flag.SC or flag == GtTypes.Flag.VSC) and car.pit_request < 0 and laps_left > 2 and (car.wear > 0.35 or car.damage > 15.0):
-			var compound: int = GtTypes.Compound.HARD if laps_left > 8 else GtTypes.Compound.SOFT
-			suggest_tactic(car, GtTypes.TacticType.PIT, compound, "BOX (%s) UNDER SC" % GtTypes.COMPOUND_NAME[compound],
-				"Safety Car deployed! Cheap pit stop window open. Suggest box for %s tyres." % GtTypes.COMPOUND_NAME[compound])
+			var caution: String = "Safety Car" if flag == GtTypes.Flag.SC else "Virtual Safety Car"
+			suggest_tactic(car, GtTypes.TacticType.PIT, fresh, "BOX (%s) UNDER %s" % [GtTypes.COMPOUND_NAME[fresh], "SC" if flag == GtTypes.Flag.SC else "VSC"],
+				"%s deployed! Cheap pit stop window open. Suggest box for %s tyres." % [caution, GtTypes.COMPOUND_NAME[fresh]],
+				"%s deployed. Tyre wear %d%%." % [caution, roundi(car.wear * 100.0)])
 			continue
 		if car.damage > 20.0 and car.pit_request < 0 and laps_left > 2:
-			var compound: int = GtTypes.Compound.HARD if laps_left > 8 else GtTypes.Compound.SOFT
-			suggest_tactic(car, GtTypes.TacticType.PIT, compound, "REPAIR WING (%s)" % GtTypes.COMPOUND_NAME[compound],
-				"Front wing aero damage (%d%%). Suggest box this lap to replace wing and tyres." % roundi(car.damage))
+			suggest_tactic(car, GtTypes.TacticType.PIT, fresh, "REPAIR WING (%s)" % GtTypes.COMPOUND_NAME[fresh],
+				"Front wing aero damage (%d%%). Suggest box this lap to replace wing and tyres." % roundi(car.damage),
+				"Front wing aero damage at %d%%." % roundi(car.damage))
 			continue
-		if water > 45.0 and car.compound != GtTypes.Compound.WET and car.pit_request < 0:
-			suggest_tactic(car, GtTypes.TacticType.PIT, GtTypes.Compound.WET, "BOX FOR FULL WET",
-				"Standing water critical (%d%%). Suggest box immediately for Full WET tyres!" % roundi(water))
-			continue
-		if water > 18.0 and slick and car.pit_request < 0:
-			suggest_tactic(car, GtTypes.TacticType.PIT, GtTypes.Compound.INTERMEDIATE, "BOX FOR INTERMEDIATE",
-				"Track damp (%d%% water). Suggest box for Intermediate tyres." % roundi(water))
-			continue
-		if water < 12.0 and not slick and weather.rain_intensity < 0.04 and car.pit_request < 0 and laps_left > 1:
-			var dry: int = GtTypes.Compound.HARD if laps_left > 8 else (GtTypes.Compound.MEDIUM if laps_left > 4 else GtTypes.Compound.SOFT)
-			suggest_tactic(car, GtTypes.TacticType.PIT, dry, "BOX FOR %s (DRY LINE)" % GtTypes.COMPOUND_NAME[dry],
-				"Track is dry (%d%% water, groove %d%%). Switch to %s slicks!" % [roundi(water), roundi(weather.drying_line_pct), GtTypes.COMPOUND_NAME[dry]])
-			continue
-		if car.wear > 0.62 and car.pit_request < 0 and laps_left > 1:
-			var compound: int = GtTypes.Compound.HARD if laps_left > 8 else GtTypes.Compound.SOFT
-			suggest_tactic(car, GtTypes.TacticType.PIT, compound, "BOX FOR %s" % GtTypes.COMPOUND_NAME[compound],
-				"Tyre wear at %d%%. Suggest box for %s tyres." % [roundi(car.wear * 100.0), GtTypes.COMPOUND_NAME[compound]])
+		if car.wear > GtStrategy.WORN_OUT_WEAR and car.pit_request < 0 and laps_left > 1:
+			suggest_tactic(car, GtTypes.TacticType.PIT, fresh, "BOX FOR %s" % GtTypes.COMPOUND_NAME[fresh],
+				"Tyre wear critical (%d%%). Suggest box this lap for %s tyres." % [roundi(car.wear * 100.0), GtTypes.COMPOUND_NAME[fresh]],
+				"Tyre wear at %d%%." % roundi(car.wear * 100.0))
 			continue
 		if car.tyre_temp > 114.0 and car.pace_mode != GtTypes.PaceMode.CONSERVE and car.pace_mode != GtTypes.PaceMode.LIGHT:
 			suggest_tactic(car, GtTypes.TacticType.PACE, GtTypes.PaceMode.LIGHT, "PACE: LIGHT",
-				"Tyre temps critical (%d C). Suggest switching pace to LIGHT to cool tyres." % roundi(car.tyre_temp))
+				"Tyre temps critical (%d C). Suggest switching pace to LIGHT to cool tyres." % roundi(car.tyre_temp),
+				"Tyre temps at %d C." % roundi(car.tyre_temp))
 			continue
 		if is_under_caution(car):
 			continue
@@ -967,6 +1008,7 @@ func update_sector_and_speed_trap(car: GtCar) -> void:
 			record_sector_split(car, sector)
 		car.sector_entry_time = time
 		car.current_sector = new_sector
+		decide_strategy(car)
 	elif new_sector < car.current_sector and floori(car.s / track.length) <= car.lap:
 		car.current_sector = new_sector
 

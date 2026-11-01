@@ -1,13 +1,14 @@
 extends CanvasLayer
 
-## Comic radio cut-in (Layer 3 / Z:30): a manga speech balloon with a jagged ink outline (the convention for an
-## electronic voice), a die-cut round portrait ringed by concentration lines, a static SFX in the corner and an
-## equaliser of ink teeth. Compact (about 258 x 92) so two of them fit the lower corners of the free area.
-## Decorative and input-transparent: every node is MOUSE_FILTER_IGNORE.
-## The ENGINEER role is the same balloon mirrored to the right edge, in cyan, so the driver
+## Comic radio cut-in (Layer 3 / Z:30), the "Koma Strip": the call as a strip of manga panels inside a hard ink frame
+## with an accent outline and a hard shadow. A portrait panel (the face, ringed by concentration lines) and the speech
+## panel (screentone paper, the speaker tag, the headline and an equaliser of ink teeth) are split by a slanted white
+## gutter, and a small SFX panel breaks out of the frame's top corner. Compact (258 x 96 and up) so two of them fit the
+## lower corners of the free area. Decorative and input-transparent: every node is MOUSE_FILTER_IGNORE.
+## The ENGINEER role is the same strip mirrored to the right edge, in cyan, so the driver
 ## and the pit wall can be on screen at the same time (set role before adding to the tree).
 ## Default placement is the bottom strip of the window (pit wall dashboard). set_dock() instead
-## parks the balloon in the bottom corner of a free area, at the HUD scale, and pops it in.
+## parks the strip in the bottom corner of a free area, at the HUD scale, and pops it in.
 
 enum Role { DRIVER, ENGINEER }
 
@@ -19,7 +20,7 @@ const T = preload("res://scripts/ui/ui_theme_tokens.gd")
 const UI = preload("res://scripts/ui/pit_wall_ui.gd")
 
 const BANNER_WIDTH := 258.0
-const BANNER_MIN_HEIGHT := 92.0
+const BANNER_MIN_HEIGHT := 106.0
 const TICKER_OFFSET := 84.0
 const SLIDE_X := 32.0
 const SLIDE_IN_SEC := 0.22
@@ -28,52 +29,62 @@ const HOLD_SEC := 3.5
 const PREWARM_TEXT := "ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789 !?:;.,'#%/-() THE ENGINEER SAYS CHECK THE TELEMETRY"
 const PREWARM_FRAMES: int = 2
 const SLIDE_OUT_SEC := 0.18
-const PORTRAIT_SIZE := 62.0
-const PORTRAIT_RING := 4.0
-## The balloon: width, top inside the banner, minimum height, jagged outline (tooth pitch and depth) and the hard
-## ink shadow offset. The portrait overlaps its near end.
-const BALLOON_W := 218.0
-const BALLOON_TOP := 8.0
-const BALLOON_MIN_H := 80.0
-const TOOTH_STEP := 12.0
-const TOOTH_DEPTH := 4.0
-const INK_INSET := 4.0
-const SHADOW_OFFSET := Vector2(4.0, 5.0)
-## Text: padding on the portrait side and on the far side, rows inside the balloon, size and line count.
-const TEXT_NEAR := 36.0 # clears the portrait overlap and the lightning tail
-const TEXT_FAR := 14.0
-const SPEAKER_Y := 7.0
-const SPEECH_Y := 22.0
-const SPEAKER_SIZE := 11
+## The frame: the space above it the SFX panel breaks into, the hard shadow, the accent outline, the ink border and
+## the white gutter between the border and the panels (and between the panels).
+const FRAME_TOP := 16.0
+const SHADOW_OFFSET := Vector2(6.0, 6.0)
+const OUTLINE_W := 2.0
+const INK_W := 3.0
+const GUTTER := 4.0
+const PANEL_INK := 2.0
+## The portrait panel: its width at the top and at the bottom (the slanted gutter leans like a speed line).
+const PORTRAIT_TOP_W := 64.0
+const PORTRAIT_BOTTOM_W := 56.0
+## The SFX panel breaking out of the frame's top corner: size, how far it sits in from the far side, its turn.
+const SFX_PANEL := Vector2(62.0, 28.0)
+const SFX_INSET := 34.0
+const SFX_TILT_DEG := 5.0
+## Text inside the speech panel: padding, the speaker tag row, the headline row, size and line count, and the row
+## below the text that the equaliser stands on.
+const TEXT_PAD := 8.0
+const TAG_Y := 8.0
+const TAG_H := 15.0
+const SPEECH_Y := 27.0
+const SPEAKER_SIZE := 10
 const SPEECH_SIZE := 16
 const LINE_TIGHTEN := 2.0
-const MAX_LINES := 3
-const WAVE_STRIP := 24.0
+## Width held back when counting lines: the keyword blocks are set in the wider display face, so the headline wraps
+## sooner than the plain text measures (8 px let a fourth line run into the equaliser).
+const KEYWORD_SLACK := 22.0
+## The strip is narrow (the HUD's centre card sits between the two), so a call may take a fourth line rather than
+## lose its tail: "…box this lap for INTERMEDIATE tyres" ends on the word that matters.
+const MAX_LINES := 4
+const WAVE_STRIP := 18.0
 ## Papers: off-white for a routine call, a pink for an urgent one (the accent turns crimson).
 const PAPER_COLORS: Array[Color] = [Color("#FFFDF4"), Color("#F2FDFF")]
 const URGENT_PAPER := Color("#FFE3EA")
+const PAGE := Color("#F4F5F7")
 const INK := Color("#050505")
-## Concentration lines ring the portrait, between these radii, and flicker between two phases.
+const SFX_YELLOW := Color("#FFE600")
+## Concentration lines inside the portrait panel, from this radius outward, flickering between two phases.
 const RAY_COUNT := 40
 const RAY_WIDTH_DEG := 3.0
-const RAY_INNER := 33.0
-const RAY_OUTER := 47.0
+const RAY_INNER := 24.0
+const RAY_OUTER := 90.0
 const RAY_ALT_DEG := 4.5
-const RAY_DARKEN := 0.45
-## The outline shivers "on twos": 12 poses a second from this cycle, at most 2 px.
+const RAY_ALPHA := 0.55
+## How much the portrait is zoomed into its panel, and where the face sits (share of the panel height).
+const PORTRAIT_ZOOM := 1.2
+const FACE_Y := 0.42
+## The art shivers "on twos": 12 poses a second from this cycle, at most 2 px.
 const JITTER_HZ := 12.0
 const JITTER: Array[Vector2] = [Vector2(0.0, 0.0), Vector2(1.5, -1.0), Vector2(-1.0, 1.5), Vector2(1.0, 1.0)]
-## The lightning tail between portrait and balloon, in a 34 x 40 box, drawn for the driver (mirrored for the engineer).
-const TAIL_POINTS: Array[Vector2] = [
-	Vector2(2, 20), Vector2(14, 12), Vector2(12, 19), Vector2(24, 11), Vector2(21, 20), Vector2(32, 18), Vector2(22, 24), Vector2(24, 30), Vector2(12, 26), Vector2(14, 33),
-]
-const TAIL_WIDTH := 34.0
-const TAIL_TOP := 14.0
 const SFX_ROUTINE := "ザザッ"
 const SFX_URGENT := "ガガッ!"
 const SFX_SIZE := 17
-const SFX_TILT_DEG := 6.0
-const SFX_OUTLINE := 6
+const SFX_OUTLINE := 5
+## An urgent call breaks the strip: the speech panel jumps up and the SFX panel drops.
+const URGENT_BREAK := Vector2(0.0, 3.0)
 ## Entry pop: scale and turn settle to rest in SLAP_SEC around the bottom centre; the listener of a two-way exchange dims.
 const REST_TILT_DEG: Array[float] = [0.0, 0.0]
 const DIM_ALPHA := 0.6
@@ -89,8 +100,8 @@ const MIRROR_EDGE_PAD := 8.0
 const DOCK_MARGIN_X := 8.0
 const DOCK_MARGIN_BOTTOM := 10.0
 const DOCK_DROP := 24.0
-## Equaliser: eight ink teeth at the balloon's lower right, their size, the harmonics (Hz) that drive them and
-## how fast they chase their target while talking and fall back when idle.
+## Equaliser: eight ink teeth at the speech panel's lower outer corner, their size, the harmonics (Hz) that drive them
+## and how fast they chase their target while talking and fall back when idle.
 const WAVE_BARS := 8
 const WAVE_BAR_W := 5.0
 const WAVE_GAP := 2.0
@@ -115,7 +126,7 @@ var _portrait_texture: Texture2D
 var _accent: Color = T.ACCENT_ACID_LIME
 ## Accent of a routine call; urgent calls are crimson.
 var base_color: Color = T.ACCENT_ACID_LIME
-## The listener of a two-way exchange: dimmed and a little smaller while the other balloon speaks.
+## The listener of a two-way exchange: dimmed and a little smaller while the other strip speaks.
 var dimmed: bool = false
 ## The headline: capitalised, keywords as accent blocks. `speech` keeps the plain text.
 var rich: RichTextLabel
@@ -126,7 +137,6 @@ var _message := ""
 var _prewarm_frames: int = 0
 var _prewarm_kept: Array = []
 var _urgent := false
-var _balloon_h := BALLOON_MIN_H
 var _banner_h := BANNER_MIN_HEIGHT
 var _banner_w := BANNER_WIDTH
 var _present := false
@@ -144,6 +154,9 @@ var _pending: Array = []
 var _docked := false
 var _dock_rect := Rect2()
 var _dock_scale := 1.0
+## The panels of the current layout in banner pixels: [portrait, speech, sfx] (see koma_panels()).
+var _panels: Array[PackedVector2Array] = []
+var _tag_w := 0.0
 
 ## True while a transmission is on screen: the soundwave bars pulse.
 var soundwave_active: bool = false
@@ -155,8 +168,7 @@ var _ray_phase := 0
 
 
 func _ready() -> void:
-	var authored_width := banner.offset_right - banner.offset_left
-	_banner_w = authored_width if authored_width > 100.0 else BANNER_WIDTH
+	_banner_w = BANNER_WIDTH
 	banner.anchor_left = 0.0
 	banner.anchor_right = 0.0
 	banner.anchor_top = 1.0
@@ -168,12 +180,8 @@ func _ready() -> void:
 		banner.anchor_bottom = 0.0
 		banner.scale = Vector2(_dock_scale, _dock_scale)
 	_backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_portrait.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_portrait.offset_left = PORTRAIT_RING
-	_portrait.offset_top = PORTRAIT_RING
-	_portrait.offset_right = -PORTRAIT_RING
-	_portrait.offset_bottom = -PORTRAIT_RING
-	_portrait_frame.clip_children = CanvasItem.CLIP_CHILDREN_AND_DRAW # the portrait is a disc
+	# The portrait is painted into its slanted panel by the backdrop; the TextureRect only holds the texture.
+	_portrait_frame.visible = false
 	base_color = T.ACCENT_ACID_LIME if role == Role.DRIVER else T.ACCENT_ELECTRIC_CYAN
 	_accent = base_color
 	_radio_font = _make_radio_font()
@@ -194,10 +202,11 @@ func _ready() -> void:
 	banner.add_child(rich)
 	_sfx = Label.new()
 	_sfx.name = "Sfx"
+	_sfx.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_sfx.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_sfx.add_theme_font_override("font", UI.DISPLAY)
 	_sfx.add_theme_font_size_override("font_size", SFX_SIZE)
 	_sfx.add_theme_constant_override("outline_size", SFX_OUTLINE)
-	_sfx.add_theme_color_override("font_outline_color", INK)
 	banner.add_child(_sfx)
 	_lines_layer = _make_layer("ConcentrationLines", _draw_concentration_lines)
 	_wave_layer = _make_layer("SoundWave", _draw_manga_soundwave)
@@ -205,9 +214,10 @@ func _ready() -> void:
 	_ignore_mouse(banner)
 	_backdrop.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	_backdrop.draw.connect(_draw_backdrop)
-	# Back to front: lines, balloon, teeth, portrait, its emotion marks, then the type and the SFX.
-	banner.move_child(_lines_layer, 0)
-	banner.move_child(_backdrop, 1)
+	# Back to front: the strip (frame, panels, portrait), the lines over the face, the teeth, the emotion marks, then
+	# the type and the SFX.
+	banner.move_child(_backdrop, 0)
+	banner.move_child(_lines_layer, 1)
 	banner.move_child(_wave_layer, 2)
 	banner.move_child(_portrait_frame, 3)
 	banner.move_child(_emotion_layer, 4)
@@ -250,7 +260,7 @@ func _process(delta: float) -> void:
 	_wave_layer.queue_redraw()
 
 
-## While the voice is on the air the outline shivers and the concentration lines flicker, a new pose twelve times a
+## While the voice is on the air the strip shivers and the concentration lines flicker, a new pose twelve times a
 ## second (animation on twos); at rest, or with reduce motion, everything is still.
 func _update_jitter(delta: float) -> void:
 	if soundwave_active and not PresentationSettings.reduce_motion:
@@ -259,15 +269,17 @@ func _update_jitter(delta: float) -> void:
 		if step != _jitter_step:
 			_jitter_step = step
 			_backdrop.position = jitter_for(step)
+			_lines_layer.position = _backdrop.position # the lines stay on the face they ring
 			_ray_phase = step % 2
 			_lines_layer.queue_redraw()
 	elif _backdrop.position != Vector2.ZERO or _ray_phase != 0:
 		_backdrop.position = Vector2.ZERO
+		_lines_layer.position = Vector2.ZERO
 		_ray_phase = 0
 		_lines_layer.queue_redraw()
 
 
-## Outline offset of pose `step`; always zero under reduce motion.
+## Strip offset of pose `step`; always zero under reduce motion.
 func jitter_for(step: int) -> Vector2:
 	if PresentationSettings.reduce_motion:
 		return Vector2.ZERO
@@ -315,11 +327,11 @@ func set_dock(free_rect: Rect2, factor: float) -> void:
 		_apply_scale()
 		_refresh_layout()
 		if _present:
-			_place_rest() # a balloon that is up follows a window resize at once; its fade keeps running
+			_place_rest() # a strip that is up follows a window resize at once; its fade keeps running
 
 
-## The listener of a two-way exchange dims while the other balloon speaks (state, not motion). Safe while this
-## balloon is popping in or fading out: the tint changes now, the alpha follows the animation's own progress.
+## The listener of a two-way exchange dims while the other strip speaks (state, not motion). Safe while this
+## strip is popping in or fading out: the tint changes now, the alpha follows the animation's own progress.
 func set_dimmed(value: bool) -> void:
 	dimmed = value
 	if not is_node_ready():
@@ -336,7 +348,7 @@ func _rest_alpha() -> float:
 	return DIM_ALPHA if dimmed else 1.0
 
 
-## Alpha = how far the pop / fade has got (`_fade`, 0..1) times the rest alpha of this balloon; the tint is the dim.
+## Alpha = how far the pop / fade has got (`_fade`, 0..1) times the rest alpha of this strip; the tint is the dim.
 func _apply_alpha() -> void:
 	var tint: float = DIM_TINT if dimmed else 1.0
 	banner.modulate = Color(tint, tint, tint, _fade * _rest_alpha())
@@ -352,31 +364,53 @@ func _apply_scale() -> void:
 	banner.scale = Vector2.ONE * base * (DIM_SCALE if dimmed else 1.0)
 
 
-## Jagged ink outline of a balloon of `extent`, `inset` px in from its edge: the rectangle's edges pushed in by
-## TOOTH_DEPTH on every other point. The same count for every inset, so the paper (inset INK_INSET) nests in the ink.
-func balloon_polygon(extent: Vector2, inset: float) -> PackedVector2Array:
-	var rect := Rect2(Vector2(inset, inset), extent - Vector2(inset, inset) * 2.0)
-	var across: int = maxi(2, roundi(extent.x / TOOTH_STEP))
-	var down: int = maxi(2, roundi(extent.y / TOOTH_STEP))
-	var depth: float = TOOTH_DEPTH - inset * 0.25
-	var points := PackedVector2Array()
-	for index: int in range(across + 1):
-		points.append(Vector2(rect.position.x + rect.size.x * float(index) / float(across), rect.position.y + (depth if index % 2 == 1 else 0.0)))
-	for index: int in range(1, down + 1):
-		points.append(Vector2(rect.end.x - (depth if index % 2 == 1 else 0.0), rect.position.y + rect.size.y * float(index) / float(down)))
-	for index: int in range(across - 1, -1, -1):
-		points.append(Vector2(rect.position.x + rect.size.x * float(index) / float(across), rect.end.y - (depth if index % 2 == 1 else 0.0)))
-	for index: int in range(down - 1, 0, -1):
-		points.append(Vector2(rect.position.x + (depth if index % 2 == 1 else 0.0), rect.position.y + rect.size.y * float(index) / float(down)))
-	return points
+## The three panels of a strip of `extent` in banner pixels, for the driver (the engineer's are mirrored):
+## [portrait, speech, sfx]. The portrait and the speech panel share the frame's height and are split by a slanted
+## gutter; the SFX panel is a turned box breaking out above the frame's far corner.
+func koma_panels(extent: Vector2, urgent: bool = false) -> Array[PackedVector2Array]:
+	var inset: float = INK_W + GUTTER
+	var left: float = inset
+	var right: float = extent.x - SHADOW_OFFSET.x - inset
+	var top: float = FRAME_TOP + inset
+	var bottom: float = extent.y - SHADOW_OFFSET.y - inset
+	var portrait := PackedVector2Array([
+		Vector2(left, top), Vector2(left + PORTRAIT_TOP_W, top),
+		Vector2(left + PORTRAIT_BOTTOM_W, bottom), Vector2(left, bottom)])
+	var lift: Vector2 = -URGENT_BREAK if urgent else Vector2.ZERO
+	var speech_panel := PackedVector2Array([
+		Vector2(left + PORTRAIT_TOP_W + GUTTER, top) + lift, Vector2(right, top) + lift,
+		Vector2(right, bottom) + lift, Vector2(left + PORTRAIT_BOTTOM_W + GUTTER, bottom) + lift])
+	var centre := Vector2(extent.x - SHADOW_OFFSET.x - SFX_INSET, FRAME_TOP * 0.5 + 3.0) + (URGENT_BREAK if urgent else Vector2.ZERO)
+	var half: Vector2 = SFX_PANEL * 0.5
+	var sfx := PackedVector2Array()
+	for corner: Vector2 in [Vector2(-half.x, -half.y), Vector2(half.x, -half.y), Vector2(half.x, half.y), Vector2(-half.x, half.y)]:
+		sfx.append(centre + corner.rotated(deg_to_rad(SFX_TILT_DEG)))
+	var panels: Array[PackedVector2Array] = [portrait, speech_panel, sfx]
+	if role == Role.ENGINEER:
+		for index: int in range(panels.size()):
+			panels[index] = _mirrored(panels[index], extent.x)
+	return panels
 
 
-## Paper colour of the balloon.
+func _mirrored(points: PackedVector2Array, width: float) -> PackedVector2Array:
+	var flipped := PackedVector2Array()
+	for index: int in range(points.size() - 1, -1, -1): # keep the winding after the flip
+		flipped.append(Vector2(width - points[index].x, points[index].y))
+	return flipped
+
+
+## The frame's outer rectangle (the ink border's outside edge) in banner pixels.
+func _frame_rect() -> Rect2:
+	var x: float = 0.0 if role == Role.DRIVER else SHADOW_OFFSET.x
+	return Rect2(x, FRAME_TOP, _banner_w - SHADOW_OFFSET.x, _banner_h - FRAME_TOP - SHADOW_OFFSET.y)
+
+
+## Paper colour of the speech panel.
 func paper_color() -> Color:
 	return URGENT_PAPER if _urgent else PAPER_COLORS[role]
 
 
-## The static SFX in the corner of the balloon.
+## The static SFX in the breakout panel.
 func sfx_text() -> String:
 	return SFX_URGENT if _urgent else SFX_ROUTINE
 
@@ -407,7 +441,7 @@ func prewarm() -> void:
 	# calls `_play` makes are made here once too.
 	_speaker.add_theme_color_override("font_color", INK)
 	rich.add_theme_color_override("default_color", INK)
-	_sfx.add_theme_color_override("font_color", _accent)
+	_sfx.add_theme_color_override("font_color", PAGE)
 	_refresh_layout() # a card that is not present sits offscreen
 	banner.visible = true
 	_prewarm_frames = PREWARM_FRAMES
@@ -447,10 +481,8 @@ func _play(car_id: int, message: String, urgent: bool, hold: float) -> void:
 	if urgent:
 		_speaker.text += " // URGENT"
 	speech.text = message
-	_speaker.add_theme_color_override("font_color", INK)
 	rich.add_theme_color_override("default_color", INK)
 	_sfx.text = sfx_text()
-	_sfx.add_theme_color_override("font_color", _accent)
 	_update_accent()
 	_refresh_layout()
 	_show_banner()
@@ -479,8 +511,8 @@ func _show_banner() -> void:
 	_tween.tween_callback(_hide_banner)
 
 
-## Docked: the balloon pops in (scale x1.4 and a 6 degree turn settle to the rest pose in SLAP_SEC), holds, then
-## fades out over FADE_OUT_SEC. A balloon that is already up just takes the new text. Reduce motion shows and hides
+## Docked: the strip pops in (scale x1.4 and a 6 degree turn settle to the rest pose in SLAP_SEC), holds, then
+## fades out over FADE_OUT_SEC. A strip that is already up just takes the new text. Reduce motion shows and hides
 ## it at its rest pose without moving.
 func _fade_in_docked(was_present: bool) -> void:
 	_tween = create_tween()
@@ -500,8 +532,8 @@ func _fade_in_docked(was_present: bool) -> void:
 	_tween.tween_callback(_hide_banner)
 
 
-## The pop pose at progress `t` (1 = rest): scale and turn around the balloon's bottom centre, which stays where the
-## rest pose puts it, so the balloon grows upward and lands exactly on its dock position.
+## The pop pose at progress `t` (1 = rest): scale and turn around the strip's bottom centre, which stays where the
+## rest pose puts it, so the strip grows upward and lands exactly on its dock position.
 func _apply_slap(t: float, start_tilt: float) -> void:
 	var rest_scale: float = _dock_scale * (DIM_SCALE if dimmed else 1.0)
 	var tilt: float = REST_TILT_DEG[role]
@@ -535,7 +567,7 @@ func is_urgent() -> bool:
 	return _present and _urgent
 
 
-## Test hook: jumps the entrance animation to the rest pose and keeps the balloon up.
+## Test hook: jumps the entrance animation to the rest pose and keeps the strip up.
 func _settle() -> void:
 	if _tween != null and _tween.is_valid():
 		_tween.kill()
@@ -569,23 +601,16 @@ func _hide_banner() -> void:
 
 
 func _apply_portrait() -> void:
-	var shown := _portrait_texture != null
 	_portrait.texture = _portrait_texture
-	_portrait_frame.visible = shown
-	_portrait.visible = shown
+	_redraw_all()
 
 
+## The accent paints the outline, the speaker tag, the SFX outline and the rays' tint; the tag's ink follows it.
 func _update_accent() -> void:
-	# The portrait is a disc with a thick ink ring.
-	var box := StyleBoxFlat.new()
-	box.bg_color = _accent
-	box.border_color = INK
-	box.set_border_width_all(int(PORTRAIT_RING))
-	box.set_corner_radius_all(int(PORTRAIT_SIZE * 0.5))
-	box.set_content_margin_all(0)
-	_portrait_frame.add_theme_stylebox_override("panel", box)
+	_speaker.add_theme_color_override("font_color", RadioMarkup.ink_for(_accent))
 	if _sfx != null:
-		_sfx.add_theme_color_override("font_color", _accent)
+		_sfx.add_theme_color_override("font_color", SFX_YELLOW if _urgent else PAGE)
+		_sfx.add_theme_color_override("font_outline_color", INK if _urgent else _accent)
 	_redraw_all()
 
 
@@ -595,6 +620,7 @@ func _apply_fonts() -> void:
 		node.add_theme_color_override("font_color", INK)
 		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_speaker.add_theme_font_size_override("font_size", SPEAKER_SIZE)
+	_speaker.clip_text = true
 	speech.add_theme_font_size_override("font_size", SPEECH_SIZE)
 	speech.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	speech.clip_text = false
@@ -621,45 +647,49 @@ func _count_lines(text: String, width: float) -> int:
 func _fit_message(text: String, width: float) -> String:
 	var words: PackedStringArray = text.split(" ")
 	var candidate: String = text
-	while _count_lines(candidate, width - 8.0) > MAX_LINES and words.size() > 1:
+	while _count_lines(candidate, width - KEYWORD_SLACK) > MAX_LINES and words.size() > 1:
 		words.remove_at(words.size() - 1)
 		candidate = " ".join(words) + "…"
 	return candidate
 
 
-func _balloon_x() -> float:
-	return _banner_w - BALLOON_W if role == Role.DRIVER else 0.0
+## The text box inside the speech panel: its left edge and width, clear of the slanted gutter on either side.
+func _text_box() -> Vector2:
+	var inner_left: float = INK_W + GUTTER + PORTRAIT_TOP_W + GUTTER + TEXT_PAD
+	var inner_right: float = _banner_w - SHADOW_OFFSET.x - INK_W - GUTTER - TEXT_PAD
+	var width: float = inner_right - inner_left
+	var x: float = inner_left if role == Role.DRIVER else _banner_w - inner_left - width
+	return Vector2(x, width)
 
 
-func _text_x() -> float:
-	return _balloon_x() + (TEXT_NEAR if role == Role.DRIVER else TEXT_FAR)
-
-
-func _portrait_x() -> float:
-	return 0.0 if role == Role.DRIVER else _banner_w - PORTRAIT_SIZE
-
-
+## Centre of the face in the portrait panel: where the concentration lines and the sweat drop are placed.
 func _portrait_centre() -> Vector2:
-	return Vector2(_portrait_x() + PORTRAIT_SIZE * 0.5, BALLOON_TOP + 2.0 + PORTRAIT_SIZE * 0.5)
+	if _panels.is_empty():
+		return Vector2.ZERO
+	var box: Rect2 = _bounds(_panels[0])
+	return Vector2(box.get_center().x, box.position.y + box.size.y * FACE_Y)
 
 
 func _refresh_layout() -> void:
 	if not is_node_ready():
 		return
-	var has_portrait := _portrait_texture != null
-	_portrait_frame.visible = has_portrait
-	_portrait.visible = has_portrait
-	var text_w: float = BALLOON_W - TEXT_NEAR - TEXT_FAR
+	var text_box: Vector2 = _text_box()
+	var text_w: float = text_box.y
 	var shown: String = _fit_message(_message.to_upper(), text_w)
-	var lines: int = _count_lines(shown, text_w - 8.0)
-	_balloon_h = maxf(BALLOON_MIN_H, SPEECH_Y + float(lines) * _line_height() + WAVE_STRIP)
-	_banner_h = maxf(BANNER_MIN_HEIGHT, BALLOON_TOP + _balloon_h + 4.0)
+	var lines: int = _count_lines(shown, text_w - KEYWORD_SLACK)
 	rich.text = RadioMarkup.highlight(shown, INK, _accent, true)
-	var text_x: float = _text_x()
-	_speaker.position = Vector2(text_x + 12.0, BALLOON_TOP + SPEAKER_Y - 2.0)
-	_speaker.size = Vector2(text_w - 12.0, _radio_font.get_height(SPEAKER_SIZE) + 4.0)
-	speech.position = Vector2(text_x, BALLOON_TOP + SPEECH_Y)
-	speech.size = Vector2(text_w, float(lines) * _line_height() + 4.0)
+	rich.size = Vector2(text_w, rich.size.y)
+	# The wrapped headline's real height: a keyword block sets its line in the taller display face.
+	var text_h: float = maxf(float(lines) * _line_height(), rich.get_content_height())
+	var top: float = FRAME_TOP + INK_W + GUTTER
+	_banner_h = maxf(BANNER_MIN_HEIGHT, top + SPEECH_Y + text_h + WAVE_STRIP + INK_W + GUTTER + SHADOW_OFFSET.y)
+	_panels = koma_panels(Vector2(_banner_w, _banner_h), _urgent)
+	var lift: float = -URGENT_BREAK.y if _urgent else 0.0
+	_speaker.position = Vector2(text_box.x + 4.0, top + TAG_Y + lift)
+	_speaker.size = Vector2(text_w - 8.0, TAG_H)
+	_tag_w = minf(_radio_font.get_string_size(_speaker.text, HORIZONTAL_ALIGNMENT_LEFT, -1, SPEAKER_SIZE).x + 10.0, text_w)
+	speech.position = Vector2(text_box.x, top + SPEECH_Y + lift)
+	speech.size = Vector2(text_w, text_h + 4.0)
 	rich.position = speech.position
 	rich.size = speech.size
 	if _docked:
@@ -670,12 +700,10 @@ func _refresh_layout() -> void:
 	else:
 		banner.offset_top = -TICKER_OFFSET - _banner_h
 		banner.offset_bottom = -TICKER_OFFSET
-	_portrait_frame.position = Vector2(_portrait_x(), BALLOON_TOP + 2.0)
-	_portrait_frame.size = Vector2(PORTRAIT_SIZE, PORTRAIT_SIZE)
-	_sfx.size = Vector2(80.0, 24.0)
-	_sfx.pivot_offset = _sfx.size * 0.5
-	var near_end: float = _balloon_x() + BALLOON_W - 6.0 - 52.0 if role == Role.DRIVER else _balloon_x() + 6.0
-	_sfx.position = Vector2(near_end, BALLOON_TOP - 20.0)
+	var sfx_box: Rect2 = _bounds(_panels[2])
+	_sfx.size = SFX_PANEL
+	_sfx.pivot_offset = SFX_PANEL * 0.5
+	_sfx.position = sfx_box.get_center() - SFX_PANEL * 0.5
 	_sfx.rotation_degrees = SFX_TILT_DEG if role == Role.DRIVER else -SFX_TILT_DEG
 	if not _present:
 		if _docked:
@@ -685,42 +713,75 @@ func _refresh_layout() -> void:
 	_redraw_all()
 
 
-## The balloon: a hard ink shadow, the jagged ink outline, flat paper inset into it, a hard-edged screentone on the
-## shadow side, the lightning tail toward the portrait and a recording dot at the head of the speaker line.
+static func _bounds(points: PackedVector2Array) -> Rect2:
+	var box := Rect2(points[0], Vector2.ZERO)
+	for point: Vector2 in points:
+		box = box.expand(point)
+	return box
+
+
+## The strip: a hard shadow, the accent outline, the ink frame with its white gutter, then each panel in ink with its
+## fill inset: the portrait painted into its slanted panel, the speech panel on screentone paper with the speaker
+## tag, and the SFX panel in ink (crimson screentone when urgent).
 func _draw_backdrop() -> void:
-	var extent := Vector2(BALLOON_W, _balloon_h)
-	var origin := Vector2(_balloon_x(), BALLOON_TOP)
-	var outer: PackedVector2Array = _offset_polygon(balloon_polygon(extent, 0.0), origin)
-	var inner: PackedVector2Array = _offset_polygon(balloon_polygon(extent, INK_INSET), origin)
-	_backdrop.draw_colored_polygon(_offset_polygon(outer, SHADOW_OFFSET), INK)
-	_backdrop.draw_colored_polygon(outer, INK)
-	_backdrop.draw_colored_polygon(inner, paper_color())
-	var tone_corner: float = 1.0 if role == Role.DRIVER else 0.0
-	var tone := PackedVector2Array([
-		origin + Vector2(extent.x * lerpf(0.65, 0.35, tone_corner), extent.y), origin + Vector2(extent.x * tone_corner, extent.y * 0.30),
-		origin + Vector2(extent.x * tone_corner, extent.y), ])
-	for piece: PackedVector2Array in Geometry2D.intersect_polygons(inner, tone):
+	if _panels.is_empty():
+		return
+	var frame: Rect2 = _frame_rect()
+	_backdrop.draw_rect(Rect2(frame.position + SHADOW_OFFSET, frame.size), INK)
+	_backdrop.draw_rect(frame.grow(OUTLINE_W), _accent)
+	_backdrop.draw_rect(frame, INK)
+	_backdrop.draw_rect(frame.grow(-INK_W), PAGE)
+	# Portrait panel: the face, zoomed in and centred, painted straight into the slanted shape.
+	var portrait: PackedVector2Array = _panels[0]
+	_backdrop.draw_colored_polygon(portrait, INK)
+	var face: PackedVector2Array = _inset(portrait, PANEL_INK)
+	if _portrait_texture != null:
+		var box: Rect2 = _bounds(face)
+		var span: float = maxf(box.size.x, box.size.y) * PORTRAIT_ZOOM
 		var uvs := PackedVector2Array()
-		for point: Vector2 in piece:
-			uvs.append(point / 16.0)
-		_backdrop.draw_colored_polygon(piece, Color.WHITE, uvs, _halftone_tile())
-	_draw_tail()
-	var dot := Vector2(_text_x() + 4.0, origin.y + SPEAKER_Y + 5.0)
-	_backdrop.draw_circle(dot, 5.0, INK)
-	_backdrop.draw_circle(dot, 3.0, _accent)
+		for point: Vector2 in face:
+			uvs.append((point - box.get_center()) / span + Vector2(0.5, 0.5))
+		_backdrop.draw_colored_polygon(face, Color.WHITE, uvs, _portrait_texture)
+	else:
+		_backdrop.draw_colored_polygon(face, _accent)
+	# Speech panel: paper with a light screentone.
+	var speech_panel: PackedVector2Array = _panels[1]
+	_backdrop.draw_colored_polygon(speech_panel, INK)
+	var paper: PackedVector2Array = _inset(speech_panel, PANEL_INK)
+	_backdrop.draw_colored_polygon(paper, paper_color())
+	_draw_tone(paper, Color(1.0, 1.0, 1.0, 0.35))
+	var tag := Rect2(_speaker.position - Vector2(4.0, 1.0), Vector2(_tag_w, TAG_H))
+	_backdrop.draw_rect(tag, _accent)
+	_backdrop.draw_rect(tag, INK, false, 1.5)
+	# SFX panel breaking out of the frame.
+	var sfx: PackedVector2Array = _panels[2]
+	_backdrop.draw_colored_polygon(_offset_polygon(sfx, Vector2(3.0, 3.0)), INK)
+	_backdrop.draw_colored_polygon(sfx, INK)
+	var inner_sfx: PackedVector2Array = _inset(sfx, PANEL_INK)
+	_backdrop.draw_colored_polygon(inner_sfx, T.ACCENT_ANIME_CRIMSON if _urgent else INK)
+	if _urgent:
+		_draw_tone(inner_sfx, Color.WHITE)
+	_backdrop.draw_polyline(_closed(inner_sfx), _accent, 1.5, true)
 
 
-func _draw_tail() -> void:
-	var driver: bool = role == Role.DRIVER
-	var x0: float = _balloon_x() if driver else _balloon_x() + BALLOON_W - TAIL_WIDTH
-	var points := PackedVector2Array()
-	for point: Vector2 in TAIL_POINTS:
-		var local_x: float = point.x if driver else TAIL_WIDTH - point.x
-		points.append(Vector2(x0 + local_x, BALLOON_TOP + TAIL_TOP + point.y))
-	_backdrop.draw_colored_polygon(points, paper_color())
-	var outline := points.duplicate()
-	outline.append(points[0])
-	_backdrop.draw_polyline(outline, INK, 2.5, true)
+## A polygon pushed in by `by` px; the original when it would vanish.
+func _inset(points: PackedVector2Array, by: float) -> PackedVector2Array:
+	var shrunk: Array[PackedVector2Array] = Geometry2D.offset_polygon(points, -by, Geometry2D.JOIN_MITER)
+	return shrunk[0] if not shrunk.is_empty() else points
+
+
+func _closed(points: PackedVector2Array) -> PackedVector2Array:
+	var loop := points.duplicate()
+	loop.append(points[0])
+	return loop
+
+
+## The tiled halftone over `area`, tinted by `tint`.
+func _draw_tone(area: PackedVector2Array, tint: Color) -> void:
+	var uvs := PackedVector2Array()
+	for point: Vector2 in area:
+		uvs.append(point / 16.0)
+	_backdrop.draw_colored_polygon(area, tint, uvs, _halftone_tile())
 
 
 func _offset_polygon(points: PackedVector2Array, by: Vector2) -> PackedVector2Array:
@@ -730,42 +791,49 @@ func _offset_polygon(points: PackedVector2Array, by: Vector2) -> PackedVector2Ar
 	return moved
 
 
-## Concentration lines around the portrait, in a dark shade of the accent; they flicker between two phases.
+## Concentration lines over the edge of the portrait panel, in ink, clipped to the panel; they flicker between two
+## phases. The face itself stays clear (they start RAY_INNER px out).
 func _draw_concentration_lines() -> void:
+	if _panels.is_empty():
+		return
 	var centre: Vector2 = _portrait_centre()
-	var shade: Color = _accent.darkened(RAY_DARKEN)
+	var face: PackedVector2Array = _inset(_panels[0], PANEL_INK)
+	var shade := Color(INK, RAY_ALPHA)
 	for index: int in range(RAY_COUNT):
 		var start: float = deg_to_rad(float(index) * 360.0 / float(RAY_COUNT) + float(_ray_phase) * RAY_ALT_DEG)
 		var end: float = start + deg_to_rad(RAY_WIDTH_DEG)
-		_lines_layer.draw_colored_polygon(PackedVector2Array([
+		var ray := PackedVector2Array([
 			centre + Vector2.from_angle(start) * RAY_INNER, centre + Vector2.from_angle(start) * RAY_OUTER,
-			centre + Vector2.from_angle(end) * RAY_OUTER, centre + Vector2.from_angle(end) * RAY_INNER]), shade)
+			centre + Vector2.from_angle(end) * RAY_OUTER, centre + Vector2.from_angle(end) * RAY_INNER])
+		for piece: PackedVector2Array in Geometry2D.intersect_polygons(ray, face):
+			_lines_layer.draw_colored_polygon(piece, shade)
 
 
 ## Manga emotion marks on the portrait: while the call is urgent a sweat drop and three shock lines.
 func _draw_emotion() -> void:
-	if not sweating or _portrait_texture == null:
+	if not sweating or _portrait_texture == null or _panels.is_empty():
 		return
 	var side: float = 1.0 if role == Role.DRIVER else -1.0
-	var centre: Vector2 = _portrait_centre() + Vector2(side * 26.0, -28.0)
+	var centre: Vector2 = _portrait_centre() + Vector2(side * 18.0, -20.0)
 	var drop := PackedVector2Array([
-		centre + Vector2(0, -11), centre + Vector2(5, -3), centre + Vector2(7, 3), centre + Vector2(5, 8),
-		centre + Vector2(0, 10), centre + Vector2(-5, 8), centre + Vector2(-7, 3), centre + Vector2(-5, -3)])
+		centre + Vector2(0, -9), centre + Vector2(4, -2), centre + Vector2(6, 3), centre + Vector2(4, 7),
+		centre + Vector2(0, 8), centre + Vector2(-4, 7), centre + Vector2(-6, 3), centre + Vector2(-4, -2)])
 	_emotion_layer.draw_colored_polygon(drop, Color("#CFEFFF"))
-	var outline := drop.duplicate()
-	outline.append(drop[0])
-	_emotion_layer.draw_polyline(outline, INK, 2.5, true)
-	for tick: Array in [[Vector2(-12, -8), Vector2(-17, -12)], [Vector2(-13, 0), Vector2(-19, 0)], [Vector2(-12, 8), Vector2(-17, 12)]]:
-		_emotion_layer.draw_line(centre + (tick[0] as Vector2) * side, centre + (tick[1] as Vector2) * side, INK, 2.5, true)
+	_emotion_layer.draw_polyline(_closed(drop), INK, 2.0, true)
+	for tick: Array in [[Vector2(-10, -7), Vector2(-14, -10)], [Vector2(-11, 0), Vector2(-16, 0)], [Vector2(-10, 7), Vector2(-14, 10)]]:
+		_emotion_layer.draw_line(centre + (tick[0] as Vector2) * side, centre + (tick[1] as Vector2) * side, INK, 2.0, true)
 
 
-## Equaliser teeth at the balloon's lower right: ink triangles that rise and fall with the voice, and a 2 px ink
-## baseline that they fall back to when idle.
+## Equaliser teeth on the row under the text, at the speech panel's outer end: ink triangles that rise and fall with
+## the voice, and a 2 px ink baseline that they fall back to when idle.
 func _draw_manga_soundwave() -> void:
+	if _panels.is_empty():
+		return
 	var step := WAVE_BAR_W + WAVE_GAP
 	var span := step * float(WAVE_BARS) - WAVE_GAP
-	var wave_x: float = _balloon_x() + BALLOON_W - 16.0 - span
-	var base_y: float = BALLOON_TOP + _balloon_h - 11.0
+	var panel: Rect2 = _bounds(_panels[1])
+	var wave_x: float = panel.end.x - TEXT_PAD - span if role == Role.DRIVER else panel.position.x + TEXT_PAD
+	var base_y: float = panel.end.y - 7.0
 	_wave_layer.draw_rect(Rect2(wave_x, base_y - 2.0, span, 2.0), INK)
 	for index: int in range(WAVE_BARS):
 		var height: float = 2.0 + _wave_bars[index] * (WAVE_MAX_H - 2.0)

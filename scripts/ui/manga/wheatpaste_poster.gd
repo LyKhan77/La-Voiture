@@ -23,16 +23,16 @@ const CELL_SIZE := Vector2(274.0, 170.0)
 const CELL_GAP: float = 12.0
 ## [label, value, note, colour] per penalty cell, per hazard.
 const SLICKS_CELLS: Array = [
-	["CORNERING SPEED LIMIT", "-45% SLOW", "Grip lateral ambruk total di tikungan.", CRIMSON],
-	["BRAKING DISTANCE", "3.0x LONGER", "Roda terkunci & meluncur tak terkendali.", YELLOW],
-	["STRAIGHT-LINE HEADROOM", "100% TOPSPEED", "Kecepatan lurus tetap tinggi (wheelspin awal).", LIME],
-	["SOLO SPIN RISK", "500% (5x LIPAT)", "Peluang melintir mandiri di tiap tikungan.", CRIMSON],
+	["CORNERING SPEED LIMIT", "-45% SLOW", "Lateral grip collapses in every corner.", CRIMSON],
+	["BRAKING DISTANCE", "3.0x LONGER", "Wheels lock and slide out of control.", YELLOW],
+	["STRAIGHT-LINE HEADROOM", "100% TOPSPEED", "Straight-line speed stays high (early wheelspin).", LIME],
+	["SOLO SPIN RISK", "500% (5x)", "A solo spin waiting at every corner.", CRIMSON],
 ]
 const WETS_CELLS: Array = [
-	["CORNERING SPEED LIMIT", "-30% SLOW", "Tapak lunak melepuh, grip tikungan turun.", CRIMSON],
-	["TYRE TEMPERATURE", ">130 C SIZZLE", "Karet mendidih di atas aspal kering.", YELLOW],
-	["TYRE WEAR RATE", "5-6x FASTER", "Tapak habis dalam hitungan lap.", CRIMSON],
-	["PUNCTURE WINDOW", "LAP 2-3", "Ban meletus bila tidak segera masuk pit.", CRIMSON],
+	["CORNERING SPEED LIMIT", "-30% SLOW", "Soft tread blisters, cornering grip drops.", CRIMSON],
+	["TYRE TEMPERATURE", ">130 C SIZZLE", "Rubber boils on the dry asphalt.", YELLOW],
+	["TYRE WEAR RATE", "5-6x FASTER", "The tread is gone within a few laps.", CRIMSON],
+	["PUNCTURE WINDOW", "LAP 2-3", "The tyre bursts unless you pit soon.", CRIMSON],
 ]
 static var _grain: ImageTexture
 var title: Label
@@ -109,11 +109,12 @@ func present(hazard_type: String, water_pct: float, track_temp: float, which_car
 	title.text = "SLICKS ON MONSOON RAIN!" if slicks else "WET TYRES ON BONE DRY TRACK!"
 	title.add_theme_font_size_override("font_size", 54 if slicks else 44)
 	hazard_code.text = "HAZARD CODE: 994-AQUAPLANE" if slicks else "HAZARD CODE: 138-BLISTER"
+	var verb: String = "are" if which_cars.contains("&") else "is"
 	if slicks:
-		desc.text = "Lintasan basah %d%% namun %s memakai ban SLICK tanpa alur air! Mobil tidak akan mampu memecah lapisan air di atas aspal:" % [roundi(water_pct), which_cars]
+		desc.text = "Track is %d%% wet, but %s %s on treadless SLICKS! The car cannot cut through the water film on the asphalt:" % [roundi(water_pct), which_cars, verb]
 		apply_button.text = "SLAP WETS ON\n[CREW REC]"
 	else:
-		desc.text = "Lintasan kering, aspal %.0f C, namun %s memakai ban WET! Karet lunak akan mendidih dan melepuh di atas aspal panas:" % [track_temp, which_cars]
+		desc.text = "Track is dry with the asphalt at %.0f C, but %s %s on WETS! The soft rubber will boil and blister on the hot asphalt:" % [track_temp, which_cars, verb]
 		apply_button.text = "SLAP SLICKS ON\n[CREW REC]"
 	var cells: Array = SLICKS_CELLS if slicks else WETS_CELLS
 	for index: int in range(4):

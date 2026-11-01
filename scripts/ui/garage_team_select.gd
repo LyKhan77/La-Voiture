@@ -40,11 +40,11 @@ const COMPOUND_COLORS: Array[Color] = [
 ## Tread drawn on each wheel: 0 slick, 1 intermediate, 2 wet.
 const COMPOUND_TREAD: Array[int] = [0, 0, 0, 1, 2]
 const COMPOUND_NOTES: Array[String] = [
-	"Grip kering maksimum, aus tercepat. Butuh trek kering.",
-	"Seimbang antara grip dan keausan. Pilihan aman balapan kering.",
-	"Paling awet, grip awal paling rendah. Cocok untuk stint panjang.",
-	"Alur dangkal untuk genangan tipis dan trek lembap.",
-	"Alur penuh membuang air dalam jumlah besar. Anti-aquaplaning.",
+	"Peak dry grip, fastest wear. Needs a dry track.",
+	"Balanced grip and wear. The safe call for a dry race.",
+	"Longest life, lowest grip out of the box. Built for long stints.",
+	"Shallow tread for a damp track and light standing water.",
+	"Full tread clears heavy standing water. Anti-aquaplaning.",
 ]
 ## Kanji stamps exist only for the drivers the roster document gives one (field slot -> stamp).
 const DRIVER_KANJI: Dictionary = {0: "「疾風」"}
@@ -129,16 +129,12 @@ class SegmentBar extends Control:
 			draw_colored_polygon(PackedVector2Array([
 				Vector2(x + lean, 0.0), Vector2(x + block + lean, 0.0), Vector2(x + block, size.y), Vector2(x, size.y),
 			]), tint if index < lit else Color("#222a3b"))
+## CREW PICK: the pit wall's own start call (GtStrategy, a neutral wall reading this race's forecast).
 func get_optimal_compound() -> int:
 	if _forecast_weather == null:
 		return Types.Compound.MEDIUM
-	var water: float = _forecast_weather.track_water_pct
-	if water >= 40.0 or (config != null and config.weather_preset == 3):
-		return Types.Compound.WET
-	elif water >= 18.0 or (config != null and config.weather_preset == 2):
-		return Types.Compound.INTERMEDIATE
-	else:
-		return Types.Compound.MEDIUM
+	var laps: int = config.total_laps if config != null else 5
+	return GtStrategy.start_compound(_forecast_weather, laps, GtCar.new(), GtStrategy.NEUTRAL_PROFILE)
 func _ready() -> void:
 	config = ConfigScript.get_config()
 	_forecast_weather = config.make_weather()
@@ -536,12 +532,12 @@ func _inspect(compound: int, car_slot: int) -> void:
 	var braking: String = "1.0x"
 	if hazard == "SLICKS_ON_WET":
 		_inspect_status.text = "CRITICAL MISMATCH (HAZARD!)"
-		_inspect_note.text = "Slick tanpa alur: aquaplaning, grip lateral ambruk, jarak rem hingga 3x lebih panjang."
+		_inspect_note.text = "Slicks have no tread: aquaplaning, lateral grip collapses, braking distance up to 3x longer."
 		cornering = "-45%"
 		braking = "3.0x"
 	elif hazard == "WETS_ON_DRY":
 		_inspect_status.text = "CRITICAL MISMATCH (HAZARD!)"
-		_inspect_note.text = "Ban basah di aspal kering: suhu >130 C, aus 5-6x lebih cepat, puncture dalam 2-3 lap."
+		_inspect_note.text = "Wets on dry asphalt: over 130 C, 5-6x faster wear, a puncture within 2-3 laps."
 		cornering = "-30%"
 	elif compound == get_optimal_compound():
 		_inspect_status.text = "OPTIMAL (100% MATCH) // CREW PICK"
@@ -570,10 +566,11 @@ func _refresh_forecast() -> void:
 		"state": states[0], "wetness_pct": _forecast_weather.track_water_pct / 100.0,
 		"forecast": states, "ambient_c": _forecast_weather.air_temp,
 	})
-	_forecast_laps.text = "%d LAPS // APEX RING INTERNATIONAL\n%s // AIR %.0fC // TRACK %.0fC" % [
-		config.total_laps, time_name, _forecast_weather.air_temp, _forecast_weather.track_temp,
+	var circuit_name: String = config.get_active_circuit().display_name.to_upper()
+	_forecast_laps.text = "%d LAPS // %s\n%s // AIR %.0fC // TRACK %.0fC" % [
+		config.total_laps, circuit_name, time_name, _forecast_weather.air_temp, _forecast_weather.track_temp,
 	]
-	_race_line.text = "EXHIBITION DRAFT // APEX RING // %d LAPS // %s" % [config.total_laps, time_name]
+	_race_line.text = "EXHIBITION DRAFT // %s // %d LAPS // %s" % [circuit_name, config.total_laps, time_name]
 # --- helpers -------------------------------------------------------------------------------
 func _fit() -> void:
 	if stage == null or not is_inside_tree():

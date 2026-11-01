@@ -42,15 +42,26 @@ add("eng_affirmative", "engineer", "^Affirmative, executing .+\\.$", "Affirmativ
 // Strategy desk calls (decide_strategy) and hybrid tactic cards (_check_hybrid_tactics).
 add("eng_strat_rain_wet", "engineer", "^Heavy rain on track \\(\\d+% water\\)\\. Suggest box this lap for WET tyres\\.$", "Heavy rain on track. Suggest box this lap for wet tyres.");
 add("eng_strat_damp_inter", "engineer", "^Track is damp \\(\\d+% water\\)\\. Suggest box this lap for INTERMEDIATE tyres\\.$", "Track is damp. Suggest box this lap for intermediate tyres.");
-for (const c of ["HARD", "SOFT"]) {
+for (const c of ["HARD", "SOFT", "MEDIUM"]) {
 	add(`eng_strat_drying_${word(c)}`, "engineer", `^Track drying rapidly \\(\\d+% water\\)\\. Suggest box this lap for ${c} tyres\\.$`, `Track is drying fast. Suggest box this lap for ${word(c)} tyres.`);
 }
-for (const c of ["HARD", "MEDIUM", "SOFT"]) {
+for (const c of ["HARD", "MEDIUM", "SOFT", "INTERMEDIATE", "WET"]) {
 	add(`eng_strat_wear_${word(c)}`, "engineer", `^Tyre wear critical \\(\\d+%\\)\\. Suggest box this lap for ${c} tyres\\.$`, `Tyre wear is critical. Suggest box this lap for ${word(c)} tyres.`);
 }
-for (const c of ["HARD", "SOFT"]) {
+// FASE 19 strategist calls (GtRace._strategy_call_text).
+add("eng_strat_easing_inter", "engineer", "^Rain easing \\(\\d+% water\\)\\. Suggest box this lap for INTERMEDIATE tyres\\.$", "The rain is easing. Suggest box this lap for intermediate tyres.");
+add("eng_strat_cooking", "engineer", "^The (INTERMEDIATE|WET) tyres are cooking on the dry line\\. Box now for \\w+ tyres\\.$", "The rain tyres are cooking on the dry line. Box now, box now!");
+for (const c of ["HARD", "SOFT", "MEDIUM", "INTERMEDIATE", "WET"]) {
 	add(`eng_tactic_sc_${word(c)}`, "engineer", `^Safety Car deployed! Cheap pit stop window open\\. Suggest box for ${c} tyres\\.$`, `Safety car deployed! Cheap pit stop window open. Suggest box for ${word(c)} tyres.`);
+	add(`eng_tactic_vsc_${word(c)}`, "engineer", `^Virtual Safety Car deployed! Cheap pit stop window open\\. Suggest box for ${c} tyres\\.$`, `Virtual safety car deployed! Cheap pit stop window open. Suggest box for ${word(c)} tyres.`);
 }
+// MANUAL without COACH: the engineer reports the facts and advises nothing (GtRace.suggest_tactic `info`).
+add("eng_info_weather", "engineer", "^Track water \\d+%, forecast \\d+% next lap\\.$", "Weather update. Track water and the forecast are on your screen.");
+add("eng_info_wear", "engineer", "^Tyre wear at \\d+%\\.$", "Tyre wear is high.");
+add("eng_info_temps", "engineer", "^Tyre temps at \\d+ C\\.$", "Tyre temps are high.");
+add("eng_info_wing", "engineer", "^Front wing aero damage at \\d+%\\.$", "Front wing aero damage.");
+add("eng_info_sc", "engineer", "^Safety Car deployed\\. Tyre wear \\d+%\\.$", "Safety car deployed.");
+add("eng_info_vsc", "engineer", "^Virtual Safety Car deployed\\. Tyre wear \\d+%\\.$", "Virtual safety car deployed.");
 add("eng_tactic_wing", "engineer", "^Front wing aero damage \\(\\d+%\\)\\. Suggest box this lap to replace wing and tyres\\.$", "Front wing aero damage. Suggest box this lap to replace the wing and tyres.");
 add("eng_tactic_full_wet", "engineer", "^Standing water critical \\(\\d+%\\)\\. Suggest box immediately for Full WET tyres!$", "Standing water is critical. Suggest box immediately for full wet tyres!");
 add("eng_tactic_inter", "engineer", "^Track damp \\(\\d+% water\\)\\. Suggest box for Intermediate tyres\\.$", "Track is damp. Suggest box for intermediate tyres.");
@@ -66,6 +77,9 @@ add("eng_tactic_slipstream", "engineer", "^DRS slipstream behind \\w+ \\(.+\\)! 
 add("eng_weather_alert", "engineer", "^Weather radar alert: .+ hitting the circuit! Track water \\d+%, track temp \\d+ C\\.$", "Weather radar alert! Rain is hitting the circuit.");
 add("eng_weather_incoming", "engineer", "^Radar update: rain front approaching in about 1 lap \\(wind \\d+ km/h\\)\\. Prepare INTERMEDIATE tyres\\.$", "Radar update: rain front approaching in about one lap. Prepare intermediate tyres.");
 add("eng_weather_dry_line", "engineer", "^Dry racing line has formed \\(.+\\)\\. Slick crossover window is OPEN!$", "Dry racing line has formed. Slick crossover window is open!");
+// The same radar news without the engineer's advice (MANUAL without COACH).
+add("eng_weather_incoming_info", "engineer", "^Radar update: rain front approaching in about 1 lap \\(wind \\d+ km/h\\)\\.$", "Radar update: rain front approaching in about one lap.");
+add("eng_weather_dry_line_info", "engineer", "^Dry racing line has formed \\(.+\\)\\.$", "Dry racing line has formed.");
 // Race incidents relayed to the player's engineer (GtContacts).
 for (const n of [1, 2, 3]) {
 	add(`eng_yellow_contact_${n}`, "engineer", `^Yellow Flag Sector ${n}\\. Contact between \\w+ and \\w+\\.$`, `Yellow flag, sector ${SECTOR_WORD[n]}. Contact on track.`);

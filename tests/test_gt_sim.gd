@@ -536,7 +536,7 @@ func _test_tyres_and_fuel() -> void:
 	race.step()
 	var punctured: bool = car.is_punctured and car.punctured_wheel >= 0
 	race.step_ticks(100)
-	var limp_speed: bool = car.v <= 16.0
+	var limp_speed: bool = car.v <= GtDriving.LIMP_SPEED_MPS + 0.5
 	car.wear = 0.5 # keep the pace at the limp cap for the long drive
 	car.team_id = race.player_team_id
 	race.set_tactic_mode(Types.TacticMode.MANUAL)
@@ -546,7 +546,7 @@ func _test_tyres_and_fuel() -> void:
 		race.step()
 		guard += 1
 	check(grip_after < grip_before and punctured and limp_speed and car.is_dnf and car.dnf_reason == "Suspension Failure",
-		"tyres: grip falls off the cliff past 75 %% wear, a worn tyre bursts, the car limps at 55 km/h and fails after a lap")
+		"tyres: grip falls off the cliff past 75 %% wear, a worn tyre bursts, the car limps at up to 100 km/h and the flat breaks the suspension")
 	_free(race)
 
 
@@ -660,12 +660,9 @@ func _test_tactics() -> void:
 	player.wear = 0.7
 	race.set_tactic_mode(Types.TacticMode.AUTO)
 	race.decide_strategy(player)
-	var auto_card: bool = not race.latest_suggestion.is_empty() and player.pit_request < 0
-	race.time += RaceScript.SUGGESTION_WINDOW_S + 0.1
-	race.step()
 	var auto_calls: bool = player.pit_request >= 0 and race.latest_suggestion.is_empty()
-	check(offered and accepted and auto_card and auto_calls,
-		"tactics: MANUAL and AUTO both raise a BOX card at 70 %% wear; accept calls the stop; AUTO calls it itself when the 10 s window ends")
+	check(offered and accepted and auto_calls,
+		"tactics: MANUAL raises a BOX card at 70 %% wear and accept calls the stop; AUTO calls it itself at once, with no card")
 	race.set_pace_mode(player.id, Types.PaceMode.ATTACK)
 	race.set_fuel_mode(player.id, Types.FuelMode.PUSH)
 	race.set_ers_mode(player.id, Types.ErsMode.HARVEST)

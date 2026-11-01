@@ -178,6 +178,8 @@ func _scenario(compound: int) -> Array:
 		race.cars[index].prev_s = race.cars[index].s
 	subject.compound = compound
 	subject.lap = 1
+	# A physics probe: the player's MANUAL desk only offers cards, so no strategist boxes the cooking tyre first.
+	race.player_team_id = subject.team_id
 	return [race, subject]
 
 func _put(car: GtCar, s: float, v: float) -> void:

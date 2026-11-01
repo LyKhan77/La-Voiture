@@ -297,6 +297,18 @@ func _test_deck_layout_and_flow() -> void:
 	deck.pace_row.unhovered.emit()
 	check(coach_off and coach_on, "deck N2: COACH toggles the plain-language sentence")
 
+	deck.coach_button.pressed.emit()
+	var sim_off: bool = not deck.race.coach_enabled
+	deck.coach_button.pressed.emit()
+	var sim_on: bool = deck.race.coach_enabled
+	deck.race.set_tactic_mode(GtTypes.TacticMode.AUTO)
+	deck.refresh()
+	var auto_locked: bool = deck.coach_button.disabled
+	deck.race.set_tactic_mode(GtTypes.TacticMode.MANUAL)
+	deck.refresh()
+	check(sim_off and sim_on and auto_locked and not deck.coach_button.disabled,
+		"deck N2: COACH sets the engineer's advice in the sim and only applies in MANUAL (locked in AUTO)")
+
 	deck.tyre_row.buttons[1 + GtTypes.Compound.INTERMEDIATE].pressed.emit()
 	var chip_ok: bool = deck.wheel.compound == 1 + GtTypes.Compound.INTERMEDIATE and deck.pit_compound == GtTypes.Compound.INTERMEDIATE and deck.wheel.impulse > 800.0
 	deck.wheel.clicked.emit()

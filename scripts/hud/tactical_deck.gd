@@ -369,8 +369,11 @@ func _on_tactic(index: int) -> void:
 	race.set_tactic_mode(index)
 
 
+## COACH is a MANUAL desk setting: it also tells the sim whether the engineer raises decision cards and advice.
 func _on_coach() -> void:
 	coach = not coach
+	if race != null:
+		race.coach_enabled = coach
 	coach_button.text = "COACH ON" if coach else "COACH OFF"
 	apply_click_feedback(coach_button, coach_button.text, 1.4)
 	_refresh_hover()
@@ -568,6 +571,10 @@ func refresh() -> void:
 	tactic_row.set_active(race.tactic_mode)
 	tyre_row.set_active(pit_compound + 1)
 	desk_status.text = DESK_STATUS[clampi(race.tactic_mode, 0, DESK_STATUS.size() - 1)]
+	# In AUTO the engineer makes the calls: there is nobody to coach.
+	coach_button.disabled = race.tactic_mode == GtTypes.TacticMode.AUTO
+	coach = race.coach_enabled
+	coach_button.text = "COACH ON" if coach else "COACH OFF"
 	var locked: bool = car.pit != null or car.finished_at >= 0.0 or car.is_dnf
 	box_button.disabled = locked
 	var cancelling: bool = not locked and car.pit_request >= 0
