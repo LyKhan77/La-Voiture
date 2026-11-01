@@ -31,26 +31,33 @@ func _make(finishers: int) -> WinningCutDirector:
 
 
 func _run() -> void:
-	var full: Array[int] = [Cut.P3_TAG, Cut.HERO, Cut.P2_TAG, Cut.DETAIL, Cut.FINAL]
+	var full: Array[int] = [Cut.INTRO, Cut.FOCUS_P3, Cut.FOCUS_P2, Cut.FOCUS_P1, Cut.FINAL]
 	check(WinningCutDirector.playlist_for(20) == full and WinningCutDirector.playlist_for(3) == full,
 		"Three or more finishers get all five cuts")
-	check(WinningCutDirector.playlist_for(2) == [Cut.HERO, Cut.P2_TAG, Cut.DETAIL, Cut.FINAL],
-		"Two finishers skip the P3 wall")
-	check(WinningCutDirector.playlist_for(1) == [Cut.HERO, Cut.DETAIL, Cut.FINAL], "One finisher skips both walls")
-	check(WinningCutDirector.playlist_for(0) == [Cut.FINAL], "No finisher goes straight to the final")
+	check(WinningCutDirector.playlist_for(2) == ([Cut.INTRO, Cut.FOCUS_P2, Cut.FOCUS_P1, Cut.FINAL] as Array[int]),
+		"Two finishers skip the P3 focus")
+	check(WinningCutDirector.playlist_for(1) == ([Cut.INTRO, Cut.FOCUS_P1, Cut.FINAL] as Array[int]),
+		"One finisher gets intro, P1 focus and final")
+	check(WinningCutDirector.playlist_for(0) == ([Cut.FINAL] as Array[int]), "No finisher goes straight to the final")
 
 	var director: WinningCutDirector = _make(20)
 	director.start(false)
-	check(director.current_cut == Cut.P3_TAG and emitted == [Cut.P3_TAG], "start() announces the first cut once")
+	check(director.current_cut == Cut.INTRO and emitted == ([Cut.INTRO] as Array[int]), "start() announces the first cut once")
 	director.tick(1.59)
-	check(director.current_cut == Cut.P3_TAG, "A cut lasts 1.6 s (4 beats @ 150 BPM)")
+	check(director.current_cut == Cut.INTRO and is_equal_approx(WinningCutDirector.CUT_SECONDS, 1.6), "A cut lasts 1.6 s (4 beats @ 150 BPM)")
 	director.tick(0.02)
-	check(director.current_cut == Cut.HERO and emitted == [Cut.P3_TAG, Cut.HERO], "Crossing 1.6 s advances to the next cut")
-	check(director.label() == "CUT 2/5 // HERO MACHINE", "The label counts cuts in the playlist")
+	check(director.current_cut == Cut.FOCUS_P3 and emitted == ([Cut.INTRO, Cut.FOCUS_P3] as Array[int]), "Crossing 1.6 s advances to the next cut")
+	check(director.label() == "CUT 2/5 // FOCUS P3", "The label counts cuts in the playlist (%s)" % director.label())
+
+	director = _make(20)
+	director.start(false)
+	for i: int in range(4):
+		director.tick(WinningCutDirector.CUT_SECONDS + 0.001)
+	check(director.is_final() and emitted.back() == Cut.FINAL, "The final lands after four bars, at 6.4 s")
 	director = _make(20)
 	director.start(false)
 	director.tick(5.0)
-	check(director.current_cut == Cut.HERO, "One tick never skips over a cut")
+	check(director.current_cut == Cut.FOCUS_P3, "One tick never skips over a cut")
 	for i: int in range(6):
 		director.tick(1.65)
 	check(director.is_final() and emitted.back() == Cut.FINAL, "The timeline settles on the final cut")
@@ -66,13 +73,13 @@ func _run() -> void:
 	check(emitted.count(Cut.FINAL) == 1 and director.is_final(), "Skipping twice announces the final once")
 	director = _make(20)
 	director.start(true)
-	check(director.is_final() and emitted == [Cut.FINAL], "start(true) lands on the final immediately")
+	check(director.is_final() and emitted == ([Cut.FINAL] as Array[int]), "start(true) lands on the final immediately")
 	director = _make(3)
 	director.start(false)
-	director.tick(1.95)
-	check(director.label() == "CUT 2/5 // HERO MACHINE", "Label denominator is the playlist length")
+	director.tick(1.65)
+	check(director.label() == "CUT 2/5 // FOCUS P3", "Label denominator is the playlist length")
 	director = _make(1)
 	director.start(false)
-	check(director.label() == "CUT 1/3 // HERO MACHINE", "A shortened playlist renumbers its cuts")
+	check(director.label() == "CUT 1/3 // INTRO", "A shortened playlist renumbers its cuts")
 	print("CUT DIRECTOR: %d assertions, %d FAIL" % [assertions, failures])
 	quit(0 if failures == 0 else 1)
