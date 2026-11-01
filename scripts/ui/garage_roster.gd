@@ -70,3 +70,36 @@ static func portrait_path(slot: int) -> String:
 	return "res://reference-assets/characters/%s/%s/radio_portrait.png" % [
 		TEAM_SLUGS[team], DRIVER_SLUGS[posmod(slot, DRIVER_SLUGS.size())],
 	]
+
+
+## One epithet per driver slot, in GtData.DRIVER_NAMES order (source: DRIVER-CHARACTERIZATION-ROSTER.md,
+## checked against GtData.DRIVER_CODES). Shown on the podium panel's narration box.
+const DRIVER_EPITHETS: Array[String] = [
+	"The High-Voltage Prodigy", "The Cybernetic Calculator",
+	"The Apex Drifter", "The Camden Rocker",
+	"The Iron Matador", "The Silent Ronin",
+	"The Monaco Prodigy", "The Sao Paulo Storm",
+	"The Laser Meister", "The Iron Valkyrie",
+	"The Redline Brawler", "The Guadalajara Bull",
+	"The Siberian Frost", "The Cyber Kitsune",
+	"The Monokrom Stylist", "The Bauhaus Architect",
+	"The Monsoon Emperor", "The Riviera Playboy",
+	"The Ghost Operator", "The Horizon Hunter",
+	"The Monza Virtuoso", "The Aero Donna",
+	"The Detroit Brawler", "The High-Plains Drifter",
+	"The Midnight Ghost", "The Touge Empress",
+]
+
+## Podium decoration per place (index 0 = P1): rank kanji and the katakana sound effect.
+const RANK_KANJI: Array[String] = ["優勝", "準優勝", "第三位"]
+const RANK_SFX: Array[String] = ["ドォン!!", "ザッ!", "ゴゴゴ"]
+
+
+static func epithet(slot: int) -> String:
+	return DRIVER_EPITHETS[slot] if slot >= 0 and slot < DRIVER_EPITHETS.size() else ""
+
+
+## Baked 2D sprite of the team's car for the podium (made by tools/bake_podium_car_sprites.gd).
+static func podium_sprite_path(team: int) -> String:
+	var slug: String = CAR_SLUGS[posmod(team, CAR_SLUGS.size())]
+	return "res://assets/cars/%s/podium_sprite.png" % slug
