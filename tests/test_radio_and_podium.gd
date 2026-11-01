@@ -225,15 +225,15 @@ func _test_podium_standees() -> void:
 	var studio: Node3D = load(studio_script.PATH).instantiate()
 	studio.setup_celebration(snapshot)
 	root.add_child(studio)
-	check(studio.standees.size() == 3, "#27 three kinetic character silhouettes stand on the 3D podium")
+	check(studio.standees.size() == 3, "#27 three character standees stand in the podium triptych")
 	for place: int in range(3):
-		var standee: Node3D = studio.standees[place]
+		var standee: TextureRect = studio.standees[place]
 		var entry: Dictionary = snapshot.order[place]
-		var texture: Texture2D = standee.material.get_shader_parameter("albedo_texture")
+		var texture: Texture2D = standee.texture
 		check(texture.resource_path == studio_script.standee_path(int(entry.id))
 			and studio.name_labels[place].text.contains(String(entry.driver_name).to_upper()),
 			"#28 P%d art and name belong to the actual finisher" % (place + 1))
-		check(standee.mesh_instance.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_ON,
-			"P%d character casts a studio silhouette shadow" % (place + 1))
+		check(float(standee.material.get_shader_parameter("outline_px")) > 0.0,
+			"P%d character wears the die-cut sticker outline" % (place + 1))
 	studio.queue_free()
 	await process_frame
