@@ -18,7 +18,7 @@ const RESOLUTIONS: Array[Vector2i] = [Vector2i(1920, 1080), Vector2i(1280, 720),
 const RESOLUTION_NAMES: Array[String] = ["1920 x 1080", "1280 x 720", "2560 x 1440"]
 
 const BUSES: Array[StringName] = [&"Master", &"SFX", &"Radio", &"Music", &"UI"]
-const BUS_LABELS: Array[String] = ["MASTER", "ENGINE SFX", "PIT RADIO", "SYNTHWAVE MUSIC", "UI CLICK"]
+const BUS_LABELS: Array[String] = ["MASTER", "ENGINE SFX", "PIT RADIO", "MUSIC", "UI CLICK"]
 
 ## Shadows by preset: distance (0 disables them), blur, directional split mode.
 const SHADOW_DISTANCE: Array[float] = [0.0, 70.0, 150.0, 260.0]
@@ -220,8 +220,13 @@ static func set_volume(bus: StringName, gain: float) -> void:
 	if index < 0:
 		return
 	AudioServer.set_bus_mute(index, gain <= 0.001)
-	AudioServer.set_bus_volume_db(index, linear_to_db(maxf(gain, 0.001)))
+	AudioServer.set_bus_volume_db(index, bus_db(bus))
 
 
 static func volume(bus: StringName) -> float:
 	return float(volumes.get(bus, 1.0))
+
+
+## Bus level the config asks for. Anything that moves a bus temporarily (the radio duck) is an offset from this.
+static func bus_db(bus: StringName) -> float:
+	return linear_to_db(maxf(volume(bus), 0.001))

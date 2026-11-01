@@ -26,9 +26,6 @@ var transmitting: bool = false # any source live
 var events: Array[StringName] = []
 ## Ids of the voice clips spoken so far.
 var voice_log: Array[String] = []
-## Resting level of the Music bus, read from the bus layout; the duck is relative to it.
-var music_base_db: float = 0.0
-
 var _sources: Dictionary = {} # instance id of each live source (0 = none given)
 var _queued: Dictionary = {} # source id -> clip waiting for its transmission to start
 var _voices: Dictionary = {} # source id -> AudioStreamPlayer on the Radio bus
@@ -38,9 +35,6 @@ var _tween: Tween
 
 func _ready() -> void:
 	AudioManager.ensure_buses()
-	var index: int = AudioServer.get_bus_index(AudioManager.BUS_MUSIC)
-	if index >= 0:
-		music_base_db = AudioServer.get_bus_volume_db(index)
 
 
 func on_transmission_shown(_car_id: int = 0, _message: String = "", source: Object = null) -> void:
@@ -117,12 +111,13 @@ func _stop_voice(key: int) -> void:
 		(_voices[key] as AudioStreamPlayer).stop()
 
 
-## Music bus 8 dB under its resting level (150 ms), or back up to it (500 ms).
+## Music bus 8 dB under the level the Music setting asks for (150 ms), or back up to it (500 ms).
 func duck_music(active: bool) -> void:
 	var music_bus_idx: int = AudioServer.get_bus_index(AudioManager.BUS_MUSIC)
 	if music_bus_idx < 0:
 		return
-	var target_db: float = music_base_db + DUCK_DB if active else music_base_db
+	var base_db: float = PresentationSettings.bus_db(AudioManager.BUS_MUSIC)
+	var target_db: float = base_db + DUCK_DB if active else base_db
 	var duration: float = DUCK_TIME_S if active else RESTORE_TIME_S
 	if _tween != null and _tween.is_valid():
 		_tween.kill()

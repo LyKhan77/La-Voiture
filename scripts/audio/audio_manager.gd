@@ -43,6 +43,10 @@ const MUSIC_STREAM := preload("res://assets/audio/music/streetwear_synth.ogg")
 const PODIUM_MUSIC_STREAM := preload("res://assets/audio/music/podium_rock_anthem.mp3")
 const TRACK_MENU := &"menu"
 const TRACK_PODIUM := &"podium"
+## Static mastering trim per track so the one Music slider gives the same loudness on every track. Measured with
+## `ffmpeg -i <file> -af ebur128=peak=true -f null -`: streetwear_synth.ogg -11.9 LUFS, podium_rock_anthem.mp3 -9.7 LUFS.
+## Measure again if a track is replaced.
+const TRACK_TRIM_DB: Dictionary = {TRACK_MENU: 0.0, TRACK_PODIUM: -2.2}
 
 ## Each of the five start lights climbs a semitone-ish step, so the countdown reads as rising.
 const START_BEEP_PITCH_STEP: float = 0.09
@@ -63,6 +67,10 @@ var _ui_players: Array[AudioStreamPlayer] = []
 var _next_ui_voice: int = 0
 var _radio_player: AudioStreamPlayer
 var _music_player: AudioStreamPlayer
+
+
+static func track_trim_db(track: StringName) -> float:
+	return float(TRACK_TRIM_DB.get(track, 0.0))
 
 
 ## The hub for any node in the tree: the autoload, or one built on first use.
@@ -126,6 +134,7 @@ func _ready() -> void:
 	(_menu_stream as AudioStreamOggVorbis).loop = true
 	# A track requested before the players existed (the fallback hub is added deferred) lands now.
 	_music_player.stream = podium_stream if music_track == TRACK_PODIUM else _menu_stream
+	_music_player.volume_db = track_trim_db(music_track)
 
 
 ## Quits leave no stream playing, so the resources are free at shutdown.
@@ -237,6 +246,7 @@ func _set_track(track: StringName) -> void:
 		return
 	_music_player.stop()
 	_music_player.stream = podium_stream if track == TRACK_PODIUM else _menu_stream
+	_music_player.volume_db = track_trim_db(track)
 	if is_inside_tree() and has_output():
 		_music_player.play()
 
