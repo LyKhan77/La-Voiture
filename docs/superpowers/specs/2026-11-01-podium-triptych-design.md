@@ -1,6 +1,6 @@
 # Winning Scene: Triptych (podium seimbang P1-P3)
 
-Tanggal: 2026-11-01. Status: disetujui pemilik proyek pada 2026-11-01 (tampilan sprite hasil bake, 7 keputusan di bagian 15 termasuk font berglyph Jepang, dan tambahan musik di bagian 16). Mengganti struktur cut dari `docs/superpowers/specs/2026-10-27-winning-scene-hero-graffiti-design.md` (5 cut yang menyorot mobil P1). Bagian lain spec itu tetap berlaku: data hasil (`capture_results`, `award_points`), reveal keberangkatan, tower [TAB], musik, dan gaya Toon Anime Graffiti Brutalism.
+Tanggal: 2026-11-01. Status: **dibangun dan di-merge (Fase 20)**; disetujui pemilik proyek pada 2026-11-01 (tampilan sprite hasil bake, 7 keputusan di bagian 15 termasuk font berglyph Jepang, dan tambahan musik di bagian 16). Mengganti struktur cut dari `docs/superpowers/specs/2026-10-27-winning-scene-hero-graffiti-design.md` (5 cut yang menyorot mobil P1). Bagian lain spec itu tetap berlaku: data hasil (`capture_results`, `award_points`), reveal keberangkatan, tower [TAB], musik, dan gaya Toon Anime Graffiti Brutalism.
 
 Referensi visual yang dipilih pemilik proyek:
 - Preview Triptych dengan mobil hasil bake dari model 3D dan linimasa 5 cut: https://claude.ai/artifact/7aZxpnm1xEkiPjFo7GNQdw
@@ -228,3 +228,16 @@ Pengujian (test baru, konvensi `tests/test_*.gd`):
 - Dengan Music = 0, ducking dan pemulihan membiarkan bus tetap mute.
 - Selisih trim menu dan podium sama dengan selisih LUFS terukur (2,2 dB, toleransi 0,3 dB), dan label slider berbunyi `MUSIC`.
 - Test yang sudah ada tentang musik podium (`tests/test_podium_music.gd`) dan scene kemenangan tetap lulus.
+
+## 17. Catatan implementasi (selisih dari draf ini)
+
+Dibangun di branch `fase-20-podium-triptych` mengikuti `docs/superpowers/plans/2026-11-01-podium-triptych.md`. Selisih dan temuan; rinciannya di `executor-report/reports/FASE-20-PODIUM-TRIPTYCH-REPORT.md`:
+- Lebar panel saat tower terbuka 1215 px (draf: area kiri 1280 px). Tower miring 1,2 derajat, kotak batasnya mulai di x = 1271.
+- Tag nama berisi `#NN NAMA` (agar `name_labels` memuat nomor). Lebar maksimum tag 640 px dan tag diskalakan ke ruang di kiri bubble; nama yang tetap tidak muat dipotong dengan elipsis.
+- Konten panel diskalakan turun (`content_scale`, minimum 0,6) pada panel yang lebih sempit dari 700 px.
+- Standee berdiri di 40% lebar panel (bukan tengah) supaya tag tidak menutup wajahnya.
+- Latar panel memakai posisi lokal `VERTEX` di shader (UV Polygon2D menghasilkan warna datar). Shader kontur memakai makro, bukan fungsi (`TEXTURE` tidak terbaca di fungsi pembantu).
+- Margin sprite 0 di bawah (baris terakhir = garis kontak ban).
+- Skip saat INTRO membiarkan panel meluncur masuk sekitar 1 dtk.
+- Konfeti 3D hilang bersama set 3D.
+- Hasil: 93/93 suite headless; smoke native 60,003 FPS, p95 <= 16,70 ms di semua state studio.

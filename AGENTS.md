@@ -68,7 +68,7 @@ Semua perintah berikut dapat dijalankan dari terminal repositori:
 ```
 La_Voiture/
 ├── assets/                 # Aset biner game resmi (Runtime)
-│   ├── cars/<slug>/        # Model GLB (<slug>_body.glb, <slug>_full.glb), tekstur 4K PBR
+│   ├── cars/<slug>/        # Model GLB (<slug>_body.glb, <slug>_full.glb), tekstur 4K PBR, sprite podium (podium_sprite.png, hasil bake 1600 px)
 │   │   └── raw/            # Model mentah hasil AI (dilacak Git LFS, tidak disentuh langsung saat runtime)
 │   └── audio/              # SFX, musik synthwave, engine loops, suara radio TTS Kokoro
 │
@@ -78,7 +78,7 @@ La_Voiture/
 │
 ├── scenes/                 # Scene Godot (.tscn) terorganisasi per modul domain
 │   ├── main.tscn           # Entry point utama game (membuka scenes/ui/main_menu.tscn)
-│   ├── ui/                 # Main menu, race setup, 3D garage team select, transition, settings, podium
+│   ├── ui/                 # Main menu, race setup, 3D garage team select, transition, settings, winning scene (Triptych podium)
 │   ├── car/                # Scene chassis mobil (<slug>_chassis.tscn)
 │   ├── race_world/         # circuits/<id>/ (scene sirkuit + pit tiap sirkuit), shared/ (vista, gantry), paddock/ (kit paddock bersama)
 │   ├── hud/                # In-game HUD, radio cut-in dock, race standings, timing tower
@@ -148,7 +148,7 @@ flowchart TD
     Setup --> Garage["scenes/ui/garage_team_select.tscn<br>(10-stall dolly, driver cards, tire select)"]
     Garage --> Transition["scenes/ui/manga_race_transition.tscn<br>(1-frame negative snap, 3 panels, halftone wipe)"]
     Transition --> Race["scenes/race_weekend_world.tscn<br>(20 GT3 Cars, 5 FIA Lights, Dynamic Weather, Pit Crews)"]
-    Race --> Podium["scenes/ui/podium_screen.tscn<br>(P1-P3, trophies, points haul)"]
+    Race --> Podium["scenes/ui/winning_scene.tscn<br>(Triptych P2/P1/P3: standee, sprite mobil, kartu manga; 5 cut @1,6 dtk)"]
     Podium -->|"EXIT TO HQ"| Menu
 ```
 
@@ -198,6 +198,10 @@ flowchart TD
    - Stance rata spakbor (*flush*): selisih bibir ban ke fender $\le 1.5\text{ cm}$ per as roda.
 3. **Penyimpanan File Mentah AI:**
    - File GLB mentah hasil Meshy AI disimpan di `assets/cars/<slug>/raw/` dan **wajib dilacak oleh Git LFS** (`.gitattributes`).
+4. **Sprite Mobil Podium (`podium_sprite.png`):**
+   - Satu PNG transparan per slug di `Roster.CAR_SLUGS` (13), lebar tepat 1600 px, dibake dari `<slug>_full.glb` dengan material toon game oleh `tools/bake_podium_car_sprites.gd` (native, butuh renderer). Scene podium tidak memuat model 3D mobil.
+   - Gerbang: `tests/podium_sprite_checks.gd` (RGBA8, lebar 1600, rasio 1,3 sampai 2,1, sudut transparan, baris terbawah buram = garis kontak ban, isi siluet 0,25 sampai 0,85), dijalankan oleh `tests/test_podium_car_sprites.gd`.
+   - Bake ulang semua sprite bila model atau livery mobil berubah; sprite adalah aset hasil generate, alat bake adalah sumbernya.
 
 ---
 
@@ -241,6 +245,8 @@ Sebelum suatu tugas atau fase dinyatakan **SELESAI**, agen wajib memenuhi seluru
 | **Godot lambat membuka dan membuat ribuan `.import`** | Folder laporan atau unduhan AI mentah tidak di-ignore oleh engine Godot. | Pastikan file kosong `.gdignore` ada di `executor-report/`, `temp/`, `meshy_output/`, `docs/`. |
 | **Git Push ke GitHub ditolak (`GH001: Large files detected`)** | Terdapat file model mentah di `assets/cars/*/raw/*.glb` yang melebihi batas 100 MB. | Daftarkan file tersebut ke Git LFS (`git lfs track "assets/cars/*/raw/*.glb"`) dan commit `.gitattributes`. |
 | **Lampu start langsung padam saat kamera transisi selesai** | Panggilan start balapan dieksekusi sebelum wipe manga tuntas. | Tahan countdown melalui `pre_grid_hold` di `RaceWeekendWorld`, dan panggil `finish_grid_intro()` tepat setelah wipe selesai. |
+| **Nama pengemudi terpotong elipsis di tag panel podium** | Tag nama memakai batas lebar yang terlalu sempit untuk nama nyata terpanjang ("#26 R. TAKAHASHI"). | Lebar maksimum tag 640 px dan diskalakan ke ruang di kiri bubble; `tests/test_winning_panel.gd` memeriksa semua `GtData.DRIVER_NAMES`. |
+| **Suite penuh di latar belakang dihentikan sistem (RAM kritis)** | `tools/run_tests.ps1` penuh sebagai perintah latar belakang dibunuh saat memori hampir habis. | Jalankan di latar depan dalam irisan di bawah 10 menit: `-From 0 -To 19`, `20-39`, `40-59`, `60-74`, `75-92` (93 suite). |
 
 ---
 
@@ -253,6 +259,7 @@ Sebelum suatu tugas atau fase dinyatakan **SELESAI**, agen wajib memenuhi seluru
 * **Status Roadmap Proyek:** [`ROADMAP.md`](file:///D:/Occupation/Porto/genex/La_Voiture/ROADMAP.md)
 * **Laporan Eksekutif Fase 10 (Sirkuit):** [`executor-report/reports/FASE-10-TRACK-ENVIRONMENT-UPGRADE-REPORT.md`](file:///D:/Occupation/Porto/genex/La_Voiture/executor-report/reports/FASE-10-TRACK-ENVIRONMENT-UPGRADE-REPORT.md)
 * **Laporan Eksekutif Fase 9 (Menu & Garasi):** [`executor-report/reports/FASE-9-MAIN-MENU-AND-GARAGE-FLOW-REPORT.md`](file:///D:/Occupation/Porto/genex/La_Voiture/executor-report/reports/FASE-9-MAIN-MENU-AND-GARAGE-FLOW-REPORT.md)
+* **Laporan Eksekutif Fase 20 (Podium Triptych):** [`executor-report/reports/FASE-20-PODIUM-TRIPTYCH-REPORT.md`](file:///D:/Occupation/Porto/genex/La_Voiture/executor-report/reports/FASE-20-PODIUM-TRIPTYCH-REPORT.md), spec [`docs/superpowers/specs/2026-11-01-podium-triptych-design.md`](file:///D:/Occupation/Porto/genex/La_Voiture/docs/superpowers/specs/2026-11-01-podium-triptych-design.md)
 * **Panduan Tata Kelola Multi-Agent & Protokol Inisiasi:** [`docs/AGENT-WORKFLOW.md`](file:///D:/Occupation/Porto/genex/La_Voiture/docs/AGENT-WORKFLOW.md)
 
 ---

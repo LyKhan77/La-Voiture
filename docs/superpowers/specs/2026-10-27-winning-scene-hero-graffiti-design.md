@@ -1,5 +1,7 @@
 # Winning Scene: Hero Machine Graffiti (Fase 11 Langkah 7, revisi desain)
 
+> **Digantikan sebagian (2026-11-01):** struktur 5 cut yang menyorot mobil P1 diganti Triptych di Fase 20 (`2026-11-01-podium-triptych-design.md`). Dokumen ini tetap sah untuk bahasa visual graffiti brutalism, reveal keberangkatan, perhitungan hasil, dan audio.
+
 Tanggal: 2026-10-27. Menggantikan arah visual di `prompt/TASK-WINNING-SCENE-DYNAMIC-POLISH-AND-AUDIO.md`. Spec induk (pipeline standee 2.5D, reveal, hasil) tetap berlaku: `docs/superpowers/specs/2026-10-26-winning-scene-and-2.5d-character-pipeline-design.md`.
 
 Referensi visual yang disetujui pemilik proyek:

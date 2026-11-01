@@ -1,5 +1,7 @@
 # Podium Triptych Implementation Plan
 
+> **Dieksekusi 2026-11-01 (native, inline).** Urutan task dan penyimpangan: spec bagian 17 dan laporan Fase 20. Perubahan terhadap rencana: urutan T1, T2, T3, T4, T6, T7, T5, T8, T9, T10; lebar tower 1215 px; tag `#NN NAMA` 640 px.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Ganti layar kemenangan 5 cut yang menyorot mobil P1 dengan Triptych 3 panel yang menyorot P1, P2, P3 seimbang (standee, mobil sprite hasil bake, kartu manga), dan satukan semua volume musik di satu konfigurasi Music.
