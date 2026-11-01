@@ -1,6 +1,6 @@
 extends SceneTree
 
-## Native 1080p/High acceptance and captures. Add -- --race for the complete 3-lap game loop.
+## Native 1080p/High acceptance and captures of the podium triptych. Add -- --race for the complete 3-lap game loop.
 ## godot --path . -s res://scratch/smoke_winning_scene.gd -- --race
 const Studio := preload("res://scripts/ui/winning_scene.gd")
 const Config := preload("res://scripts/core/race_config_data.gd")
@@ -9,7 +9,7 @@ const World := preload("res://scenes/race_weekend_world.tscn")
 const TrackScene := preload("res://scenes/race_world/circuits/apex_ring/apex_circuit.tscn")
 const Track := preload("res://scripts/gt/gt_track.gd")
 const Race := preload("res://scripts/gt/gt_race.gd")
-const OUT := "res://executor-report/screenshots/winning_scene/"
+const OUT := "res://executor-report/screenshots/phases/phase-20/"
 var failures: int = 0
 var studio: Node3D
 
@@ -63,9 +63,9 @@ func _capture_cut(cut: int, file_name: String, settle: float) -> void:
 	await _save(file_name)
 
 
-func _measure(label: String, seconds: float) -> void:
+func _measure(label: String, seconds: float, settle: float = 1.5) -> void:
 	# The screenshot just written stalls the process for ~300 ms while the OS flushes it (not a render cost); sample after it.
-	await create_timer(1.5).timeout
+	await create_timer(settle).timeout
 	var samples: Array[float] = []
 	var last: int = Time.get_ticks_usec()
 	var start: int = last
@@ -103,28 +103,36 @@ func _run() -> void:
 	root.add_child(studio)
 	current_scene = studio
 	var Cut := WinningCutDirector.Cut
-	await _capture_cut(Cut.P3_TAG, "hero-graffiti-cut-1", 0.8)
-	await _capture_cut(Cut.HERO, "hero-graffiti-cut-2", 0.8)
-	await _capture_cut(Cut.P2_TAG, "hero-graffiti-cut-3", 0.8)
-	await _capture_cut(Cut.DETAIL, "hero-graffiti-cut-4", 0.85)
-	await _capture_cut(Cut.FINAL, "hero-graffiti-cut-5", 1.2)
+	await _capture_cut(Cut.INTRO, "triptych-cut-1-intro", 0.9)
+	await _capture_cut(Cut.FOCUS_P3, "triptych-cut-2-focus-p3", 1.0)
+	await _capture_cut(Cut.FOCUS_P2, "triptych-cut-3-focus-p2", 1.0)
+	await _capture_cut(Cut.FOCUS_P1, "triptych-cut-4-focus-p1", 1.0)
+	await _capture_cut(Cut.FINAL, "triptych-cut-5-final", 1.2)
 	check(AudioManager.of(studio).music_track == &"podium", "Native winning scene plays the podium anthem")
 	if "--captures-only" not in OS.get_cmdline_user_args():
-		await _measure("STUDIO CLEAN HIGH", 10.0)
+		await _measure("TRIPTYCH FINAL EQUAL HIGH", 8.0)
+		for step: int in range(3):
+			_key(KEY_RIGHT)
+			await _measure("TRIPTYCH FOCUS %s HIGH" % ["P2", "P1", "P3"][step], 3.0, 1.2)
+		_key(KEY_RIGHT)
+		await create_timer(1.0).timeout
 	_key(KEY_TAB)
-	await create_timer(0.4).timeout
+	await create_timer(0.6).timeout
 	check(studio.is_leaderboard_open, "Native TAB opens the complete timing tower")
-	await _save("hero-graffiti-final-tab")
+	await _save("triptych-final-tab")
 	if "--captures-only" not in OS.get_cmdline_user_args():
-		await _measure("STUDIO TIMING HIGH", 5.0)
+		await _measure("TRIPTYCH TIMING TOWER HIGH", 5.0)
 	_key(KEY_TAB)
-	await create_timer(0.4).timeout
-	studio.set_process(false)
-	studio.camera.position = Vector3(2.8, 2.5, 4.8)
-	studio.camera.look_at(Vector3(0, 1.4, 0))
-	studio.camera.fov = 44.0
-	studio.get_node("VictoryHUD").hide()
-	await _save("hero-graffiti-standee-closeup")
+	await create_timer(0.6).timeout
+	if "--captures-only" not in OS.get_cmdline_user_args():
+		# A fresh finale, measured over its own five cuts: intro slide-in and the three focus tweens included.
+		var closing: Node3D = studio
+		studio = load(Studio.PATH).instantiate()
+		studio.setup_celebration(_fixture())
+		root.add_child(studio)
+		current_scene = studio
+		closing.queue_free()
+		await _measure("TRIPTYCH TIMELINE (INTRO TO FINAL) HIGH", 6.2, 0.2)
 	var reference: WeakRef = weakref(studio)
 	_key(KEY_ESCAPE)
 	await scene_changed

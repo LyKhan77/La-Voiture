@@ -55,6 +55,7 @@ Semua perintah berikut dapat dijalankan dari terminal repositori:
 | **Menjalankan Seluruh Test Suite** | `powershell -File tools/run_tests.ps1` (satu proses per suite dengan timeout; `-Filter pit`, `-From 0 -To 20` untuk sebagian) |
 | **Uji Gate Fitment Roda & Sasis** | `godot --headless --path . -s scratch/fit_cars.gd` |
 | **Automasi Pipeline Mobil GT3 Baru** | `powershell -File scratch/make_car.ps1 -Car <slug_mobil>` |
+| **Bake Sprite Mobil Podium (13 mobil)** | `godot --rendering-driver d3d12 --resolution 1280x800 --path . -s tools/bake_podium_car_sprites.gd` (native, butuh renderer; `-- <slug>` untuk satu mobil, `-- --sheet` untuk lembar kontak di `temp/podium_sprites_sheet.png`). Jalankan ulang bila model atau livery mobil berubah |
 | **Cek Status Git & LFS** | `git status -s` dan `git lfs status` |
 | **Health Check Genex** | `npx genex doctor` |
 

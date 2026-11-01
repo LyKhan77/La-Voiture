@@ -61,7 +61,8 @@ func _run() -> void:
 	check(_panel(2, _entry(8, "T. Kade", 0), "RUNNING").result_label.text == "RUNNING // 0 PTS", "A running finisher shows RUNNING")
 	check(p2.name_label.text == "#03 M. ITO", "Name tag carries the car number and the uppercased driver")
 	var long_name: WinningPanel = _panel(1, _entry(2, "MAXIMILIAN-ALEXANDER FEATHERSTONEHAUGH", 18), "+1.700s")
-	check(long_name.name_label.size.x <= WinningPanel.NAME_MAX_WIDTH, "A very long name still fits the tag (%.0f px)" % long_name.name_label.size.x)
+	check(long_name.name_label.size.x <= WinningPanel.NAME_MAX_WIDTH and long_name.name_label.size.y < 140.0 and long_name.name_label.text.ends_with("…") and long_name.name_label.text.begins_with("#03 M"),
+		"A very long name is trimmed with an ellipsis onto one line (%s, %.0fx%.0f px)" % [long_name.name_label.text, long_name.name_label.size.x, long_name.name_label.size.y])
 	check(float(p1.standee.material.get_shader_parameter("outline_px")) > 0.0 and float(p1.car.material.get_shader_parameter("outline_px")) > 0.0,
 		"Standee and car carry the die-cut outline")
 	check(p1.bubble.texture == shared.portrait and p1.standee.texture == shared.standee and p1.car.texture == shared.car,
@@ -82,9 +83,14 @@ func _run() -> void:
 	var carless: WinningPanel = _panel(1, _entry(2, "M. Ito", 18), "+1.700s", false, textures)
 	check(not carless.car.visible, "A null car texture draws no car and does not fail")
 
-	p1.relayout(Vector2(617.0, 940.0))
-	check(is_equal_approx(p1.car.size.x, 0.76 * 617.0) and is_equal_approx(p1.car.position.x + p1.car.size.x * 0.5, 617.0 * 0.5),
+	p1.relayout(Vector2(730.0, 940.0))
+	check(is_equal_approx(p1.content_scale, 1.0) and is_equal_approx(p1.car.size.x, 0.76 * 730.0) and is_equal_approx(p1.car.position.x + p1.car.size.x * 0.5, 730.0 * 0.5),
 		"The car is 76%% of the panel width and centred (%.1f px)" % p1.car.size.x)
+	p1.relayout(Vector2(500.0, 940.0))
+	check(is_equal_approx(p1.content_scale, 500.0 / WinningPanel.REFERENCE_WIDTH) and is_equal_approx(p1.car.size.x * p1.content_scale, 0.76 * 500.0),
+		"A narrow panel scales its content down to fit instead of overlapping (scale %.2f)" % p1.content_scale)
+	p1.relayout(Vector2(200.0, 940.0))
+	check(is_equal_approx(p1.content_scale, WinningPanel.MIN_FIT), "The content never shrinks below the minimum scale")
 	p1.relayout(Vector2(1200.0, 940.0))
 	check(is_equal_approx(p1.car.size.x, WinningPanel.CAR_MAX_WIDTH), "The car width is capped at %d px in a wide panel" % int(WinningPanel.CAR_MAX_WIDTH))
 	check(is_equal_approx(p1.standee.size.y, WinningPanel.STANDEE_HEIGHT) and is_equal_approx(p1.standee.position.y + p1.standee.size.y, 940.0),
