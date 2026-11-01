@@ -94,10 +94,15 @@ func _run() -> void:
 	check(AudioManager.of(studio).music_track == &"podium", "The winning scene plays the podium anthem")
 
 	await _test_cuts(studio)
+	var closing: WeakRef = weakref(studio)
+	studio.queue_free()
+	await process_frame
+	await process_frame
+	check(closing.get_ref() == null, "Closing the studio releases its entire owned tree")
 	await _test_edge_cases(results)
 	await _test_input_and_motion(results, settings)
-	await _test_tower_and_focus(results, studio)
-	await _test_lifecycle(results, studio)
+	await _test_tower_and_focus(results)
+	await _test_lifecycle(results)
 	print("WINNING SCENE: %d assertions, %d FAIL" % [assertions, failures])
 	quit(0 if failures == 0 else 1)
 
@@ -158,26 +163,151 @@ func _test_edge_cases(results: Dictionary) -> void:
 	await process_frame
 
 
-func _test_input_and_motion(_results: Dictionary, _settings: Script) -> void:
-	pass
+## Skip keys, a click on a panel or on empty stage, TAB mid-cut, the arrow keys, and reduce_motion landing on the final.
+func _test_input_and_motion(results: Dictionary, settings: Script) -> void:
+	var studio: Node3D = await _spawn(results)
+	check(not studio.director.is_final(), "A fresh finale plays its cuts")
+	_key(KEY_RIGHT)
+	await process_frame
+	check(not studio.director.is_final() and studio.triptych.focus_place == -1, "Arrow keys do nothing before the final")
+	_key(KEY_ENTER)
+	await process_frame
+	check(studio.director.is_final() and studio.triptych.focus_place == -1, "Enter skips to the final")
+	studio.queue_free()
 
+	studio = await _spawn(results)
+	_key(KEY_SPACE)
+	await process_frame
+	check(studio.director.is_final(), "Space skips to the final")
+	studio.queue_free()
 
-func _test_tower_and_focus(_results: Dictionary, _studio: Node3D) -> void:
-	pass
+	studio = await _spawn(results)
+	_click_stage(studio, Vector2(20.0, 20.0))
+	await process_frame
+	check(studio.director.is_final(), "A click on empty stage skips to the final")
+	studio.queue_free()
 
+	studio = await _spawn(results)
+	_click_stage(studio, Vector2(960.0, 540.0))
+	await process_frame
+	check(studio.director.is_final() and studio.triptych.focus_place == -1, "A real click on a panel before the final skips instead of focusing")
+	await create_timer(1.2).timeout # the intro keeps sliding the panels in after a skip
+	_click_stage(studio, Vector2(960.0, 540.0))
+	await process_frame
+	check(studio.triptych.focus_place == 0, "A real click on the P1 panel after the final focuses P1")
+	studio.queue_free()
 
-func _test_lifecycle(results: Dictionary, studio: Node3D) -> void:
-	var studio_ref: WeakRef = weakref(studio)
+	studio = await _spawn(results)
+	studio.triptych.panels[1].background.gui_input.emit(_press())
+	await process_frame
+	check(studio.director.is_final() and studio.triptych.focus_place == -1, "A click on a panel before the final skips instead of focusing")
+	studio.queue_free()
+
+	studio = await _spawn(results)
+	var finals: Array[int] = []
+	studio.director.cut_changed.connect(func(cut: int) -> void:
+		if cut == Cut.FINAL:
+			finals.append(cut))
+	for i: int in range(10):
+		_key(KEY_ENTER)
+	await process_frame
+	check(finals.size() == 1, "Mashing skip announces the final exactly once")
+	studio.queue_free()
+
+	studio = await _spawn(results)
+	_key(KEY_TAB)
+	await create_timer(0.4).timeout
+	check(studio.director.is_final() and studio.is_leaderboard_open, "TAB mid-cut skips to the final and opens the tower")
+	studio.queue_free()
+
+	studio = await _spawn(results)
+	studio.skip_cuts()
+	var walk: Array[int] = []
+	for i: int in range(4):
+		_key(KEY_RIGHT)
+		await process_frame
+		walk.append(studio.triptych.focus_place)
+	check(walk == ([1, 0, 2, -1] as Array[int]), "Right arrow after the final focuses P2, P1, P3, then equal (%s)" % str(walk))
+	_key(KEY_LEFT)
+	await process_frame
+	check(studio.triptych.focus_place == 2, "Left arrow walks the cycle backwards")
+	studio.triptych.set_focus(-1, true)
+	studio.triptych.panels[1].background.gui_input.emit(_press())
+	check(studio.triptych.focus_place == 1, "Clicking a panel after the final focuses it")
+	studio.triptych.panels[1].background.gui_input.emit(_press())
+	check(studio.triptych.focus_place == -1, "Clicking the focused panel returns to equal")
 	studio.queue_free()
 	await process_frame
+
+	var normal: Node3D = await _spawn(results)
+	var with_motion: int = get_processed_tweens().size()
+	normal.queue_free()
 	await process_frame
-	check(studio_ref.get_ref() == null, "Closing studio releases its entire owned tree")
+	await process_frame
+	settings.reduce_motion = true
+	var calm: Node3D = await _spawn(results)
+	check(calm.director.is_final(), "Reduce motion lands on the final")
+	check(get_processed_tweens().size() < with_motion and calm.triptych.panels[0].standee.scale == Vector2.ONE,
+		"Reduce motion starts no drip or breathing tweens")
+	_key(KEY_RIGHT)
+	await process_frame
+	check(is_equal_approx(calm.triptych.panels[1].size.x, calm.triptych.panels[1].size.x) and calm.triptych.focus_place == 1
+		and is_equal_approx(calm.triptych.panels[1].size.x / calm.triptych.panels[0].size.x, WinningTriptych.FOCUS_WEIGHT),
+		"Reduce motion applies a focus change at once")
+	settings.reduce_motion = false
+	calm.queue_free()
+	await process_frame
+
+
+func _outer(control: Control) -> Rect2:
+	return control.get_global_transform() * Rect2(Vector2.ZERO, control.size)
+
+
+## The tower slides in over the right edge; the triptych narrows so no panel, tag or plate sits under it.
+func _test_tower_and_focus(results: Dictionary) -> void:
+	var studio: Node3D = await _spawn(results)
+	studio.skip_cuts()
+	_key(KEY_TAB)
+	await create_timer(0.5).timeout
+	check(studio.is_leaderboard_open and is_equal_approx(studio.leaderboard.position.x, 1280.0), "TAB opens the timing panel even with button focus")
+	var tower: Rect2 = _outer(studio.leaderboard)
+	var clear: bool = true
+	for place: int in range(3):
+		clear = clear and not _outer(studio.triptych.panels[place]).intersects(tower)
+		clear = clear and not _outer(studio.name_labels[place]).intersects(tower) and not _outer(studio.time_labels[place]).intersects(tower)
+	check(clear, "With the timing tower open no panel, tag or plate sits under it")
+	check(is_equal_approx(studio.leaderboard.rotation_degrees, 1.2), "The tower slides in as a slightly tilted poster")
+	check(studio.timing_rows[0].get_theme_color("font_color").get_luminance() < 0.2, "Timing rows are inked dark so they read on the paper poster")
+	studio.toggle_leaderboard()
+	studio.toggle_leaderboard()
+	studio.toggle_leaderboard()
+	await create_timer(0.5).timeout
+	check(not studio.is_leaderboard_open and not studio.leaderboard.visible, "Rapid TAB reversals end fully closed without a stale tween")
+	check(_outer(studio.triptych.panels[2]).end.x > 1900.0 * studio._stage.scale.x, "Closing the tower gives the triptych its full width back")
+	studio.toggle_leaderboard()
+	await create_timer(0.5).timeout
+	check(studio.timing_rows.size() == 20 and studio.team_labels.size() == 10,
+		"Expanded timing contains all twenty finishers and all ten constructors")
+	check(studio.timing_rows[1].text.contains("+1 PT") and studio.timing_rows[19].text.contains("DNF"),
+		"Timing distinguishes the awarded fastest lap bonus from a retired result")
+	studio.toggle_leaderboard()
+	await create_timer(0.5).timeout
+	studio.triptych.set_focus(2)
+	studio.toggle_leaderboard()
+	await create_timer(1.2).timeout
+	check(studio.triptych.focus_place == 2 and not _outer(studio.triptych.panels[2]).intersects(_outer(studio.leaderboard)),
+		"Opening the tower while a focus tween runs still ends clear of it")
+	studio.queue_free()
+	await process_frame
+
+
+func _test_lifecycle(results: Dictionary) -> void:
 	# Exercise restart through the real manga transition and configured grid.
-	studio = load(SCENE).instantiate()
+	var studio: Node3D = load(SCENE).instantiate()
 	studio.setup_celebration(results)
 	root.add_child(studio)
 	current_scene = studio
-	studio_ref = weakref(studio)
+	var studio_ref: WeakRef = weakref(studio)
 	var config_script: Script = load("res://scripts/core/race_config_data.gd")
 	var config: RefCounted = config_script.reset()
 	config.total_laps = 3
@@ -245,6 +375,24 @@ func _test_lifecycle(results: Dictionary, studio: Node3D) -> void:
 	check(int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)) == 0, "Exit leaves zero orphan nodes")
 	load("res://scripts/world/shared/toon_materials.gd")._cache.clear()
 	load("res://scripts/car/gt_car_actor.gd")._paint_cache.clear()
+
+
+func _press() -> InputEventMouseButton:
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	click.position = Vector2(300.0, 500.0)
+	return click
+
+
+## A left click on a point of the 1920x1080 stage, pushed through the real GUI picking (canvas coordinates).
+func _click_stage(studio: Node3D, stage_point: Vector2) -> void:
+	var click: InputEventMouseButton = _press()
+	click.position = studio._stage.get_global_transform() * stage_point
+	root.push_input(click, true)
+	var release: InputEventMouseButton = click.duplicate()
+	release.pressed = false
+	root.push_input(release, true)
 
 
 func _key(code: Key) -> void:

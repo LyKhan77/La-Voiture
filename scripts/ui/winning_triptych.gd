@@ -155,8 +155,11 @@ func set_available_width(width: float, instant: bool = false) -> void:
 	_width_tween.tween_method(_set_width, size.x - 2.0 * BLEED_PX, width, 0.25).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 
+## The panel's bounding box in canvas space (ancestor scale and rotation included).
 func panel_rect(place: int) -> Rect2:
-	return panels[place].get_global_rect() if place >= 0 and place < panels.size() else Rect2()
+	if place < 0 or place >= panels.size():
+		return Rect2()
+	return panels[place].get_global_transform() * Rect2(Vector2.ZERO, panels[place].size)
 
 
 func _screen_panels() -> Array[WinningPanel]:

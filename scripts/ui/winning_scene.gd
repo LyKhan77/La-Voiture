@@ -20,6 +20,8 @@ const Settings := preload("res://scripts/core/presentation_settings.gd")
 const POINTS: Array[int] = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1]
 const MEDALS: Array[Color] = [Color("#FFD23F"), Color("#D8DCE6"), Color("#D9803A")]
 const STAGE := Vector2(1920, 1080)
+## Visible width the panels share while the timing tower (x = 1280) is open.
+const NARROW_WIDTH: float = 1215.0
 const PATH := "res://scenes/ui/winning_scene.tscn"
 
 ## Single-use handoff: copied into the new scene then cleared immediately.
@@ -178,13 +180,18 @@ func _input(event: InputEvent) -> void:
 	if key == null or not key.pressed or key.echo or _leaving:
 		return
 	var skipping: bool = not director.is_final() and (key.keycode == KEY_ENTER or key.keycode == KEY_KP_ENTER or key.keycode == KEY_SPACE)
-	if not skipping and key.keycode != KEY_TAB and key.keycode != KEY_R and key.keycode != KEY_ESCAPE:
+	var arrow: bool = director.is_final() and (key.keycode == KEY_LEFT or key.keycode == KEY_RIGHT)
+	if not skipping and not arrow and key.keycode != KEY_TAB and key.keycode != KEY_R and key.keycode != KEY_ESCAPE:
 		return
 	# A successful scene change immediately detaches this node and its viewport.
 	get_viewport().set_input_as_handled()
 	match key.keycode:
 		KEY_ENTER, KEY_KP_ENTER, KEY_SPACE:
 			skip_cuts()
+		KEY_LEFT:
+			focus_step(-1)
+		KEY_RIGHT:
+			focus_step(1)
 		KEY_TAB:
 			if not director.is_final():
 				skip_cuts()
@@ -210,6 +217,22 @@ func skip_cuts() -> void:
 	director.skip_to_final()
 
 
+## Moves the spotlight between the panels (equal, P2, P1, P3, equal ...); only once the cuts are over.
+func focus_step(step: int) -> void:
+	if director.is_final():
+		triptych.cycle_focus(step)
+
+
+## Before the final a click on a panel skips like a click on empty stage; after it, it focuses that panel.
+func _on_panel_pressed(place: int) -> void:
+	if _leaving:
+		return
+	if not director.is_final():
+		skip_cuts()
+	else:
+		triptych.set_focus(-1 if triptych.focus_place == place else place)
+
+
 ## start_music() does not restart a running track, so the anthem must be replaced before leaving.
 func _hand_back_music() -> void:
 	var hub: AudioManager = AudioManager.of(self) if is_inside_tree() else _audio_hub
@@ -229,6 +252,7 @@ func toggle_leaderboard() -> void:
 	_slide = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	_slide.tween_property(leaderboard, "position:x", 1280.0 if is_leaderboard_open else 1940.0,
 		0.0 if Settings.reduce_motion else 0.25)
+	triptych.set_available_width(NARROW_WIDTH if is_leaderboard_open else STAGE.x)
 	if not is_leaderboard_open:
 		_slide.tween_callback(leaderboard.hide)
 
@@ -328,6 +352,7 @@ func _build_ui() -> void:
 	_stage.add_child(halftone)
 	triptych = WinningTriptych.new()
 	triptych.name = "Triptych"
+	triptych.panel_pressed.connect(_on_panel_pressed)
 	_stage.add_child(triptych)
 	var tape_top: Control = Kit.caution_tape(STAGE.x)
 	tape_top.name = "TapeTop"
