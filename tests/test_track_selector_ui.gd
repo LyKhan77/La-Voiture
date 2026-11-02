@@ -141,16 +141,25 @@ func _test_reserved_rounds_and_wrap() -> void:
 		and absf(float(radar.stats()["length_m"]) - 5200.0) <= 1.0 and radar.circuit_id == "stoke_crown" \
 		and not continue_button.disabled
 	check(stoke_ok, "#S4d Round 06 Stoke Crown is playable with its own 5.2km map and Continue enabled")
-	# Round 07 is still reserved; selecting an unbuilt round remains safe.
+	# Step 5: Round 07, Pacific Coast Corkscrew is now playable with its own homologated map.
 	_press("TrackNextButton")
 	await process_frame
-	var reserved_ok: bool = _label("CircuitNameLabel") == "Pacific Coast Corkscrew" \
-		and float(radar.stats()["length_m"]) == 0.0 and radar.circuit_id == "pacific_corkscrew" \
+	var pacific_ok: bool = _label("CircuitNameLabel") == "Pacific Coast Corkscrew" \
+		and _label("CircuitTypeLabel") == "GRAND PRIX" \
+		and absf(float(radar.stats()["length_m"]) - 4100.0) <= 50.0 and radar.circuit_id == "pacific_corkscrew" \
+		and not continue_button.disabled
+	check(pacific_ok, "#S4e Round 07 Pacific Coast Corkscrew is playable with its own 4.1km map and Continue enabled")
+	# Round 08 is still reserved; selecting an unbuilt round remains safe.
+	_press("TrackNextButton")
+	await process_frame
+	var reserved_ok: bool = _label("CircuitNameLabel") == "Eifel Forest Ring" \
+		and float(radar.stats()["length_m"]) == 0.0 and radar.circuit_id == "eifel_forest" \
 		and continue_button.disabled and continue_button.text.contains("IN PREPARATION")
 	check(reserved_ok,
-		"#S4e unbuilt Round 07 remains empty with Continue disabled")
+		"#S4f unbuilt Round 08 remains empty with Continue disabled")
 
 	# Return to Apex Ring
+	_press("TrackPrevButton")
 	_press("TrackPrevButton")
 	_press("TrackPrevButton")
 	_press("TrackPrevButton")

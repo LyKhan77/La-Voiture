@@ -592,15 +592,17 @@ func _test_race_setup_hero_map() -> void:
 	check(apex != null and neo != null and brianza != null and monte != null and apex.text.contains("APEX RING") and neo.text.contains("NEO-WANGAN")
 		and brianza.text.contains("BRIANZA") and monte.text.contains("MONTE AZURE") and not monte.text.contains("IN PREPARATION") and not apex.disabled,
 		"race setup C: the carousel opens on Round 01 Apex Ring with Neo-Wangan, Brianza and Monte Azure playable")
-	# The second page includes the completed Ardennes and Stoke Crown venues.
+	# The second page includes the completed Ardennes, Stoke Crown and Pacific Corkscrew venues.
 	setup.select_circuit("ardennes")
 	var ardennes := setup.find_child("CarouselCard0", true, false) as Button
 	var stoke := setup.find_child("CarouselCard1", true, false) as Button
-	var unbuilt := setup.find_child("CarouselCard2", true, false) as Button
-	check(ardennes != null and stoke != null and unbuilt != null and ardennes.text.contains("ARDENNES") and not ardennes.text.contains("IN PREPARATION")
+	var pacific := setup.find_child("CarouselCard2", true, false) as Button
+	var unbuilt := setup.find_child("CarouselCard3", true, false) as Button
+	check(ardennes != null and stoke != null and pacific != null and unbuilt != null and ardennes.text.contains("ARDENNES") and not ardennes.text.contains("IN PREPARATION")
 		and stoke.text.contains("STOKE CROWN") and not stoke.text.contains("IN PREPARATION") and not stoke.disabled
+		and pacific.text.contains("PACIFIC") and not pacific.text.contains("IN PREPARATION") and not pacific.disabled
 		and unbuilt.text.contains("IN PREPARATION"),
-		"race setup C: second page shows playable Ardennes and Stoke Crown, while Round 07 remains in preparation")
+		"race setup C: second page shows playable Ardennes, Stoke Crown and Pacific Corkscrew, while Round 08 remains in preparation")
 	setup.select_circuit("apex_ring")
 	var next := setup.get("continue_button") as Button
 	check(next != null and next.text.contains("CONTINUE") and _skew_of(next, "normal") > 0.1, "race setup C: the continue button is a skewed street plate")

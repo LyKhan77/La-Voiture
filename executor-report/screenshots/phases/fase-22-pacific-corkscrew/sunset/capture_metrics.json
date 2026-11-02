@@ -1,0 +1,95 @@
+{
+	"complete_static_triangles": 6515944,
+	"environment_stats": {
+		"build_ms": 836,
+		"built": true,
+		"circuit_id": "pacific_corkscrew",
+		"draw_calls": 38,
+		"environment_triangles": 192586,
+		"grass_count": 698,
+		"grass_triangles": 4188,
+		"helipad": true,
+		"kerb_runs": 7,
+		"landmark_triangles": 10072,
+		"landmarks": [
+			{
+				"anchor": "terrain",
+				"glb": "res://assets/tracks/pacific_corkscrew/models/lone_oak_tree.glb",
+				"id": "lone_oak_tree",
+				"note": "The Lone Oak Tree – landmark braking reference on the Corkscrew crest",
+				"offset_m": 18.0,
+				"placed": true,
+				"placed_lateral_m": 18.0,
+				"position": [
+					-641.21,
+					28.18,
+					480.07
+				],
+				"s": 2750.0,
+				"side": "R",
+				"triangles": 460
+			},
+			{
+				"anchor": "deck",
+				"glb": "res://assets/tracks/pacific_corkscrew/models/pedestrian_arch_bridge.glb",
+				"id": "pedestrian_arch_bridge",
+				"note": "spec anchor L offset 12 m; placed lateral 0 so the arch deck spans the main straight, piers off the asphalt",
+				"offset_m": 12.0,
+				"placed": true,
+				"placed_lateral_m": 0.0,
+				"position": [
+					319.99,
+					7.58,
+					0.0
+				],
+				"s": 320.0,
+				"side": "L",
+				"triangles": 3192
+			},
+			{
+				"anchor": "ground",
+				"glb": "res://assets/tracks/pacific_corkscrew/models/corkscrew_amphitheater.glb",
+				"id": "corkscrew_amphitheater",
+				"note": "natural hill-terrace spectator amphitheatre overlooking The Corkscrew",
+				"offset_m": 35.0,
+				"placed": true,
+				"placed_lateral_m": 35.0,
+				"position": [
+					-747.04,
+					20.86,
+					435.52
+				],
+				"s": 2850.0,
+				"side": "L",
+				"triangles": 6420
+			}
+		],
+		"landmarks_placed": 3,
+		"multimeshes": 12,
+		"paddock_boards": 8,
+		"paddock_generators": 4,
+		"paddock_motorhomes": 8,
+		"paddock_palms": 9,
+		"paddock_parking_cars": 25,
+		"paddock_people": 120,
+		"paddock_tents": 6,
+		"paddock_transporters": 10,
+		"paddock_umbrellas": 12,
+		"paddock_vehicles": 6,
+		"roadbed_drop_m": 0.16,
+		"shrub_count": 707,
+		"shrub_triangles": 21210,
+		"terrain_max_y": 46.75,
+		"terrain_min_y": -3.37,
+		"terrain_triangles": 77654,
+		"tree_count": 1500,
+		"tree_triangles": 51000,
+		"triangle_budget": 320000,
+		"triangles": 301174
+	},
+	"failures": 0,
+	"fps": 20.0,
+	"orphans": 0.0,
+	"set": "pit",
+	"tod": 1
+}

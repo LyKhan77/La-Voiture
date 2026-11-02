@@ -33,7 +33,7 @@ const TABLE: Array[Array] = [
 	["stoke_crown", "JUN", "Stoke Crown Circuit", "", "Silverstone Circuit", "GBR", 0, 5.20, 18, true, 12.0,
 		"res://scenes/race_world/circuits/stoke_crown/stoke_crown_circuit.tscn", 0.65, "Maggotts-Becketts high-G aero sweepers."],
 	["pacific_corkscrew", "JUL", "Pacific Coast Corkscrew", "", "WeatherTech Raceway Laguna Seca", "USA", 0, 4.10, 11, true, 30.0,
-		"res://scenes/race_world/pacific_corkscrew_circuit.tscn", 0.10, "Blind Corkscrew drop, coastal Californian dust."],
+		"res://scenes/race_world/circuits/pacific_corkscrew/pacific_corkscrew_circuit.tscn", 0.10, "Blind Corkscrew drop, coastal Californian dust."],
 	["eifel_forest", "AUG", "Eifel Forest Ring", "", "Nurburgring GP", "GER", 0, 5.15, 16, true, 30.0,
 		"res://scenes/race_world/eifel_forest_circuit.tscn", 0.60, "Misty pine forest, technical Schumacher S."],
 	["paulistano", "SEP", "Paulistano Speed Arena", "", "Interlagos (Carlos Pace)", "BRA", 0, 4.31, 15, false, 40.0,

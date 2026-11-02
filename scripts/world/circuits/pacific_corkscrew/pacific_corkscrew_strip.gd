@@ -1,0 +1,115 @@
+extends RefCounted
+
+## Baked environment strip; regenerate with tools/build_pacific_corkscrew_curve.gd.
+const SEGMENTS: Array[Dictionary] = [
+	{
+		"band_depth_m": 200.0,
+		"band_offset_m": 20.0,
+		"density": 0.85,
+		"height_m": 22.0,
+		"kit_ids": [],
+		"s0": 0.0,
+		"s1": 450.0,
+		"side": "L",
+		"zone": "paddock"
+	},
+	{
+		"band_depth_m": 250.0,
+		"band_offset_m": 16.0,
+		"density": 0.5,
+		"height_m": 4.0,
+		"kit_ids": [],
+		"s0": 450.0,
+		"s1": 1500.0,
+		"side": "L",
+		"zone": "sand"
+	},
+	{
+		"band_depth_m": 240.0,
+		"band_offset_m": 18.0,
+		"density": 0.6,
+		"height_m": 8.0,
+		"kit_ids": [],
+		"s0": 1500.0,
+		"s1": 2600.0,
+		"side": "L",
+		"zone": "grass"
+	},
+	{
+		"band_depth_m": 220.0,
+		"band_offset_m": 22.0,
+		"density": 0.75,
+		"height_m": 25.0,
+		"kit_ids": [],
+		"s0": 2600.0,
+		"s1": 3100.0,
+		"side": "L",
+		"zone": "cliff"
+	},
+	{
+		"band_depth_m": 260.0,
+		"band_offset_m": 18.0,
+		"density": 0.55,
+		"height_m": 6.0,
+		"kit_ids": [],
+		"s0": 3100.0,
+		"s1": 4100.0,
+		"side": "L",
+		"zone": "grass"
+	},
+	{
+		"band_depth_m": 220.0,
+		"band_offset_m": 22.0,
+		"density": 0.8,
+		"height_m": 14.0,
+		"kit_ids": [],
+		"s0": 0.0,
+		"s1": 450.0,
+		"side": "R",
+		"zone": "paddock"
+	},
+	{
+		"band_depth_m": 260.0,
+		"band_offset_m": 16.0,
+		"density": 0.5,
+		"height_m": 4.0,
+		"kit_ids": [],
+		"s0": 450.0,
+		"s1": 1500.0,
+		"side": "R",
+		"zone": "grass"
+	},
+	{
+		"band_depth_m": 280.0,
+		"band_offset_m": 18.0,
+		"density": 0.7,
+		"height_m": 16.0,
+		"kit_ids": [],
+		"s0": 1500.0,
+		"s1": 2600.0,
+		"side": "R",
+		"zone": "forest"
+	},
+	{
+		"band_depth_m": 200.0,
+		"band_offset_m": 20.0,
+		"density": 0.7,
+		"height_m": 18.0,
+		"kit_ids": [],
+		"s0": 2600.0,
+		"s1": 3100.0,
+		"side": "R",
+		"zone": "rock"
+	},
+	{
+		"band_depth_m": 220.0,
+		"band_offset_m": 20.0,
+		"density": 0.65,
+		"height_m": 10.0,
+		"kit_ids": [],
+		"s0": 3100.0,
+		"s1": 4100.0,
+		"side": "R",
+		"zone": "paddock"
+	}
+]
