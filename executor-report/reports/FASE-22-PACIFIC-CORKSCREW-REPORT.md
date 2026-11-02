@@ -2,9 +2,9 @@
 
 **Tanggal:** 2026-11-02
 **Agen:** omp — Adaptive Game Tech Lead / Executor
-**Branch:** `fase-22-pacific-corkscrew` (belum di-commit; menunggu izin)
+**Branch:** `fase-22-pacific-corkscrew`; merge fast-forward ke `main` sebagai `87f6f0c` dan sudah di-push ke `origin/main`.
 **Sumber:** `mapgen-circuit/builds/pacific_corkscrew/production-handoff.md` (approved 2026-11-02) dan `Circuit-Environment-Component-Guide` v2.0.
-**Status:** implementasi produksi selesai; seluruh gate sirkuit PASS; suite penuh dicatat di bagian akhir.
+**Status:** implementasi produksi selesai; seluruh gate sirkuit PASS; suite penuh 103/103 PASS; terintegrasi ke `main`.
 
 ---
 
@@ -192,3 +192,18 @@ Satu-satunya kegagalan sementara adalah `test_visual_polish_and_consistency` yan
 Setelah polish pit lane (entry/exit + marka), 12 tes regresi dijalankan ulang: Pacific circuit/pit drive/pit flood, lima kontrak, racing line, selector, dan visual polish — **semua PASS**. Perubahan polish bersifat visual (mesh marka, apron, hatch, label), tidak mengubah geometri sim.
 
 Catatan eksekusi: seluruh proses Godot native/headless ditutup setelah pengujian; tidak ada window atau proses uji yang ditinggalkan.
+
+---
+
+## 7. Integrasi Git
+
+| Langkah | Hasil |
+|---|---|
+| Basis | `main` / `origin/main` = `18f275e`, tanpa divergensi |
+| Branch | `fase-22-pacific-corkscrew` |
+| Commit | `87f6f0c` — 114 file, +4.921 / −15 |
+| Merge | fast-forward `main` `18f275e` → `87f6f0c` |
+| Push | `origin/main` `18f275e` → `87f6f0c` (ack `main -> main`) |
+| Working tree | perubahan `.import`/`AGENTS.md` lama milik developer tetap tidak di-commit |
+
+Isi commit: 12 modul sirkuit, scene + pit scene, 3 GLB, data paket, curve, strip, 3 shader, preview 1920 px, 3 tes Pacific, 8 tes kontrak/selector/visual yang diperbarui, registry, tool bake, tool capture, laporan, dan 51 screenshot gate (16 PNG × 3 TOD + metrics).
