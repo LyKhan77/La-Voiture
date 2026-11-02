@@ -47,6 +47,7 @@ const GARAGE_HEIGHT_M: float = 4.2
 const GARAGE_WIDTH_M: float = 16.4
 const ENTRY_BLEND_M: float = 80.0
 const EXIT_BLEND_M: float = 90.0
+const PAVEMENT_TAIL_M: float = 65.0
 ## The race control tower beyond the building's end, seated on the ribbon: the straight bends here, so a
 ## straight-line offset from the building put its track face over the pit lane. Its track face (centre - 7.75 m)
 ## stands 2.35 m outside the lane edge (13.9 m).
@@ -189,6 +190,18 @@ func lane_edges(u: float) -> Vector2:
 	return Vector2(lerpf(6.0, FAST_LANE_M - FAST_LANE_HALF_M, blend), lerpf(lerpf(7.2, FAST_LANE_M + FAST_LANE_HALF_M, blend), GARAGE_FRONT_M + 0.05, working))
 
 
+## Continuous civil pavement, independent of the simulator's lane/limiter.
+func pavement_edges(u: float) -> Vector2:
+	var outer: float = FAST_LANE_M + FAST_LANE_HALF_M
+	if u < 0.0:
+		outer = lerpf(ROAD_EDGE_M, outer, smoothstep(-PAVEMENT_TAIL_M, 0.0, u))
+	elif u > LANE_LENGTH_M:
+		outer = lerpf(outer, ROAD_EDGE_M, smoothstep(LANE_LENGTH_M, LANE_LENGTH_M + PAVEMENT_TAIL_M, u))
+	else:
+		outer = maxf(outer, lane_edges(u).y)
+	return Vector2(ROAD_EDGE_M - 0.2, outer)
+
+
 func wall_lateral(u: float) -> float:
 	return lane_edges(u).x - 0.8
 
@@ -236,12 +249,13 @@ func _build_stalls(team_ids: Array[int] = []) -> void:
 func _build_asphalt() -> void:
 	var batch := MeshBatchScript.new()
 	var material: ShaderMaterial = PitKit.asphalt_material()
-	var steps: int = ceili(LANE_LENGTH_M / 3.0)
+	var span: float = LANE_LENGTH_M + 2.0 * PAVEMENT_TAIL_M
+	var steps: int = ceili(span / 3.0)
 	for i: int in range(steps):
-		var u0: float = float(i) * 3.0
-		var u1: float = minf(float(i + 1) * 3.0, LANE_LENGTH_M)
-		var edges0: Vector2 = lane_edges(u0)
-		var edges1: Vector2 = lane_edges(u1)
+		var u0: float = -PAVEMENT_TAIL_M + span * float(i) / float(steps)
+		var u1: float = -PAVEMENT_TAIL_M + span * float(i + 1) / float(steps)
+		var edges0: Vector2 = pavement_edges(u0)
+		var edges1: Vector2 = pavement_edges(u1)
 		var t0_inner: Vector3 = get_pit_transform(u0, edges0.x).origin + Vector3.UP * SURFACE_Y
 		var t0_outer: Vector3 = get_pit_transform(u0, edges0.y).origin + Vector3.UP * SURFACE_Y
 		var t1_inner: Vector3 = get_pit_transform(u1, edges1.x).origin + Vector3.UP * SURFACE_Y
@@ -262,7 +276,7 @@ func _build_markings() -> void:
 	var left: Callable = func(u: float) -> float: return lane_edges(u).x
 	var right: Callable = func(u: float) -> float: return lane_edges(u).y
 	_marking_strip(batch, material, PAINT_YELLOW, 0.0, LANE_LENGTH_M, func(u: float) -> float: return left.call(u) + 0.25, func(u: float) -> float: return left.call(u) + 0.55)
-	_marking_strip(batch, material, PAINT_WHITE, 0.0, LANE_LENGTH_M, func(u: float) -> float: return right.call(u) - 0.55, func(u: float) -> float: return right.call(u) - 0.25)
+	_marking_strip(batch, material, PAINT_WHITE, -PAVEMENT_TAIL_M, LANE_LENGTH_M + PAVEMENT_TAIL_M, func(u: float) -> float: return pavement_edges(u).y - 0.14, func(u: float) -> float: return pavement_edges(u).y)
 	_marking_strip(batch, material, PAINT_WHITE, float(stalls[0]["u"]) - 22.0, float(stalls[-1]["u"]) + 22.0, func(_u: float) -> float: return FAST_LANE_M + FAST_LANE_HALF_M - 0.1, func(_u: float) -> float: return FAST_LANE_M + FAST_LANE_HALF_M + 0.1)
 	lane_separator_count = 1
 	for u: float in [0.0, LANE_LENGTH_M - 1.5]:

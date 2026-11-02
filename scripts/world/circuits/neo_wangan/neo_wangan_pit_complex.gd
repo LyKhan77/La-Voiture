@@ -66,6 +66,7 @@ const GARAGE_WIDTH_M: float = 16.4
 const ENTRY_BLEND_M: float = 20.0
 const EXIT_BLEND_M: float = 80.0
 const ROAD_EDGE_M: float = 5.75 # half of the circuit's 11.5 m road
+const PAVEMENT_TAIL_M: float = 65.0
 
 const SURFACE_Y: float = 0.015
 const LINE_Y: float = 0.03
@@ -234,10 +235,12 @@ func _build_asphalt() -> void:
 func _lane_surface(y: float) -> ArrayMesh:
 	var batch := MeshBatchScript.new()
 	var material: Material = ToonMaterials.vertex_colored(false)
-	var steps: int = maxi(1, ceili(merge_u() / STEP_M))
+	var start: float = -PAVEMENT_TAIL_M
+	var span: float = merge_u() + 2.0 * PAVEMENT_TAIL_M
+	var steps: int = maxi(1, ceili(span / STEP_M))
 	for index: int in range(steps):
-		var ua: float = merge_u() * float(index) / float(steps)
-		var ub: float = merge_u() * float(index + 1) / float(steps)
+		var ua: float = start + span * float(index) / float(steps)
+		var ub: float = start + span * float(index + 1) / float(steps)
 		var left_a: float = _surface_left(ua)
 		var right_a: float = _surface_right(ua)
 		var left_b: float = _surface_left(ub)
@@ -247,21 +250,23 @@ func _lane_surface(y: float) -> ArrayMesh:
 	return batch.commit()
 
 
-## Working lane and the fast lane, on the road's edge at the entry mouth.
-func _surface_left(u: float) -> float:
-	return lerpf(ROAD_EDGE_M, FAST_LANE_M - FAST_LANE_HALF_M, smoothstep(0.0, ENTRY_BLEND_M, u)) if u <= LANE_LENGTH_M \
-		else lerpf(FAST_LANE_M - FAST_LANE_HALF_M, ROAD_EDGE_M, smoothstep(LANE_LENGTH_M, merge_u(), u))
+## Continuous road overlap, including the approach and departure tapers.
+func _surface_left(_u: float) -> float:
+	return ROAD_EDGE_M - 0.2
 
 
 func _surface_right(u: float) -> float:
 	var fast_edge: float = FAST_LANE_M + FAST_LANE_HALF_M
+	if u < 0.0:
+		return lerpf(ROAD_EDGE_M, fast_edge, smoothstep(-PAVEMENT_TAIL_M, 0.0, u))
+	if u > merge_u():
+		return lerpf(fast_edge, ROAD_EDGE_M, smoothstep(merge_u(), merge_u() + PAVEMENT_TAIL_M, u))
 	if u > LANE_LENGTH_M:
 		return fast_edge
-	var entry_edge: float = lerpf(ENTRY_LATERAL_M + FAST_LANE_HALF_M, fast_edge, smoothstep(0.0, ENTRY_BLEND_M, u))
 	var last_box: float = STALL_FIRST_OFFSET_M + STALL_PITCH_M * float(STALL_COUNT - 1)
 	var apron: float = smoothstep(STALL_FIRST_OFFSET_M - 24.0, STALL_FIRST_OFFSET_M - 8.0, u) \
 		* (1.0 - smoothstep(last_box + 12.0, LANE_LENGTH_M, u))
-	return lerpf(entry_edge, GARAGE_FRONT_M, apron)
+	return lerpf(fast_edge, GARAGE_FRONT_M, apron)
 
 
 func _at(u: float, lateral_m: float, y: float) -> Vector3:
@@ -280,8 +285,8 @@ func _build_markings() -> void:
 				_at(ua, left.call(ua), y), _at(ub, left.call(ub), y),
 				_at(ub, right.call(ub), y), _at(ua, right.call(ua), y), Vector3.UP)
 	# The fast lane's two limits: yellow on the pit wall side, white on the working lane side.
-	add_band.call(2.0, LANE_LENGTH_M, func(u: float) -> float: return _surface_left(u) + 0.25, func(u: float) -> float: return _surface_left(u) + 0.55, PAINT_YELLOW, LINE_Y)
-	add_band.call(ENTRY_BLEND_M, LANE_LENGTH_M, func(_u: float) -> float: return FAST_LANE_M + FAST_LANE_HALF_M - 0.55, func(_u: float) -> float: return FAST_LANE_M + FAST_LANE_HALF_M - 0.25, PAINT_WHITE, LINE_Y)
+	add_band.call(2.0, LANE_LENGTH_M, func(u: float) -> float: return lerpf(ROAD_EDGE_M, FAST_LANE_M - FAST_LANE_HALF_M, smoothstep(0.0, ENTRY_BLEND_M, u)) + 0.25, func(u: float) -> float: return lerpf(ROAD_EDGE_M, FAST_LANE_M - FAST_LANE_HALF_M, smoothstep(0.0, ENTRY_BLEND_M, u)) + 0.55, PAINT_YELLOW, LINE_Y)
+	add_band.call(-PAVEMENT_TAIL_M, merge_u() + PAVEMENT_TAIL_M, func(u: float) -> float: return _surface_right(u) - 0.14, func(u: float) -> float: return _surface_right(u), PAINT_WHITE, LINE_Y)
 	# Yellow limiter lines across the lane at Pit Entry and Pit Exit.
 	add_band.call(0.0, 1.2, func(u: float) -> float: return _surface_left(u), func(u: float) -> float: return _surface_right(u), PAINT_YELLOW, LINE_Y + 0.004)
 	add_band.call(LANE_LENGTH_M - 1.2, LANE_LENGTH_M, func(u: float) -> float: return _surface_left(u), func(u: float) -> float: return _surface_right(u), PAINT_YELLOW, LINE_Y + 0.004)

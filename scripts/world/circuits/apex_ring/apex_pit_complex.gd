@@ -51,6 +51,8 @@ const RAMP_OUT_M: float = GtPitLayout.RAMP_OUT_M
 ## The asphalt strip starts under the circuit's own surface (left edge) and at its edge (right edge).
 const STRIP_START_LEFT_M: float = 6.0
 const STRIP_START_RIGHT_M: float = 7.2
+## Civil pavement extends beyond the limiter/path, like the newer circuits.
+const PAVEMENT_TAIL_M: float = 65.0
 
 const GARAGE_WIDTH_M: float = 16.4
 const GARAGE_DEPTH_M: float = 9.0
@@ -172,6 +174,20 @@ func lane_edges(u: float) -> Vector2:
 		lerpf(lerpf(STRIP_START_RIGHT_M, fast_right, blend), garage_edge, working))
 
 
+## Fill the road-to-lane seam; only the outer pavement edge tapers. The lane
+## edges above still locate the driving corridor, pit wall and limiter bars.
+func pavement_edges(u: float) -> Vector2:
+	var road: float = ribbon.road_half_width_m
+	var outer: float = FAST_LANE_M + LANE_HALF_WIDTH_M
+	if u < 0.0:
+		outer = lerpf(road, outer, smoothstep(-PAVEMENT_TAIL_M, 0.0, u))
+	elif u > length_m:
+		outer = lerpf(outer, road, smoothstep(length_m, length_m + PAVEMENT_TAIL_M, u))
+	else:
+		outer = maxf(outer, lane_edges(u).y)
+	return Vector2(road - 0.2, outer)
+
+
 ## World transform of a point in the pit lane: arc distance u, absolute lateral.
 func get_pit_transform(u: float, lateral_m: float) -> Transform3D:
 	return ribbon.get_point_at_offset(s_from_u(u), lateral_m)
@@ -213,9 +229,9 @@ func _build_stalls(team_ids: Array[int] = []) -> void:
 func _build_asphalt() -> void:
 	var batch := MeshBatchScript.new()
 	var material: ShaderMaterial = PitKit.asphalt_material()
-	var left: Callable = func(u: float) -> float: return lane_edges(u).x
-	var right: Callable = func(u: float) -> float: return lane_edges(u).y
-	_strip(batch, material, ASPHALT_COLOR, SURFACE_Y, 0.0, length_m, left, right)
+	var left: Callable = func(u: float) -> float: return pavement_edges(u).x
+	var right: Callable = func(u: float) -> float: return pavement_edges(u).y
+	_strip(batch, material, ASPHALT_COLOR, SURFACE_Y, -PAVEMENT_TAIL_M, length_m + PAVEMENT_TAIL_M, left, right)
 	var instance := MeshInstance3D.new()
 	instance.name = "PitAsphalt"
 	instance.mesh = batch.commit()
@@ -248,7 +264,7 @@ func _build_markings() -> void:
 	var right: Callable = func(u: float) -> float: return lane_edges(u).y
 	# Yellow limiter line on the circuit side of the lane, white line on the garage side.
 	_strip(batch, paint, PAINT_YELLOW, LINE_Y, 0.0, length_m, func(u: float) -> float: return left.call(u) + 0.25, func(u: float) -> float: return left.call(u) + 0.55)
-	_strip(batch, paint, PAINT_WHITE, LINE_Y, 0.0, length_m, func(u: float) -> float: return right.call(u) - 0.55, func(u: float) -> float: return right.call(u) - 0.25)
+	_strip(batch, paint, PAINT_WHITE, LINE_Y, -PAVEMENT_TAIL_M, length_m + PAVEMENT_TAIL_M, func(u: float) -> float: return pavement_edges(u).y - 0.14, func(u: float) -> float: return pavement_edges(u).y)
 	# The fast lane / working lane separator runs in front of all ten boxes.
 	var first_u: float = (float(stalls[0]["u"]) - 22.0) if not stalls.is_empty() else (stall_u(0) - 22.0)
 	var last_u: float = (float(stalls[stalls.size() - 1]["u"]) + 22.0) if not stalls.is_empty() else (stall_u(TEAM_COUNT - 1) + 22.0)
