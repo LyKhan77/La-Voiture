@@ -115,14 +115,16 @@ func _test_audio_files() -> void:
 # --- #5..#7 the engine ---------------------------------------------------------------------
 
 func _test_engine_voice() -> void:
+	# Fase 21.3: the pitch belongs to the car's engine family (tests/test_engine_audio_profiles.gd covers the families).
+	var family: EngineProfile = EngineProfile.for_family(EngineProfile.DEFAULT_FAMILY)
 	var rising: bool = true
 	var last: float = -1.0
 	for rpm: int in range(1200, 8501, 100):
-		var pitch: float = EngineAudio3D.pitch_for(float(rpm))
-		rising = rising and pitch > last
+		var pitch: float = family.pitch_for(float(rpm))
+		rising = rising and pitch >= last # flat only where the family clamps to EngineProfile.PITCH_MIN
 		last = pitch
-	check(rising and is_equal_approx(EngineAudio3D.pitch_for(1200.0), 0.65) and is_equal_approx(EngineAudio3D.pitch_for(8500.0), 1.85),
-		"#5 engine pitch climbs monotonically from 0.65 at 1200 RPM to 1.85 at 8500 RPM")
+	rising = rising and family.pitch_for(8500.0) > family.pitch_for(1200.0)
+	check(rising, "#5 engine pitch climbs monotonically from %.2f at 1200 RPM to %.2f at 8500 RPM (%s family)" % [family.pitch_for(1200.0), family.pitch_for(8500.0), family.id])
 	var idle_db: float = EngineAudio3D.volume_for(0.0, 0.0)
 	var loud_db: float = EngineAudio3D.volume_for(1.0, 76.0)
 	check(EngineAudio3D.volume_for(1.0, 40.0) > EngineAudio3D.volume_for(0.5, 40.0) and EngineAudio3D.volume_for(0.5, 40.0) > EngineAudio3D.volume_for(0.0, 40.0)
@@ -131,7 +133,7 @@ func _test_engine_voice() -> void:
 	var engine := EngineAudio3D.new()
 	root.add_child(engine)
 	engine.update_engine_audio(8500.0, 1.0, 76.0)
-	var pitch_ok: bool = is_equal_approx(engine.pitch_scale, 1.85) and is_equal_approx(engine.volume_db, 0.0)
+	var pitch_ok: bool = absf(engine.pitch_scale / family.pitch_for(8500.0) - 1.0) <= EngineAudio3D.DETUNE + 0.0001 and is_equal_approx(engine.volume_db, 0.0)
 	engine.on_gear_changed(3)
 	engine.on_gear_changed(2) # a downshift is no pop
 	var after_downshift: int = engine.pops_triggered
@@ -429,10 +431,16 @@ func _test_actor_wiring() -> void:
 		var car: GtCar = actor.car
 		if car.v > 0.5:
 			moving += 1
-			in_step = in_step and is_equal_approx(actor.audio.engine.pitch_scale, EngineAudio3D.pitch_for(car.rpm))
+			var family: EngineProfile = EngineProfile.for_team(car.team_id)
+			in_step = in_step and actor.audio.engine.profile == family and absf(actor.audio.engine.pitch_scale / family.pitch_for(car.rpm) - 1.0) <= EngineAudio3D.DETUNE + 0.0001
 			var squeal: bool = absf(car.lateral_g) > 1.8 or TireAudio3D.is_lockup(car)
 			in_step = in_step and actor.audio.tire.screeching == squeal
-	check(wired and moving > 10 and in_step, "#22 every GT car actor carries its spatial engine and tyre voices, driven by its RPM and lateral G (%d cars rolling)" % moving)
+	var doppler: bool = world.camera.doppler_tracking != Camera3D.DOPPLER_TRACKING_DISABLED
+	var focused: int = 0
+	for actor: ActorScript in world.actors:
+		focused += 1 if actor.audio.focused else 0
+	check(wired and moving > 10 and in_step and doppler and focused == 1,
+		"#22 every GT car actor carries its spatial engine (its team's engine family) and tyre voices, driven by its RPM and lateral G (%d cars rolling); Doppler on the camera; one followed car in focus" % moving)
 	var actor: ActorScript = world.actors[0]
 	var pops: int = actor.audio.engine.pops_triggered
 	actor.car.gear += 1

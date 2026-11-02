@@ -125,6 +125,7 @@ func _ready() -> void:
 		if building.has_method("apply_teams"):
 			building.apply_teams(race.active_teams)
 	environment.bind_world($WorldEnvironment, $Sun, camera)
+	camera.doppler_tracking = Camera3D.DOPPLER_TRACKING_IDLE_STEP # cars move on render frames (step in _process)
 	choreographer.setup(pit_lane, ActorScript.WHEEL_SCENES)
 	for car: CarScript in race.cars:
 		var actor := ActorScene.instantiate() as ActorScript
@@ -305,6 +306,8 @@ func step(delta: float) -> void:
 	var spin_scale: float = minf(time_scale, 2.0)
 	var audible: bool = time_scale <= AUDIBLE_MAX_TIME_SCALE and not _celebration_requested
 	for actor: ActorScript in actors:
+		if actor.audio != null:
+			actor.audio.focused = actor.car.id == followed_id
 		actor.present(alpha, delta, spin_scale, audible)
 		_present_pit(actor)
 	_update_pit_crews(delta)

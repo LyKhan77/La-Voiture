@@ -11,6 +11,12 @@ const KERB_LATERAL_M: float = 5.2
 const KERB_MIN_SPEED_MPS: float = 20.0
 const KERB_VOLUME_DB: float = -10.0
 const PARKED_SPEED_MPS: float = 0.5
+## Beyond this distance from the camera an engine keeps only its main loop (voice budget).
+const NEAR_CAMERA_M: float = 45.0
+
+## Set by the world: the car the camera follows sits a little above the pack.
+var focused: bool = false
+var _voice_key: Vector2i = Vector2i(-1, -1)
 
 @onready var engine: EngineAudio3D = $Engine
 @onready var tire: TireAudio3D = $Tire
@@ -24,6 +30,11 @@ func _ready() -> void:
 	kerb.stream = EngineAudio3D.looped(KERB_STREAM)
 
 
+func _near_camera() -> bool:
+	var camera: Camera3D = get_viewport().get_camera_3d() if is_inside_tree() else null
+	return camera == null or camera.global_position.distance_squared_to(global_position) < NEAR_CAMERA_M * NEAR_CAMERA_M
+
+
 ## `audible` is false at high time scales, where a field of 20 squealing cars is just noise.
 func update_from_car(car: GtCar, audible: bool = true) -> void:
 	if not audible or car.is_dnf:
@@ -31,8 +42,12 @@ func update_from_car(car: GtCar, audible: bool = true) -> void:
 		tire.update_tire_audio(0.0, false)
 		kerb.stop()
 		return
+	if _voice_key != Vector2i(car.team_id, car.id):
+		_voice_key = Vector2i(car.team_id, car.id)
+		engine.set_voice(EngineProfile.for_team(car.team_id), car.id)
+	engine.focused = focused
 	var parked: bool = car.v < PARKED_SPEED_MPS
-	engine.update_engine_audio(EngineAudio3D.IDLE_RPM if parked else car.rpm, 0.0 if parked else car.throttle, car.v)
+	engine.update_engine_audio(EngineProfile.SIM_IDLE_RPM if parked else car.rpm, 0.0 if parked else car.throttle, car.v, focused or _near_camera())
 	engine.on_gear_changed(car.gear)
 	tire.update_tire_audio(car.lateral_g, TireAudio3D.is_lockup(car))
 	var on_kerb: bool = absf(car.lateral) > KERB_LATERAL_M and car.v > KERB_MIN_SPEED_MPS and car.pit == null
