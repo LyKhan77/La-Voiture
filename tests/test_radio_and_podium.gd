@@ -203,12 +203,32 @@ func _test_voice_casting() -> void:
 	var patterns: Dictionary = {}
 	for row: Dictionary in rows:
 		patterns[String(row["speaker"])] = true
-	check(RadioVoice.is_female_driver(7) and not RadioVoice.is_female_driver(6),
-		"#23 only Freja Berg's slot (7) is cast with the female voice")
-	var male: Dictionary = RadioVoice.find("driver", "Tyres are cooked! Rear is sliding everywhere!", 6)
-	var female: Dictionary = RadioVoice.find("driver", "Tyres are cooked! Rear is sliding everywhere!", 7)
-	check(not male.is_empty() and not female.is_empty() and String(female["id"]).ends_with("_f") and not String(male["id"]).ends_with("_f"),
-		"#24 a new driver call resolves a male clip and Freja's own female clip")
+	# The roster's five women (DRIVER-CHARACTERIZATION-ROSTER.md): Novak, Aoki, Weiss, Rossi, Takahashi.
+	var women: Array[int] = [9, 13, 15, 21, 25]
+	var miscast: Array[String] = []
+	for slot: int in range(GtData.DRIVER_NAMES.size()):
+		if RadioVoice.is_female_driver(slot) != women.has(slot):
+			miscast.append(GtData.DRIVER_NAMES[slot])
+	check(miscast.is_empty(), "#23 exactly the roster's five women are cast with female voices%s" % ("" if miscast.is_empty() else " (miscast: %s)" % ", ".join(PackedStringArray(miscast))))
+	var shared: Array[String] = []
+	for team: int in range(GtData.DRIVER_NAMES.size() / 2):
+		if RadioVoice.voice_of(team * 2) == RadioVoice.voice_of(team * 2 + 1):
+			shared.append(GtData.DRIVER_NAMES[team * 2])
+	check(shared.is_empty(), "#24 teammates never share a radio voice%s" % ("" if shared.is_empty() else " (shared: %s)" % ", ".join(PackedStringArray(shared))))
+	var missing: Array[String] = []
+	var line: String = "Tyres are cooked! Rear is sliding everywhere!"
+	for slot: int in range(GtData.DRIVER_NAMES.size()):
+		var clip: Dictionary = RadioVoice.find("driver", line, slot)
+		if clip.is_empty() or String(clip["voice"]) != RadioVoice.voice_of(slot):
+			missing.append("%s (%s)" % [GtData.DRIVER_NAMES[slot], RadioVoice.voice_of(slot)])
+	var per_voice: Dictionary = {}
+	for row: Dictionary in rows:
+		if String(row["speaker"]) == "driver":
+			per_voice[row["voice"]] = int(per_voice.get(row["voice"], 0)) + 1
+	for slot: int in range(GtData.DRIVER_NAMES.size()):
+		if int(per_voice.get(RadioVoice.voice_of(slot), 0)) != int(per_voice.get(RadioVoice.DEFAULT_DRIVER_VOICE, -1)):
+			missing.append("%s lacks lines" % RadioVoice.voice_of(slot))
+	check(missing.is_empty(), "#24b every driver's call plays in that driver's own voice%s" % ("" if missing.is_empty() else " (wrong: %s)" % ", ".join(PackedStringArray(missing))))
 	for text: String in [
 		"Pass made on REN! Clean move down the inside!", "Lost the spot to REN! Defending now!",
 		"Deploying ERS boost! Maximum attack!", "We touched with REN! Check the telemetry!",

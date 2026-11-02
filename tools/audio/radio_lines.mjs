@@ -7,18 +7,29 @@
 export const VOICES = {
 	engineer: { voice: "bm_lewis", speed: 1.05 },
 	driver: { voice: "am_eric", speed: 1.05 },
-	// Freja Berg (Nordic Phantom, field slot 7) hears her own voice: every driver line is also
-	// rendered as <id>_f and marked voice: "female" (see RadioVoice.FEMALE_DRIVER_SLOTS).
-	driver_female: { voice: "af_bella", speed: 1.05 },
 };
+
+// Every driver line is rendered once per driver voice, so each driver keeps one voice and two
+// teammates never share one. Casting per field slot lives in RadioVoice.DRIVER_VOICES (Godot);
+// this list must hold every voice used there. The id suffix keeps the older clips: am_eric has
+// none, af_bella is "_f" (the first female cast), the rest add "_<name>".
+export const DRIVER_VOICES = {
+	am_eric: "", af_bella: "_f",
+	am_michael: "_michael", am_fenrir: "_fenrir", am_puck: "_puck", bm_george: "_george",
+	af_heart: "_heart", bf_emma: "_emma",
+};
+export const DRIVER_SPEED = 1.05;
 
 const COMPOUNDS = ["SOFT", "MEDIUM", "HARD", "INTERMEDIATE", "WET"];
 const SECTOR_WORD = { 1: "one", 2: "two", 3: "three" };
 const lines = [];
 
 function add(id, speaker, pattern, spoken) {
-	lines.push({ id, speaker, pattern, spoken });
-	if (speaker === "driver") lines.push({ id: `${id}_f`, speaker, pattern, spoken, voice: "female" });
+	if (speaker !== "driver") {
+		lines.push({ id, speaker, pattern, spoken });
+		return;
+	}
+	for (const [voice, suffix] of Object.entries(DRIVER_VOICES)) lines.push({ id: `${id}${suffix}`, speaker, pattern, spoken, voice });
 }
 const word = (compound) => compound.toLowerCase();
 
