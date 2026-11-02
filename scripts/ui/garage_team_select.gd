@@ -21,7 +21,6 @@ const TyreWheelButton := preload("res://scripts/ui/manga/tyre_wheel_button.gd")
 const DriverSeatCard := preload("res://scripts/ui/manga/driver_seat_card.gd")
 const WheatpastePoster := preload("res://scripts/ui/manga/wheatpaste_poster.gd")
 const HazardStripe := preload("res://scripts/ui/manga/hazard_stripe.gd")
-const EngineAudio := preload("res://scripts/audio/engine_audio_3d.gd")
 const SettingsScript := preload("res://scripts/core/presentation_settings.gd")
 const ForecastRadar := preload("res://scripts/ui/weather_radar_widget.gd")
 const FONT_MONO := preload("res://assets/fonts/JetBrainsMono.ttf")
@@ -31,6 +30,14 @@ const BACK_SCENE := "res://scenes/ui/race_setup_menu.tscn"
 const NEXT_SCENE := "res://scenes/ui/manga_race_transition.tscn"
 const TRANSITION_SCRIPT := "res://scripts/ui/manga_race_transition.gd"
 const STAGE := Vector2(1920.0, 1080.0)
+const REV_ACTION: StringName = &"garage_rev_engine"
+const REV_RISE_RPM_S: float = 5800.0
+const REV_FALL_RPM_S: float = 7000.0
+const REV_RELEASE_RPM: float = 6000.0
+const REV_VOLUME_DB: float = -6.0
+const REV_FADE_SEC: float = 0.65
+const REV_LIMITER_HZ: float = 12.0
+const REV_LIMITER_DIP_RPM: float = 240.0
 const COMPOUND_NAMES: Array[String] = ["SOFT", "MEDIUM", "HARD", "INTER", "WET"]
 const COMPOUND_BUTTON_NAMES: Array[String] = ["Soft", "Medium", "Hard", "Inter", "Wet"]
 ## Compound colours are fixed (they mean rubber, not team): crimson, yellow, white, cyan, lime.
@@ -102,6 +109,13 @@ var _forecast_laps: Label
 var _forecast_radar: ForecastRadar
 var _forecast_weather: GtWeather
 var _engine_player: AudioStreamPlayer
+var _rev_active: bool = false
+var _rev_held: bool = false
+var _rev_rpm: float = EngineProfile.SIM_IDLE_RPM
+var _rev_clock: float = 0.0
+var _rev_idle_s: float = 0.0
+var _rev_profile: EngineProfile
+var _rev_exhaust: AudioStreamPlayer
 ## A row of skewed ink segments (the performance matrix).
 class SegmentBar extends Control:
 	const TOKENS = preload("res://scripts/ui/ui_theme_tokens.gd")
@@ -173,6 +187,7 @@ func _ready() -> void:
 	AudioManager.of(self).play_context(AudioManager.TRACK_GARAGE)
 ## Selects a stall (wraps around the ten teams); the camera dollies, nothing reloads.
 func select_team(index: int) -> void:
+	_stop_engine_test()
 	if config == null:
 		config = ConfigScript.get_config()
 	selected_team = posmod(index, Roster.TEAM_SLUGS.size())
@@ -232,22 +247,107 @@ func _do_launch() -> void:
 func _back() -> void:
 	if _launching:
 		return
+	_stop_engine_test()
 	AudioManager.click(self)
 	var error: Error = get_tree().change_scene_to_file(BACK_SCENE)
 	if error != OK:
 		push_error("Garage back: cannot open %s (error %d)" % [BACK_SCENE, error])
-func _play_launch_rev() -> void:
+func _ensure_engine_player() -> void:
 	if _engine_player == null:
 		_engine_player = AudioStreamPlayer.new()
 		_engine_player.name = "LaunchRev"
 		_engine_player.bus = &"SFX"
 		add_child(_engine_player)
-	_engine_player.stream = EngineAudio.looped(EngineAudio.ENGINE_STREAM)
-	_engine_player.volume_db = -3.0
-	_engine_player.pitch_scale = 1.55
+func _play_launch_rev() -> void:
+	_stop_engine_test()
+	_ensure_engine_player()
+	var profile: EngineProfile = EngineProfile.for_team(selected_team)
+	_engine_player.stream = profile.on_stream
+	_engine_player.volume_db = -3.0 + profile.on_gain_db
+	_engine_player.pitch_scale = profile.pitch_for(7500.0)
 	if AudioManager.has_output():
 		_engine_player.play()
+## Presentation-only throttle: no car stats or simulation state are touched.
+func _start_engine_test() -> void:
+	if _launching or _rev_held or (_mismatch_modal != null and _mismatch_modal.visible):
+		return
+	if not _rev_active:
+		_rev_profile = EngineProfile.for_team(selected_team)
+		_rev_rpm = EngineProfile.SIM_IDLE_RPM
+		_rev_clock = 0.0
+		_ensure_engine_player()
+		_engine_player.stream = _rev_profile.on_stream
+		_engine_player.pitch_scale = _rev_profile.pitch_for(_rev_rpm)
+		if AudioManager.has_output():
+			_engine_player.play()
+	_rev_active = true
+	_rev_held = true
+	_rev_idle_s = 0.0
+	_engine_player.volume_db = REV_VOLUME_DB + _rev_profile.on_gain_db
+	if _rev_exhaust != null:
+		_rev_exhaust.stop()
+		_rev_exhaust.stream = null
+
+func _release_engine_test() -> void:
+	if not _rev_held:
+		return
+	_rev_held = false
+	if _rev_rpm < REV_RELEASE_RPM:
+		return
+	if _rev_exhaust == null:
+		_rev_exhaust = AudioStreamPlayer.new()
+		_rev_exhaust.name = "EngineTestExhaust"
+		_rev_exhaust.bus = &"SFX"
+		_rev_exhaust.volume_db = EngineAudio3D.ONE_SHOT_DB
+		add_child(_rev_exhaust)
+	_rev_exhaust.stream = EngineAudio3D.BLOW_OFF_STREAM if _rev_profile.turbo else EngineAudio3D.UPSHIFT_STREAM
+	if AudioManager.has_output():
+		_rev_exhaust.play()
+
+func _stop_engine_test() -> void:
+	_rev_held = false
+	if not _rev_active:
+		return
+	_rev_active = false
+	_rev_rpm = EngineProfile.SIM_IDLE_RPM
+	_rev_idle_s = 0.0
+	_engine_player.stop()
+	_engine_player.volume_db = -80.0
+	if _rev_exhaust != null:
+		_rev_exhaust.stop()
+
+func _process(delta: float) -> void:
+	if not _rev_active:
+		return
+	_rev_clock += delta
+	var target: float = EngineProfile.SIM_REDLINE_RPM if _rev_held else EngineProfile.SIM_IDLE_RPM
+	var rate: float = REV_RISE_RPM_S if _rev_held else REV_FALL_RPM_S
+	_rev_rpm = move_toward(_rev_rpm, target, rate * delta)
+	var audible_rpm: float = _rev_rpm
+	if _rev_held and _rev_rpm >= EngineProfile.SIM_REDLINE_RPM:
+		audible_rpm -= REV_LIMITER_DIP_RPM * (0.5 + 0.5 * sin(_rev_clock * TAU * REV_LIMITER_HZ))
+	_engine_player.pitch_scale = _rev_profile.pitch_for(audible_rpm)
+	if not _rev_held and _rev_rpm <= EngineProfile.SIM_IDLE_RPM:
+		_rev_idle_s += delta
+		_engine_player.volume_db = lerpf(REV_VOLUME_DB + _rev_profile.on_gain_db, -80.0, clampf(_rev_idle_s / REV_FADE_SEC, 0.0, 1.0))
+		if _rev_idle_s >= REV_FADE_SEC:
+			_stop_engine_test()
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
+		_stop_engine_test()
+
 func _input(event: InputEvent) -> void:
+	if _launching:
+		return
+	if event.is_action(REV_ACTION):
+		if _mismatch_modal == null or not _mismatch_modal.visible:
+			if event.is_action_pressed(REV_ACTION):
+				_start_engine_test()
+			elif event.is_action_released(REV_ACTION):
+				_release_engine_test()
+		get_viewport().set_input_as_handled()
+		return
 	var key := event as InputEventKey
 	if key == null or not key.pressed or key.echo:
 		return
@@ -323,6 +423,7 @@ func _build_team_panel() -> void:
 		panel.add_child(bar)
 		_perf_bars.append(bar)
 	_text(panel, "Hint", "DRAG ORBIT  /  A-D TEAM  /  TAB FOCUS  /  ESC BACK", Vector2(38, 440), Vector2(420, 20), FONT_MONO, 12, T.TEXT_MUTED)
+	_text(panel, "EngineTestHint", "HOLD W // REV ENGINE", Vector2(38, 464), Vector2(420, 20), FONT_MONO, 14, T.TEXT_PRIMARY)
 	var tape := ColorRect.new()
 	tape.name = "DuctTape"
 	tape.position = Vector2(430, 22)
@@ -716,6 +817,7 @@ func _build_mismatch_modal() -> void:
 	_mismatch_cancel_btn.tooltip_text = "Return to garage to adjust strategy manually"
 	_mismatch_cancel_btn.pressed.connect(_hide_mismatch_modal)
 func _show_mismatch_modal(mismatch: Dictionary) -> void:
+	_stop_engine_test()
 	if _mismatch_modal == null:
 		_build_mismatch_modal()
 	var cars: String = "CAR 1 & CAR 2"

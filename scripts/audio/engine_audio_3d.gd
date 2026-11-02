@@ -10,8 +10,6 @@ extends AudioStreamPlayer3D
 
 signal backfire_triggered
 
-## Still used by the garage and the race transition for their single rev.
-const ENGINE_STREAM := preload("res://assets/audio/engine/gt3_engine_loop.wav")
 const UPSHIFT_STREAM := preload("res://assets/audio/engine/profiles/upshift_crack.wav")
 const OVERRUN_STREAM := preload("res://assets/audio/engine/profiles/overrun_crackle.wav")
 const BLOW_OFF_STREAM := preload("res://assets/audio/engine/profiles/blow_off.wav")

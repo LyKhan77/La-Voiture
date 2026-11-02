@@ -13,7 +13,6 @@ const Roster := preload("res://scripts/ui/garage_roster.gd")
 const Data := preload("res://scripts/gt/gt_data.gd")
 const UI := preload("res://scripts/ui/pit_wall_ui.gd")
 const T := preload("res://scripts/ui/ui_theme_tokens.gd")
-const ROAR: AudioStream = preload("res://assets/audio/engine/gt3_engine_loop.wav")
 
 const WORLD_PATH := "res://scenes/race_weekend_world.tscn"
 const MENU_PATH := "res://scenes/ui/main_menu.tscn"
@@ -82,6 +81,7 @@ var _load_failed: bool = false
 var _panels: Array[CutPanel] = []
 var _wipe_mat: ShaderMaterial
 var _world: Node
+var _engine_profile: EngineProfile
 
 
 func _ready() -> void:
@@ -123,9 +123,18 @@ func _on_flash_drawn() -> void:
 
 
 func _start_roar() -> void:
-	_roar.stream = ROAR
-	_roar.volume_db = 0.0
-	_roar.pitch_scale = 1.35
+	_engine_profile = EngineProfile.for_team(_team)
+	_roar.stream = _engine_profile.on_stream
+	_roar.volume_db = _engine_profile.on_gain_db
+	_roar.pitch_scale = _engine_profile.pitch_for(7500.0)
+	var snap := AudioStreamPlayer.new()
+	snap.name = "SnapExhaust"
+	snap.bus = &"SFX"
+	snap.stream = EngineAudio3D.BLOW_OFF_STREAM if _engine_profile.turbo else EngineAudio3D.UPSHIFT_STREAM
+	snap.volume_db = EngineAudio3D.ONE_SHOT_DB
+	add_child(snap)
+	if AudioManager.has_output():
+		snap.play()
 	if AudioManager.has_output():
 		_roar.play()
 
@@ -141,7 +150,7 @@ func _process(delta: float) -> void:
 		State.FLASH:
 			_rev += delta
 			_clock += delta
-			_roar.pitch_scale = lerpf(1.35, 1.12, clampf(_rev / FLASH_SEC, 0.0, 1.0))
+			_roar.pitch_scale = _engine_profile.pitch_for(lerpf(7500.0, 6000.0, clampf(_rev / FLASH_SEC, 0.0, 1.0)))
 			if _clock >= FLASH_SEC:
 				_enter_panels()
 		State.PANELS:
@@ -149,7 +158,7 @@ func _process(delta: float) -> void:
 			_clock += delta
 			var panels_t: float = clampf(_clock / PANELS_SEC, 0.0, 1.0)
 			_apply_panels(panels_t)
-			_roar.pitch_scale = lerpf(1.12, 0.78, panels_t)
+			_roar.pitch_scale = _engine_profile.pitch_for(lerpf(6000.0, 3500.0, panels_t))
 			if panels_t >= 1.0:
 				_state = State.WAIT_WORLD
 				_wait_clock = 0.0
@@ -163,7 +172,7 @@ func _process(delta: float) -> void:
 			_wipe_clock += delta
 			var wipe_t: float = clampf(_wipe_clock / WIPE_SEC, 0.0, 1.0)
 			_set_wipe(wipe_t)
-			_roar.volume_db = lerpf(0.0, -34.0, wipe_t)
+			_roar.volume_db = lerpf(_engine_profile.on_gain_db, -34.0, wipe_t)
 			if wipe_t >= 1.0:
 				_finish()
 
