@@ -1,0 +1,44 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] #P0 the circuit scene loads
+[PASS] #P1 PitLane is a built CircuitPitComplex
+[PASS] #P2 sim_layout entry_s = 2790.0 (got 2790.0)
+[PASS] #P2 sim_layout exit_s = 360.0 (got 360.0)
+[PASS] #P2 sim_layout lane_length_m = 420.0 (got 420.0)
+[PASS] #P2 sim_layout stall_first_s = 2896.0 (got 2896.0)
+[PASS] #P2 sim_layout stall_pitch_m = 20.0 (got 20.0)
+[PASS] #P2 sim_layout stall_lane_m = 13.0 (got 13.0)
+[PASS] #P2 sim_layout fast_lane_m = 8.5 (got 8.5)
+[PASS] #P2 sim_layout edge_lateral_m = 4.6 (got 4.6)
+[PASS] #P2 sim_layout queue_gap_m = 8.0 (got 8.0)
+[PASS] #P2 sim_layout lane_ramp_in_m = 60.0 (got 60.0)
+[PASS] #P2 sim_layout lane_ramp_out_m = 100.0 (got 100.0)
+[PASS] #P2 sim_layout stalls = 10 (got 10)
+[PASS] #P2 pit limiter is 80 km/h
+[PASS] #P3 ten boxes and ten garages
+[PASS] #P4 boxes at 13.0 m and garage fronts at 16.0 m (setback 3.0 m, as Neo-Wangan)
+[PASS] #P5 box i stands at s = 46 + 20 i, lateral 13.0, with its Socket_PitStall_i
+[PASS] #P5b the sim's boxes (entry 2790 + offset) and its 420 m lane are the ones drawn
+[PASS] #P6 the wall stands on the 11 m road's edge (edge 5.50, wall 5.75)
+[PASS] #P7 the 4.5 m fast lane (6.25..10.75) clears the wall and the box (box half width 1.65 m)
+[PASS] #P8 both mouths meet the circuit at lateral 4.6 m
+[PASS] #P9 the fast lane runs at 8.5 m from u=60 to u=320
+[PASS] #P10 the wall stands only where the cars are on the fast lane (u 58..318)
+[PASS] #P11 PitBuilding, MainGrandstand and RaceControlTower stand in the complex
+[PASS] #P12 the pit asphalt is a PitAsphalt mesh (RaceVfx wets it with the road)
+[PASS] #P13 one transporter per team parks behind the pit building
+[PASS] #P14 the pit building is centred on the ten boxes, s=136 (got 136.0)
+[PASS] #P15 the control tower stands clear of the 204 m building's end (building s 136, tower s 252)
+[PASS] #P16 the main grandstand faces the pits from the harbour side, front at 21.5 m left (lateral -21.5 m)
+[PASS] #P17 the grandstand is centred on s=95 (got 95.0)
+[PASS] #P20 the pit asphalt is joined to the road's edge and reaches 0.1 m past the car's outer side along the lane and both tails (0 stations short)
+[PASS] #P21 the path never turns more than 7 degrees (steepest 0.097 m per m)
+[PASS] #P21b the path has no kink: its slope changes by at most 0.007 per metre, a bend of radius 140 m or more (0.0063)
+[PASS] #P22 the asphalt is a sliver on the road's edge at the far end of both tails (width 0.10 and 0.10 m): no hard start
+[PASS] #P22b the tails are long enough to read as a gentle taper (45 m before the entry, 55 m after the exit; at least 30)
+[PASS] #P23b the barrier terminals stand on the street barrier line (6.20 m)
+[PASS] #P23 a car on the road's edge (lateral 4.6, outer side 5.64) clears the barrier's inner face at 5.92 m by at least 0.2 m
+[PASS] #P18 the car's lane (2 m wide, 3 m tall) is clear of every solid along the full 420 m (0 hits)
+[PASS] #P19 no right-hand barrier between s=2745 and s=415 (0 inside the gap) while the rest of the lap keeps 716
+MONTE AZURE PIT LAYOUT TEST SUITE: PASS

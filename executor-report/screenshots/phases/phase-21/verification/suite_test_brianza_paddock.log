@@ -1,0 +1,23 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] Brianza paddock exists
+[PASS] paddock has transporters, tents, fencing and parking
+[PASS] PaddockApron exists
+[PASS] PaddockServiceRoad exists
+[PASS] PaddockTents exists
+[PASS] PaddockFence exists
+[PASS] PaddockGate exists
+[PASS] PaddockParking exists
+[PASS] PaddockProps exists
+[PASS] PaddockTransporters exists
+[PASS] paddock footprints stay within their zone and away from other roads
+[PASS] transporters clear the race control tower
+[PASS] the race control tower stands clear of the pit lane (0 lane points inside it)
+[PASS] paddock mesh surfaces stay within 10 (9)
+[PASS] transporters and tents stand on the ground platform
+[PASS] rebuild updates transporter teams without duplicating nodes
+[PASS] paddock visible in time-of-day mode 0
+[PASS] paddock visible in time-of-day mode 1
+[PASS] paddock visible in time-of-day mode 2
+[PASS] paddock teardown leaves no orphan nodes

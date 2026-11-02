@@ -1,0 +1,31 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+--- Running Ardennes Valley Ring circuit suite ---
+[PASS] #A1 'ardennes' is in the calendar registry
+[PASS] #A2 the registry points at the circuits/ardennes module scene (got res://scenes/race_world/circuits/ardennes/ardennes_circuit.tscn)
+[PASS] #A3 Ardennes is playable once its scene exists
+[PASS] #A4 round 5, GRAND_PRIX, 5.40 km
+[PASS] #A5 ArdennesCircuitBuilder script exists at res://scripts/world/circuits/ardennes/ardennes_circuit_builder.gd
+[PASS] #A6 the circuit scene loads
+[PASS] #A7 the scene root is the ArdennesCircuitBuilder
+[PASS] #A8 TrackRibbon and its Curve3D exist
+[PASS] #A9 the builder records the frozen blueprint geometry_hash
+[PASS] #A10 baked length is 5400 m +-15 (got 5400.00)
+[PASS] #A11 the 3D ribbon is exactly 5400 m so every blueprint station (pit 5220 / 240) is a ribbon distance; the flat plan is a few metres shorter (ribbon 5400.004, plan 5391.95)
+[PASS] #A12 road is 14 m wide (half width 7.00)
+[PASS] #A13 plan_scale is under the 1.002666 flat scale because the 104 m climb lengthens the 3D curve (got 1.001172)
+[PASS] #A14 the ribbon is closed (first point repeated last)
+[PASS] #A15 20 numbered turns (got 20)
+[PASS] #A16 turn names are the blueprint's, T1 to T20
+[PASS] #A17 turn directions follow the blueprint (+1 right, -1 left)
+[PASS] #A18 turns are numbered in travel order
+[PASS] #A19 Arena Gateway Hairpin sits at s~387 (got 386)
+[PASS] #A20 tightest world radius is >= 38 m (got 38.04)
+[PASS] #A21 16 of the 20 turns turn >= 15 deg and take kerbs and braking boards; T2, T3, T4 and T11 are kinks (got 16)
+[PASS] #A22 the lowest point is the stadium floor at ~0 m (0.00 m)
+[PASS] #A23 peak >= 103.5 m and delta >= 103.5 m (peak 104.0, delta 104.0)
+[PASS] #A24 steepest grade is <= 14 % (got 13.4 %)
+[PASS] #A25 three sectors split the lap in thirds (1800 / 3600 / 5400)
+[PASS] #A26 tearing the circuit down leaves no orphan nodes
+ARDENNES CIRCUIT TEST SUITE: PASS

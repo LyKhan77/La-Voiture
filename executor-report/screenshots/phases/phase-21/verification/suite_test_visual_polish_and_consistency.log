@@ -1,0 +1,43 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] lamps: no cars carry a SphereMesh orb (0 found)
+[PASS] lamps: no lamp slabs or boxes are stuck on any car body (0 found)
+[PASS] tail trails: hidden when not braking by day, a red ribbon streams 26.0 m behind the car on the brakes
+[PASS] tail lights: dark by day when coasting (0.0), >= 5.0 on the brakes (6.5)
+[PASS] tail lights: they go dark again once the brake is released
+[PASS] tail lights: they glow softly at 1.2 at night without braking (1.2)
+[PASS] speedlines: 0 at rest (0.00), 0.65 at 252 km/h, 1.00 during ERS overtake, overlay hidden again at rest
+[PASS] speedlines: the overlay is a click-through rect on the manga_speedlines shader
+[PASS] speedlines: centred on the car ((0.497101, 0.57048)) and clipped to the HUD-free window ((0.183333, 0.264583, 0.823958, 0.676042))
+[PASS] boost punch: FOV kicks +3.5 deg in 0.08 s (70.0 -> 73.5) and eases back inside 0.35 s (70.0)
+[PASS] kerb sparks: 18 streaks fire only on the kerb above 35 m/s (slow=false, mid=false, kerb=true)
+[PASS] backfire: a downshift lights a crimson-core / acid-yellow flame for 0.12 s
+[PASS] kerb sparks: uneven ink shards (sizes x7.6 apart, four-colour ramp, wide spread) with sparkle stars, not identical dashes
+[PASS] kerb sparks: the throw leans away from whichever kerb the wheel is on (-0.55 / 0.61)
+[PASS] tyre smoke: puffs are the halftone graffiti swirl sheet, each one a random frame of its 2x2
+[PASS] flames: each pop carries a comic flame-burst sprite and two more burst from the wing tips
+[PASS] flames: the wing tips burst on a downshift only, for 0.12 s
+[PASS] speedlines: uneven hand-inked rays, a share painted lime / cyan / crimson, halftone wedges
+[PASS] presets: LOW drops beams, trails and comic bursts, MEDIUM adds the light trail, HIGH adds the headlight beams ({ 0: { "beams": false, "trail": false }, 1: { "beams": false, "trail": true }, 2: { "beams": true, "trail": true } })
+[PASS] reduce motion: no FOV punch (70.00 vs 70.00) and the speedlines hold still (reroll 0, normally 12)
+[PASS] sounds: a near downshift crackles (3 -> 4), an ERS overtake whooshes (5), a distant downshift is silent (5)
+[PASS] radio banner: while the bars move only the bars repaint (wave 16, static art 0 redraws in 8 frames)
+[PASS] radio banner: the halftone is one tiled texture, not a thousand circles
+[PASS] menu: the title is the toon-anime x graffiti logo art (no plain text label, halo or echo copies)
+[PASS] menu: the street-marker subtag is stamped under the title
+[PASS] menu: every button is a skewed parallelogram with a 4 px ink border, 6 px shadow, '/// ' prefix and an acid/crimson hover inversion
+[PASS] menu: hover snaps the button (+6, -2) and exit settles it back
+[PASS] menu: modals tilt -4 deg and carry a crimson 'SYS' badge
+[PASS] settings: the REDUCE MOTION toggle drives PresentationSettings.reduce_motion
+[PASS] settings A: the panel hangs as a -4 deg inspection tag with a crimson SYS // CONFIG badge
+[PASS] settings A: dropdowns are skewed plates, toggles are skewed switches, sliders are skewed ink bars with a lime fill
+[PASS] race setup C: the circuit map is the hero ((780.0, 604.0) px) with the real DRS zones (2) and numbered corners
+[PASS] race setup C: laps, weather and time are chips that write straight into the race config
+[PASS] race setup C: the carousel opens on Round 01 Apex Ring with Neo-Wangan, Brianza and Monte Azure playable
+[PASS] race setup C: second page shows playable Ardennes and Stoke Crown, while Round 07 remains in preparation
+[PASS] race setup C: the continue button is a skewed street plate
+[PASS] showroom: stall cars wear the race cel paint with an inverted-hull ink pass
+[PASS] showroom: the graphics preset drives the showroom ink width (LOW 0.007, ULTRA 0.020)
+38 assertions, 0 failure(s)
+FASE 8.5 VISUAL POLISH: PASS

@@ -1,0 +1,300 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] apex_ring, one car: scenario has cars to send
+[PASS] apex_ring, one car: car 4 is serviced and leaves the lane
+[PASS] apex_ring, one car: car 4: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] apex_ring, one car: car 4 gets 4 wheels swapped (4)
+[PASS] apex_ring, one car: car 4: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] apex_ring, one car: car 4 is never held in its box past 20 s (0.0 s)
+[PASS] apex_ring, one car: car 4: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] apex_ring, one car: car 4: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] apex_ring, one car: car 4: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] apex_ring, one car: no job is left open
+[PASS] apex_ring, one car: every stop is recorded as finished (1 of 1: [4] for [4])
+[PASS] apex_ring, one car: every crew is back in its garage
+[PASS] apex_ring, two teammates share a box: scenario has cars to send
+[PASS] apex_ring, two teammates share a box: car 4 is serviced and leaves the lane
+[PASS] apex_ring, two teammates share a box: car 4: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] apex_ring, two teammates share a box: car 4 gets 4 wheels swapped (4)
+[PASS] apex_ring, two teammates share a box: car 4: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] apex_ring, two teammates share a box: car 4 is never held in its box past 20 s (0.0 s)
+[PASS] apex_ring, two teammates share a box: car 4: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] apex_ring, two teammates share a box: car 4: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] apex_ring, two teammates share a box: car 4: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] apex_ring, two teammates share a box: car 5 is serviced and leaves the lane
+[PASS] apex_ring, two teammates share a box: car 5: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] apex_ring, two teammates share a box: car 5 gets 4 wheels swapped (4)
+[PASS] apex_ring, two teammates share a box: car 5: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] apex_ring, two teammates share a box: car 5 is never held in its box past 20 s (0.0 s)
+[PASS] apex_ring, two teammates share a box: car 5: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] apex_ring, two teammates share a box: car 5: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] apex_ring, two teammates share a box: car 5: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] apex_ring, two teammates share a box: no job is left open
+[PASS] apex_ring, two teammates share a box: every stop is recorded as finished (2 of 2: [4, 5] for [4, 5])
+[PASS] apex_ring, two teammates share a box: every crew is back in its garage
+[PASS] apex_ring, six cars box at once: scenario has cars to send
+[PASS] apex_ring, six cars box at once: car 4 is serviced and leaves the lane
+[PASS] apex_ring, six cars box at once: car 4: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] apex_ring, six cars box at once: car 4 gets 4 wheels swapped (4)
+[PASS] apex_ring, six cars box at once: car 4: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] apex_ring, six cars box at once: car 4 is never held in its box past 20 s (0.0 s)
+[PASS] apex_ring, six cars box at once: car 4: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] apex_ring, six cars box at once: car 4: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] apex_ring, six cars box at once: car 4: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] apex_ring, six cars box at once: car 12 is serviced and leaves the lane
+[PASS] apex_ring, six cars box at once: car 12: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] apex_ring, six cars box at once: car 12 gets 4 wheels swapped (4)
+[PASS] apex_ring, six cars box at once: car 12: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] apex_ring, six cars box at once: car 12 is never held in its box past 20 s (0.0 s)
+[PASS] apex_ring, six cars box at once: car 12: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] apex_ring, six cars box at once: car 12: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] apex_ring, six cars box at once: car 12: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] apex_ring, six cars box at once: car 16 is serviced and leaves the lane
+[PASS] apex_ring, six cars box at once: car 16: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] apex_ring, six cars box at once: car 16 gets 4 wheels swapped (4)
+[PASS] apex_ring, six cars box at once: car 16: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] apex_ring, six cars box at once: car 16 is never held in its box past 20 s (0.0 s)
+[PASS] apex_ring, six cars box at once: car 16: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] apex_ring, six cars box at once: car 16: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] apex_ring, six cars box at once: car 16: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] apex_ring, six cars box at once: car 17 is serviced and leaves the lane
+[PASS] apex_ring, six cars box at once: car 17: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] apex_ring, six cars box at once: car 17 gets 4 wheels swapped (4)
+[PASS] apex_ring, six cars box at once: car 17: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] apex_ring, six cars box at once: car 17 is never held in its box past 20 s (0.3 s)
+[PASS] apex_ring, six cars box at once: car 17: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] apex_ring, six cars box at once: car 17: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] apex_ring, six cars box at once: car 17: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] apex_ring, six cars box at once: car 7 is serviced and leaves the lane
+[PASS] apex_ring, six cars box at once: car 7: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] apex_ring, six cars box at once: car 7 gets 4 wheels swapped (4)
+[PASS] apex_ring, six cars box at once: car 7: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] apex_ring, six cars box at once: car 7 is never held in its box past 20 s (0.5 s)
+[PASS] apex_ring, six cars box at once: car 7: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] apex_ring, six cars box at once: car 7: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] apex_ring, six cars box at once: car 7: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] apex_ring, six cars box at once: car 6 is serviced and leaves the lane
+[PASS] apex_ring, six cars box at once: car 6: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] apex_ring, six cars box at once: car 6 gets 4 wheels swapped (4)
+[PASS] apex_ring, six cars box at once: car 6: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] apex_ring, six cars box at once: car 6 is never held in its box past 20 s (0.0 s)
+[PASS] apex_ring, six cars box at once: car 6: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] apex_ring, six cars box at once: car 6: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] apex_ring, six cars box at once: car 6: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] apex_ring, six cars box at once: at least one serviced car had to wait for the lane (11 held frames), so the hold animation was exercised
+[PASS] apex_ring, six cars box at once: no job is left open
+[PASS] apex_ring, six cars box at once: every stop is recorded as finished (6 of 6: [4, 12, 16, 7, 6, 17] for [4, 12, 16, 17, 7, 6])
+[PASS] apex_ring, six cars box at once: every crew is back in its garage
+[PASS] neo_wangan, six cars box at once: scenario has cars to send
+[PASS] neo_wangan, six cars box at once: car 4 is serviced and leaves the lane
+[PASS] neo_wangan, six cars box at once: car 4: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] neo_wangan, six cars box at once: car 4 gets 4 wheels swapped (4)
+[PASS] neo_wangan, six cars box at once: car 4: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] neo_wangan, six cars box at once: car 4 is never held in its box past 20 s (0.8 s)
+[PASS] neo_wangan, six cars box at once: car 4: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] neo_wangan, six cars box at once: car 4: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] neo_wangan, six cars box at once: car 4: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] neo_wangan, six cars box at once: car 13 is serviced and leaves the lane
+[PASS] neo_wangan, six cars box at once: car 13: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] neo_wangan, six cars box at once: car 13 gets 4 wheels swapped (4)
+[PASS] neo_wangan, six cars box at once: car 13: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] neo_wangan, six cars box at once: car 13 is never held in its box past 20 s (0.0 s)
+[PASS] neo_wangan, six cars box at once: car 13: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] neo_wangan, six cars box at once: car 13: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] neo_wangan, six cars box at once: car 13: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] neo_wangan, six cars box at once: car 12 is serviced and leaves the lane
+[PASS] neo_wangan, six cars box at once: car 12: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] neo_wangan, six cars box at once: car 12 gets 4 wheels swapped (4)
+[PASS] neo_wangan, six cars box at once: car 12: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] neo_wangan, six cars box at once: car 12 is never held in its box past 20 s (0.5 s)
+[PASS] neo_wangan, six cars box at once: car 12: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] neo_wangan, six cars box at once: car 12: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] neo_wangan, six cars box at once: car 12: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] neo_wangan, six cars box at once: car 5 is serviced and leaves the lane
+[PASS] neo_wangan, six cars box at once: car 5: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] neo_wangan, six cars box at once: car 5 gets 4 wheels swapped (4)
+[PASS] neo_wangan, six cars box at once: car 5: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] neo_wangan, six cars box at once: car 5 is never held in its box past 20 s (0.0 s)
+[PASS] neo_wangan, six cars box at once: car 5: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] neo_wangan, six cars box at once: car 5: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] neo_wangan, six cars box at once: car 5: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] neo_wangan, six cars box at once: car 16 is serviced and leaves the lane
+[PASS] neo_wangan, six cars box at once: car 16: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] neo_wangan, six cars box at once: car 16 gets 4 wheels swapped (4)
+[PASS] neo_wangan, six cars box at once: car 16: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] neo_wangan, six cars box at once: car 16 is never held in its box past 20 s (0.4 s)
+[PASS] neo_wangan, six cars box at once: car 16: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] neo_wangan, six cars box at once: car 16: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] neo_wangan, six cars box at once: car 16: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] neo_wangan, six cars box at once: car 19 is serviced and leaves the lane
+[PASS] neo_wangan, six cars box at once: car 19: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] neo_wangan, six cars box at once: car 19 gets 4 wheels swapped (4)
+[PASS] neo_wangan, six cars box at once: car 19: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] neo_wangan, six cars box at once: car 19 is never held in its box past 20 s (0.0 s)
+[PASS] neo_wangan, six cars box at once: car 19: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] neo_wangan, six cars box at once: car 19: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] neo_wangan, six cars box at once: car 19: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] neo_wangan, six cars box at once: at least one serviced car had to wait for the lane (22 held frames), so the hold animation was exercised
+[PASS] neo_wangan, six cars box at once: no job is left open
+[PASS] neo_wangan, six cars box at once: every stop is recorded as finished (6 of 6: [4, 12, 5, 16, 13, 19] for [4, 13, 12, 5, 16, 19])
+[PASS] neo_wangan, six cars box at once: every crew is back in its garage
+[PASS] brianza, six cars box at once: scenario has cars to send
+[PASS] brianza, six cars box at once: car 4 is serviced and leaves the lane
+[PASS] brianza, six cars box at once: car 4: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] brianza, six cars box at once: car 4 gets 4 wheels swapped (4)
+[PASS] brianza, six cars box at once: car 4: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] brianza, six cars box at once: car 4 is never held in its box past 20 s (0.0 s)
+[PASS] brianza, six cars box at once: car 4: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] brianza, six cars box at once: car 4: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] brianza, six cars box at once: car 4: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] brianza, six cars box at once: car 13 is serviced and leaves the lane
+[PASS] brianza, six cars box at once: car 13: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] brianza, six cars box at once: car 13 gets 4 wheels swapped (4)
+[PASS] brianza, six cars box at once: car 13: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] brianza, six cars box at once: car 13 is never held in its box past 20 s (0.0 s)
+[PASS] brianza, six cars box at once: car 13: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] brianza, six cars box at once: car 13: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] brianza, six cars box at once: car 13: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] brianza, six cars box at once: car 12 is serviced and leaves the lane
+[PASS] brianza, six cars box at once: car 12: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] brianza, six cars box at once: car 12 gets 4 wheels swapped (4)
+[PASS] brianza, six cars box at once: car 12: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] brianza, six cars box at once: car 12 is never held in its box past 20 s (0.0 s)
+[PASS] brianza, six cars box at once: car 12: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] brianza, six cars box at once: car 12: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] brianza, six cars box at once: car 12: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] brianza, six cars box at once: car 5 is serviced and leaves the lane
+[PASS] brianza, six cars box at once: car 5: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] brianza, six cars box at once: car 5 gets 4 wheels swapped (4)
+[PASS] brianza, six cars box at once: car 5: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] brianza, six cars box at once: car 5 is never held in its box past 20 s (0.0 s)
+[PASS] brianza, six cars box at once: car 5: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] brianza, six cars box at once: car 5: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] brianza, six cars box at once: car 5: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] brianza, six cars box at once: car 16 is serviced and leaves the lane
+[PASS] brianza, six cars box at once: car 16: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] brianza, six cars box at once: car 16 gets 4 wheels swapped (4)
+[PASS] brianza, six cars box at once: car 16: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] brianza, six cars box at once: car 16 is never held in its box past 20 s (1.1 s)
+[PASS] brianza, six cars box at once: car 16: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] brianza, six cars box at once: car 16: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] brianza, six cars box at once: car 16: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] brianza, six cars box at once: car 19 is serviced and leaves the lane
+[PASS] brianza, six cars box at once: car 19: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] brianza, six cars box at once: car 19 gets 4 wheels swapped (4)
+[PASS] brianza, six cars box at once: car 19: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] brianza, six cars box at once: car 19 is never held in its box past 20 s (0.0 s)
+[PASS] brianza, six cars box at once: car 19: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] brianza, six cars box at once: car 19: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] brianza, six cars box at once: car 19: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] brianza, six cars box at once: at least one serviced car had to wait for the lane (11 held frames), so the hold animation was exercised
+[PASS] brianza, six cars box at once: no job is left open
+[PASS] brianza, six cars box at once: every stop is recorded as finished (6 of 6: [5, 12, 4, 16, 13, 19] for [4, 13, 12, 5, 16, 19])
+[PASS] brianza, six cars box at once: every crew is back in its garage
+[PASS] monte_azure, six cars box at once: scenario has cars to send
+[PASS] monte_azure, six cars box at once: car 4 is serviced and leaves the lane
+[PASS] monte_azure, six cars box at once: car 4: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] monte_azure, six cars box at once: car 4 gets 4 wheels swapped (4)
+[PASS] monte_azure, six cars box at once: car 4: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] monte_azure, six cars box at once: car 4 is never held in its box past 20 s (0.0 s)
+[PASS] monte_azure, six cars box at once: car 4: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] monte_azure, six cars box at once: car 4: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] monte_azure, six cars box at once: car 4: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] monte_azure, six cars box at once: car 13 is serviced and leaves the lane
+[PASS] monte_azure, six cars box at once: car 13: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] monte_azure, six cars box at once: car 13 gets 4 wheels swapped (4)
+[PASS] monte_azure, six cars box at once: car 13: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] monte_azure, six cars box at once: car 13 is never held in its box past 20 s (0.0 s)
+[PASS] monte_azure, six cars box at once: car 13: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] monte_azure, six cars box at once: car 13: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] monte_azure, six cars box at once: car 13: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] monte_azure, six cars box at once: car 12 is serviced and leaves the lane
+[PASS] monte_azure, six cars box at once: car 12: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] monte_azure, six cars box at once: car 12 gets 4 wheels swapped (4)
+[PASS] monte_azure, six cars box at once: car 12: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] monte_azure, six cars box at once: car 12 is never held in its box past 20 s (0.0 s)
+[PASS] monte_azure, six cars box at once: car 12: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] monte_azure, six cars box at once: car 12: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] monte_azure, six cars box at once: car 12: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] monte_azure, six cars box at once: car 5 is serviced and leaves the lane
+[PASS] monte_azure, six cars box at once: car 5: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] monte_azure, six cars box at once: car 5 gets 4 wheels swapped (4)
+[PASS] monte_azure, six cars box at once: car 5: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] monte_azure, six cars box at once: car 5 is never held in its box past 20 s (0.0 s)
+[PASS] monte_azure, six cars box at once: car 5: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] monte_azure, six cars box at once: car 5: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] monte_azure, six cars box at once: car 5: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] monte_azure, six cars box at once: car 16 is serviced and leaves the lane
+[PASS] monte_azure, six cars box at once: car 16: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] monte_azure, six cars box at once: car 16 gets 4 wheels swapped (4)
+[PASS] monte_azure, six cars box at once: car 16: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] monte_azure, six cars box at once: car 16 is never held in its box past 20 s (0.7 s)
+[PASS] monte_azure, six cars box at once: car 16: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] monte_azure, six cars box at once: car 16: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] monte_azure, six cars box at once: car 16: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] monte_azure, six cars box at once: car 19 is serviced and leaves the lane
+[PASS] monte_azure, six cars box at once: car 19: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] monte_azure, six cars box at once: car 19 gets 4 wheels swapped (4)
+[PASS] monte_azure, six cars box at once: car 19: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] monte_azure, six cars box at once: car 19 is never held in its box past 20 s (0.4 s)
+[PASS] monte_azure, six cars box at once: car 19: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] monte_azure, six cars box at once: car 19: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] monte_azure, six cars box at once: car 19: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] monte_azure, six cars box at once: at least one serviced car had to wait for the lane (15 held frames), so the hold animation was exercised
+[PASS] monte_azure, six cars box at once: no job is left open
+[PASS] monte_azure, six cars box at once: every stop is recorded as finished (6 of 6: [4, 12, 5, 13, 16, 19] for [4, 13, 12, 5, 16, 19])
+[PASS] monte_azure, six cars box at once: every crew is back in its garage
+[PASS] ardennes, six cars box at once: scenario has cars to send
+[PASS] ardennes, six cars box at once: car 4 is serviced and leaves the lane
+[PASS] ardennes, six cars box at once: car 4: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] ardennes, six cars box at once: car 4 gets 4 wheels swapped (4)
+[PASS] ardennes, six cars box at once: car 4: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] ardennes, six cars box at once: car 4 is never held in its box past 20 s (0.0 s)
+[PASS] ardennes, six cars box at once: car 4: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] ardennes, six cars box at once: car 4: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] ardennes, six cars box at once: car 4: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] ardennes, six cars box at once: car 13 is serviced and leaves the lane
+[PASS] ardennes, six cars box at once: car 13: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] ardennes, six cars box at once: car 13 gets 4 wheels swapped (4)
+[PASS] ardennes, six cars box at once: car 13: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] ardennes, six cars box at once: car 13 is never held in its box past 20 s (0.0 s)
+[PASS] ardennes, six cars box at once: car 13: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] ardennes, six cars box at once: car 13: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] ardennes, six cars box at once: car 13: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] ardennes, six cars box at once: car 12 is serviced and leaves the lane
+[PASS] ardennes, six cars box at once: car 12: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] ardennes, six cars box at once: car 12 gets 4 wheels swapped (4)
+[PASS] ardennes, six cars box at once: car 12: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] ardennes, six cars box at once: car 12 is never held in its box past 20 s (1.2 s)
+[PASS] ardennes, six cars box at once: car 12: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] ardennes, six cars box at once: car 12: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] ardennes, six cars box at once: car 12: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] ardennes, six cars box at once: car 5 is serviced and leaves the lane
+[PASS] ardennes, six cars box at once: car 5: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] ardennes, six cars box at once: car 5 gets 4 wheels swapped (4)
+[PASS] ardennes, six cars box at once: car 5: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] ardennes, six cars box at once: car 5 is never held in its box past 20 s (0.0 s)
+[PASS] ardennes, six cars box at once: car 5: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] ardennes, six cars box at once: car 5: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] ardennes, six cars box at once: car 5: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] ardennes, six cars box at once: car 16 is serviced and leaves the lane
+[PASS] ardennes, six cars box at once: car 16: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] ardennes, six cars box at once: car 16 gets 4 wheels swapped (4)
+[PASS] ardennes, six cars box at once: car 16: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] ardennes, six cars box at once: car 16 is never held in its box past 20 s (2.0 s)
+[PASS] ardennes, six cars box at once: car 16: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] ardennes, six cars box at once: car 16: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] ardennes, six cars box at once: car 16: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] ardennes, six cars box at once: car 19 is serviced and leaves the lane
+[PASS] ardennes, six cars box at once: car 19: the crew works within 1.0 s of the car sitting in its box (0.00 s)
+[PASS] ardennes, six cars box at once: car 19 gets 4 wheels swapped (4)
+[PASS] ardennes, six cars box at once: car 19: the job closes within 1.0 s of the car leaving its box (0.00 s)
+[PASS] ardennes, six cars box at once: car 19 is never held in its box past 20 s (0.0 s)
+[PASS] ardennes, six cars box at once: car 19: the crew has stepped to the car by the time it stops (1.00 of the way)
+[PASS] ardennes, six cars box at once: car 19: a penalty hold shows a red board with the crew kept back (0 of 0 frames off)
+[PASS] ardennes, six cars box at once: car 19: while held the job is in HOLD with a red board (0 frames off, 0 green)
+[PASS] ardennes, six cars box at once: at least one serviced car had to wait for the lane (40 held frames), so the hold animation was exercised
+[PASS] ardennes, six cars box at once: no job is left open
+[PASS] ardennes, six cars box at once: every stop is recorded as finished (6 of 6: [4, 5, 12, 16, 13, 19] for [4, 13, 12, 5, 16, 19])
+[PASS] ardennes, six cars box at once: every crew is back in its garage

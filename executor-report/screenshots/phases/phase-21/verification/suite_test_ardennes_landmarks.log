@@ -1,0 +1,17 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] #L0 the five GLBs and asset_manifest.json are in assets/tracks/ardennes/models
+[PASS] #L1 HeroLandmarks holds the viaduct, the flyover, the tunnel and the glass terrace
+[PASS] #L1b the fifth hero, the futuristic pit building, stands in the pit complex
+[PASS] #L2 every landmark is real geometry within budget ([2304, 1220, 21360, 12444])
+[PASS] #L3 the thirty tunnel bays merge into at most three meshes (2)
+[PASS] #L3b the canopy covers about 180 m of road and rises over 10 m (178 m long, 21.0 m high)
+[PASS] #L4 the road is open through the acoustic tunnel in both directions: 0 of 1920 car-height rays blocked
+[PASS] #L5 the flyover's deck stands at least 6 m over the road (lowest 9.71 m)
+[PASS] #L6 the viaduct's feet stand 2 m under the river's surface and it rises over 30 m (base 11.7, 32.0 m high)
+[PASS] #L6b the viaduct stands 25 m or more from every other stretch of road (103 m)
+[PASS] #L7 the glass terrace is 222 m long and stands 24 m or more from the road (44 m)
+[PASS] #L8 the two grandstands do not overlap: 13 m of clear line between the glass terrace and the main stand
+[PASS] #L9 the glass lights up at night (glow 0.00 -> 0.22)
+ARDENNES LANDMARKS TEST SUITE: PASS

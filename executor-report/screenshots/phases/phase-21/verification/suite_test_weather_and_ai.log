@@ -1,0 +1,48 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] #1 WeatherManager starts DRY at 0.0 mm
+[PASS] #2 drizzle accumulates track water gradually at 0.005 mm/s ([0.15, 0.3, 0.45] mm per 30 s)
+[PASS] #3 downpour passes 1.0 mm in a minute (1.50 mm) and saturates at 3.5 mm
+[PASS] #4 DRYING returns the track to 0.0 mm and the state to DRY (1167 s)
+[PASS] #5 racing line dries 2x faster with traffic (0.40 mm vs 0.70 outer, 0.70 untrafficked)
+[PASS] #6 ambient temperature falls 25 -> 17 C in a downpour (17.0 C)
+[PASS] radio: crossing 35% wetness calls out exactly once ('TRACK WETNESS EXCEEDING 35% — BOX FOR WETS!')
+[PASS] radio: entering HEAVY_DOWNPOUR calls 'BOX THIS LAP — TRACK IS FLOODING!'
+[PASS] 5-lap forecast reads 'L+3: DRIZZLE | L+5: HEAVY RAIN' from the schedule
+[PASS] #8 slick loses grip once wetness > 0.35 mm (1.094 -> 0.976)
+[PASS] #11 WET compound out-grips slick on wet asphalt at 0.6, 1.0 and 2.0 mm (1.10 vs 1.03, 1.20 vs 0.88, 1.20 vs 0.56)
+[PASS] #7 AI Race Director sees 18 rival cars from 9 teams, none of them the player's
+[PASS] #9 slick car boxes for WET when wetness passes 0.35 mm (reason WEATHER_WET)
+[PASS] wet car stays out while the track is still wet
+[PASS] hysteresis: at 0.25 mm neither slicks nor wets pit (window is 0.18-0.35 mm)
+[PASS] #12 wet car boxes for MEDIUM/HARD once wetness < 0.18 mm (took HARD)
+[PASS] #13 AI undercuts only inside 1.8 s of a worn (<45%) car, and pushes while it chases (far '', fresh '', now 'UNDERCUT')
+[PASS] #14 AI boxes when average tire wear drops under 22% (23% stays out, 20% boxes)
+[PASS] engine mode: tires over 105 C drop to ECO, hold it until under 98 C, then return to STANDARD
+[PASS] low fuel (< 5 kg) boxes the car
+[PASS] undercut waits out the weather crossover (0.4 mm -> '', 0.8 mm -> 'UNDERCUT')
+[PASS] #10 all 18 rivals are on WET tires after a drizzle crossover, 18 stops served, player cars left alone
+[PASS] #15 safety car deploys in an extreme storm (> 2.8 mm): YELLOW_FLAG, overtaking disabled
+[PASS] safety car comes in after its minimum 120 s once the storm has cleared
+[PASS] a race incident deploys the safety car too
+[PASS] a car stranded out of fuel is reported and brings the safety car out
+[PASS] control: without the safety car the faster tail car passes (3660 order changes) and tops 328 km/h
+[PASS] #16 every car obeys 120 km/h under the safety car (255.5 km/h before, 120.0 km/h peak after settling)
+[PASS] #17 nobody overtakes under the yellow flag (0 order changes in 90 s)
+[PASS] #18 pack compresses behind the safety car (854 m -> 143 m long, closest gap 13.8 m)
+[PASS] safety car pit stop is cheap: 4.2 s lost vs 16.5 s under green
+[PASS] AI takes the cheap stop for worn (<60%) tires while the safety car is out
+[PASS] #19 track_ribbon shader exposes track_wetness (0..1) and the material accepts it
+[PASS] #19 shader drives ROUGHNESS from 0.85 (dry) to 0.15 (wet) with puddle noise and rain ripples
+[PASS] 3D world: the ribbon road uses the wet-track shader material
+[PASS] 3D world: heavy rain drives track_wetness (0.00 -> 1.00), road ripples and the rain particles
+[PASS] 3D rain is world-space GPUParticles3D (no 2D overlay): 2600 drops at ratio 1.00
+[PASS] 3D rain tracks the camera velocity (162 m/s) and 20 cars throw road spray
+[PASS] 3D world: rain stops when the weather clears
+[PASS] pit wall ribbon shows the weather status icons (now '🌧️ RAIN (WET 42%)  25°C')
+[PASS] pit wall radio carries 'TRACK WETNESS EXCEEDING 35% — BOX FOR WETS!' and the flooding call
+[PASS] pit wall flag turns YELLOW FLAG // SAFETY CAR and radio announces the deployment
+[PASS] #20 earlier suites still pass with no regression: test_simulation_verification=PASS, test_modular_car=PASS, test_pit_wall=PASS (test_race_world: run with -- --with-race-world)
+43 assertions, 0 failure(s)
+FASE 5 ACCEPTANCE: PASS

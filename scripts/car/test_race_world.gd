@@ -1,7 +1,7 @@
 extends Node3D
 
 ## 20-car test race on the 3-lane ribbon: sim -> actors (3D) + radar (2D).
-## Keys: 1-5 = 1x 2x 4x 8x 16x, Left/Right = follow another car.
+## Keys: 1-4 = 1x 2x 4x 8x, Left/Right = follow another car.
 
 const Sim := preload("res://scripts/car/traffic_race_sim.gd")
 const CarActorScene := preload("res://scenes/car/car_actor.tscn")
@@ -9,7 +9,7 @@ const ActorScript := preload("res://scripts/car/kinematic_car_actor.gd")
 const RibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const CarStateScript := preload("res://scripts/core/car_state.gd")
 
-const TIME_SCALES: Array[float] = [1.0, 2.0, 4.0, 8.0, 16.0]
+const TIME_SCALES: Array[float] = [1.0, 2.0, 4.0, 8.0]
 const CAMERA_BACK_M: float = 16.0
 const CAMERA_UP_M: float = 6.0
 const CAMERA_SMOOTH: float = 6.0
@@ -72,7 +72,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	var key := event as InputEventKey
 	if key == null or not key.pressed or key.echo:
 		return
-	if key.keycode >= KEY_1 and key.keycode <= KEY_5:
+	if key.keycode >= KEY_1 and key.keycode <= KEY_4:
 		set_time_scale(TIME_SCALES[key.keycode - KEY_1])
 	elif key.keycode == KEY_RIGHT:
 		followed_index = posmod(followed_index + 1, actors.size())
@@ -89,6 +89,6 @@ func _update_camera(weight: float) -> void:
 
 func _update_hud() -> void:
 	var car: CarStateScript = engine.cars[followed_index]
-	_info.text = "TIME x%d   CAR #%02d   LAP %d/%d   %3d KM/H   [1-5] SPEED  [</>] CAR" % [
+	_info.text = "TIME x%d   CAR #%02d   LAP %d/%d   %3d KM/H   [1-4] SPEED  [</>] CAR" % [
 		int(engine.time_scale), followed_index + 1, car.lap_number, total_laps, roundi(car.get_speed_kmh())
 	]

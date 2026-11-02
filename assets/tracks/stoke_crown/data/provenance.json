@@ -1,0 +1,56 @@
+{
+	"source": "mapgen-circuit/builds/stoke_crown",
+	"approved_design": "Route 2",
+	"phase0_geometry_hash": "sha256:5b8aaf2e6e71ad67ba7272cbe427db03146ebd510139e21f2f03e2c2e581dd1a",
+	"phase0_patches": [
+		{
+			"op": "alignment.set_radius",
+			"index": 12,
+			"value": 100.0
+		},
+		{
+			"op": "alignment.set_radius",
+			"index": 15,
+			"value": 100.0
+		},
+		{
+			"op": "pit.set_pitch",
+			"value": 20.0
+		}
+	],
+	"curve_bake_command": "godot --headless --path . -s tools/build_stoke_crown_curve.gd",
+	"files": [
+		{
+			"path": "models/becketts_pedestrian_flyover.glb",
+			"sha256": "2bd62fa76bd2f9656a90f589952f4b916e8ef3198f99bf84bcf0463b59e19931"
+		},
+		{
+			"path": "models/crown_wing_paddock.glb",
+			"sha256": "acd3d86532154e1786ec85f6195dff761865782ba1d65d32dd11bc6b6255a7d7"
+		},
+		{
+			"path": "models/luffield_arena_grandstand.glb",
+			"sha256": "7a036828fadce6f5f1da6e948513994f9a19233489fa362bd1456f59372a1a73"
+		},
+		{
+			"path": "models/raf_hangar_tower.glb",
+			"sha256": "af2163d8b4dca4d7e7920273996013b661741039997f6cebbc3e78189c7eae6a"
+		},
+		{
+			"path": "models/runway_crossing_spitfire.glb",
+			"sha256": "a4befbdb025ac298fe803c01a2ede07c7914f738010d433ae26b29d19210da4a"
+		},
+		{
+			"path": "data/blueprint.track.json",
+			"sha256": "7fbfdf88e182411aab6592cc94e933d19d938a28ac03a753f473cdd7685133ca"
+		},
+		{
+			"path": "data/environment_strip.json",
+			"sha256": "362c40133cac1902a83e5c09bab5ae4850adc132c2abb00b9a2fce7369c0cc0b"
+		},
+		{
+			"path": "data/stoke_crown_curve.tres",
+			"sha256": "0bbfaba49b78c53122ba2e298bd87a47ae081317f4a36f41b53b3edac920dc03"
+		}
+	]
+}

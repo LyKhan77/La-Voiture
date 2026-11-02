@@ -1,0 +1,16 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+ERROR: Failed to read the root certificate store.
+   at: get_system_ca_certificates (platform/windows/os_windows.cpp:2582)
+[stoke-runtime] armco posts: 2567 (122 interpolated)
+[stoke-runtime] catch fence panels: 897
+[stoke-crown-env] built in 0.81s | terrain tris 76558 | trees 1600 | grass 600 | hedges 633 | landmarks 5/5 | env tris 167042 (budget 320000)
+[phase18] ribbon length 5200.134 m | line limit 5.30 m (production: road_half - 1.7)
+[phase18] kinks: 0 (new-circuit cap 0)
+[phase18] real corners: 8 (registry turns_count 18 | R:5 L:3)
+[phase18] outside-apex-outside: 1/8 (13%, gate >= 60%)
+[phase18] pace: profile lap 97.43 s, avg 192 km/h (gate 130-230)
+[phase18] vendored line width: widest 3.20 m (clamp 3.2 | production limit 5.30, gate widest >= 4.77)
+[phase18] line cross-slope: steepest 0.55 m/m (gate <= 0.4)
+[phase18] RubberGroove: present (max vertex alpha 0.42, GP scale 1.0)
+[phase18] REVIEW: 2 gate(s) off (geometry gates: kink/corners/shape/pace/groove; width gate pending production line)

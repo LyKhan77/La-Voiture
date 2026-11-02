@@ -1,0 +1,92 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] Snapshot uses classified order and includes unserved finish penalties
+[PASS] Retirement outside top ten earns no fastest lap bonus
+[PASS] Fastest eligible finisher earns exactly one bonus and constructor sum includes both drivers
+[PASS] Results snapshot owns values, not mutable simulation objects
+[PASS] Driver 00 has a genuine transparent RGBA cutout
+[PASS] Driver 01 has a genuine transparent RGBA cutout
+[PASS] Driver 02 has a genuine transparent RGBA cutout
+[PASS] Driver 03 has a genuine transparent RGBA cutout
+[PASS] Driver 04 has a genuine transparent RGBA cutout
+[PASS] Driver 05 has a genuine transparent RGBA cutout
+[PASS] Driver 06 has a genuine transparent RGBA cutout
+[PASS] Driver 07 has a genuine transparent RGBA cutout
+[PASS] Driver 08 has a genuine transparent RGBA cutout
+[PASS] Driver 09 has a genuine transparent RGBA cutout
+[PASS] Driver 10 has a genuine transparent RGBA cutout
+[PASS] Driver 11 has a genuine transparent RGBA cutout
+[PASS] Driver 12 has a genuine transparent RGBA cutout
+[PASS] Driver 13 has a genuine transparent RGBA cutout
+[PASS] Driver 14 has a genuine transparent RGBA cutout
+[PASS] Driver 15 has a genuine transparent RGBA cutout
+[PASS] Driver 16 has a genuine transparent RGBA cutout
+[PASS] Driver 17 has a genuine transparent RGBA cutout
+[PASS] Driver 18 has a genuine transparent RGBA cutout
+[PASS] Driver 19 has a genuine transparent RGBA cutout
+[PASS] Three finishers populate the triptych from the twenty-car snapshot
+[PASS] P1 standee shows its own driver with the die-cut outline
+[PASS] P1 car is the finisher's own team sprite
+[PASS] P1 bubble carries the driver portrait
+[PASS] P1 has every texture loaded before the first cut
+[PASS] P1 tag names the real finisher and number
+[PASS] P2 standee shows its own driver with the die-cut outline
+[PASS] P2 car is the finisher's own team sprite
+[PASS] P2 bubble carries the driver portrait
+[PASS] P2 has every texture loaded before the first cut
+[PASS] P2 tag names the real finisher and number
+[PASS] P3 standee shows its own driver with the die-cut outline
+[PASS] P3 car is the finisher's own team sprite
+[PASS] P3 bubble carries the driver portrait
+[PASS] P3 has every texture loaded before the first cut
+[PASS] P3 tag names the real finisher and number
+[PASS] The P3 plate carries gap and points
+[PASS] The scene holds no 3D car, set or camera
+[PASS] The winning scene plays the podium anthem
+[PASS] The finale opens on the intro: equal panels, no details
+[PASS] The second cut focuses P3
+[PASS] The third cut focuses P2
+[PASS] The fourth cut focuses P1
+[PASS] The final settles the panels equal with every detail shown
+[PASS] current_cut() follows the director
+[PASS] Closing the studio releases its entire owned tree
+[PASS] A retired P3 shows DNF and 0 PTS
+[PASS] With two finishers the P3 focus is skipped
+[PASS] With no finishers the studio goes straight to the final without panels or a crash
+[PASS] A very long driver name still fits its tag
+[PASS] A fresh finale plays its cuts
+[PASS] Arrow keys do nothing before the final
+[PASS] Enter skips to the final
+[PASS] Space skips to the final
+[PASS] A click on empty stage skips to the final
+[PASS] A real click on a panel before the final skips instead of focusing
+[PASS] A real click on the P1 panel after the final focuses P1
+[PASS] A click on a panel before the final skips instead of focusing
+[PASS] Mashing skip announces the final exactly once
+[PASS] TAB mid-cut skips to the final and opens the tower
+[PASS] Right arrow after the final focuses P2, P1, P3, then equal ([1, 0, 2, -1])
+[PASS] Left arrow walks the cycle backwards
+[PASS] Clicking a panel after the final focuses it
+[PASS] Clicking the focused panel returns to equal
+[PASS] Reduce motion lands on the final
+[PASS] Reduce motion starts no drip or breathing tweens
+[PASS] Reduce motion applies a focus change at once
+[PASS] TAB opens the timing panel even with button focus
+[PASS] With the timing tower open no panel, tag or plate sits under it
+[PASS] The tower slides in as a slightly tilted poster
+[PASS] Timing rows are inked dark so they read on the paper poster
+[PASS] Rapid TAB reversals end fully closed without a stale tween
+[PASS] Closing the tower gives the triptych its full width back
+[PASS] Expanded timing contains all twenty finishers and all ten constructors
+[PASS] Timing distinguishes the awarded fastest lap bonus from a retired result
+[PASS] Opening the tower while a focus tween runs still ends clear of it
+[PASS] Restart frees the old studio without changing the configured seed
+[PASS] Restart hands the music back to the menu loop so the anthem cannot leak into the race
+[PASS] Restart reaches the selected team's real three-lap grid
+[PASS] Race-to-studio handoff releases the race and consumes its snapshot
+[PASS] EXIT TO HQ frees the studio and reaches the real main scene
+[PASS] EXIT TO HQ returns to the menu music
+[PASS] Standalone restart retains laps, simulation seed and start-light seed without inventing a menu draft
+[PASS] Exit leaves zero orphan nodes
+WINNING SCENE: 88 assertions, 0 FAIL

@@ -1,0 +1,45 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] #S1 asphalt surface stays at Y = 0.0 m, paint at most 0.03 m (min 0.000, max 0.030 over 24978 vertices)
+[PASS] #S0 the track spline is untouched (303 control points, 4158.75 m lap)
+[PASS] #S2 the road wears shaders/road_asphalt.gdshader: weather uniforms plus grit and paint wear (res://shaders/road_asphalt.gdshader)
+[PASS] #S3 kerbs are a real 3D profile: peak 0.050 m (0.04..0.05 allowed), floor 0.000 m, 2 height levels
+[PASS] #S4 kerb faces point upward so the cel shader lights them
+[PASS] #S5 sharp corners get a tarmac runoff strip and a gravel trap (3096 / 1638 vertices)
+[PASS] #S6 gravel is coarse sand #A69477
+[PASS] #S7 runoff and gravel never cover asphalt (>= 6.95 m from every centreline sample) and stay below the kerb crest
+[PASS] #S8 8 sharp corners have their gravel trap on the outside, opposite the kerb; none where the outside is the pit lane
+[PASS] #S9 the rubber groove follows the adaptive racing line through 9 corners (worst edge 0.010 m off), a hair above the asphalt (0.012..0.012 m)
+[PASS] #M1 MeshBatch merges primitives into one surface per material (2 surfaces: 72 + 36 vertices)
+[PASS] #M2 MeshBatch faces wind clockwise (Godot front face) and point away from their box
+[PASS] #M3 MeshBatch extrusions are 4 outward walls (24 vertices) for a clockwise and a counter-clockwise profile
+[PASS] #M4 a capped extrusion adds both end caps (36 vertices), each facing out of its end
+[PASS] #F1 furniture is five MultiMeshInstance3D (armco, tecpro, markers, floodlights, flag panels) with 7 surfaces in total
+[PASS] #F2 armco is continuous (posts at most 4.1 m apart, left lap closed: true) except one 521 m opening for Pit Entry to Exit, 1975 posts
+[PASS] #F3 armco stands behind the gravel trap of all 8 wide-runoff corners []
+[PASS] #F4 150/100/50 m braking boards stand 2.5 m off the track edge before the apex of every one of the 9 sharp corners
+[PASS] #F5 28 floodlight towers, 18 m tall (18.0), clear of the road edge (15.5 m from a centreline) and >= 40 m apart (closest 58 m), 28 placed
+[PASS] #F6 176 Tecpro blocks line the outside of Turn 1, the hairpin and the chicane (zones [0, 3, 1, 2, 5, 6]), none on the asphalt
+[PASS] #H1 the paddock holds the pit building, main grandstand and race control tower, each instanced from its own scene
+[PASS] #H2 the two-storey pit building spans all ten stalls (201 m, lateral 18.1..30.9, top 15.8 m) with a tinted glass lounge, behind the working lane (nothing over the car corridor lower than inf m)
+[PASS] #H3 the main grandstand: 243 m long, 3 tiers, cantilever roof to 29.6 m (lowest 17.8 m over the corridor), 1484 spectators, Jumbotron true
+[PASS] #H4 the four-floor race control tower stands beyond Pit Exit (s 336..353, lateral 16.1..35.0, 28.1 m tall) clear of the car corridor
+[PASS] #H5 the start gantry is a double truss 27.5 m wide across the track and the pit lane (3.6 m deep), merged to 12 meshes, lamps intact
+[PASS] #H6 the five FIA red-light pairs still light pair by pair after the gantry upgrade
+[PASS] #H7 the Jumbotron leaderboard follows the live standings (row 1 = the leader's team colour)
+[PASS] #B1 no barrier line crosses the middle of the gap to another stretch of road (2537 posts checked; past the middle: []; missing: [])
+[PASS] #B2 no barrier stands inside the pit lane between Pit Entry and Pit Exit ([])
+[PASS] #S10 the road shows only its edge lines and the start line, no painted lane lines (0 lane-line vertices, 16656 white-line vertices)
+[PASS] #V1 the low-poly mountain ring stands 1250..1500 m from the circuit centre, peaks 470 m, base buried (-8.0 m), with an atmospheric haze shader
+[PASS] #V2 a star field of 900 points is part of the vista and invisible by day
+[PASS] #T1 1100 anime trees in three kinds (cedar 9.1 m > pine 8.5 m > oak 5.4 m) share one wind-sway material with per-vertex sway weights
+[PASS] #T2 trees are Poisson-disc spaced (closest pair 6.1 m), >= 18 m off the asphalt edge (28.0 m from a centreline) and keep clear of the pit complex, grandstand and tower (0 inside)
+[PASS] #P1 the full track scene (road, environment, pit lane, gantry) costs about 106 main-pass draw calls (budget < 180)
+[PASS] #P2 the track environment is 309121 triangles (budget < 350000)
+[PASS] #P3 guardrail, Tecpro, braking boards, floodlights, flag panels and trees are 8 MultiMeshInstance3D and 0 single meshes
+[PASS] #L1 Day: harsh sun (energy 1.15, pitch -76 deg), floodlights and windows off, no stars, light haze
+[PASS] #L2 Sunset: sun drops to -30 deg (day -76) with golden light ((1.0, 0.4, 0.1333, 1.0)), floodlights easing in (0.39)
+[PASS] #L3 Night: 28 floodlight towers lit (glow 4.0, 6 real spot lights, none casting shadows), windows warm (1.10), stars 1.00
+40 assertions, 0 failure(s)
+FASE 10 TRACK ENVIRONMENT: PASS

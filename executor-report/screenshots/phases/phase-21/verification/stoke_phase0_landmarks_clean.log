@@ -1,0 +1,8 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[landmark] crown_wing_paddock             tris=  2600  aabb=(22.06, 16.9, 206.0)
+[landmark] runway_crossing_spitfire       tris=  1104  aabb=(45.0, 12.85, 30.0)
+[landmark] luffield_arena_grandstand      tris=  5856  aabb=(38.14, 26.8, 221.08)
+[landmark] becketts_pedestrian_flyover    tris=  2044  aabb=(36.4, 18.06, 27.7)
+[landmark] raf_hangar_tower               tris=  2572  aabb=(61.6, 24.8, 90.34)
+[landmark] 5 models, total tris=14176 written to res://builds/stoke_crown/assets

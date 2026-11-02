@@ -1,0 +1,11 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+D3D12 12_0 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 3050 Laptop GPU
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[stoke-crown-env] built in 0.70s | terrain tris 76558 | trees 1600 | grass 600 | hedges 633 | landmarks 5/5 | env tris 152790 (budget 320000)
+[stoke-runtime] armco posts: 2549 (121 interpolated)
+SMOKE race finished=true cars_finished=20 ticks_guard=363
+SMOKE frame_ms mean=16.66 p95=16.82 worst=26.91 frames=259 fps=60.0
+SMOKE environment draw_calls=[250, 253, 253, 239, 243] tris=[2176264, 2176270, 2176270, 2222050, 2179411]
+SMOKE podium=true
+SMOKE orphans_after_free=0

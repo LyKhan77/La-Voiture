@@ -1,0 +1,39 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] forecast: the multiplier tables carry the numbers gt_driving always used
+[PASS] forecast: wear, burn, fuel margin and battery seconds come from the sim's own formulas
+[PASS] forecast: a pace option is judged against the cliff at the finish (Tyres pass the cliff (25%) about 7 laps from now, well before the finish. | Tyres end at ~20%: right at the cliff (25%) by the finish.)
+[PASS] forecast: a fuel mix is judged by the laps of fuel spare at the finish (Short by 2.0 laps of fuel: you will not finish without a stop.)
+[PASS] forecast: ERS options are judged by the seconds of deploying the battery lasts, never locked
+[PASS] forecast: zero burn, zero laps left and a DNF car still give a valid verdict
+[PASS] forecast: the tyre recommendation uses the strategy desk's own thresholds (45 % wet, 18 % inter)
+[PASS] forecast: slicks in rain or before coming rain are DANGER, wets on a dry track WATCH, AUTO names its fit (Water arrives in 2 laps: slicks will aquaplane (3x braking distance).)
+[PASS] forecast: texts print a single percent sign (Water is over 45%: WET is the better choice.)
+[PASS] widgets: the fader ladder keeps the option order (strongest on top), selects, and marks risky options
+[PASS] widgets: the gauge lights blocks by value and shows the finish ghost only when set
+[PASS] widgets: the tyre chip grid selects a compound
+[PASS] widgets: the wheel spins with the car, takes a kick on a change and the kick dies away
+[PASS] widgets: under reduce motion the wheel takes no kick or shake but still turns with the car
+[PASS] audio: click_pitched logs one click
+[PASS] widgets: the tooltip stays inside the deck width, sits above it and drops the plain sentence when COACH is off
+[PASS] widgets: the tooltip hides
+[PASS] deck N2: every control sits inside the unchanged 1888x140 box, the header holds COACH, desk, radio and fold
+[PASS] deck N2: faders write straight into the sim
+[PASS] deck N2: option marks, pills and gauges follow the model and nothing is locked
+[PASS] deck N2: hovering an option shows its effect and the tooltip, leaving restores the forecast line
+[PASS] deck N2: COACH toggles the plain-language sentence
+[PASS] deck N2: COACH sets the engineer's advice in the sim and only applies in MANUAL (locked in AUTO)
+[PASS] deck N2: the wheel and the chips pick the next tyre and the wheel is kicked
+[PASS] deck N2: BOX arms the wheel, cancel releases it, a double click does not call then cancel
+[PASS] deck N2: switching car swaps verdicts, gauges and the active card
+[PASS] deck N2: every control gives audible and visible click feedback (no animation under reduce motion)
+[PASS] deck N2: the window card reads the weather forecast (BOX WINDOW L+3 -> WET)
+[PASS] review: the wheel tooltip follows the tyre the click picked (TYRES: SOFT)
+[PASS] review: the tooltip and forecast line are recomputed after a fader click (SPEED +4.8%  WEAR 6.7%/lap  FUEL 3.75 kg/lap -> SPEED +0.0%  WEAR 6.7%/lap  FUEL 3.75 kg/lap)
+[PASS] review: verdict texts say when the tyres are past the cliff and the battery is nearly empty (Tyres are already past the cliff (25%): grip is falling. | Battery nearly empty: no boost left.)
+[PASS] review: the tooltip stays off while an engineer card is open, the forecast line still carries the impact
+[PASS] review: the AUTO wheel colour is the tyre the world fits for this car (0)
+[PASS] review: switching car drops the tyre picked for the other car
+34 assertions, 0 failure(s)
+FASE 11 LANGKAH 3C DECK N2: PASS

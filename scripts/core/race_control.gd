@@ -5,7 +5,7 @@ extends RefCounted
 ## engine has no per-tick hook and stays untouched, so this owns the stepping
 ## loop instead: `process_frame()` / `step_ticks()` replace the engine's own and
 ## advance it one tick at a time, running the directors after every tick. The
-## integer tick accumulator is the engine's, so 1x and 16x run the same tick
+## integer tick accumulator is the engine's, so 1x and 8x run the same tick
 ## sequence.
 
 signal radio(message: String, urgent: bool)

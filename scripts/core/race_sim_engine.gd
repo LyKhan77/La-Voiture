@@ -3,7 +3,7 @@ extends RefCounted
 
 ## Deterministic 60 Hz race simulation. Rendering is intentionally absent:
 ## `process_frame()` converts wall-clock seconds into a fixed number of
-## 1/60 s math ticks, so 1x and 16x execute the exact same tick sequence.
+## 1/60 s math ticks, so 1x and 8x execute the exact same tick sequence.
 
 signal lap_completed(car_id: int, lap_number: int, lap_time: float)
 signal race_finished(classifications: Array)
@@ -159,7 +159,7 @@ func add_car(car: CarStateScript) -> void:
 
 
 func set_time_scale(scale: float) -> void:
-	time_scale = clampf(scale, 1.0, 16.0)
+	time_scale = clampf(scale, 1.0, 8.0)
 
 
 func set_weather_wetness(wetness_mm: float) -> void:

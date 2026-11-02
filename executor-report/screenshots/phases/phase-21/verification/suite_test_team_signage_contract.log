@@ -1,0 +1,159 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] apex_ring player 4: one garage sign per racing team (10)
+[PASS] apex_ring player 4: each sign spells its team's name
+[PASS] apex_ring player 4: each sign sits at the front of its own team's garage
+[PASS] apex_ring player 4: team 10 has no box and no sign
+[PASS] apex_ring player 4: all garage signs share one mesh surface
+[PASS] apex_ring player 4: the sign mesh holds real lettering (9651 vertices)
+[PASS] apex_ring player 4: the paddock carries a TransporterPlates sign mesh
+[PASS] apex_ring player 4: one transporter sign per racing team (10)
+[PASS] apex_ring player 4: transporter signs sit on their own truck, facing the track
+[PASS] apex_ring player 11: one garage sign per racing team (10)
+[PASS] apex_ring player 11: each sign spells its team's name
+[PASS] apex_ring player 11: each sign sits at the front of its own team's garage
+[PASS] apex_ring player 11: team 0 has no box and no sign
+[PASS] apex_ring player 11: all garage signs share one mesh surface
+[PASS] apex_ring player 11: the sign mesh holds real lettering (11880 vertices)
+[PASS] apex_ring player 11: the paddock carries a TransporterPlates sign mesh
+[PASS] apex_ring player 11: one transporter sign per racing team (10)
+[PASS] apex_ring player 11: transporter signs sit on their own truck, facing the track
+[PASS] apex_ring player 12: one garage sign per racing team (10)
+[PASS] apex_ring player 12: each sign spells its team's name
+[PASS] apex_ring player 12: each sign sits at the front of its own team's garage
+[PASS] apex_ring player 12: team 0 has no box and no sign
+[PASS] apex_ring player 12: all garage signs share one mesh surface
+[PASS] apex_ring player 12: the sign mesh holds real lettering (11880 vertices)
+[PASS] apex_ring player 12: the paddock carries a TransporterPlates sign mesh
+[PASS] apex_ring player 12: one transporter sign per racing team (10)
+[PASS] apex_ring player 12: transporter signs sit on their own truck, facing the track
+[PASS] neo_wangan player 4: one garage sign per racing team (10)
+[PASS] neo_wangan player 4: each sign spells its team's name
+[PASS] neo_wangan player 4: each sign sits at the front of its own team's garage
+[PASS] neo_wangan player 4: team 10 has no box and no sign
+[PASS] neo_wangan player 4: the paddock carries a TransporterPlates sign mesh
+[PASS] neo_wangan player 4: one transporter sign per racing team (10)
+[PASS] neo_wangan player 4: transporter signs sit on their own truck, facing the track
+[PASS] neo_wangan player 11: one garage sign per racing team (10)
+[PASS] neo_wangan player 11: each sign spells its team's name
+[PASS] neo_wangan player 11: each sign sits at the front of its own team's garage
+[PASS] neo_wangan player 11: team 0 has no box and no sign
+[PASS] neo_wangan player 11: the paddock carries a TransporterPlates sign mesh
+[PASS] neo_wangan player 11: one transporter sign per racing team (10)
+[PASS] neo_wangan player 11: transporter signs sit on their own truck, facing the track
+[PASS] neo_wangan player 12: one garage sign per racing team (10)
+[PASS] neo_wangan player 12: each sign spells its team's name
+[PASS] neo_wangan player 12: each sign sits at the front of its own team's garage
+[PASS] neo_wangan player 12: team 0 has no box and no sign
+[PASS] neo_wangan player 12: the paddock carries a TransporterPlates sign mesh
+[PASS] neo_wangan player 12: one transporter sign per racing team (10)
+[PASS] neo_wangan player 12: transporter signs sit on their own truck, facing the track
+[PASS] brianza player 4: one garage sign per racing team (10)
+[PASS] brianza player 4: each sign spells its team's name
+[PASS] brianza player 4: each sign sits at the front of its own team's garage
+[PASS] brianza player 4: team 10 has no box and no sign
+[PASS] brianza player 4: all garage signs share one mesh surface
+[PASS] brianza player 4: the sign mesh holds real lettering (9651 vertices)
+[PASS] brianza player 4: the paddock carries a TransporterPlates sign mesh
+[PASS] brianza player 4: one transporter sign per racing team (10)
+[PASS] brianza player 4: transporter signs sit on their own truck, facing the track
+[PASS] brianza player 11: one garage sign per racing team (10)
+[PASS] brianza player 11: each sign spells its team's name
+[PASS] brianza player 11: each sign sits at the front of its own team's garage
+[PASS] brianza player 11: team 0 has no box and no sign
+[PASS] brianza player 11: all garage signs share one mesh surface
+[PASS] brianza player 11: the sign mesh holds real lettering (11880 vertices)
+[PASS] brianza player 11: the paddock carries a TransporterPlates sign mesh
+[PASS] brianza player 11: one transporter sign per racing team (10)
+[PASS] brianza player 11: transporter signs sit on their own truck, facing the track
+[PASS] brianza player 12: one garage sign per racing team (10)
+[PASS] brianza player 12: each sign spells its team's name
+[PASS] brianza player 12: each sign sits at the front of its own team's garage
+[PASS] brianza player 12: team 0 has no box and no sign
+[PASS] brianza player 12: all garage signs share one mesh surface
+[PASS] brianza player 12: the sign mesh holds real lettering (11877 vertices)
+[PASS] brianza player 12: the paddock carries a TransporterPlates sign mesh
+[PASS] brianza player 12: one transporter sign per racing team (10)
+[PASS] brianza player 12: transporter signs sit on their own truck, facing the track
+[PASS] monte_azure player 4: one garage sign per racing team (10)
+[PASS] monte_azure player 4: each sign spells its team's name
+[PASS] monte_azure player 4: each sign sits at the front of its own team's garage
+[PASS] monte_azure player 4: team 10 has no box and no sign
+[PASS] monte_azure player 4: the paddock carries a TransporterPlates sign mesh
+[PASS] monte_azure player 4: one transporter sign per racing team (10)
+[PASS] monte_azure player 4: transporter signs sit on their own truck, facing the track
+[PASS] monte_azure player 11: one garage sign per racing team (10)
+[PASS] monte_azure player 11: each sign spells its team's name
+[PASS] monte_azure player 11: each sign sits at the front of its own team's garage
+[PASS] monte_azure player 11: team 0 has no box and no sign
+[PASS] monte_azure player 11: the paddock carries a TransporterPlates sign mesh
+[PASS] monte_azure player 11: one transporter sign per racing team (10)
+[PASS] monte_azure player 11: transporter signs sit on their own truck, facing the track
+[PASS] monte_azure player 12: one garage sign per racing team (10)
+[PASS] monte_azure player 12: each sign spells its team's name
+[PASS] monte_azure player 12: each sign sits at the front of its own team's garage
+[PASS] monte_azure player 12: team 0 has no box and no sign
+[PASS] monte_azure player 12: the paddock carries a TransporterPlates sign mesh
+[PASS] monte_azure player 12: one transporter sign per racing team (10)
+[PASS] monte_azure player 12: transporter signs sit on their own truck, facing the track
+[PASS] ardennes player 4: one garage sign per racing team (10)
+[PASS] ardennes player 4: each sign spells its team's name
+[PASS] ardennes player 4: each sign sits at the front of its own team's garage
+[PASS] ardennes player 4: team 10 has no box and no sign
+[PASS] ardennes player 4: all garage signs share one mesh surface
+[PASS] ardennes player 4: the sign mesh holds real lettering (9654 vertices)
+[PASS] ardennes player 4: the paddock carries a TransporterPlates sign mesh
+[PASS] ardennes player 4: one transporter sign per racing team (10)
+[PASS] ardennes player 4: transporter signs sit on their own truck, facing the track
+[PASS] ardennes player 11: one garage sign per racing team (10)
+[PASS] ardennes player 11: each sign spells its team's name
+[PASS] ardennes player 11: each sign sits at the front of its own team's garage
+[PASS] ardennes player 11: team 0 has no box and no sign
+[PASS] ardennes player 11: all garage signs share one mesh surface
+[PASS] ardennes player 11: the sign mesh holds real lettering (11880 vertices)
+[PASS] ardennes player 11: the paddock carries a TransporterPlates sign mesh
+[PASS] ardennes player 11: one transporter sign per racing team (10)
+[PASS] ardennes player 11: transporter signs sit on their own truck, facing the track
+[PASS] ardennes player 12: one garage sign per racing team (10)
+[PASS] ardennes player 12: each sign spells its team's name
+[PASS] ardennes player 12: each sign sits at the front of its own team's garage
+[PASS] ardennes player 12: team 0 has no box and no sign
+[PASS] ardennes player 12: all garage signs share one mesh surface
+[PASS] ardennes player 12: the sign mesh holds real lettering (11880 vertices)
+[PASS] ardennes player 12: the paddock carries a TransporterPlates sign mesh
+[PASS] ardennes player 12: one transporter sign per racing team (10)
+[PASS] ardennes player 12: transporter signs sit on their own truck, facing the track
+[stoke-crown-env] built in 1.19s | terrain tris 44096 | trees 1600 | grass 600 | hedges 633 | landmarks 5/5 | env tris 120328 (budget 320000)
+[stoke-runtime] armco posts: 2549 (121 interpolated)
+[PASS] stoke_crown player 4: one garage sign per racing team (10)
+[PASS] stoke_crown player 4: each sign spells its team's name
+[PASS] stoke_crown player 4: each sign sits at the front of its own team's garage
+[PASS] stoke_crown player 4: team 10 has no box and no sign
+[PASS] stoke_crown player 4: all garage signs share one mesh surface
+[PASS] stoke_crown player 4: the sign mesh holds real lettering (9651 vertices)
+[PASS] stoke_crown player 4: the paddock carries a TransporterPlates sign mesh
+[PASS] stoke_crown player 4: one transporter sign per racing team (10)
+[PASS] stoke_crown player 4: transporter signs sit on their own truck, facing the track
+[stoke-crown-env] built in 1.16s | terrain tris 44096 | trees 1600 | grass 600 | hedges 633 | landmarks 5/5 | env tris 120328 (budget 320000)
+[stoke-runtime] armco posts: 2549 (121 interpolated)
+[PASS] stoke_crown player 11: one garage sign per racing team (10)
+[PASS] stoke_crown player 11: each sign spells its team's name
+[PASS] stoke_crown player 11: each sign sits at the front of its own team's garage
+[PASS] stoke_crown player 11: team 0 has no box and no sign
+[PASS] stoke_crown player 11: all garage signs share one mesh surface
+[PASS] stoke_crown player 11: the sign mesh holds real lettering (11880 vertices)
+[PASS] stoke_crown player 11: the paddock carries a TransporterPlates sign mesh
+[PASS] stoke_crown player 11: one transporter sign per racing team (10)
+[PASS] stoke_crown player 11: transporter signs sit on their own truck, facing the track
+[stoke-crown-env] built in 1.14s | terrain tris 44096 | trees 1600 | grass 600 | hedges 633 | landmarks 5/5 | env tris 120328 (budget 320000)
+[stoke-runtime] armco posts: 2549 (121 interpolated)
+[PASS] stoke_crown player 12: one garage sign per racing team (10)
+[PASS] stoke_crown player 12: each sign spells its team's name
+[PASS] stoke_crown player 12: each sign sits at the front of its own team's garage
+[PASS] stoke_crown player 12: team 0 has no box and no sign
+[PASS] stoke_crown player 12: all garage signs share one mesh surface
+[PASS] stoke_crown player 12: the sign mesh holds real lettering (11880 vertices)
+[PASS] stoke_crown player 12: the paddock carries a TransporterPlates sign mesh
+[PASS] stoke_crown player 12: one transporter sign per racing team (10)
+[PASS] stoke_crown player 12: transporter signs sit on their own truck, facing the track

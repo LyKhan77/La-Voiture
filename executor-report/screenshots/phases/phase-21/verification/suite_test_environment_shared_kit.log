@@ -1,0 +1,19 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[PASS] sky rig: the shared Environment resource is duplicated, never written to
+[PASS] sky rig: live environment shows a sky and fog
+[PASS] sky rig: clear weather paints the profile's sky
+[PASS] sky rig: sun takes the profile's colour and energy
+[PASS] sky rig: no ambient colour key leaves the ambient source alone
+[PASS] sky rig: a second apply reuses the live environment
+[PASS] sky rig: full gloom greys the horizon toward the storm colour
+[PASS] sky rig: full gloom dims the sun and thickens the fog
+[PASS] sky rig: an ambient key switches the ambient light to that colour
+[PASS] sky rig: pitch and yaw keys aim the sun
+[PASS] sky rig: ACES tonemap and fog-to-sky blend apply when a circuit asks for them
+[PASS] sky rig: no WorldEnvironment is a no-op
+[PASS] pit layout: GtRace falls back on GtPitLayout
+[PASS] pit layout: the Apex lane is built from the same numbers
+[PASS] pit layout: values are those of the Apex Ring's lane
+[PASS] pit layout: sim and car scripts load no circuit script ()
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)

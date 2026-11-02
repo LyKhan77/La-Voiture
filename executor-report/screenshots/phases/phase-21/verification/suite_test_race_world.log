@@ -1,0 +1,62 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] physics runs at 60 Hz
+[PASS] circuit is a ~4 km loop (4159 m)
+[PASS] loop closes: distance 0 == distance length
+[PASS] distance wraps around the lap
+[PASS] lane 0 is 2.5 m from the racing line
+[PASS] lane 2 is 2.5 m from the racing line
+[PASS] lane offset is perpendicular to travel
+[PASS] lane 2 is right of travel, lane 0 left
+[PASS] integrated curvature is one full left turn (6.276 rad)
+[PASS] tightest corner radius ~35 m (32.9 m)
+[PASS] start straight reports a straight
+[PASS] 1x: 20 car actors spawned
+[PASS] 1x: sensors are front 14 m, left 3 m, right 3 m
+[PASS] 1x: stopped at exactly 18000 sim ticks
+[PASS] 1x: no car box overlaps another (worst 0.000 m, 0 frames)
+[PASS] 1x: cars overtake each other (25 passes)
+[PASS] 1x: front sensors detect cars (189528 sensor-frames)
+    (1x: 0 side-sensor vetoes)
+[PASS] 1x: front sensor flags a faster car closing on a slower one (28735 car-frames)
+[PASS] 1x: cars shift lanes (9060 car-frames)
+[PASS] 1x: lane shift rate <= 2.1 lanes/s (peak 2.100)
+[PASS] 1x: no teleport, peak 66.2 m/s of world motion
+[PASS] 2x: 20 car actors spawned
+[PASS] 2x: sensors are front 14 m, left 3 m, right 3 m
+[PASS] 2x: stopped at exactly 18000 sim ticks
+[PASS] 2x: no car box overlaps another (worst 0.000 m, 0 frames)
+[PASS] 2x: cars overtake each other (25 passes)
+[PASS] 2x: front sensors detect cars (94767 sensor-frames)
+    (2x: 0 side-sensor vetoes)
+[PASS] 2x: front sensor flags a faster car closing on a slower one (14361 car-frames)
+[PASS] 2x: cars shift lanes (4645 car-frames)
+[PASS] 2x: lane shift rate <= 2.1 lanes/s (peak 2.098)
+[PASS] 2x: no teleport, peak 65.2 m/s of world motion
+[PASS] 2x: final car positions identical to 1x
+[PASS] 4x: 20 car actors spawned
+[PASS] 4x: sensors are front 14 m, left 3 m, right 3 m
+[PASS] 4x: stopped at exactly 18000 sim ticks
+[PASS] 4x: no car box overlaps another (worst 0.000 m, 0 frames)
+[PASS] 4x: cars overtake each other (25 passes)
+[PASS] 4x: front sensors detect cars (47385 sensor-frames)
+    (4x: 0 side-sensor vetoes)
+[PASS] 4x: front sensor flags a faster car closing on a slower one (7144 car-frames)
+[PASS] 4x: cars shift lanes (2390 car-frames)
+[PASS] 4x: lane shift rate <= 2.1 lanes/s (peak 2.093)
+[PASS] 4x: no teleport, peak 64.5 m/s of world motion
+[PASS] 4x: final car positions identical to 1x
+[PASS] 8x: 20 car actors spawned
+[PASS] 8x: sensors are front 14 m, left 3 m, right 3 m
+[PASS] 8x: stopped at exactly 18000 sim ticks
+[PASS] 8x: no car box overlaps another (worst 0.000 m, 0 frames)
+[PASS] 8x: cars overtake each other (25 passes)
+[PASS] 8x: front sensors detect cars (23689 sensor-frames)
+    (8x: 0 side-sensor vetoes)
+[PASS] 8x: front sensor flags a faster car closing on a slower one (3542 car-frames)
+[PASS] 8x: cars shift lanes (1274 car-frames)
+[PASS] 8x: lane shift rate <= 2.1 lanes/s (peak 2.075)
+[PASS] 8x: no teleport, peak 64.2 m/s of world motion
+[PASS] 8x: final car positions identical to 1x
+ALL PASS (0 failure(s))

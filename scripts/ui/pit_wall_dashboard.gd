@@ -107,7 +107,7 @@ func _build_workspace() -> void:
 	var time_label := UI.label("SIM RATE",12,T.TEXT_SECONDARY)
 	time_label.position = Vector2(1260,19)
 	ribbon.add_child(time_label)
-	for i: int in range(5):
+	for i: int in range(4):
 		var speed: float = pow(2,i)
 		var button := UI.button("%dx" % int(speed))
 		button.name = "Speed%dx" % int(speed)

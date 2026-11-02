@@ -1,0 +1,16 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+ERROR: Failed to read the root certificate store.
+   at: get_system_ca_certificates (platform/windows/os_windows.cpp:2582)
+[stoke-crown-env] built in 2.19s | terrain tris 76558 | trees 1600 | grass 600 | hedges 633 | landmarks 5/5 | env tris 167042 (budget 320000)
+[smoke] build 4.93s | frames 1
+[smoke] road samples 450 | worst terrain-vs-road -0.160 m (negative = below) | bed error mean 0.038 max 0.135
+[smoke] corridor nodes near road 649 | nodes above bed 0
+[smoke] terrain tris 76558 | trees 1600 | grass 600 | hedges 633 | landmarks 5/5 (14176 tris) | env tris 167042/320000
+[smoke] terrain y range -0.39..11.84 | build nodes: Terrain, TerrainSkirt, TerrainBase, DistantRidge, HeroLandmarks, PitBoxPaint, PitCrew, PitWorkingLight_50, PitWorkingLight_90, PitWorkingLight_130, PitWorkingLight_170, PaddockDressing, UrbanPlazas, Foliage
+[smoke] landmark crown_wing_paddock s=120 R off=25 m placed=true lat=25 pos=[120.0, 5.86, 25.0] | replaces the generic kit pit building; assembly frees the kit node
+[smoke] landmark runway_crossing_spitfire s=1450 L off=26 m placed=true lat=26 pos=[17.58, 4.16, 409.29] | Wellington runway crossing + Spitfire prop monument
+[smoke] landmark luffield_arena_grandstand s=2150 L off=32 m placed=true lat=32 pos=[-513.21, -0.02, 114.39] | Luffield arena horseshoe grandstand
+[smoke] landmark becketts_pedestrian_flyover s=3650 L off=16 m placed=true lat=0 pos=[537.97, 11.25, -384.11] | spec anchor L offset 16 m; placed lateral 0, deck spans -16..+16 over the centreline at deck height, stairs/pylons off the pavement
+[smoke] landmark raf_hangar_tower s=4250 R off=45 m placed=true lat=45 pos=[302.75, 5.72, -241.12] | historic RAF hangar + vintage control tower
+SMOKE_OK

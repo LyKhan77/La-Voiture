@@ -107,7 +107,7 @@ flowchart TD
 * **Zone A (Top Ribbon, Tinggi $56\text{px}$):**
   - Identitas `LA VOITURE`, `[LAP 01/50]`, status bendera dinamis (`GREEN FLAG`, `YELLOW FLAG // SAFETY CAR`, `LIGHTS ●●●●●`, `CHEQUERED FLAG`).
   - Widget radar cuaca `WeatherRadarWidget` (status cuaca, suhu, bar kebasahan, prakiraan 5 lap).
-  - Tombol pengatur kecepatan simulasi (`1x, 2x, 4x, 8x, 16x`), indikator kamera siaran aktif, dan chip status DRS.
+  - Tombol pengatur kecepatan simulasi (`1x, 2x, 4x, 8x`), indikator kamera siaran aktif, dan chip status DRS.
 * **Zone B (Live Timing Tower Kiri, Lebar $320\text{px}$, Tinggi $780\text{px}$):**
   - 20 baris pembalap dalam urutan balapan real-time dengan snap-invert highlight.
   - Kolom adaptif dapat diganti dengan tombol **`Tab`**: `INT` (interval), `GAP` (jarak ke leader), atau `LAST` (lap time terakhir).

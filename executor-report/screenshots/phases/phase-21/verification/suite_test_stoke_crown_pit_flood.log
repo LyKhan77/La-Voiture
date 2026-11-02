@@ -1,0 +1,41 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[stoke-crown-env] built in 0.48s | terrain tris 44096 | trees 1600 | grass 600 | hedges 633 | landmarks 5/5 | env tris 120328 (budget 320000)
+[stoke-runtime] armco posts: 2549 (121 interpolated)
+--- Stoke Crown pit lane flood: pitch 20 m, lane 420 m ---
+  [train of 20 cars 30 m apart] left out 0 pack pair(s); serviced=20/20 flushed in 54 s, longest stand-still 6.9 s (7.0 s over the stop), decel 9.0, teleport 0.05, overlap 15 ticks (deepest 1.86 m)
+[PASS] train of 20 cars 30 m apart: every car is serviced and back on the circuit
+[PASS] train of 20 cars 30 m apart: no car stands still outside its box for more than 18 s at a time (6.9 s)
+[PASS] train of 20 cars 30 m apart: the lane is clear within 90 s of the first call (54 s)
+[PASS] train of 20 cars 30 m apart: lane braking stays comfortable (9.0 m/s2)
+[PASS] train of 20 cars 30 m apart: no car is pushed or teleported (0.05 m)
+[PASS] train of 20 cars 30 m apart: no car drives into another: 15 car-pair ticks overlap by more than 1.0 m (deepest 1.86 m)
+  [bunched 20 m apart] left out 0 pack pair(s); serviced=20/20 flushed in 51 s, longest stand-still 7.8 s (7.9 s over the stop), decel 9.0, teleport 0.05, overlap 0 ticks (deepest 0.57 m)
+[PASS] bunched 20 m apart: every car is serviced and back on the circuit
+[PASS] bunched 20 m apart: no car stands still outside its box for more than 18 s at a time (7.8 s)
+[PASS] bunched 20 m apart: the lane is clear within 90 s of the first call (51 s)
+[PASS] bunched 20 m apart: lane braking stays comfortable (9.0 m/s2)
+[PASS] bunched 20 m apart: no car is pushed or teleported (0.05 m)
+[PASS] bunched 20 m apart: no car drives into another: 0 car-pair ticks overlap by more than 1.0 m (deepest 0.57 m)
+  [spread around the lap] left out 0 pack pair(s); serviced=20/20 flushed in 122 s, longest stand-still 0.1 s (0.1 s over the stop), decel 9.0, teleport 0.05, overlap 0 ticks (deepest 0.00 m)
+[PASS] spread around the lap: every car is serviced and back on the circuit
+[PASS] spread around the lap: no car stands still outside its box for more than 18 s at a time (0.1 s)
+[PASS] spread around the lap: lane braking stays comfortable (9.0 m/s2)
+[PASS] spread around the lap: no car is pushed or teleported (0.05 m)
+[PASS] spread around the lap: no car drives into another: 0 car-pair ticks overlap by more than 1.0 m (deepest 0.00 m)
+  [raced field, everyone boxes together] left out 0 pack pair(s); serviced=20/20 flushed in 122 s, longest stand-still 6.8 s (6.8 s over the stop), decel 9.0, teleport 0.05, overlap 11 ticks (deepest 1.77 m)
+[PASS] raced field, everyone boxes together: every car is serviced and back on the circuit
+[PASS] raced field, everyone boxes together: no car stands still outside its box for more than 20 s at a time (6.8 s)
+[PASS] raced field, everyone boxes together: lane braking stays comfortable (9.0 m/s2)
+[PASS] raced field, everyone boxes together: no car is pushed or teleported (0.05 m)
+[PASS] raced field, everyone boxes together: no car drives into another: 11 car-pair ticks overlap by more than 1.0 m (deepest 1.77 m)
+  [raced field, cars box 3-9 s apart] left out 0 pack pair(s); serviced=20/20 flushed in 233 s, longest stand-still 3.4 s (3.4 s over the stop), decel 9.0, teleport 0.05, overlap 0 ticks (deepest 0.00 m)
+[PASS] raced field, cars box 3-9 s apart: every car is serviced and back on the circuit
+[PASS] raced field, cars box 3-9 s apart: no car stands still outside its box for more than 20 s at a time (3.4 s)
+[PASS] raced field, cars box 3-9 s apart: lane braking stays comfortable (9.0 m/s2)
+[PASS] raced field, cars box 3-9 s apart: no car is pushed or teleported (0.05 m)
+[PASS] raced field, cars box 3-9 s apart: no car drives into another: 0 car-pair ticks overlap by more than 1.0 m (deepest 0.00 m)
+[PASS] raced field, cars box 3-9 s apart: a serviced car waits on average at most 1.5 s in its box for the lane (0.38 s)
+[PASS] raced field, cars box 3-9 s apart: a serviced car waits at most 7 s in its box for the lane (1.9 s)
+[PASS] raced field, cars box 3-9 s apart: a car pulling out stands at most 4 s before the fast lane (0.1 s)

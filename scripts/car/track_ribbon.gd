@@ -5,7 +5,7 @@ extends Path3D
 ## Lane 0 = left of travel (inside for a counter-clockwise circuit), lane 1 =
 ## racing line (the path itself), lane 2 = right of travel. Positions come from
 ## a table sampled once at SAMPLE_STEP_M, so every query is O(1) and cheap
-## enough for 20 cars at 16x. The curve must be closed by repeating its first
+## enough for 20 cars at 8x. The curve must be closed by repeating its first
 ## point as its last point.
 
 const LANE_COUNT: int = 3

@@ -1,0 +1,117 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] apex_ring player 4: pit seats follow the sim's stall order
+[PASS] apex_ring player 4: each team's box is where the sim parks it
+[PASS] apex_ring player 4: every racing team has its garage
+[PASS] apex_ring player 4: each crew belongs to its team and stands at its own box
+[PASS] apex_ring player 4: a team without a box gets no crew
+[PASS] apex_ring player 4: pit building shutters wear the colours of the teams in the boxes
+[PASS] apex_ring player 11: pit seats follow the sim's stall order
+[PASS] apex_ring player 11: each team's box is where the sim parks it
+[PASS] apex_ring player 11: every racing team has its garage
+[PASS] apex_ring player 11: each crew belongs to its team and stands at its own box
+[PASS] apex_ring player 11: a team without a box gets no crew
+[PASS] apex_ring player 11: pit building shutters wear the colours of the teams in the boxes
+[PASS] apex_ring player 12: pit seats follow the sim's stall order
+[PASS] apex_ring player 12: each team's box is where the sim parks it
+[PASS] apex_ring player 12: every racing team has its garage
+[PASS] apex_ring player 12: each crew belongs to its team and stands at its own box
+[PASS] apex_ring player 12: a team without a box gets no crew
+[PASS] apex_ring player 12: pit building shutters wear the colours of the teams in the boxes
+[PASS] neo_wangan player 4: pit seats follow the sim's stall order
+[PASS] neo_wangan player 4: each team's box is where the sim parks it
+[PASS] neo_wangan player 4: every racing team has its garage
+[PASS] neo_wangan player 4: each crew belongs to its team and stands at its own box
+[PASS] neo_wangan player 4: a team without a box gets no crew
+[PASS] neo_wangan player 4: pit building shutters wear the colours of the teams in the boxes
+[PASS] neo_wangan player 11: pit seats follow the sim's stall order
+[PASS] neo_wangan player 11: each team's box is where the sim parks it
+[PASS] neo_wangan player 11: every racing team has its garage
+[PASS] neo_wangan player 11: each crew belongs to its team and stands at its own box
+[PASS] neo_wangan player 11: a team without a box gets no crew
+[PASS] neo_wangan player 11: pit building shutters wear the colours of the teams in the boxes
+[PASS] neo_wangan player 12: pit seats follow the sim's stall order
+[PASS] neo_wangan player 12: each team's box is where the sim parks it
+[PASS] neo_wangan player 12: every racing team has its garage
+[PASS] neo_wangan player 12: each crew belongs to its team and stands at its own box
+[PASS] neo_wangan player 12: a team without a box gets no crew
+[PASS] neo_wangan player 12: pit building shutters wear the colours of the teams in the boxes
+[PASS] brianza player 4: pit seats follow the sim's stall order
+[PASS] brianza player 4: each team's box is where the sim parks it
+[PASS] brianza player 4: every racing team has its garage
+[PASS] brianza player 4: each crew belongs to its team and stands at its own box
+[PASS] brianza player 4: a team without a box gets no crew
+[PASS] brianza player 4: pit building shutters wear the colours of the teams in the boxes
+[PASS] brianza player 11: pit seats follow the sim's stall order
+[PASS] brianza player 11: each team's box is where the sim parks it
+[PASS] brianza player 11: every racing team has its garage
+[PASS] brianza player 11: each crew belongs to its team and stands at its own box
+[PASS] brianza player 11: a team without a box gets no crew
+[PASS] brianza player 11: pit building shutters wear the colours of the teams in the boxes
+[PASS] brianza player 12: pit seats follow the sim's stall order
+[PASS] brianza player 12: each team's box is where the sim parks it
+[PASS] brianza player 12: every racing team has its garage
+[PASS] brianza player 12: each crew belongs to its team and stands at its own box
+[PASS] brianza player 12: a team without a box gets no crew
+[PASS] brianza player 12: pit building shutters wear the colours of the teams in the boxes
+[PASS] monte_azure player 4: pit seats follow the sim's stall order
+[PASS] monte_azure player 4: each team's box is where the sim parks it
+[PASS] monte_azure player 4: every racing team has its garage
+[PASS] monte_azure player 4: each crew belongs to its team and stands at its own box
+[PASS] monte_azure player 4: a team without a box gets no crew
+[PASS] monte_azure player 4: pit building shutters wear the colours of the teams in the boxes
+[PASS] monte_azure player 11: pit seats follow the sim's stall order
+[PASS] monte_azure player 11: each team's box is where the sim parks it
+[PASS] monte_azure player 11: every racing team has its garage
+[PASS] monte_azure player 11: each crew belongs to its team and stands at its own box
+[PASS] monte_azure player 11: a team without a box gets no crew
+[PASS] monte_azure player 11: pit building shutters wear the colours of the teams in the boxes
+[PASS] monte_azure player 12: pit seats follow the sim's stall order
+[PASS] monte_azure player 12: each team's box is where the sim parks it
+[PASS] monte_azure player 12: every racing team has its garage
+[PASS] monte_azure player 12: each crew belongs to its team and stands at its own box
+[PASS] monte_azure player 12: a team without a box gets no crew
+[PASS] monte_azure player 12: pit building shutters wear the colours of the teams in the boxes
+[PASS] ardennes player 4: pit seats follow the sim's stall order
+[PASS] ardennes player 4: each team's box is where the sim parks it
+[PASS] ardennes player 4: every racing team has its garage
+[PASS] ardennes player 4: each crew belongs to its team and stands at its own box
+[PASS] ardennes player 4: a team without a box gets no crew
+[PASS] ardennes player 4: pit building shutters wear the colours of the teams in the boxes
+[PASS] ardennes player 11: pit seats follow the sim's stall order
+[PASS] ardennes player 11: each team's box is where the sim parks it
+[PASS] ardennes player 11: every racing team has its garage
+[PASS] ardennes player 11: each crew belongs to its team and stands at its own box
+[PASS] ardennes player 11: a team without a box gets no crew
+[PASS] ardennes player 11: pit building shutters wear the colours of the teams in the boxes
+[PASS] ardennes player 12: pit seats follow the sim's stall order
+[PASS] ardennes player 12: each team's box is where the sim parks it
+[PASS] ardennes player 12: every racing team has its garage
+[PASS] ardennes player 12: each crew belongs to its team and stands at its own box
+[PASS] ardennes player 12: a team without a box gets no crew
+[PASS] ardennes player 12: pit building shutters wear the colours of the teams in the boxes
+[stoke-crown-env] built in 0.97s | terrain tris 44096 | trees 1600 | grass 600 | hedges 633 | landmarks 5/5 | env tris 120328 (budget 320000)
+[stoke-runtime] armco posts: 2549 (121 interpolated)
+[PASS] stoke_crown player 4: pit seats follow the sim's stall order
+[PASS] stoke_crown player 4: each team's box is where the sim parks it
+[PASS] stoke_crown player 4: every racing team has its garage
+[PASS] stoke_crown player 4: each crew belongs to its team and stands at its own box
+[PASS] stoke_crown player 4: a team without a box gets no crew
+[PASS] stoke_crown player 4: pit building shutters wear the colours of the teams in the boxes
+[stoke-crown-env] built in 0.97s | terrain tris 44096 | trees 1600 | grass 600 | hedges 633 | landmarks 5/5 | env tris 120328 (budget 320000)
+[stoke-runtime] armco posts: 2549 (121 interpolated)
+[PASS] stoke_crown player 11: pit seats follow the sim's stall order
+[PASS] stoke_crown player 11: each team's box is where the sim parks it
+[PASS] stoke_crown player 11: every racing team has its garage
+[PASS] stoke_crown player 11: each crew belongs to its team and stands at its own box
+[PASS] stoke_crown player 11: a team without a box gets no crew
+[PASS] stoke_crown player 11: pit building shutters wear the colours of the teams in the boxes
+[stoke-crown-env] built in 1.22s | terrain tris 44096 | trees 1600 | grass 600 | hedges 633 | landmarks 5/5 | env tris 120328 (budget 320000)
+[stoke-runtime] armco posts: 2549 (121 interpolated)
+[PASS] stoke_crown player 12: pit seats follow the sim's stall order
+[PASS] stoke_crown player 12: each team's box is where the sim parks it
+[PASS] stoke_crown player 12: every racing team has its garage
+[PASS] stoke_crown player 12: each crew belongs to its team and stands at its own box
+[PASS] stoke_crown player 12: a team without a box gets no crew
+[PASS] stoke_crown player 12: pit building shutters wear the colours of the teams in the boxes

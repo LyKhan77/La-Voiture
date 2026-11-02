@@ -1,7 +1,7 @@
 extends SceneTree
 
 ## Headless Phase 1 acceptance runner: 30 laps, 20 cars, no viewport.
-## Verifies Soft vs Hard pace and bit-exact 1x/16x determinism.
+## Verifies Soft vs Hard pace and bit-exact 1x/8x determinism.
 
 const EngineScript := preload("res://scripts/core/race_sim_engine.gd")
 const CarStateScript := preload("res://scripts/core/car_state.gd")
@@ -29,32 +29,32 @@ func _initialize() -> void:
 
 	_check_compound_pace()
 
-	var sim_16x: EngineScript = EngineScript.new(TOTAL_LAPS)
-	sim_16x.setup_standard_race(CAR_COUNT)
-	var race_start_16x: int = Time.get_ticks_msec()
-	_run_simulation(sim_16x, 16.0)
-	var wall_16x: int = Time.get_ticks_msec() - race_start_16x
-	_check(sim_16x.is_finished, "16x race should have finished")
-	_check_race_integrity(sim_16x)
+	var sim_8x: EngineScript = EngineScript.new(TOTAL_LAPS)
+	sim_8x.setup_standard_race(CAR_COUNT)
+	var race_start_8x: int = Time.get_ticks_msec()
+	_run_simulation(sim_8x, 8.0)
+	var wall_8x: int = Time.get_ticks_msec() - race_start_8x
+	_check(sim_8x.is_finished, "8x race should have finished")
+	_check_race_integrity(sim_8x)
 
 	var sim_1x: EngineScript = EngineScript.new(TOTAL_LAPS)
 	sim_1x.setup_standard_race(CAR_COUNT)
 	var race_start_1x: int = Time.get_ticks_msec()
 	_run_simulation(sim_1x, 1.0)
 	var wall_1x: int = Time.get_ticks_msec() - race_start_1x
-	_check_determinism(sim_1x, sim_16x)
+	_check_determinism(sim_1x, sim_8x)
 
-	_print_report(sim_16x)
+	_print_report(sim_8x)
 	print("")
 	print("---------------------------------------------------------------")
 	print(" SIMULATION TIMING")
 	print("---------------------------------------------------------------")
-	print(" 16x wall time: %d ms" % wall_16x)
+	print(" 8x wall time: %d ms" % wall_8x)
 	print(" 1x  wall time: %d ms" % wall_1x)
-	print(" Simulated race duration: %.3f s" % sim_16x.race_time)
-	if wall_16x > 0:
-		print(" 16x realtime factor: %.1fx" % (sim_16x.race_time / (float(wall_16x) / 1000.0)))
-	print(" Base track length: %.1f m" % sim_16x.track_length_m)
+	print(" Simulated race duration: %.3f s" % sim_8x.race_time)
+	if wall_8x > 0:
+		print(" 8x realtime factor: %.1fx" % (sim_8x.race_time / (float(wall_8x) / 1000.0)))
+	print(" Base track length: %.1f m" % sim_8x.track_length_m)
 	print(" Full run wall time: %d ms" % (Time.get_ticks_msec() - wall_start))
 	print("---------------------------------------------------------------")
 	if _failures == 0:
@@ -133,11 +133,11 @@ func _check_race_integrity(sim: EngineScript) -> void:
 	print("")
 
 
-func _check_determinism(sim_1x: EngineScript, sim_16x: EngineScript) -> void:
+func _check_determinism(sim_1x: EngineScript, sim_8x: EngineScript) -> void:
 	var failures_before: int = _failures
-	_check(sim_1x.tick_count == sim_16x.tick_count, "1x and 16x ran the same tick count")
-	_check(sim_1x.race_time == sim_16x.race_time, "1x and 16x ended at the same race time")
-	_check(sim_1x.finish_order == sim_16x.finish_order, "1x and 16x finish order is identical")
+	_check(sim_1x.tick_count == sim_8x.tick_count, "1x and 8x ran the same tick count")
+	_check(sim_1x.race_time == sim_8x.race_time, "1x and 8x ended at the same race time")
+	_check(sim_1x.finish_order == sim_8x.finish_order, "1x and 8x finish order is identical")
 
 	var lap_times_identical: bool = true
 	var finish_times_identical: bool = true
@@ -146,7 +146,7 @@ func _check_determinism(sim_1x: EngineScript, sim_16x: EngineScript) -> void:
 	var distances_identical: bool = true
 	for index: int in range(mini(CAR_COUNT, sim_1x.cars.size())):
 		var a: CarStateScript = sim_1x.cars[index]
-		var b: CarStateScript = sim_16x.cars[index]
+		var b: CarStateScript = sim_8x.cars[index]
 		if a.lap_times != b.lap_times:
 			lap_times_identical = false
 		if a.finish_time != b.finish_time:
@@ -158,15 +158,15 @@ func _check_determinism(sim_1x: EngineScript, sim_16x: EngineScript) -> void:
 		if a.total_distance != b.total_distance:
 			distances_identical = false
 
-	_check(lap_times_identical, "all 600 lap times are bit-identical at 1x vs 16x")
-	_check(finish_times_identical, "finish times are bit-identical at 1x vs 16x")
-	_check(tires_identical, "4-corner tire wear is bit-identical at 1x vs 16x")
-	_check(fuel_identical, "fuel mass is bit-identical at 1x vs 16x")
-	_check(distances_identical, "track distances are bit-identical at 1x vs 16x")
+	_check(lap_times_identical, "all 600 lap times are bit-identical at 1x vs 8x")
+	_check(finish_times_identical, "finish times are bit-identical at 1x vs 8x")
+	_check(tires_identical, "4-corner tire wear is bit-identical at 1x vs 8x")
+	_check(fuel_identical, "fuel mass is bit-identical at 1x vs 8x")
+	_check(distances_identical, "track distances are bit-identical at 1x vs 8x")
 	if _failures == failures_before:
-		print("[PASS] 1x vs 16x determinism: identical classification, lap times, tires and fuel")
-	print("[INFO] determinism ticks: %d (1x), %d (16x)" % [
-		sim_1x.tick_count, sim_16x.tick_count
+		print("[PASS] 1x vs 8x determinism: identical classification, lap times, tires and fuel")
+	print("[INFO] determinism ticks: %d (1x), %d (8x)" % [
+		sim_1x.tick_count, sim_8x.tick_count
 	])
 	print("")
 

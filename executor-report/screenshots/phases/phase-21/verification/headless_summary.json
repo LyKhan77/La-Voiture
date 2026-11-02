@@ -1,0 +1,616 @@
+{
+  "suite_count": 96,
+  "pass_count": 96,
+  "results": [
+    {
+      "suite": "test_adaptive_tyre_strategy",
+      "passes": 29,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_apex_pit_flood",
+      "passes": 30,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_ardennes_circuit",
+      "passes": 26,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_ardennes_dressing",
+      "passes": 17,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_ardennes_landmarks",
+      "passes": 13,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_ardennes_pit_flood",
+      "passes": 30,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_ardennes_pit_layout",
+      "passes": 46,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_ardennes_terrain_gate",
+      "passes": 16,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_aston_vantage_chassis",
+      "passes": 18,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_audi_r8_chassis",
+      "passes": 17,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_audio_and_race_weekend",
+      "passes": 36,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_bmw_m4_chassis",
+      "passes": 18,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_brianza_circuit",
+      "passes": 118,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_brianza_paddock",
+      "passes": 20,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_brianza_pit_flood",
+      "passes": 30,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_brianza_pit_lane_v2",
+      "passes": 20,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_brianza_terrain_gate",
+      "passes": 8,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_car_dynamics_vfx",
+      "passes": 29,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_chevy_corvette_chassis",
+      "passes": 18,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_circuit_calendar_registry",
+      "passes": 8,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_circuit_environment_contract",
+      "passes": 48,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_circuit_minimap",
+      "passes": 7,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_deck_n2",
+      "passes": 34,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_environment_shared_kit",
+      "passes": 16,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_ferrari_296_chassis",
+      "passes": 27,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_flag_panels_contract",
+      "passes": 56,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_ford_mustang_chassis",
+      "passes": 27,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_garage_tyre_strategy",
+      "passes": 39,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_graffiti_kit",
+      "passes": 16,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_gt_sim",
+      "passes": 43,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_honda_nsx_chassis",
+      "passes": 18,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_hud_theme_and_telemetry",
+      "passes": 32,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_lambo_huracan_chassis",
+      "passes": 18,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_lexus_rcf_chassis",
+      "passes": 18,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_main_menu_flow",
+      "passes": 75,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_mclaren_720s_chassis",
+      "passes": 18,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_mercedes_amg_chassis",
+      "passes": 18,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_modular_car",
+      "passes": 18,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_monte_azure_circuit",
+      "passes": 26,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_monte_azure_dressing",
+      "passes": 17,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_monte_azure_landmarks",
+      "passes": 24,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_monte_azure_pit_flood",
+      "passes": 22,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_monte_azure_pit_layout",
+      "passes": 40,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_monte_azure_terrain_gate",
+      "passes": 15,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_music_single_config",
+      "passes": 10,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_neo_wangan_cel_ambience",
+      "passes": 12,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_neo_wangan_circuit",
+      "passes": 48,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_neo_wangan_glb_assets",
+      "passes": 33,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_neo_wangan_pit_flood",
+      "passes": 30,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_nissan_gtr_chassis",
+      "passes": 18,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_pit_complex_contract",
+      "passes": 114,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_pit_deck_and_radio",
+      "passes": 35,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_pit_lane",
+      "passes": 19,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_pit_queue_flow",
+      "passes": 29,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_pit_service_skipped_frames",
+      "passes": 6,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_pit_stop_in_world",
+      "passes": 297,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_pit_straightness",
+      "passes": 4,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_pit_team_assignment_contract",
+      "passes": 108,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_pit_under_safety_car",
+      "passes": 8,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_pit_wall",
+      "passes": 28,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_pit_zone_contract",
+      "passes": 14,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_pitcrew_visual",
+      "passes": 32,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_podium_car_sprites",
+      "passes": 18,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_podium_data",
+      "passes": 6,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_podium_font",
+      "passes": 4,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_podium_music",
+      "passes": 7,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_race_hud",
+      "passes": 38,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_race_setup_overhaul",
+      "passes": 24,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_race_weekend_and_physics",
+      "passes": 31,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_race_world",
+      "passes": 54,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_racing_line",
+      "passes": 61,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_radio_and_podium",
+      "passes": 35,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_radio_cutin_prewarm",
+      "passes": 6,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_radio_r2",
+      "passes": 29,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_reusable_sky_and_time_of_day",
+      "passes": 18,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_safety_car_cinematic",
+      "passes": 108,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_shared_paddock_kit",
+      "passes": 10,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_simulation_verification",
+      "passes": 43,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_stoke_crown",
+      "passes": 19,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_stoke_crown_pit_flood",
+      "passes": 30,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_team_identity_consistency",
+      "passes": 108,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_team_signage_contract",
+      "passes": 150,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_toyota_supra_chassis",
+      "passes": 27,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_track_environment",
+      "passes": 40,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_track_environment_upgrade",
+      "passes": 40,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_track_incidents_and_stewards",
+      "passes": 55,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_track_selector_ui",
+      "passes": 11,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_visual_polish_and_consistency",
+      "passes": 38,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_weather_and_ai",
+      "passes": 43,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_weather_ladder",
+      "passes": 23,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_wheel_glow_warmup",
+      "passes": 4,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_winning_cut_director",
+      "passes": 16,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_winning_panel",
+      "passes": 24,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_winning_scene_and_standee",
+      "passes": 88,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_winning_triptych",
+      "passes": 24,
+      "failed": false,
+      "log_present": true
+    },
+    {
+      "suite": "test_world_frame_driver",
+      "passes": 4,
+      "failed": false,
+      "log_present": true
+    }
+  ],
+  "runner_slices": [
+    {
+      "from": 0,
+      "to": 19,
+      "seconds": 1009,
+      "failures": 0
+    },
+    {
+      "from": 20,
+      "to": 39,
+      "seconds": 282,
+      "failures": 0
+    },
+    {
+      "from": 40,
+      "to": 59,
+      "seconds": 679,
+      "failures": 0
+    },
+    {
+      "from": 60,
+      "to": 74,
+      "seconds": 558,
+      "failures": 0
+    },
+    {
+      "from": 75,
+      "to": 95,
+      "seconds": 372,
+      "failures": 0
+    }
+  ],
+  "scope": "Stoke Crown plus removal of 16x fast-forward; full final rerun",
+  "interrupted_run": "Initial 60-74 attempt deliberately stopped for low RAM; entire slice rerun. Only completed final slices counted."
+}

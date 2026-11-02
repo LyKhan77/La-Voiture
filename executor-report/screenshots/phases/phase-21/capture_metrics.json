@@ -1,0 +1,1048 @@
+{
+	"complete_static_triangles": 317054,
+	"environment_stats": {
+		"build_ms": 737,
+		"built": true,
+		"circuit_id": "stoke_crown",
+		"draw_calls": 46,
+		"environment_triangles": 120328,
+		"grass_count": 600,
+		"grass_triangles": 3600,
+		"hedge_count": 633,
+		"hedge_triangles": 7596,
+		"helipad": true,
+		"landmark_triangles": 14296,
+		"landmarks": [
+			{
+				"anchor": "ground",
+				"glb": "res://assets/tracks/stoke_crown/models/crown_wing_paddock.glb",
+				"id": "crown_wing_paddock",
+				"note": "Crown Wing owned by CircuitPitComplex; active team fascias and crew",
+				"offset_m": 25.0,
+				"placed": true,
+				"placed_lateral_m": 25.0,
+				"position": [
+					120.0,
+					5.8600001335144,
+					25.0
+				],
+				"s": 120.0,
+				"side": "R",
+				"triangles": 2720
+			},
+			{
+				"anchor": "ground",
+				"glb": "res://assets/tracks/stoke_crown/models/runway_crossing_spitfire.glb",
+				"id": "runway_crossing_spitfire",
+				"note": "Wellington runway crossing + Spitfire prop monument",
+				"offset_m": 26.0,
+				"placed": true,
+				"placed_lateral_m": 26.0,
+				"position": [
+					17.58,
+					4.16,
+					409.29
+				],
+				"s": 1450.0,
+				"side": "L",
+				"triangles": 1104
+			},
+			{
+				"anchor": "ground",
+				"glb": "res://assets/tracks/stoke_crown/models/luffield_arena_grandstand.glb",
+				"id": "luffield_arena_grandstand",
+				"note": "Luffield arena horseshoe grandstand",
+				"offset_m": 32.0,
+				"placed": true,
+				"placed_lateral_m": 32.0,
+				"position": [
+					-513.21,
+					-0.02,
+					114.39
+				],
+				"s": 2150.0,
+				"side": "L",
+				"triangles": 5856
+			},
+			{
+				"anchor": "deck",
+				"glb": "res://assets/tracks/stoke_crown/models/becketts_pedestrian_flyover.glb",
+				"id": "becketts_pedestrian_flyover",
+				"note": "spec anchor L offset 16 m; placed lateral 0, deck spans -16..+16 over the centreline at deck height, stairs/pylons off the pavement",
+				"offset_m": 16.0,
+				"placed": true,
+				"placed_lateral_m": 0.0,
+				"position": [
+					537.97,
+					11.56,
+					-384.11
+				],
+				"s": 3650.0,
+				"side": "L",
+				"triangles": 2044
+			},
+			{
+				"anchor": "ground",
+				"glb": "res://assets/tracks/stoke_crown/models/raf_hangar_tower.glb",
+				"id": "raf_hangar_tower",
+				"note": "historic RAF hangar + vintage control tower",
+				"offset_m": 45.0,
+				"placed": true,
+				"placed_lateral_m": 45.0,
+				"position": [
+					302.75,
+					5.72,
+					-241.12
+				],
+				"s": 4250.0,
+				"side": "R",
+				"triangles": 2572
+			}
+		],
+		"landmarks_placed": 5,
+		"multimeshes": 12,
+		"paddock_tents": 7,
+		"paddock_transporters": 8,
+		"paddock_vehicles": 6,
+		"plaza_quads": 193,
+		"roadbed_drop_m": 0.16,
+		"terrain_max_y": 11.84,
+		"terrain_min_y": -0.2,
+		"terrain_triangles": 44096,
+		"tree_count": 1600,
+		"tree_triangles": 51200,
+		"triangle_budget": 320000,
+		"triangles": 228156
+	},
+	"failures": 0,
+	"shots": [
+		{
+			"complete_static_calls": 132,
+			"frame_calls": 367,
+			"name": "day/01_start_pit",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 62,
+			"frame_calls": 62,
+			"name": "day/02_spitfire",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 69,
+			"frame_calls": 69,
+			"name": "day/03_luffield",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 83,
+			"frame_calls": 253,
+			"name": "day/04_pit_entry",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 95,
+			"frame_calls": 325,
+			"name": "day/05_horizon",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 71,
+			"frame_calls": 71,
+			"name": "day/06_chase",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 125,
+			"frame_calls": 363,
+			"name": "day/07_pit_lane",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 119,
+			"frame_calls": 165,
+			"name": "day/08_garage",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 61,
+			"frame_calls": 61,
+			"name": "day/09_flyover",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 76,
+			"frame_calls": 76,
+			"name": "day/10_hangar",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 105,
+			"frame_calls": 190,
+			"name": "day/11_pit_top",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 141,
+			"frame_calls": 477,
+			"name": "sunset/01_start_pit",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 62,
+			"frame_calls": 62,
+			"name": "sunset/02_spitfire",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 71,
+			"frame_calls": 71,
+			"name": "sunset/03_luffield",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 86,
+			"frame_calls": 278,
+			"name": "sunset/04_pit_entry",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 95,
+			"frame_calls": 325,
+			"name": "sunset/05_horizon",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 71,
+			"frame_calls": 71,
+			"name": "sunset/06_chase",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 135,
+			"frame_calls": 472,
+			"name": "sunset/07_pit_lane",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 121,
+			"frame_calls": 167,
+			"name": "sunset/08_garage",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 65,
+			"frame_calls": 65,
+			"name": "sunset/09_flyover",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 72,
+			"frame_calls": 72,
+			"name": "sunset/10_hangar",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 105,
+			"frame_calls": 194,
+			"name": "sunset/11_pit_top",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 133,
+			"frame_calls": 368,
+			"name": "night/01_start_pit",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 63,
+			"frame_calls": 63,
+			"name": "night/02_spitfire",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 68,
+			"frame_calls": 68,
+			"name": "night/03_luffield",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 82,
+			"frame_calls": 262,
+			"name": "night/04_pit_entry",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 96,
+			"frame_calls": 326,
+			"name": "night/05_horizon",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 70,
+			"frame_calls": 70,
+			"name": "night/06_chase",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 130,
+			"frame_calls": 368,
+			"name": "night/07_pit_lane",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 116,
+			"frame_calls": 162,
+			"name": "night/08_garage",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 62,
+			"frame_calls": 62,
+			"name": "night/09_flyover",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 73,
+			"frame_calls": 73,
+			"name": "night/10_hangar",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": 105,
+			"frame_calls": 200,
+			"name": "night/11_pit_top",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 465,
+			"name": "flythrough/s0000_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 347,
+			"name": "flythrough/s0000_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 381,
+			"name": "flythrough/s0150_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 120,
+			"name": "flythrough/s0150_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 366,
+			"name": "flythrough/s0300_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 62,
+			"name": "flythrough/s0300_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 343,
+			"name": "flythrough/s0450_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 61,
+			"name": "flythrough/s0450_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 361,
+			"name": "flythrough/s0600_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 61,
+			"name": "flythrough/s0600_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 251,
+			"name": "flythrough/s0750_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 63,
+			"name": "flythrough/s0750_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 64,
+			"name": "flythrough/s0900_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 336,
+			"name": "flythrough/s0900_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 61,
+			"name": "flythrough/s1050_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 336,
+			"name": "flythrough/s1050_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 60,
+			"name": "flythrough/s1200_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 122,
+			"name": "flythrough/s1200_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 59,
+			"name": "flythrough/s1350_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 71,
+			"name": "flythrough/s1350_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 90,
+			"name": "flythrough/s1500_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 63,
+			"name": "flythrough/s1500_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 105,
+			"name": "flythrough/s1650_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 63,
+			"name": "flythrough/s1650_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 61,
+			"name": "flythrough/s1800_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 64,
+			"name": "flythrough/s1800_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 61,
+			"name": "flythrough/s1950_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 71,
+			"name": "flythrough/s1950_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 73,
+			"name": "flythrough/s2100_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 76,
+			"name": "flythrough/s2100_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 71,
+			"name": "flythrough/s2250_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 71,
+			"name": "flythrough/s2250_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 69,
+			"name": "flythrough/s2400_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 63,
+			"name": "flythrough/s2400_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 67,
+			"name": "flythrough/s2550_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 62,
+			"name": "flythrough/s2550_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 67,
+			"name": "flythrough/s2700_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 62,
+			"name": "flythrough/s2700_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 67,
+			"name": "flythrough/s2850_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 64,
+			"name": "flythrough/s2850_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 67,
+			"name": "flythrough/s3000_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 71,
+			"name": "flythrough/s3000_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 68,
+			"name": "flythrough/s3150_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 71,
+			"name": "flythrough/s3150_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 63,
+			"name": "flythrough/s3300_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 75,
+			"name": "flythrough/s3300_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 63,
+			"name": "flythrough/s3450_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 62,
+			"name": "flythrough/s3450_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 77,
+			"name": "flythrough/s3600_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 61,
+			"name": "flythrough/s3600_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 309,
+			"name": "flythrough/s3750_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 54,
+			"name": "flythrough/s3750_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 58,
+			"name": "flythrough/s3900_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 340,
+			"name": "flythrough/s3900_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 56,
+			"name": "flythrough/s4050_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 362,
+			"name": "flythrough/s4050_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 62,
+			"name": "flythrough/s4200_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 345,
+			"name": "flythrough/s4200_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 78,
+			"name": "flythrough/s4350_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 344,
+			"name": "flythrough/s4350_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 94,
+			"name": "flythrough/s4500_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 217,
+			"name": "flythrough/s4500_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 139,
+			"name": "flythrough/s4650_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 72,
+			"name": "flythrough/s4650_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 80,
+			"name": "flythrough/s4800_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 79,
+			"name": "flythrough/s4800_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 69,
+			"name": "flythrough/s4950_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 394,
+			"name": "flythrough/s4950_forward",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 266,
+			"name": "flythrough/s5100_reverse",
+			"size": [
+				1920,
+				1080
+			]
+		},
+		{
+			"complete_static_calls": -1,
+			"frame_calls": 387,
+			"name": "flythrough/s5100_forward",
+			"size": [
+				1920,
+				1080
+			]
+		}
+	],
+	"vram_mb": 1854.76953125
+}

@@ -1,0 +1,112 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] SC deploys from pit exit, outside track
+[PASS] Pit exit merge decreases monotonically
+[PASS] SC reaches track center after merge
+[PASS] SC peels toward pit on in-lap
+[PASS] In-lap disables amber strobes
+[PASS] Peel-off reaches fast lane
+[PASS] Expired timer cannot hide SC before leader restart line
+[PASS] Pit lateral survives lap wrap
+[PASS] Withdrawn SC waits inside pit before exit ramp
+[PASS] Withdrawn SC stops while awaiting distant leader restart
+[PASS] SC retains flag priority throughout in-lap
+[PASS] Restart goes green after leader crosses line
+[PASS] SC hidden only after peel-off and restart
+[PASS] Finishing leader still releases restart at the line
+[PASS] Deployment stays ahead at leader s=0.0
+[PASS] Deployment always starts on pit ramp at leader s=0.0
+[PASS] Deployment stays ahead at leader s=100.0
+[PASS] Deployment always starts on pit ramp at leader s=100.0
+[PASS] Deployment stays ahead at leader s=369.0
+[PASS] Deployment always starts on pit ramp at leader s=369.0
+[PASS] Deployment stays ahead at leader s=500.0
+[PASS] Deployment always starts on pit ramp at leader s=500.0
+[PASS] Deployment stays ahead at leader s=4658.8
+[PASS] Deployment always starts on pit ramp at leader s=4658.8
+[PASS] Exit spline matches hand-calculated s=240
+[PASS] Exit spline matches hand-calculated s=270
+[PASS] Exit spline matches hand-calculated s=300
+[PASS] Exit spline matches hand-calculated s=335
+[PASS] Exit spline matches hand-calculated s=370
+[PASS] Entry spline matches hand-calculated s=3920
+[PASS] Entry spline matches hand-calculated s=3960
+[PASS] Entry spline matches hand-calculated s=4000
+[PASS] Entry spline matches hand-calculated s=4030
+[PASS] Entry spline matches hand-calculated s=4060
+[PASS] Renewed caution restores amber at s=3700
+[PASS] Renewed caution before pit entry cancels withdrawal
+[PASS] Renewed caution restores amber at s=4020
+[PASS] Renewed caution after entry cannot release green
+[PASS] Renewed caution remains in pit lane until exit
+[PASS] Renewed SC merges through upcoming pit exit
+[PASS] Late in-lap call cannot jump sideways midway through entry
+[PASS] Late in-lap call waits without misleading IN THIS LAP announcement
+[PASS] Odd three-car grid allocates enough team entries
+[PASS] Incomplete field queue blocks withdrawal
+[PASS] Uncleared retirement blocks withdrawal
+[PASS] Safe track and collected queue allow withdrawal
+[PASS] Late call does not announce IN THIS LAP after approach passed
+[PASS] Race exposes per-car restart and pickup permission
+[PASS] Mid-pack pickup permits nonleader past SC, not leader
+[PASS] Pickup pass permission drives green signal
+[PASS] Green pickup signal goes off after leader collected
+[PASS] Normal withdrawal releases global green at leader line
+[PASS] Trailing car retains own control-line restriction after global green
+[PASS] Trailing car releases restart restriction at its own line
+[PASS] Caution on final lap finishes without artificial GREEN
+[PASS] High closing speed cannot overtake before own restart line (flag 3)
+[PASS] Caution order enforcement never rewinds car progress (flag 3)
+[PASS] High closing speed cannot overtake before own restart line (flag 0)
+[PASS] Caution order enforcement never rewinds car progress (flag 0)
+[PASS] All cars resume racing after individual control-line crossings
+[PASS] Queue spanning control line retains actual withdrawal restart lap
+[PASS] Intermediate line crossing cannot release tail one lap early
+[PASS] ATTACK leader cannot pass in-lap SC before pit separation
+[PASS] Three-car contact regression receives a complete grid
+[PASS] Contact correction cannot reverse three-car caution order
+[PASS] Contact correction preserves nonnegative caution progress
+[PASS] Minimum lap countdown cannot announce withdrawal without safety gates
+[PASS] Pickup acceleration stays within 3m/s² without velocity kick
+[PASS] Late withdrawal waits until complete racing-line alignment is available
+[PASS] Coach cannot advise overtaking while Safety Car is deployed
+[PASS] Coach cannot advise overtaking before individual restart line
+[PASS] Coach resumes valid overtake advice after restart restrictions end
+[PASS] First deployment frame snaps to pit ramp at 30Hz
+[PASS] SC has no stationary-frame pattern at 30Hz (0 frozen)
+[PASS] SC frame movement bounded at 30Hz (0.630m)
+[PASS] SC heading follows leftward pit merge at 30Hz
+[PASS] First deployment frame snaps to pit ramp at 60Hz
+[PASS] SC has no stationary-frame pattern at 60Hz (0 frozen)
+[PASS] SC frame movement bounded at 60Hz (0.315m)
+[PASS] SC heading follows leftward pit merge at 60Hz
+[PASS] First deployment frame snaps to pit ramp at 120Hz
+[PASS] SC has no stationary-frame pattern at 120Hz (0 frozen)
+[PASS] SC frame movement bounded at 120Hz (0.157m)
+[PASS] SC heading follows leftward pit merge at 120Hz
+[PASS] 8x presentation keeps final two simulation ticks, not whole rendered-frame movement
+[PASS] Presentation never overwrites simulation snapshots
+[PASS] Camera supports Safety Car cut-in
+[PASS] Manga banner available
+[PASS] World flag signal starts SC camera
+[PASS] World flag signal shows manga banner
+[PASS] Banner identifies Safety Car
+[PASS] First camera frame uses current SC pose
+[PASS] SC tracking shot uses 65 degree lens
+[PASS] Cut-in remains active before four seconds
+[PASS] Cut-in restores CHASE after four seconds
+[PASS] Cut-in preserves previous manual mode
+[PASS] SC cinematic takes priority over automatic pit camera
+[PASS] Pit camera resumes after cinematic
+[PASS] C cycles to SC camera while actor active
+[PASS] Pickup permission illuminates green while preserving amber mode
+[PASS] Pickup pass signal visibly combines amber and green LEDs
+[PASS] Repeated pickup presentation does not reset strobe animation
+[PASS] HUD detects in-lap phase separately from flag
+[PASS] In-lap is lights out; green is reserved for pickup permission
+[PASS] Manga banner expires after 3.8 seconds
+[PASS] In-lap banner does not retrigger each frame
+[PASS] Hidden SC cannot retain manual camera
+[PASS] Green flag hides SC actor
+108 assertions, 0 failure(s)

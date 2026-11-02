@@ -1,0 +1,34 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] radio r2: keywords are highlighted whole-word and the ink follows the paper ([bgcolor=#050505][color=#ff0000]BOX[/color][/bgcolor] THIS LAP, CONFIRM [bgcolor=#050505][color=#ff0000]WET[/color][/bgcolor] [bgcolor=#050505][color=#ff0000]TYRES[/color][/bgcolor]. BOXING IS NOT A CALL)
+[PASS] radio r2: the koma strip has a portrait panel and a speech panel split by a slanted gutter, an SFX panel breaking out of the top corner, and a highlighted headline
+[PASS] radio r2: the engineer's strip is mirrored, the portrait at the right end
+[PASS] radio r2: the banner is compact (258x106, was 470x190)
+[PASS] radio r2: a routine call carries the static SFX and no sweat
+[PASS] radio r2: the accent takes the speaker's colour, urgent calls are crimson
+[PASS] radio r2: an urgent call sweats, shouts a harder SFX and turns the paper pink
+[PASS] radio r2: the outline shivers on twos by at most 2 px
+[PASS] radio r2: the listener dims and recovers
+[PASS] radio r2: long calls make the balloon taller (three lines at most), short ones keep the compact size (160)
+[PASS] animation: the balloon starts the pop big, turned and transparent (x1.40, 6.0 deg, alpha 0.00)
+[PASS] animation: 0.7 s later the pop has settled to rest on its own (x1.000, 0.00 deg, alpha 1.00)
+[PASS] animation: the outline shivered through 4 poses, the lines flickered through 2 phases and the teeth reached 0.91
+[PASS] animation: reduce motion keeps the outline and the lines still (1 pose)
+[PASS] animation: when the call ends the outline stops shivering and the teeth fall flat
+[PASS] review: a balloon dimmed during its pop ends dimmed (alpha 0.60, tint 0.75)
+[PASS] review: a balloon that is up follows a new dock rect at once ((4.0, 542.0))
+[PASS] hud radio: the driver balloon pops in in the team colour and settles upright
+[PASS] hud radio: the speaker is lit and the other card dims
+[PASS] hud radio: a routine engineer call is in the complementary colour
+[PASS] hud radio: a routine reply waits for an urgent card instead of replacing it
+[PASS] hud radio: the slap lands on the dock position and keeps the card's centre
+[PASS] hud radio: two long calls stay inside the dock and apart
+[PASS] hud radio: the balloons sit in the lower corners of the dock, level at the bottom, without overlapping
+[PASS] hud radio: the balloons clear every other HUD element ([])
+[PASS] hud radio: the dim ends with the other card and the radio is released
+[PASS] hud radio: portraits are preloaded and a missing one falls back
+[PASS] hud radio: reduce motion skips the slap and the fade
+[PASS] hud radio: a driver call and its reply each show once and the radio is not left keyed
+29 assertions, 0 failure(s)
+FASE 11 LANGKAH 3E RADIO R2: PASS

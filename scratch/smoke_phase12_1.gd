@@ -52,7 +52,7 @@ func _run() -> void:
 	var mean: float = sum_ms / float(times.size())
 	print("PHASE12_SMOKE frames=%d mean_ms=%.3f p95_ms=%.3f worst_ms=%.3f fps=%.2f draw_calls=%d tris=%d" % [times.size(), mean, times[int(times.size() * 0.95)], times.back(), 1000.0 / mean, int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)), int(Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME))])
 	print("PHASE12_SMOKE frame_budget_ms=%.6f late_frames=%d locked_60=%s" % [FRAME_BUDGET_MS, late_frames, late_frames == 0])
-	world.set_time_scale(16.0)
+	world.set_time_scale(8.0)
 	var guard: int = 0
 	while not world.race.is_finished() and guard < 12000:
 		await process_frame

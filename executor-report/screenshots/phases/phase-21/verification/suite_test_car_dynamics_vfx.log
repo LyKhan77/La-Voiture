@@ -1,0 +1,34 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] steering: a right steer angle turns the front wheels right (-0.30 rad) and a left one left (0.30 rad), the rear wheels never turn
+[PASS] body: it rolls to the outside of the corner both ways, dives its nose under braking and squats under power
+[PASS] yaw: a lateral move points the car toward it (+0.12 rad turns right: -0.116 rad)
+[PASS] smooth: 20 Hz steps of roll, pitch, yaw and steer reach the body as soft ramps (frame-to-frame jerk as a share of the step: lean 0.05, nose 0.04, heading 0.04, steer 0.04)
+[PASS] smooth: a held roll and steer still arrive in full (lean 0.075, steer 0.30 rad)
+[PASS] tip: the graffiti name tag is hidden at rest, flashes up at 0.60 opacity for about 2.4 s and fades out again
+[PASS] tip: a position change, being selected and a rival coming within 60 m each flash its name tag
+[PASS] tip: a sticker shows DRS, PIT, a blinking HAZARD on a puncture, and BRAKE only on the followed car
+[PASS] tip: it hides when the camera is inside the car or far away, floats above the roof, and no tail bar or wing flap is left on the car
+[PASS] tip: the graffiti slab is the same for the same seed and different for another, with 3 drips, 9 speckles and a halftone band; the status sticker is smaller and drip free
+[PASS] lights: the headlights come on at night and are off by day
+[PASS] weather: rain falls and the road mirrors only when the sim is wet (water 0.85), spray flies behind a car at speed (0.73)
+[PASS] weather: the sun dims under rain (1.15 -> 0.50)
+[PASS] smoke: both rear wheels smoke in a spin and stop when the car is straight again
+[PASS] sparks: a contact fires a burst from the pool of 10 at the contact point
+[PASS] exhaust: an upshift pops a flame from both tailpipes that dies within a tenth of a second
+[PASS] slipstream: twin ribbons stream from a car in the tow and vanish when it leaves it
+[PASS] safety car: it rides the dedicated FIA safety car chassis, not a borrowed team car
+[PASS] safety car: the body paint is metallic silver ((0.62, 0.63, 0.65, 1.0))
+[PASS] safety car: SAFETY CAR is lettered on both doors and the bonnet (3 labels)
+[PASS] safety car: hazard chevron strips run down both sides
+[PASS] safety car: while DEPLOYED the lightbar runs the amber strobe
+[PASS] safety car: the four amber LEDs flash in two alternating pairs ([true, false, true, false] then [false, true, false, true])
+[PASS] safety car: the amber strobe flashes at 12 Hz (23 toggles in one second)
+[PASS] safety car: the green lights stay dark while DEPLOYED
+[PASS] safety car: IN_THIS_LAP switches the lightbar off
+[PASS] safety car: withdrawal extinguishes amber; green is not a restart signal
+[PASS] safety car: it appears ahead of the leader while the flag is out and leaves with it
+[PASS] safety car: the lightbar goes dark when the car leaves the track
+29 assertions, 0 failure(s)
+FASE 5.7 DYNAMICS + VFX: PASS

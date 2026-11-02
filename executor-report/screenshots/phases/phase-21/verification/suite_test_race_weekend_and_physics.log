@@ -1,0 +1,44 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] #1 kappa is ~0 on the start straight (0.00000) and non-zero in the tightest corner (-0.0297)
+[PASS] #1 kappa = (t1 x t0).y / ds is signed: + for a right turn, - for a left turn
+[PASS] #2 d_target clips the inside of the tightest corner (5.04 m), comes in from the outside (-5.30 m), stays within +-5.30 m, lateral rate 1.8 m/s
+[PASS] #3 the braking envelope never exceeds v_limit = sqrt(mu g / |kappa|) anywhere on the lap (worst +0.0000 m/s; 35 m radius = 26.2 m/s)
+[PASS] #4 braking starts earlier on low grip: wet at s=877 vs dry at s=1047, -283 m vs -114 m after a fixed point
+[PASS] #5 all 20 x 19 / 2 = 190 pairs are checked by the match collider every tick (190)
+[PASS] #6 cyclic gap across the start/finish line: cars at L-1 and 2 are 3.0 m apart and touch; 10 vs L-10 is 20 m
+[PASS] #7 lateral repulsion acts inside the 4.45 x 2.08 m envelope (0.10 -> 2.88 m apart, jolt 0.38) and not outside it
+[PASS] #9 one-move defending: the car being caught commits to ONE line (4.66 m) and holds it
+[PASS] #10 racing room: a car alongside is left 2.46 m between the lines (a car is 2.08 m wide)
+[PASS] #11 blue flag: a lapped car with the leader 10 m behind leaves the racing line (target 5.4 m) and is slower than its unflagged twin (245 vs 265 km/h)
+[PASS] #12 the 20-car grid is lined up in staggered columns (+-2.5 m, 8 m rows) with nobody overlapping
+[PASS] #23 9 red-white kerbs sit on the inside of sharp corners, with 1975 guardrail posts and 1100 trees
+[PASS] #24 the gantry (5 pairs of lamps) stands on the start line and the 10 garages along the pit lane (458.8 m, entry 4000, exit 300)
+[PASS] #13 the five red lights come on one pair at a time, 1.0 s apart ([4.01666666666666, 5.01666666666665, 6.01666666666665, 7.01666666666665, 8.01666666666664] s)
+[PASS] #14 all lamps go out at once after a random hold (0.59..1.99 s over 25 seeds), then the race is on
+[PASS] #15 no car moved before lights out: every grid car stayed put and the sim ran 0 ticks before the lamps went out
+[PASS] #3 in the race every car stays within the grip-adaptive corner profile over 3600 ticks (worst -4.55 m/s over 1.2 x v_limit)
+[PASS] #8 zero overlapping boxes over 3600 ticks of racing: 0 frames with a box overlap (worst 0.000 m)
+[PASS] #5 the world ran the 190-pair check on every tick (684000 pair checks over 3600 ticks)
+[PASS] #21 all four wheels roll forward with the car (181.8 rad/s at 60 m/s), only the front pair steers (-0.30 rad), the brake caliper stays static
+[PASS] #22 the brake disc glows (1.00) after 3 G braking, stays cold at 1.4 G and cools down again
+[PASS] #26 broadcast cameras: C cycles chase > cockpit > heli > trackside TV, the pit close-up cuts in on its own and hands back
+[PASS] #26b the pit close-up shows only the stop of the selected car: another car's stop leaves the chase camera alone
+[PASS] #8 dense pack (20 cars within 150 m, random lateral lines): 0 overlap frames over 3600 ticks (worst 0.000 m)
+[PASS] #16 the pit lane limiter holds 80 km/h (22.22 m/s): a car arriving at 45 m/s runs at most 22.00 m/s inside
+[PASS] #17 the car stops on the stall of its team's garage (0.000 m from the box centre)
+[PASS] #18 the hydraulic jacks lift the chassis 15 cm during the stop and lower it again
+[PASS] #19 the crew took the four old wheels off and fitted four WET wheels (4 swaps, sockets empty during service: true), the sim car runs on fresh WETs
+[PASS] #20 the second teammate queued behind the stall (closest 7.9 m, car length 4.45 m) and was serviced after the first
+    test_modular_car OK (18 PASS, 0 FAIL, 0 s)
+    test_simulation_verification OK (43 PASS, 0 FAIL, 4 s)
+    test_pit_wall OK (28 PASS, 0 FAIL, 7 s)
+    test_weather_and_ai OK (43 PASS, 0 FAIL, 28 s)
+    test_race_world OK (54 PASS, 0 FAIL, 146 s)
+    test_gt_sim OK (43 PASS, 0 FAIL, 91 s)
+    test_car_dynamics_vfx OK (29 PASS, 0 FAIL, 4 s)
+    test_race_hud OK (38 PASS, 0 FAIL, 5 s)
+[PASS] #25 the earlier suites still pass without regressions: test_modular_car OK (18 PASS, 0 FAIL, 0 s), test_simulation_verification OK (43 PASS, 0 FAIL, 4 s), test_pit_wall OK (28 PASS, 0 FAIL, 7 s), test_weather_and_ai OK (43 PASS, 0 FAIL, 28 s), test_race_world OK (54 PASS, 0 FAIL, 146 s), test_gt_sim OK (43 PASS, 0 FAIL, 91 s), test_car_dynamics_vfx OK (29 PASS, 0 FAIL, 4 s), test_race_hud OK (38 PASS, 0 FAIL, 5 s)
+31 assertions, 0 failure(s)
+FASE 5.5 ACCEPTANCE: PASS

@@ -1,0 +1,35 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+ERROR: Failed to read the root certificate store.
+   at: get_system_ca_certificates (platform/windows/os_windows.cpp:2582)
+[stoke-runtime] armco posts: 2567 (122 interpolated)
+[stoke-runtime] catch fence panels: 897
+[stoke-crown-env] built in 0.76s | terrain tris 76558 | trees 1600 | grass 600 | hedges 633 | landmarks 5/5 | env tris 167042 (budget 320000)
+[stoke-crown-sim] ready | controls: Space cam, C broadcast, P pit, R reset, 1/2/4 speed, Enter pause
+[1/25] PASS P arms the pit request (phase=1 hud=PIT REQUESTED - 40 m to entry [P cancel])
+[2/25] PASS pit entry fires at s=5020 (at 5020.01 m)
+[3/25] PASS entry blend pre-positions on the road edge with no wall contact (offset 4.60 m, blend barrier violations 0, facade margin 3.00 m)
+[4/25] PASS entry speed respects the 80 km/h limit (80.00 km/h)
+[5/25] PASS no in-lane frame exceeds 80 km/h (max 80.000 km/h)
+[6/25] PASS car stopped for service
+[7/25] PASS stop bay position centred at s=127 and 16.5 m (station 130.000 m (wanted 130.0 +- 2), offset 16.500 m, entry_s 5020.000, stall_u 310.134)
+[8/25] PASS car at rest during service (max 0.0000 m/s)
+[9/25] PASS exactly one service stop (1)
+[10/25] PASS service lasts 3.0 s of sim time (3.017 s)
+[11/25] PASS departure accelerates out of the bay (0.0 km/h at release -> 80.0 km/h at exit)
+[12/25] PASS exit merge crosses s=240 (at 240.13 m)
+[13/25] PASS merge completes on the straight above 100 km/h (116.2 km/h at |lat| 3.43 m, back on asphalt true)
+[14/25] PASS 0 armco/barrier contacts over the whole run (0 frames, worst margin 8.00 m)
+[15/25] PASS 0 frames off pavement while on track (0 frames off asphalt (pit 0, lap 0))
+[16/25] PASS full lap crosses all 18 turns in order (18/18 turns, 18 hits)
+[17/25] PASS lap length within 5200 m +- 50 m (5200.9 m driven)
+[18/25] PASS corner lateral stays inside the 7 m road (max |lat| in corners 3.20 m (lap 3.20 m))
+[19/25] PASS speed profile is smooth (no teleports) (max |dspeed| 0.308 m/s per frame, max ds 0.987 m (pit 0.370 m), max dlat 0.100 m)
+[20/25] PASS HUD pit state line tracks every pit phase (req=PIT REQUESTED - 40 m to entry [P cancel] | lane=PIT LANE - LIMIT 80 km/h (u 0 m) | svc=PIT STOP - SERVICE 3.0 s | out=PIT RELEASE (u 310 m) | none=RACING - [P] request pit)
+[21/25] PASS camera switch cycles chase/broadcast and C advances (broadcast=true advance=3->4 scale=true/true chase=true)
+[22/25] PASS pause/resume freezes and resumes the car (paused=true frozen=true resumed=true)
+[23/25] PASS R resets position, speed, pit and lap timer (s=0.0 v=30.0 phase=0 lap=0.000)
+[24/25] PASS sector indicator follows S1/S2/S3 (SECTOR S1  (s = 500 m / 5200 m) | SECTOR S2  (s = 2500 m / 5200 m) | SECTOR S3  (s = 4500 m / 5200 m))
+[25/25] PASS turn label cycles through all 18 turns (18 unique labels)
+
+pit-drive: 25/25 PASS | lap 5200.9 m, entry 80.0 km/h, lane max 80.0 km/h, stop u 310.134 s=130.000, service 3.017 s, resume 213 km/h

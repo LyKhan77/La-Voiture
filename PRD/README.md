@@ -13,7 +13,7 @@ Dokumen arsitektur dan persyaratan game *La Voiture* dibagi menjadi beberapa mod
 | Dokumen | Fase | Cakupan Utama | Status |
 | :--- | :--- | :--- | :--- |
 | **[00-MASTER-OVERVIEW.md](file:///D:/Occupation/Porto/genex/La_Voiture/PRD/00-MASTER-OVERVIEW.md)** | Master | Visi Produk, Game Loop, 4 Pilar, Arsitektur Sistem Global | ✅ Ready |
-| **[01-CORE-SIMULATION-ENGINE.md](file:///D:/Occupation/Porto/genex/La_Voiture/PRD/01-CORE-SIMULATION-ENGINE.md)** | Fase 1 | Kinematic Ribbon Physics, Fast-Forward 16x, Telemetri Matematika Ban/BBM/Aero | ✅ Ready |
+| **[01-CORE-SIMULATION-ENGINE.md](file:///D:/Occupation/Porto/genex/La_Voiture/PRD/01-CORE-SIMULATION-ENGINE.md)** | Fase 1 | Kinematic Ribbon Physics, Fast-Forward 8x, Telemetri Matematika Ban/BBM/Aero | ✅ Ready |
 | **[02-UI-UX-TOPOLOGY.md](file:///D:/Occupation/Porto/genex/La_Voiture/PRD/02-UI-UX-TOPOLOGY.md)** | Fase 2 | Pit Wall Command Center, Bento Grid HQ, Halftone Screentones, Anime Cut-Ins | ✅ Ready |
 | **[03-MODULAR-ASSET-PIPELINE.md](file:///D:/Occupation/Porto/genex/La_Voiture/PRD/03-MODULAR-ASSET-PIPELINE.md)** | Fase 3 | 10 Mobil GT3, Universal Sockets, Blender Quality Gate, Meshy Ingestion, Zero-Overlap | ✅ Ready |
 | **[04-RENDERING-SHADERS-VFX.md](file:///D:/Occupation/Porto/genex/La_Voiture/PRD/04-RENDERING-SHADERS-VFX.md)** | Fase 4 | Toon Cel-Shading, Inverted-Hull Ink Outline, Asap Ban 2D Manga, Grafiti Unbound | ✅ Ready |

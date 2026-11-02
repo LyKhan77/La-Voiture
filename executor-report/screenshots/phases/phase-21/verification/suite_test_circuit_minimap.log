@@ -1,0 +1,12 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] #R1 each of the 20 cars is a dot of at least 15 px carrying its own race number in 10+ px type, inside the radar (20 numbers shown)
+[PASS] #R2 the lap is three joined sector bands in three colours labelled S1 S2 S3, with a start line tick and two sector boundary ticks (3 colours, 1 + 2 ticks)
+[PASS] #R3 the followed car (#6) is the biggest dot and drawn on top, and the player's 2 cars each wear a team ring
+[PASS] #R4 the strip under the map shows the followed car's S1 purple, S2 green, S3 yellow, marks the sector it is in (S1) and names the car (#6 SAT)
+[PASS] #R5 a yellow flag in sector 2 turns band S2 and its chip yellow and nothing else, and clears with the flag (lit [2])
+[PASS] #R6 callers that send only car_id, team_id and spline_distance still get a numbered dot (#4) and the sector strip
+[PASS] #R7 the map keeps its 300x200 footprint in the right column, clear of the tower and the telemetry drawer ([P: (1604.0, 88.0), S: (300.0, 200.0)])
+7 assertions, 0 failure(s)
+CIRCUIT MINIMAP: PASS

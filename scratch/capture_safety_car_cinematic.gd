@@ -143,7 +143,7 @@ func _smoke() -> void:
 	var p95_ms: float = frames[int(frames.size() * 0.95)]
 	print("NATIVE 1x SC SAMPLE: %d frames avg %.3f ms / %.2f FPS p95 %.3f ms max %.3f ms" % [frames.size(), total_ms / frames.size(), avg_fps, p95_ms, frames[-1]])
 	check(avg_fps >= 50.0 and p95_ms <= 32.0, "Performance gate: avg FPS %.2f >=50.0, p95 %.2f <=32.0 ms" % [avg_fps, p95_ms])
-	world.set_time_scale(16.0)
+	world.set_time_scale(8.0)
 	start_ms = Time.get_ticks_msec()
 	var saw_in_lap: bool = false
 	var saw_peeloff: bool = false

@@ -9,7 +9,7 @@ const TrackScene := preload("res://scenes/race_world/circuits/apex_ring/apex_cir
 const ActorScript := preload("res://scripts/car/kinematic_car_actor.gd")
 const RibbonScript := preload("res://scripts/car/track_ribbon.gd")
 
-const SCALES: Array[float] = [1.0, 2.0, 4.0, 8.0, 16.0]
+const SCALES: Array[float] = [1.0, 2.0, 4.0, 8.0]
 const SIM_TICKS: int = 60 * 300
 const HALF_LENGTH_M: float = 2.3
 const HALF_WIDTH_M: float = 1.0

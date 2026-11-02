@@ -1,0 +1,60 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] snap oversteer: the slip angle peaks at 0.45 rad, past a visible slide but under 0.55 rad (no 360 spin)
+[PASS] snap oversteer: the heading settles back to straight (-0.000 rad one second after the slide)
+[PASS] countersteer: the front wheels hold opposite lock to the body slip on 19 of 19 slide ticks
+[PASS] slide: the car drifts toward the outer verge at 2.8 m/s (v_lat 2.80, lateral 2.00 -> 6.60)
+[PASS] slide: heavy tyre scrub bleeds speed but never below the 12 m/s floor (lowest 12.0 m/s)
+[PASS] collider: all 190 pairs are tested on every tick of the slide and the field stays at 20 cars
+[PASS] collider: no two cars share a spot and nothing goes NaN through the slide (0 overlapping ticks)
+[PASS] evacuation: the safety car's in-lap call starts the recovery with the wreck still fully visible
+[PASS] evacuation: race control radios the pit wall ("Track clear in Sector 2. Recovery complete, Safety Car in this lap.")
+[PASS] evacuation: the race control call has a spoken clip (eng_track_clear_2)
+[PASS] evacuation: the wreck fades out over 2 s (0.75 after 0.5 s, 0.00 after 2.5 s)
+[PASS] evacuation: the retired car stays in race.cars, only its picture goes (20 cars)
+[PASS] stewards: a 9 m/s nose-to-tail hit opens a case against the car behind (1 cases)
+[PASS] stewards: the banner opens on the investigation ("/// STEWARDS: INCIDENT INVOLVING CAR #13 UNDER INVESTIGATION")
+[PASS] stewards: nine seconds in, the investigation is still open
+[PASS] stewards: after 10 s the car behind owes 5 s (owes 5.0)
+[PASS] stewards: the verdict banner reads "+5s TIME PENALTY // CAR #13: CAUSING A COLLISION"
+[PASS] stewards: a 1 m/s nose-to-tail touch is nothing for the stewards (1 contacts, 0 cases)
+[PASS] stewards: wheel-to-wheel contact is never an at-fault rear-end hit (1 contacts)
+[PASS] penalty: the stopped car is held 5.05 s before the crew starts work
+[PASS] penalty: served in the pit, nothing left to add at the finish (owed 0.0, served 5.0)
+[PASS] penalty: a car with no penalty is serviced at once
+[PASS] stewards: a hard hit in the first 45 s of the race is the standing-start concertina, not a case (0 cases)
+[PASS] stewards: the same car hitting a second car 25 s later is not investigated again (1 cases)
+[PASS] review: a car retired mid-slide stops spinning (spin_timer 0.00, slide_time 0.00)
+[PASS] review: a new spin restarts the slide envelope instead of continuing the old one
+[PASS] review: a hard hit on a car that is sliding is not a steward case (1 contacts, 0 cases)
+[PASS] review: a hard hit on a car that is punctured is not a steward case (1 contacts, 0 cases)
+[PASS] review: a hard hit under the safety car is not judged, the same hit under green is (0, then 1 cases)
+[PASS] review: a hard hit under the virtual safety car is not judged, the same hit under green is (0, then 1 cases)
+[PASS] review: a case still open at the flag gets its verdict at once (owes 5.0 s)
+[PASS] review: the evacuation call names the sector of the latest wreck ("Track clear in Sector 1. Recovery complete, Safety Car in this lap.")
+[PASS] panels: eight digital flag panels share ONE MultiMeshInstance3D (8 panels, 1 node)
+[PASS] panels: every one of the three sectors carries at least one panel
+[PASS] panels: all eight glow a dim steady green under the green flag
+[PASS] panels: a sector 2 yellow blinks only the 3 panels of sector 2
+[PASS] panels: the safety car puts SC on every panel of the circuit
+[PASS] panels: the green flag returns every panel to dim green
+[PASS] wreck: a car stopped at the outer barrier rests at 17.5 deg, between 15 and 20
+[PASS] wreck: against the other barrier the lean flips (-17.5 deg)
+[PASS] wreck: comic smoke pours from the bonnet of the retired car
+[PASS] wreck: four orange hazard lamps blink on the body (4 lamps, on true, off true)
+[PASS] wreck: only the retired car smokes, no healthy car gets the emitter
+[PASS] wreck: halfway through the recovery the body is half transparent; when it ends the actor is hidden and the smoke has stopped
+[PASS] banner: the steward banner exists on the HUD and starts hidden
+[PASS] banner: the investigation banner appears with the stewards' wording
+[PASS] banner: an investigation opens with a short notification beep
+[PASS] banner: the penalty verdict replaces it in the crimson hazard style
+[PASS] banner: a time penalty is struck with the gavel and buzzer
+[PASS] banner: a racing incident ends in no further action, without the penalty style
+[PASS] banner: no further action is silent
+[PASS] banner: a verdict leaves the screen by itself
+[PASS] podium: the 5 s penalty drops a 2 s winner to third (order 12, 4, 5)
+[PASS] podium: displayed gap and classified time both include the unserved penalty
+[PASS] review: the front wheels turn 0.64 rad on the first frame of a slide, rear wheels stay straight
+55 assertions, 0 failure(s)
+FASE 11 LANGKAH 6 INCIDENTS + STEWARDS: PASS

@@ -1,0 +1,50 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] #1 the bus layout holds the five buses Master, Music, SFX, UI and Radio: Master, Music, SFX, UI, Radio
+[PASS] #2 the Radio bus carries a band-pass filter at the 1.85 kHz voice centre (resonance 0.85, 24 dB)
+[PASS] #3 the Radio bus carries a CLIP distortion with drive 0.28
+[PASS] #4 all 12 essential audio files exist and load as non-empty streams
+[PASS] #31 the voice manifest lists 111 unique clips for the engineer and the driver, all loading as 24 kHz speech of 0.4 to 12 s
+[PASS] #32 a sim radio text finds its clip by speaker and pattern, and a speaker or text with no recording finds none
+[PASS] #5 engine pitch climbs monotonically from 0.65 at 1200 RPM to 1.85 at 8500 RPM
+[PASS] #6 engine volume rises with the throttle and with the speed (-18.0 dB idle to 0.0 dB flat out)
+[PASS] #7 the exhaust pop fires on the upshift signal and not on a downshift (1 pop)
+[PASS] #8 the tyre squeal starts above 1.8 G lateral (either side) or on a locked wheel, at the level -16.8 dB
+[PASS] #9 the tyre squeal stays silent on a relaxed drive (1.0 G) and stops at the 1.8 G limit
+[PASS] #10 music ducking drops the Music bus 8.0 dB while a radio transmission is live (-4.0 to -12.0 dB)
+[PASS] #11 the Music bus is back at its normal level after the transmission (-4.01 dB)
+[PASS] #12 squelch-in sounds when the transmission starts and squelch-out when it ends
+[PASS] #13 tab, mode-row and BOX clicks of the Tactical Deck each play the click snap (3 clicks)
+[PASS] #14 a click on a Timing Tower row (and on the Telemetry Drawer) plays the tactile snap
+[PASS] #15 the countdown beeps once per red pair, a step higher each time: [1, 2, 3, 4, 5] beeps, last pitch 1.36
+[PASS] #16 the green buzzer sounds once, exactly when the lights go out
+[PASS] #17 the wheel gun runs eight times in a four-wheel stop: four wheels off and four on (4 off, 4 on)
+[PASS] #21 the HUD radio cut-in keys the radio director: squelch-in with the banner, squelch-out when it leaves
+[PASS] #27 an engineer call cuts in on the right and a driver call on the left, both at once (the engineer has an overlay of his own)
+[PASS] #30 the driver and engineer balloons dock in the lower corners of the free viewport, clear of the tower, drawer, radar, ribbon and deck, and of each other (driver [P: (360.0, 739.0), S: (258.0, 129.0)], engineer [P: (1324.0, 733.0), S: (245.1, 128.25)])
+[PASS] #28 the engineer overlay has its own portrait, ENGINEER title and the complementary colour; the driver card keeps the team colour
+[PASS] #29 the music stays ducked until the last of the two overlapping transmissions ends
+[PASS] #34 a voiced call keys the squelch, speaks its clip after the lead-in (3.0 s banner hold for a 2.5 s clip), skips the siren, and ends with the key-down squelch
+[PASS] #35 a call with no recorded line keeps the default banner hold and the warning siren, and speaks nothing
+[PASS] #22 every GT car actor carries its spatial engine and tyre voices, driven by its RPM and lateral G (20 cars rolling)
+[PASS] #23 a gear change on a car pops its exhaust, and the engine goes quiet at high time scale
+[PASS] #33 all 180 radio calls of four short races (14 different clips used) have a voice line
+[PASS] #19 FIA scoring includes exactly one eligible fastest-lap bonus and both constructor entries
+[PASS] Fastest lap outside the top ten earns no bonus
+[PASS] A retired entry never earns finishing or fastest-lap points
+[PASS] Two-lap race produces complete studio classification
+[PASS] #18 studio snapshot preserves P1-P3 simulation finishing order
+[PASS] Studio renders the final results after the race world is freed
+    test_modular_car OK (18 PASS, 0 FAIL, 0 s)
+    test_simulation_verification OK (43 PASS, 0 FAIL, 5 s)
+    test_pit_wall OK (28 PASS, 0 FAIL, 8 s)
+    test_weather_and_ai OK (43 PASS, 0 FAIL, 28 s)
+    test_race_world OK (54 PASS, 0 FAIL, 142 s)
+    test_gt_sim OK (43 PASS, 0 FAIL, 88 s)
+    test_car_dynamics_vfx OK (29 PASS, 0 FAIL, 5 s)
+    test_race_hud OK (38 PASS, 0 FAIL, 5 s)
+    test_race_weekend_and_physics OK (30 PASS, 0 FAIL, 53 s)
+[PASS] #20 the nine earlier suites still pass without regressions: test_modular_car OK (18 PASS, 0 FAIL, 0 s), test_simulation_verification OK (43 PASS, 0 FAIL, 5 s), test_pit_wall OK (28 PASS, 0 FAIL, 8 s), test_weather_and_ai OK (43 PASS, 0 FAIL, 28 s), test_race_world OK (54 PASS, 0 FAIL, 142 s), test_gt_sim OK (43 PASS, 0 FAIL, 88 s), test_car_dynamics_vfx OK (29 PASS, 0 FAIL, 5 s), test_race_hud OK (38 PASS, 0 FAIL, 5 s), test_race_weekend_and_physics OK (30 PASS, 0 FAIL, 53 s)
+36 assertions, 0 failure(s)
+FASE 6 ACCEPTANCE: PASS

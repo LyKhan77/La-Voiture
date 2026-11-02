@@ -1,0 +1,14 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] Apex pit defaults preserved
+[PASS] Apex grandstand default preserved
+[PASS] Apex tower accent preserved
+[PASS] Apex kit 0 mesh arrays match pre-phase geometry byte for byte
+[PASS] Apex kit 1 mesh arrays match pre-phase geometry byte for byte
+[PASS] Apex kit 2 mesh arrays match pre-phase geometry byte for byte
+[PASS] Neo-Wangan reuses 204 m two-storey pit kit with ten 20 m bays
+[PASS] Neo-Wangan shared grandstand has live screen and instanced crowd
+[PASS] Neo-Wangan shared tower and catch fence integrated
+[PASS] Ten usable garages retain crew sockets and shared equipment
+SHARED PADDOCK KIT: 0 failure(s)

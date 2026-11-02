@@ -349,6 +349,21 @@ func _test_weather_and_rate() -> void:
 	check(RaceHud.weather_state(0.0, 30.0) == 3 and RaceHud.weather_state(0.2, 10.0) == 1 and RaceHud.weather_state(0.0, 2.0) == 0,
 		"weather: drying, drizzle and dry map onto the pit wall radar states")
 
+	check(hud.rate_row.buttons.size() == 4, "ribbon exposes only 1x, 2x, 4x and 8x")
+	world.set_time_scale(16.0)
+	check(world.time_scale == 8.0, "weekend API caps speed at 8x")
+	world.set_time_scale(2.0)
+	var removed_key := InputEventKey.new()
+	removed_key.keycode = KEY_5
+	removed_key.pressed = true
+	world._unhandled_key_input(removed_key)
+	check(world.time_scale == 2.0, "key 5 no longer changes race speed")
+	for index: int in range(4):
+		var speed_key := InputEventKey.new()
+		speed_key.keycode = KEY_1 + index
+		speed_key.pressed = true
+		world._unhandled_key_input(speed_key)
+		check(world.time_scale == pow(2.0, index), "key %d selects supported race speed" % (index + 1))
 	hud.rate_row.buttons[3].pressed.emit()
 	var rate: float = world.time_scale
 	world.set_time_scale(1.0)

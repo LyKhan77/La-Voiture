@@ -1,0 +1,48 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] rng: same seed gives the same stream, another seed differs, values stay in [0, 1)
+[PASS] data: 20 cars in 10 teams, unique broadcast codes, La Voiture team names
+[PASS] track: ~4.2 km loop (4159 m) and distance wraps
+[PASS] track: speed profile averages 58.0 m/s, slowest 20.5 m/s in the hairpin, fastest 76.0 m/s
+[PASS] track: racing line within +-5.3 m, inside the usable 5.4 m lateral clamp
+[PASS] track: two DRS zones, one on the start straight
+[PASS] weather: seed picks the archetype, a wet grid starts on intermediates / wets, a dry one on slicks, forecast has laps + 5 entries
+[PASS] weather: water, temperatures and the condition label evolve during the race (61% -> 64% water)
+[PASS] weather: all 7 archetypes build, the storm archetype peaks at 0.80 rain, time of day is set
+[PASS] race: a 3 lap race finishes for all 20 cars with no NaN and wear in 0..1 (5337 ticks)
+[PASS] pace: best laps run 77.6 s to 85.1 s on 4.16 km (avg 193 km/h), cars differ by team
+[PASS] pace: top speed in the race 283 km/h
+[PASS] contact: no two car boxes overlap by more than 0.2 m in 5337 ticks (0 pair-ticks)
+[PASS] lanes: longest side-by-side pair 3.6 s, longest three abreast 1.4 s (no stacked rows)
+[PASS] determinism: the same seed gives the same race, another seed a different one
+[PASS] contact: overlapping cars are pushed apart laterally (0.10 -> 2.88 m) with an impact jolt
+[PASS] contact: all 190 pairs of the 20 cars are checked each tick (190)
+[PASS] contact: the cyclic distance catches cars a lap apart that share the same road
+[PASS] racecraft: equal cars side by side do not steer back into each other and one pulls ahead (7.3 m)
+[PASS] racecraft: alongside, both cars leave racing room (targets 2.46 m apart)
+[PASS] racecraft: the car being caught commits to ONE defensive line (4.66 m) and holds it
+[PASS] racecraft: a lapped car with the leader 10 m behind yields off the racing line (target 5.4 m)
+[PASS] flags: the safety car caps the field at about 110 km/h (181 -> 97 km/h)
+[PASS] flags: a yellow cannot downgrade an active safety car, and nobody overtakes under caution
+[PASS] flags: a physical safety car leads, the leader never passes it and the field bunches single file (14 m gap)
+[PASS] incidents: terminal damage retires a car and the marshals clear it after 24 s
+[PASS] standings: retired cars are ranked at the bottom (FIA)
+[PASS] drs: off on lap 1, enabled from lap 2 on a dry green track, disabled when the track is wet
+[PASS] drs: gap < 1 s at the detection line makes a car eligible, the flap opens in the zone and snaps shut on the brakes
+[PASS] slipstream: a car 10 m behind another on the straight gets a tow (0.86)
+[PASS] ers: overtake mode drains the battery and never lowers the speed (66.6 vs 66.6 m/s)
+[PASS] fuel: OPTIMAL, warning below 3 kg, ECU limp at 20 m/s below 0.4 kg, flameout DNF at 0 and the car rolls to a stop
+[PASS] tyres: grip falls off the cliff past 75 %% wear, a worn tyre bursts, the car limps at up to 100 km/h and the flat breaks the suspension
+[PASS] pit: the boxed car stops on its stall (0.00 m), lifts 15 cm, swaps to MEDIUM and leaves on fresh tyres
+[PASS] pit: the limiter holds the lane at 80 km/h (peak 22.0 m/s)
+[PASS] pit: a damaged car gets a longer stop (5.5 s), the wing is replaced and the tank is filled
+[PASS] pit: the second teammate queues behind the stall (closest 7.9 m) and is serviced after the first
+[PASS] tactics: MANUAL raises a BOX card at 70 %% wear and accept calls the stop; AUTO calls it itself at once, with no card
+[PASS] tactics: pace (5 levels), fuel mix (3) and ERS (4) can be set per car
+[PASS] chassis: front wheels steer into the corner, + for right and - for left (12403 of 12841 samples)
+[PASS] chassis: the body rolls with the corner (12761 of 12841), dives under braking (+pitch, 23 of 23), squats under power (-pitch, 434 of 434), all angles finite
+[PASS] telemetry: 4-wheel temperature, pressure and brake temperature, pedals, G-forces and driver biometrics are live
+[PASS] timing: sector splits are recorded and the speed trap logs 283.9 km/h
+43 assertions, 0 failure(s)
+FASE 5.6 GT SIM: PASS

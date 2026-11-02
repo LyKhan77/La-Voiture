@@ -1,0 +1,21 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] #D1 a dense pine forest of 1800+ trees in two MultiMeshes (2000)
+[PASS] #D2 every tree stands 23 m or more from the road's centre line (nearest 22.9 m)
+[PASS] #D3 verge tufts keep 8 m and rocks 45 m off the road's centre line
+[PASS] #D2b every tree stands 9 m or more behind the guardrail, never in a run-off or gravel trap (0 inside)
+[PASS] #D4 both pine batches sway on the wind shader and cast no shadow (the batch spans the whole lap)
+[PASS] #D5 every tree stands on dry ground
+[PASS] #D6 16 kerb runs, one per turn of 15 degrees or more (16)
+[PASS] #D7 no kerb stands on a kink (0)
+[PASS] #D8 the FIA Armco runs round the lap (2538 posts)
+[PASS] #D9 Tecpro barriers (39), braking boards (48) and floodlight towers (28) stand
+[PASS] #D10 eight digital flag panels
+[PASS] #D11 no right-hand Armco stands along the pit asphalt and its 65 m tails (0 posts)
+[PASS] #D14 the catch fence has 307 panels and 158 posts behind the corner guardrails
+[PASS] #D15 no catch fence panel stands along the pit asphalt or inside the tunnel (0)
+[PASS] #D16 the parking apron holds the six support trailers on solid paddock slabs
+[PASS] #D12 the environment costs 303276 triangles (budget 320000)
+[PASS] #D13 the environment submits 44 draw calls statically (budget 160 per camera)
+ARDENNES DRESSING TEST SUITE: PASS

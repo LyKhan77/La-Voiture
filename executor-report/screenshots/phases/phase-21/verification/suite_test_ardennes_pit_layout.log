@@ -1,0 +1,50 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] #P0 the circuit scene loads
+[PASS] #P1 PitLane is a built CircuitPitComplex
+[PASS] #P2 sim_layout entry_s = 5220.0 (got 5220.0)
+[PASS] #P2 sim_layout exit_s = 240.0 (got 240.0)
+[PASS] #P2 sim_layout lane_length_m = 420.0 (got 420.0)
+[PASS] #P2 sim_layout stall_first_s = 5320.0 (got 5320.0)
+[PASS] #P2 sim_layout stall_pitch_m = 20.0 (got 20.0)
+[PASS] #P2 sim_layout stall_lane_m = 17.0 (got 17.0)
+[PASS] #P2 sim_layout fast_lane_m = 10.8 (got 10.8)
+[PASS] #P2 sim_layout edge_lateral_m = 5.2 (got 5.2)
+[PASS] #P2 sim_layout queue_gap_m = 8.0 (got 8.0)
+[PASS] #P2 sim_layout lane_ramp_in_m = 80.0 (got 80.0)
+[PASS] #P2 sim_layout lane_ramp_out_m = 90.0 (got 90.0)
+[PASS] #P2 sim_layout stalls = 10 (got 10)
+[PASS] #P2 pit limiter is 80 km/h
+[PASS] #P3 ten boxes and ten garages
+[PASS] #P4 boxes at 17.0 m and garage fronts at 20.6 m (setback 3.6 m, as Apex and Brianza)
+[PASS] #P5 box i stands at s = 5320 + 20 i (wrapping the line), lateral 17.0, with its Socket_PitStall_i
+[PASS] #P5b the sim's boxes (entry 5220 + offset) and its 420 m lane are the ones drawn (ribbon 5400.00 m)
+[PASS] #P6 the separator stands 1 m or more off the 14 m road's edge (edge 7.00, wall 8.30)
+[PASS] #P7 the 4.4 m fast lane (8.60..13.00) clears the wall and the box (box half width 1.65 m)
+[PASS] #P8 both mouths meet the circuit at lateral 5.2 m
+[PASS] #P9 the fast lane runs at 10.8 m from u=80 to u=330
+[PASS] #P10 the separator stands only where the cars are on the fast lane (u 78..328)
+[PASS] #P11 the pit building, MainGrandstand and RaceControlTower stand in the complex
+[PASS] #P12 the pit asphalt is a PitAsphalt mesh (RaceVfx wets it with the road)
+[PASS] #P13 one transporter per team parks behind the pit building
+[PASS] #P13b one mesh holds the ten team canopies behind the transporters, 3 m or more clear of the trucks (gap 3.8 m)
+[PASS] #P14 the pit building is centred on the ten boxes, s=10 (got 10.0)
+[PASS] #P14b the building is 222 m long and 19.5 m deep: ten 20 m bays and the model's end blocks
+[PASS] #P15 the control tower stands clear of the building's end by 10 m (building s 10, tower s 150)
+[PASS] #P15b the tower's centre stands 32 m from the racing line (got 32.0)
+[PASS] #P16 the main grandstand faces the pits from the left of the straight, front at 19 m left (lateral -19.0 m)
+[PASS] #P17 the grandstand is centred on s=125, clear of the glass terrace at s=5280 (got 125.0)
+[PASS] #P17b garage i stands in bay i of the building (the model re-spaced from 14 m to 20 m)
+[PASS] #P24 the separator is a 1.35 m wall under a 1.65 m fence, 3 m in all (3.00 m)
+[PASS] #P25 the fence is two MultiMeshes of 4 m panels and posts (60 panels)
+[PASS] #P26 the fence mesh is an alpha-scissor wire grid
+[PASS] #P27 no panel stands past the wall's ends: the pit mouths are open (panels at u 84..320, wall 78..328)
+[PASS] #P20 the pit asphalt is joined to the road's edge and reaches 0.1 m past the car's outer side along the lane and both tails (0 stations short)
+[PASS] #P21 the path never turns more than 7 degrees (steepest 0.105 m per m)
+[PASS] #P21b the path has no kink: its slope changes by at most 0.007 per metre (0.0051)
+[PASS] #P22 the asphalt is a sliver on the road's edge at the far end of both tails (width 0.10 and 0.10 m): no hard start
+[PASS] #P22b the entry taper mirrors the exit's: 65 m of tail on both sides (65 before the entry, 65 after the exit)
+[PASS] #P18 the car's lane (2 m wide, 3 m tall) is clear of every solid along the full 420 m (0 hits)
+[PASS] #P18b a car on the fast lane keeps at least 0.9 m between its side and the wall's face (8.55 m face, car 1.0 m half width)
+ARDENNES PIT LAYOUT TEST SUITE: PASS

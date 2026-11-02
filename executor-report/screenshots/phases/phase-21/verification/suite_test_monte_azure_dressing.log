@@ -1,0 +1,21 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] #D1 the environment has Districts and Foliage layers
+[PASS] #D2 at least 120 facade blocks stand in the urban zones (got 189)
+[PASS] #D3 the blocks are batched per district: 7 MultiMeshes hold all 189 (not one for the whole lap, so the frustum can cull them)
+[PASS] #D4 every block corner keeps 10.5 m from every road leg, not just its own (0 too close)
+[PASS] #D5 every block stands in the urban or paddock zone of its NEAREST leg, the one it was built for (0 elsewhere)
+[PASS] #D5b the marina yards (paddock zone) carry low sheds with flat roofs (57 sheds)
+[PASS] #D6 no block stands in the water or on the pit deck / hero plazas (0 underwater, 0 on deck)
+[PASS] #D7 every block is seated at or under the lowest ground of its footprint (0 floating)
+[PASS] #D8 blocks do not overlap (0 pairs)
+[PASS] #D9 every district is cel-shaded with an ink outline pass and casts no shadow (0 plain)
+[PASS] #D10 the facade windows light up at night and go dark by day (night 1.00)
+[PASS] #D11 palms: >= 100 instances, shadowless (got 122)
+[PASS] #D11 pines: >= 120 instances, shadowless (got 123)
+[PASS] #D11 cypresses: >= 80 instances, shadowless (got 101)
+[PASS] #D12 the foliage keeps every pose (404)
+[PASS] #D13 every tree stands on dry, undecked ground 10.5 m from every road (0 near a road, 0 off the ground, 0 in the water, 0 on a deck)
+[PASS] #D14 palms line the quay and the town streets (121)
+MONTE AZURE DRESSING TEST SUITE: PASS

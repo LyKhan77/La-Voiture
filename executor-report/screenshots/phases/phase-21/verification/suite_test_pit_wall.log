@@ -1,0 +1,32 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] 20 real simulation cars populate timing tower
+[PASS] row inversion is immediate, not color-tweened
+[PASS] selected row reaches exact +6px within120ms
+[PASS] rapid hover exit cannot cancel persistent selection
+[PASS] simulator advances fuel telemetry
+[PASS] session ribbon shows active lap after first finish-line crossing
+[PASS] four corners display remaining condition, not consumed wear
+[PASS] 60/30 percent warning boundaries and critical blink
+[PASS] commands reject rival car and invalid pace
+[PASS] commands reject invalid fuel targets
+[PASS] pace and fuel controls change selected car
+[PASS] car switch restores per-car strategy without feedback
+[PASS] second car retains independent strategy
+[PASS] rival focus changes viewer but never command target
+[PASS] BOX applies only to active team car
+[PASS] repeated BOX cannot duplicate accepted request
+[PASS] rapid radio preserves newest transmission
+[PASS] radio enters reactive layer
+[PASS] dashboard exposes only four speed choices
+[PASS] session speed 1x
+[PASS] session speed 2x
+[PASS] session speed 4x
+[PASS] session speed 8x
+[PASS] removed 16x speed leaves last valid speed unchanged
+[PASS] invalid speed leaves last valid speed unchanged
+[PASS] simulation API caps speed at 8x
+[PASS] micro-shake returns to exact base position
+[PASS] radio hides after transmission without stale tween
+PIT WALL ACCEPTANCE: PASS

@@ -41,7 +41,7 @@ static func run_single_car(compound: int, laps: int) -> CarStateScript:
 	car.lane_target = 1
 	car.lane_position = 1.0
 	sim.add_car(car)
-	sim.set_time_scale(16.0)
+	sim.set_time_scale(8.0)
 	var guard: int = 0
 	while not sim.is_finished and guard < 500_000:
 		sim.process_frame(1.0 / 60.0)
@@ -164,16 +164,16 @@ func _check_mini_sectors() -> void:
 func _check_determinism_short() -> void:
 	var sim_1x: EngineScript = EngineScript.new(3)
 	sim_1x.setup_standard_race(6)
-	var sim_16x: EngineScript = EngineScript.new(3)
-	sim_16x.setup_standard_race(6)
+	var sim_8x: EngineScript = EngineScript.new(3)
+	sim_8x.setup_standard_race(6)
 	_run(sim_1x, 1.0)
-	_run(sim_16x, 16.0)
-	_require(sim_1x.tick_count == sim_16x.tick_count, "short determinism: identical tick count")
-	_require(sim_1x.finish_order == sim_16x.finish_order, "short determinism: identical finish order")
+	_run(sim_8x, 8.0)
+	_require(sim_1x.tick_count == sim_8x.tick_count, "short determinism: identical tick count")
+	_require(sim_1x.finish_order == sim_8x.finish_order, "short determinism: identical finish order")
 	var identical: bool = true
 	for index: int in range(sim_1x.cars.size()):
 		var a: CarStateScript = sim_1x.cars[index]
-		var b: CarStateScript = sim_16x.cars[index]
+		var b: CarStateScript = sim_8x.cars[index]
 		if a.lap_times != b.lap_times or a.finish_time != b.finish_time:
 			identical = false
 		if a.tire.wear != b.tire.wear or a.fuel.remaining_kg != b.fuel.remaining_kg:

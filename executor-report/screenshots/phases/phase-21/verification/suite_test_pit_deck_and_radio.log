@@ -1,0 +1,40 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] desk: only MANUAL and AUTO exist and MANUAL is the default
+[PASS] suggestion: in MANUAL the card closes at 0.0 s and nothing is executed
+[PASS] suggestion: in AUTO the engineer executes the call at once, with no decision card
+[PASS] suggestion: AUTO never double-calls a car that is already boxing
+[PASS] suggestion: a replacement card restarts the 10 s window
+[PASS] suggestion: AUTO calls the stop once, and nothing calls it again later (box calls: 1)
+[PASS] suggestion: MANUAL without COACH raises no decision card and calls nothing
+[PASS] pit: cancelling a box call clears the request and the engineer confirms it
+[PASS] pit: cancelling blocks an instant repeat BOX suggestion (cooldown until +30 s)
+[PASS] pit: after cancelling, the car leaves the 38 m/s pit approach pace (peak 43.4 m/s) and drives past the pit entry with no penalty
+[PASS] pit: cancelling with no call is a no-op
+[PASS] pit: a car already committed to the pit lane cannot cancel
+[PASS] pit: an explicit cancel closes the open BOX card and holds: AUTO does not re-box the car straight away
+[PASS] deck: the desk row has MANUAL and AUTO only
+[PASS] deck: with no call the button reads REQUEST BOX [B] and is enabled
+[PASS] deck: after a box call the button becomes CANCEL BOX [ESC] // WET and stays enabled
+[PASS] deck: clicking CANCEL BOX withdraws the call and the button reads REQUEST BOX again
+[PASS] deck: the button locks as IN THE PIT LANE, RETIRED or CHEQUERED and unlocks again afterwards
+[PASS] deck: the desk status tag follows MANUAL and AUTO
+[PASS] burn bar: label format and flame colour stages
+[PASS] burn bar: a new card starts with a full bar and 10.0s
+[PASS] burn bar: the fill and the label follow the 10 s window
+[PASS] burn bar: under 3 s the card enters its critical state
+[PASS] burn bar: a replacement card restarts at 10.0s
+[PASS] keys: ENTER accepts the open card, and is left alone when there is no card
+[PASS] keys: ESC dismisses the card first, then cancels the box call, then is not consumed
+[PASS] keys: B requests the box once; pressing it again keeps the same call
+[PASS] radio: a driver call gets one engineer reply exactly 2.5 s of sim time later (Copy RYU, stay on it. Rear tyres at 38%, watch the exit.)
+[PASS] radio: a rival driver call gets no engineer reply
+[PASS] radio: two driver calls in a row keep both replies in order
+[PASS] radio: a reply for a car that retired meanwhile is still valid (Copy RYU, stay on it. Rear tyres at 38%, watch the exit.)
+[PASS] radio: flooding is called once per episode and answered (Understood RYU, water at 59%. Box for WETS when you are ready.)
+[PASS] radio: two cars on slicks make one flood call per episode (1)
+[PASS] radio: a car already on wets does not call the flood
+[PASS] radio: every answered call has a reply and an unrelated call has none
+35 assertions, 0 failure(s)
+FASE 11 LANGKAH 3A PIT MECHANICS: PASS

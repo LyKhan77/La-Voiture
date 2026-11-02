@@ -4,12 +4,22 @@
 
 ---
 
+## Status Stoke Crown — 2026-11-02
+
+- [x] **Fase 21: Stoke Crown — implementasi diterima; dua gate performa global ditunda atas persetujuan developer.**
+  - [x] Ronde6playable,blueprintFase0diperbaiki,5landmark,pit10stall,terrain/cel-sky/foliage,previewmenu dan4viewreference.
+  - [x] 96/96suiteheadlessPASS; native3lap20/20finish,enampitcall,podium→HQ,0orphan;103shot1080p.
+  - [x] Budgetseluruhsetstatis:317054triangle,141drawcallsmaksimum;0kink,0floatingroad/apron.
+  - [ ] Strict60FPS/totalframe180calls: meanisolated64.73FPS,p9520.175ms>16.6667ms; targettotalframe180belumtercapai. Ditunda atas izin developer2026-11-02; commit–merge–push disetujui.
+  - [x] Fast-forward pemain dibatasi1×/2×/4×/8×; tombol5 dihapus dari kontrol kecepatan, capAPI8×. Regresi final96/96PASS; native8×20/20finish,podium→HQ,0orphan. Commit–merge–push disetujui.
+  - Laporan: [FASE-21-STOKE-CROWN-REPORT.md](executor-report/reports/FASE-21-STOKE-CROWN-REPORT.md).
+
 ## Ringkasan Progres Fase
 
 - [x] **Fase 1: Inisialisasi Proyek Godot 4 & Core Simulation Math Engine**
   - [x] `Task 1.1`: Inisialisasi `project.godot` & struktur direktori
   - [x] `Task 1.2`: Model data telemetri (`CarState.gd`, `TireModel.gd`, `FuelModel.gd`)
-  - [x] `Task 1.3`: Deterministic sub-stepping simulation engine (Fast-Forward 16x)
+  - [x] `Task 1.3`: Deterministic sub-stepping simulation engine (Fast-Forward 8x)
   - [x] `Task 1.4`: Script pengujian otomatis Headless Simulation Runner
 - [x] **Fase 2: UI Pit Wall Command Center & Manga Styling ([DESIGN.md](file:///D:/Occupation/Porto/genex/La_Voiture/DESIGN.md))**
   - [x] `Task 2.1`: Shader Halftone Screentone & token warna antarmuka

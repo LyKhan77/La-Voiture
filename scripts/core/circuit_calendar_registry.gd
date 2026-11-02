@@ -31,7 +31,7 @@ const TABLE: Array[Array] = [
 	["ardennes", "MAY", "Ardennes Valley Ring", "", "Spa-Francorchamps", "BEL", 0, 5.40, 20, true, 104.0,
 		"res://scenes/race_world/circuits/ardennes/ardennes_circuit.tscn", 0.75, "Eau Rouge compression climb, micro-climate rain."],
 	["stoke_crown", "JUN", "Stoke Crown Circuit", "", "Silverstone Circuit", "GBR", 0, 5.20, 18, true, 12.0,
-		"res://scenes/race_world/stoke_crown_circuit.tscn", 0.65, "Maggotts-Becketts high-G aero sweepers."],
+		"res://scenes/race_world/circuits/stoke_crown/stoke_crown_circuit.tscn", 0.65, "Maggotts-Becketts high-G aero sweepers."],
 	["pacific_corkscrew", "JUL", "Pacific Coast Corkscrew", "", "WeatherTech Raceway Laguna Seca", "USA", 0, 4.10, 11, true, 30.0,
 		"res://scenes/race_world/pacific_corkscrew_circuit.tscn", 0.10, "Blind Corkscrew drop, coastal Californian dust."],
 	["eifel_forest", "AUG", "Eifel Forest Ring", "", "Nurburgring GP", "GER", 0, 5.15, 16, true, 30.0,

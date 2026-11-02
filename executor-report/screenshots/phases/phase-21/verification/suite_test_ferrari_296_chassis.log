@@ -1,0 +1,32 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] the four wheel sockets mirror left to right, sit at y 0.33 and z +-1.300, with a track half-width of 0.75 to 0.95 m
+[PASS] the cockpit socket exists
+[PASS] the body paint is the toon ShaderMaterial (livery tint keeps working)
+[PASS] the chassis keeps the car's original livery colours
+[PASS] body is FIA GT3 length, ~4.56 m long ((2.19938, 1.259679, 4.562326))
+[PASS] body is about 2 m wide ((2.19938, 1.259679, 4.562326))
+[PASS] body is 1.0-1.4 m tall ((2.19938, 1.259679, 4.562326))
+[PASS] the lowest body point stays at least 4 cm above the ground plane (y 0.050)
+[PASS] origin sits near mid-wheelbase (bumper offset 0.085 m)
+[PASS] body is game-ready at 80k-120k triangles (108728)
+[PASS] surface 1 is the FenderLinerMat of the inner fender tubs
+[PASS] FL radial gap to body/tub is 2.5-5.0 cm (0.031 m)
+[PASS] FL has zero body penetration inside master wheel (got 0 vertices)
+[PASS] FL tyre outer face is flush with the widest fender point within 1.5 cm (delta -0.003 m)
+[PASS] FL fender skin clears the tyre top across the whole tread width (lowest skin +0.093 m)
+[PASS] FR radial gap to body/tub is 2.5-5.0 cm (0.031 m)
+[PASS] FR has zero body penetration inside master wheel (got 0 vertices)
+[PASS] FR tyre outer face is flush with the widest fender point within 1.5 cm (delta +0.003 m)
+[PASS] FR fender skin clears the tyre top across the whole tread width (lowest skin +0.085 m)
+[PASS] RL radial gap to body/tub is 2.5-5.0 cm (0.031 m)
+[PASS] RL has zero body penetration inside master wheel (got 0 vertices)
+[PASS] RL tyre outer face is flush with the widest fender point within 1.5 cm (delta -0.000 m)
+[PASS] RL fender skin clears the tyre top across the whole tread width (lowest skin +0.136 m)
+[PASS] RR radial gap to body/tub is 2.5-5.0 cm (0.031 m)
+[PASS] RR has zero body penetration inside master wheel (got 0 vertices)
+[PASS] RR tyre outer face is flush with the widest fender point within 1.5 cm (delta +0.001 m)
+[PASS] RR fender skin clears the tyre top across the whole tread width (lowest skin +0.139 m)
+27 assertions, 0 failure(s)
+FASE 11 FERRARI 296 CHASSIS: PASS

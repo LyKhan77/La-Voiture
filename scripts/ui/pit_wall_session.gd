@@ -75,7 +75,7 @@ func request_box(car_id: int) -> bool:
 	return true
 
 func set_speed(scale: float) -> void:
-	if scale in [1.0, 2.0, 4.0, 8.0, 16.0]:
+	if scale in [1.0, 2.0, 4.0, 8.0]:
 		engine.set_time_scale(scale)
 		publish()
 

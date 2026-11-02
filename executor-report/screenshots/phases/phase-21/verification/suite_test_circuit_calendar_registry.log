@@ -1,0 +1,13 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] #K1 the registry holds exactly 10 rounds, ordered Round 01 to Round 10, with 10 unique ids and round numbers (10 entries, 10 ids)
+[PASS] #K2 all 12 rounds match the official calendar (id, round, name, type, country, length)
+[PASS] #K3 Round 01 is Apex Ring (GP, anti-clockwise, 9 corners, the existing scene) and Round 02 is 新湾岸高速 Neo-Wangan (SPRINT, 3.15 km, 12 turns, its own reserved scene)
+[PASS] #K4 every round carries a length, a turn count, a 3-letter country, scene and preview paths, a 0..1 rain probability and a non-empty note
+[PASS] #K5 the calendar splits into 8 Grand Prix (4.10–5.80 km) and 2 Sprint (2.85–3.15 km) rounds, each in round order
+[PASS] #K6 RaceConfigData starts on apex_ring, resolves neo_wangan when selected, and falls back to Round 01 for an unknown id
+[PASS] #K7 the selection rides on the shared draft and a reset returns the calendar to Round 01
+[PASS] #K8 an unknown circuit id resolves to null instead of a fabricated round
+8 assertions, 0 failure(s)
+CIRCUIT CALENDAR REGISTRY: PASS

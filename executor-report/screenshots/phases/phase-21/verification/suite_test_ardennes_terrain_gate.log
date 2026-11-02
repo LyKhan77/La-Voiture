@@ -1,0 +1,20 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] #G0 ArdennesZones exists
+[PASS] #G1 the environment renders a Terrain mesh
+[PASS] #G2 the terrain costs 20k..70k triangles (got 62060)
+[PASS] #G14 the terrain faces up (186180 of 186180 vertex normals)
+[PASS] #G3 terrain covers every road sample (0 uncovered of 2703)
+[PASS] #G4 the ground is under the road at every sample: no hill above the asphalt (0 buried)
+[PASS] #G5 no road floats more than 1 m above the ground: the bed is 0.16 m under the asphalt (worst gap 0.22 m, 0 floating)
+[PASS] #G6 the pit lane, boxes, garage floors and the paddock deck stand on ground 0.04..1.0 m below them (0 buried, 0 floating)
+[PASS] #G6b the ground under both grandstands is cut flat to the road's bed (0 buried, 0 floating)
+[PASS] #G7 the river valley is carved (bed 10.5 m at 130 m left, water 14.0 m, bank 35.3 m at 30 m left)
+[PASS] #G8 the summit road bed is at 104 m less the bed (103.83 m)
+[PASS] #G9 ground_y_at agrees with the rendered mesh within 0.35 m (0 of 224 points differ)
+[PASS] #G10 the start straight: paddock on the pit side, urban on the stand side
+[PASS] #G11 the climb: river left, rock face right at s=700, forest right at s=1500
+[PASS] #G12 the descent: rock right at s=2000, forest right at s=3000, paddock right at s=5100
+[PASS] #G13 points beside the western arm (s 3460, 4060) take their own leg's forest zone, and the pit side takes the paddock
+ARDENNES TERRAIN GATE: PASS

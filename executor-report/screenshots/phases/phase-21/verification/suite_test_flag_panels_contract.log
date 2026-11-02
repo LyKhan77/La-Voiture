@@ -1,0 +1,61 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] plan: eight panels (8)
+[PASS] plan: the first panel stands 60 m before the finish line
+[PASS] plan: a preferred anchor within 150 m of one already chosen is dropped
+[PASS] apex_ring: the environment has flag panels
+[PASS] apex_ring: eight panels share ONE MultiMeshInstance3D that is part of the scene
+[PASS] apex_ring: every sector carries a panel
+[PASS] apex_ring: every panel stands at least 1.5 m off the asphalt edge
+[PASS] apex_ring: no two panels within 60 m of each other
+[PASS] apex_ring: a sector 3 yellow lights only its 3 panels
+[PASS] apex_ring: the safety car lights every panel
+[PASS] apex_ring: green clears every panel
+[PASS] neo_wangan: the environment has flag panels
+[PASS] neo_wangan: eight panels share ONE MultiMeshInstance3D that is part of the scene
+[PASS] neo_wangan: every sector carries a panel
+[PASS] neo_wangan: every panel stands at least 1.5 m off the asphalt edge
+[PASS] neo_wangan: no two panels within 60 m of each other
+[PASS] neo_wangan: a sector 3 yellow lights only its 3 panels
+[PASS] neo_wangan: the safety car lights every panel
+[PASS] neo_wangan: green clears every panel
+[PASS] neo_wangan: no panel in the tunnel or on the bridge (0)
+[PASS] neo_wangan: no panel on the open pit side (0)
+[PASS] neo_wangan: no panel on a streetlight pole (0)
+[PASS] neo_wangan: no panel on a gantry sign post or a braking board (0)
+[PASS] neo_wangan: every panel stands clear behind the concrete barrier
+[PASS] brianza: the environment has flag panels
+[PASS] brianza: eight panels share ONE MultiMeshInstance3D that is part of the scene
+[PASS] brianza: every sector carries a panel
+[PASS] brianza: every panel stands at least 1.5 m off the asphalt edge
+[PASS] brianza: no two panels within 60 m of each other
+[PASS] brianza: a sector 3 yellow lights only its 2 panels
+[PASS] brianza: the safety car lights every panel
+[PASS] brianza: green clears every panel
+[PASS] monte_azure: the environment has flag panels
+[PASS] monte_azure: eight panels share ONE MultiMeshInstance3D that is part of the scene
+[PASS] monte_azure: every sector carries a panel
+[PASS] monte_azure: every panel stands at least 1.5 m off the asphalt edge
+[PASS] monte_azure: no two panels within 60 m of each other
+[PASS] monte_azure: a sector 3 yellow lights only its 4 panels
+[PASS] monte_azure: the safety car lights every panel
+[PASS] monte_azure: green clears every panel
+[PASS] ardennes: the environment has flag panels
+[PASS] ardennes: eight panels share ONE MultiMeshInstance3D that is part of the scene
+[PASS] ardennes: every sector carries a panel
+[PASS] ardennes: every panel stands at least 1.5 m off the asphalt edge
+[PASS] ardennes: no two panels within 60 m of each other
+[PASS] ardennes: a sector 3 yellow lights only its 2 panels
+[PASS] ardennes: the safety car lights every panel
+[PASS] ardennes: green clears every panel
+[stoke-crown-env] built in 1.07s | terrain tris 44096 | trees 1600 | grass 600 | hedges 633 | landmarks 5/5 | env tris 120328 (budget 320000)
+[stoke-runtime] armco posts: 2549 (121 interpolated)
+[PASS] stoke_crown: the environment has flag panels
+[PASS] stoke_crown: eight panels share ONE MultiMeshInstance3D that is part of the scene
+[PASS] stoke_crown: every sector carries a panel
+[PASS] stoke_crown: every panel stands at least 1.5 m off the asphalt edge
+[PASS] stoke_crown: no two panels within 60 m of each other
+[PASS] stoke_crown: a sector 3 yellow lights only its 2 panels
+[PASS] stoke_crown: the safety car lights every panel
+[PASS] stoke_crown: green clears every panel

@@ -168,7 +168,7 @@ classDiagram
 
 ### Pilar 1: Core Simulation & Race Logic
 * **Kinematic-Dynamic Ribbon Physics:** Tidak menggunakan simulasi tabrakan rigid-body yang rapuh, melainkan koridor multi-lajur dengan kalkulasi gaya sentrifugal, cengkeraman ban, dan batas pengereman.
-* **Fast-Forward (1x, 2x, 4x, 8x, 16x):** Sub-stepping tick deterministik sehingga saat dipercepat 16x, kalkulasi ban dan posisi mobil tidak mengalami lompatan (glitch/teleportasi).
+* **Fast-Forward (1x, 2x, 4x, 8x):** Sub-stepping tick deterministik sehingga saat dipercepat 8x, kalkulasi ban dan posisi mobil tidak mengalami lompatan (glitch/teleportasi).
 
 ### Pilar 2: UI Topology & Manga Aesthetics ([DESIGN.md](file:///D:/Occupation/Porto/genex/La_Voiture/DESIGN.md))
 * **Zero Softness:** Sudut tajam $90^\circ$, outline tinta `#050505` setebal $2.5\text{px}$, hard-offset shadow $5\text{px}$, tanpa blur.

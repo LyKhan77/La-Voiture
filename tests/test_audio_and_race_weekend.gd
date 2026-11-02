@@ -438,7 +438,7 @@ func _test_actor_wiring() -> void:
 	actor.car.gear += 1
 	actor.present(1.0, FRAME)
 	var popped: bool = actor.audio.engine.pops_triggered == pops + 1
-	world.set_time_scale(16.0)
+	world.set_time_scale(8.0)
 	actor.present(1.0, FRAME, 2.0, false)
 	check(popped and not actor.audio.engine.playing, "#23 a gear change on a car pops its exhaust, and the engine goes quiet at high time scale")
 	world.set_time_scale(1.0)

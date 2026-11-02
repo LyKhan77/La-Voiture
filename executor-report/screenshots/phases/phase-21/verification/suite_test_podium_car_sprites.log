@@ -1,0 +1,22 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] A fully opaque block is rejected
+[PASS] An empty image is rejected
+[PASS] A 1600 wide image with an opaque corner is rejected
+[PASS] A car-like ellipse with a ground row passes: []
+[PASS] A sprite that is not 1600 wide is rejected
+[PASS] mercedes_amg has a podium sprite that passes the checks []
+[PASS] audi_r8 has a podium sprite that passes the checks []
+[PASS] nissan_gtr has a podium sprite that passes the checks []
+[PASS] bmw_m4 has a podium sprite that passes the checks []
+[PASS] aston_vantage has a podium sprite that passes the checks []
+[PASS] chevy_corvette has a podium sprite that passes the checks []
+[PASS] honda_nsx has a podium sprite that passes the checks []
+[PASS] lexus_rcf has a podium sprite that passes the checks []
+[PASS] mclaren_720s has a podium sprite that passes the checks []
+[PASS] lambo_huracan has a podium sprite that passes the checks []
+[PASS] ferrari_296 has a podium sprite that passes the checks []
+[PASS] ford_mustang has a podium sprite that passes the checks []
+[PASS] toyota_supra has a podium sprite that passes the checks []
+PODIUM CAR SPRITES: 18 assertions, 0 FAIL

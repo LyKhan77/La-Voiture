@@ -1,0 +1,28 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] Equal state gives three equal panels (730 px)
+[PASS] Panels stand in podium order P2, P1, P3
+[PASS] Neighbouring panels overlap by exactly 90 px
+[PASS] The background sits on a lower layer at the panel's position
+[PASS] The right-most panel keeps its right-anchored details on screen (screen edge 1920)
+[PASS] name_labels and time_labels keep P1, P2, P3 order
+[PASS] Intro shows no details and dims nothing
+[PASS] After the intro the panels rest in place at equal width
+[PASS] Focus gives the focused panel 1.55 times the others (1.550)
+[PASS] Only the focused panel stays bright
+[PASS] Only the focused panel shows its details
+[PASS] Equal focus shows every detail on every panel
+[PASS] Focus changes emit once each with the place ([2, -1])
+[PASS] Setting the same focus again emits nothing
+[PASS] Focus cycles equal, P2, P1, P3, equal ([1, 0, 2, -1])
+[PASS] Stepping back reverses the cycle ([2, 0, 1, -1])
+[PASS] Reversing focus before the tween ends converges to the last request
+[PASS] Narrow layout keeps every panel clear of the tower at x=1280 (right edge 1275)
+[PASS] Full width returns
+[PASS] A click on a panel background reports that panel ([0])
+[PASS] Two finishers make two equal panels, P2 left of P1
+[PASS] Focusing a finisher that does not exist is ignored
+[PASS] One finisher fills the whole width
+[PASS] No finisher makes no panels and nothing fails
+WINNING TRIPTYCH: 24 assertions, 0 FAIL

@@ -32,7 +32,7 @@ const STAGE := Vector2(1920.0, 1080.0)
 ## Free viewport between the tower, the telemetry drawer, the ribbon and the deck (stage pixels):
 ## the radio banners dock to its top edge, over the sky, so no readout is covered.
 const RADIO_DOCK := Rect2(352.0, 88.0, 1230.0, 790.0)
-const TIME_SCALES: Array[float] = [1.0, 2.0, 4.0, 8.0, 16.0]
+const TIME_SCALES: Array[float] = [1.0, 2.0, 4.0, 8.0]
 const TOWER_MODES: Array[String] = ["INT", "GAP", "LAST"]
 const TOWER_REFRESH_FRAMES: int = 6
 const PANEL_REFRESH_FRAMES: int = 3
@@ -253,7 +253,7 @@ func _build_ribbon() -> void:
 	weather_widget = WeatherRadarWidget.new()
 	ribbon.add_child(weather_widget)
 	weather_widget.position = Vector2(990.0, 2.0)
-	var rate_labels: Array[String] = ["1x", "2x", "4x", "8x", "16x"]
+	var rate_labels: Array[String] = ["1x", "2x", "4x", "8x"]
 	rate_row = ModeRow.new(rate_labels, [T.ACCENT_ACID_LIME], 14)
 	rate_row.selected.connect(_on_rate)
 	ribbon.add_child(rate_row)

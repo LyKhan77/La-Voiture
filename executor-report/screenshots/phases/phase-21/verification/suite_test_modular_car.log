@@ -1,0 +1,26 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+===============================================================
+ RUNNING GT3 MASTER WHEEL & PIT STOP PIPELINE TESTS
+===============================================================
+[PASS] Socket_Wheel_FL must exist
+[PASS] Socket_Wheel_FR must exist
+[PASS] Socket_Wheel_RL must exist
+[PASS] Socket_Wheel_RR must exist
+[PASS] Socket_Cockpit must exist
+[PASS] Wheel FL mounted
+[PASS] Wheel FR mounted
+[PASS] Wheel RL mounted
+[PASS] Wheel RR mounted
+[PASS] Initial compound is SOFT
+[PASS] Wheel FL has WheelController attached
+[PASS] Wheel angular speed set successfully for driving animation
+[PASS] Wheel rotation stopped successfully
+[PASS] Wheel FL detached by pit crew
+[PASS] Socket Wheel FL is empty during tire service
+[PASS] New WET tire mounted to FL
+[PASS] Full tire swap to MEDIUM completed
+[PASS] Full tire swap to HARD completed
+---------------------------------------------------------------
+GT3 MASTER WHEELS & PIT STOP PIPELINE ACCEPTANCE: PASS

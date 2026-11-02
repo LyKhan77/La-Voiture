@@ -1,0 +1,22 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] SharedCelSkyController script exists at res://scripts/world/shared/shared_cel_sky_controller.gd
+[PASS] NeoWanganEnvironment implements apply_time_of_day(tod, gloom)
+[PASS] Neo-Wangan DAY: NightStars are hidden in daytime
+[PASS] Neo-Wangan DAY: Skyline neon window_energy is 0.0 in daytime (got 0.00)
+[PASS] Neo-Wangan DAY: Celestial disc acts as high Anime Sun with 0 craters
+[PASS] Neo-Wangan DAY: Streetlight asphalt pools are turned off in clear daytime
+[PASS] Neo-Wangan DAY: Underground tunnel neon remains visible in daytime
+[PASS] Neo-Wangan SUNSET: Skyline windows glow at dusk intensity (got 0.87)
+[PASS] Neo-Wangan SUNSET: Anime clouds have warm golden-crimson rim ((1.0, 0.6902, 0.3412, 1.0))
+[PASS] Neo-Wangan SUNSET: Setting sun sits low near horizon (y=340.0)
+[PASS] Neo-Wangan NIGHT: 900 NightStars are visible at night
+[PASS] Neo-Wangan NIGHT: Skyline windows glow at full night energy (got 1.70)
+[PASS] Neo-Wangan NIGHT: Celestial disc shows halftone Moon craters (got 0.34)
+[PASS] Neo-Wangan NIGHT: Streetlight asphalt pools are visible at night
+[PASS] Neo-Wangan race world keeps a single WorldEnvironment (got 1)
+[PASS] Neo-Wangan DAY race world renders a blue day sky (top (0.149, 0.451, 0.8392, 1.0))
+[PASS] Apex Ring ApexEnvironment also mounts reusable SkyAmbienceRoot
+[PASS] Apex Ring shares AnimeMoon/Sun disc and 28 wind-driven 3D AnimeNightClouds
+REUSABLE SKY & TIME OF DAY: 18 assertions, 0 failure(s)

@@ -172,7 +172,7 @@ func _race() -> void:
 	while not world.director.is_racing() and Time.get_ticks_msec() - started < 30000:
 		await process_frame
 	await _measure("RACE 1X HIGH", 8.0)
-	world.set_time_scale(16.0)
+	world.set_time_scale(8.0)
 	started = Time.get_ticks_msec()
 	while (current_scene == null or current_scene.scene_file_path != Studio.PATH) and Time.get_ticks_msec() - started < 420000:
 		await process_frame

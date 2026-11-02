@@ -7,7 +7,7 @@ extends Node3D
 ## draw the cars between ticks, the pit crew acts out the sim's pit stops, and the
 ## broadcast cameras, trackside set and the La Voiture race HUD (RaceHud) frame it.
 ##
-## Keys: 1-5 time scale, Left/Right follow a car, C camera, P pit the followed car; the HUD
+## Keys: 1-4 time scale, Left/Right follow a car, C camera, P pit the followed car; the HUD
 ## adds M deck, T telemetry, Tab tower columns, H hide, E ERS overtake, [ ] pace, N next car.
 ## Per frame: director -> fixed 20 Hz sim ticks -> actors (interpolated) -> pit crew ->
 ## cameras and HUD.
@@ -33,7 +33,7 @@ const SettingsScript := preload("res://scripts/core/presentation_settings.gd")
 const CircuitRegistry := preload("res://scripts/core/circuit_calendar_registry.gd")
 const CircuitDataScript := preload("res://scripts/core/circuit_data.gd")
 
-const TIME_SCALES: Array[float] = [1.0, 2.0, 4.0, 8.0, 16.0]
+const TIME_SCALES: Array[float] = [1.0, 2.0, 4.0, 8.0]
 ## Engine and tyre voices stay on up to this time scale; faster than that they are just noise.
 const AUDIBLE_MAX_TIME_SCALE: float = 2.0
 ## The podium comes up this long after the chequered flag falls, so the cars get over the line first.
@@ -241,7 +241,7 @@ func actor_of(car_id: int) -> ActorScript:
 
 
 func set_time_scale(scale: float) -> void:
-	time_scale = clampf(scale, 1.0, 16.0)
+	time_scale = clampf(scale, 1.0, 8.0)
 
 
 ## Asks a car to box at the next pit entry; the tyre follows the track water.
@@ -301,7 +301,7 @@ func _update_flag_panels() -> void:
 	environment.flag_panels.apply_flag(int(race.race_control["flag"]), int(race.race_control["sector"]))
 
 
-## Fixed 20 Hz ticks, so 1x and 16x run the same sequence.
+## Fixed 20 Hz ticks, so 1x and 8x run the same sequence.
 func _run_ticks(delta: float) -> void:
 	if race.is_finished():
 		return
@@ -435,7 +435,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	var key := event as InputEventKey
 	if key == null or not key.pressed or key.echo:
 		return
-	if key.keycode >= KEY_1 and key.keycode <= KEY_5:
+	if key.keycode >= KEY_1 and key.keycode <= KEY_4:
 		set_time_scale(TIME_SCALES[key.keycode - KEY_1])
 	elif key.keycode == KEY_RIGHT:
 		_follow_offset(1)

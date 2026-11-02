@@ -1,0 +1,45 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] get_optimal_compound() returns WET for FULL MONSOON
+[PASS] Monsoon auto-defaults car 1 starting compound from Soft to WET
+[PASS] Monsoon auto-defaults car 2 starting compound from Medium to WET
+[PASS] Recommended compound button has star marker (WET ★)
+[PASS] Compatibility label shows OPTIMAL when equipped with WET
+[PASS] Player can manually choose SOFT in the tyre bay
+[PASS] Compatibility label switches to CRITICAL MISMATCH on slicks in monsoon
+[PASS] Driver 1 card starting tyre badge indicates CRITICAL HAZARD
+[PASS] _check_critical_mismatch() detects hazard when Car 1 has Soft in Monsoon
+[PASS] Hazard type is accurately flagged as SLICKS_ON_WET
+[PASS] Car 1 flagged as bad while Car 2 remains safe
+[PASS] launch() intercepted: _launching remains false during critical mismatch
+[PASS] Critical Mismatch Modal is built and visible
+[PASS] Modal displays bold Toon Manga hazard title: SLICKS ON MONSOON RAIN!
+[PASS] Cancel button successfully hides the modal and returns player to garage
+[PASS] Re-calling launch() displays the modal again
+[PASS] SLAP WETS ON automatically fixes Car 1 compound to WET
+[PASS] Both cars fixed to WET
+[PASS] Modal hidden after applying crew fix
+[PASS] get_optimal_compound() returns MEDIUM for SUNNY DRY
+[PASS] Soft vs Medium compound on dry track is NOT a critical mismatch
+[PASS] WET on bone dry track is flagged as a critical mismatch
+[PASS] Hazard type is flagged as WETS_ON_DRY
+[PASS] garage accent starts as the selected team's livery colour
+[PASS] garage accent fades to the newly selected team's colour
+[PASS] a crimson team swaps the hard shadow to cyan so it stays readable
+[PASS] a white team keeps the crimson shadow and takes ink-coloured type
+[PASS] each car gets five wheel buttons; WET is grooved and SOFT is a slick
+[PASS] slicks on a flooded straight still reach > 240 km/h (peak 253 km/h)
+[PASS] a slick's straight-line speed is at least 95 percent of a wet tyre's (253 vs 220 km/h)
+[PASS] slick apex speed in monsoon is 34-48 percent down on the dry (ratio 0.53)
+[PASS] aquaplaning stretches a slick's braking distance to >= 2.5x a wet tyre's (decel ratio 3.03)
+[PASS] a slick carrying far too much speed into a wet corner snaps (error timer 2.00 s)
+[PASS] the same speed on wet tyres does not snap
+[PASS] wets on a dry track cook past 125 C (peak 142 C)
+[PASS] the same laps on mediums stay below 118 C (peak 104 C)
+[PASS] wets on a dry track wear >= 4x faster than mediums over a lap (ratio 17.9)
+[PASS] wets on a dry track puncture within three laps (lap 1.6)
+[PASS] mediums survive the same three dry laps without a puncture
+
+39 assertions, 0 failure(s)
+GARAGE TYRE STRATEGY & MISMATCH MODAL: PASS

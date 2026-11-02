@@ -1,0 +1,23 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] the four wheel sockets mirror left to right, sit at y 0.33 and z +-1.272, with a track half-width of 0.75 to 0.95 m (the x per axle comes from scratch/fit_cars.gd --apply and is checked by the flush test)
+[PASS] the cockpit socket exists
+[PASS] the body paint is the toon ShaderMaterial (livery tint keeps working)
+[PASS] the chassis keeps the car's original livery colours
+[PASS] body is FIA GT3 length, 4.55 m long ((2.138249, 1.258279, 4.541977))
+[PASS] body is about 2 m wide ((2.138249, 1.258279, 4.541977))
+[PASS] body is 1.0-1.4 m tall ((2.138249, 1.258279, 4.541977))
+[PASS] the lowest body point stays at least 4 cm above the ground plane (y 0.050)
+[PASS] origin sits near mid-wheelbase (bumper offset -0.043 m)
+[PASS] body is game-ready at 80k-120k triangles (94674)
+[PASS] surface 1 is the FenderLinerMat of the inner fender tubs
+[PASS] the underbody floor sits on the ground plane (0 of 23438 central vertices dip below)
+[PASS] no baked tyre, rim or brake geometry is left inside the four arches (0 vertices)
+[PASS] each tyre's outer face is flush with the fender of its own axle (within 2 cm of the body's widest point there)
+[PASS] all four tyres touch the ground plane
+[PASS] the tyre radius clears the 0.372 m arch opening
+[PASS] every tyre has 2.5-5 cm of radial gap to the arch and the tub, and no body vertex (tub included) inside the tyre
+[PASS] the fender skin over every tyre stays at least 5 cm above the tyre top across its width (no tyre poking out of the body)
+18 assertions, 0 failure(s)
+FASE 11 MERCEDES-AMG CHASSIS: PASS

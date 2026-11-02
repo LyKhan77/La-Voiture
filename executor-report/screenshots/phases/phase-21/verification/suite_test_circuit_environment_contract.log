@@ -1,0 +1,53 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] apex_ring: the environment is a CircuitEnvironment
+[PASS] apex_ring: the environment knows its circuit id (apex_ring)
+[PASS] apex_ring: the environment reports it is built against a ribbon
+[PASS] apex_ring: stats() carries the common keys and this circuit's id
+[PASS] apex_ring: the set measures what it submits (34 draw calls, 251327 triangles)
+[PASS] apex_ring: the set still measures after mood, gloom and wind changes (34 draw calls)
+[PASS] apex_ring: ground_y_at answers with a number
+[PASS] apex_ring: the environment is still built and measuring after 40 frames of update()
+[PASS] neo_wangan: the environment is a CircuitEnvironment
+[PASS] neo_wangan: the environment knows its circuit id (neo_wangan)
+[PASS] neo_wangan: the environment reports it is built against a ribbon
+[PASS] neo_wangan: stats() carries the common keys and this circuit's id
+[PASS] neo_wangan: the set measures what it submits (108 draw calls, 176428 triangles)
+[PASS] neo_wangan: the set still measures after mood, gloom and wind changes (109 draw calls)
+[PASS] neo_wangan: ground_y_at answers with a number
+[PASS] neo_wangan: the environment is still built and measuring after 40 frames of update()
+[PASS] brianza: the environment is a CircuitEnvironment
+[PASS] brianza: the environment knows its circuit id (brianza)
+[PASS] brianza: the environment reports it is built against a ribbon
+[PASS] brianza: stats() carries the common keys and this circuit's id
+[PASS] brianza: the set measures what it submits (53 draw calls, 316432 triangles)
+[PASS] brianza: the set still measures after mood, gloom and wind changes (53 draw calls)
+[PASS] brianza: ground_y_at answers with a number
+[PASS] brianza: the environment is still built and measuring after 40 frames of update()
+[PASS] monte_azure: the environment is a CircuitEnvironment
+[PASS] monte_azure: the environment knows its circuit id (monte_azure)
+[PASS] monte_azure: the environment reports it is built against a ribbon
+[PASS] monte_azure: stats() carries the common keys and this circuit's id
+[PASS] monte_azure: the set measures what it submits (77 draw calls, 111546 triangles)
+[PASS] monte_azure: the set still measures after mood, gloom and wind changes (78 draw calls)
+[PASS] monte_azure: ground_y_at answers with a number
+[PASS] monte_azure: the environment is still built and measuring after 40 frames of update()
+[PASS] ardennes: the environment is a CircuitEnvironment
+[PASS] ardennes: the environment knows its circuit id (ardennes)
+[PASS] ardennes: the environment reports it is built against a ribbon
+[PASS] ardennes: stats() carries the common keys and this circuit's id
+[PASS] ardennes: the set measures what it submits (44 draw calls, 303276 triangles)
+[PASS] ardennes: the set still measures after mood, gloom and wind changes (44 draw calls)
+[PASS] ardennes: ground_y_at answers with a number
+[PASS] ardennes: the environment is still built and measuring after 40 frames of update()
+[stoke-crown-env] built in 1.04s | terrain tris 44096 | trees 1600 | grass 600 | hedges 633 | landmarks 5/5 | env tris 120328 (budget 320000)
+[stoke-runtime] armco posts: 2549 (121 interpolated)
+[PASS] stoke_crown: the environment is a CircuitEnvironment
+[PASS] stoke_crown: the environment knows its circuit id (stoke_crown)
+[PASS] stoke_crown: the environment reports it is built against a ribbon
+[PASS] stoke_crown: stats() carries the common keys and this circuit's id
+[PASS] stoke_crown: the set measures what it submits (46 draw calls, 228156 triangles)
+[PASS] stoke_crown: the set still measures after mood, gloom and wind changes (46 draw calls)
+[PASS] stoke_crown: ground_y_at answers with a number
+[PASS] stoke_crown: the environment is still built and measuring after 40 frames of update()

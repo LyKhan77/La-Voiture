@@ -50,7 +50,7 @@ func _run() -> void:
 			await _capture("02-racing-pack")
 		if measured == 200:
 			await _capture("03-night-city")
-	world.set_time_scale(16.0)
+	world.set_time_scale(8.0)
 	var guard: int = 0
 	while not world.race.is_finished() and guard < 6000:
 		await process_frame

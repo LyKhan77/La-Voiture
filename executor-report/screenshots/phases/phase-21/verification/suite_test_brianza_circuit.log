@@ -1,0 +1,124 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+--- Running Autodromo di Brianza Circuit Test Suite ---
+[PASS] #B1 scene exists and loads from res://scenes/race_world/circuits/brianza/brianza_circuit.tscn
+[PASS] #B2 root node is BrianzaCircuitBuilder
+[PASS] #B3 TrackRibbon and Curve3D exist and initialized
+[PASS] #B4 baked spline length is 5790.0 m ± 25 m (actual: 5789.96 m)
+[PASS] #B5 road half-width is 7.0 m (14.0 m GP corridor)
+[PASS] #B6 turn specs define all key Monza corner complexes (got 8)
+[PASS] #B7 minimum turn radius is >= 25.0 m (actual: 31.7 m)
+[PASS] #B8 contains all iconic Monza corners: Rettifilo, Curva Grande, Roggia, Lesmos, Ascari, and Parabolica
+[PASS] #B9 elevation delta matches official 12.0 m spec (actual: 12.00 m; min=-7.2, max=4.8)
+[PASS] #B10 peak is at Lesmo (+4.8m) and lowest is at Sopraelevata (-7.2m)
+[PASS] #B11 PitLane complex node exists
+[PASS] #B13 layout contains stall_lane_m
+[PASS] #B13 layout contains fast_lane_m
+[PASS] #B13 layout contains edge_lateral_m
+[PASS] #B13 layout contains queue_gap_m
+[PASS] #B13 layout contains lane_ramp_in_m
+[PASS] #B13 layout contains lane_ramp_out_m
+[PASS] #B13 pit implements stall_transform
+[PASS] #B13 pit implements garage_for_team
+[PASS] #B13 pit implements crew_roles
+[PASS] #B13 pit implements crew_spot
+[PASS] #B13 pit implements stall_index_for_team
+[PASS] #B13 pit implements lane_lateral
+[PASS] #B13 team 0 maps to its stall and garage
+[PASS] #B13 team 1 maps to its stall and garage
+[PASS] #B13 team 2 maps to its stall and garage
+[PASS] #B13 team 3 maps to its stall and garage
+[PASS] #B13 team 4 maps to its stall and garage
+[PASS] #B13 team 5 maps to its stall and garage
+[PASS] #B13 team 6 maps to its stall and garage
+[PASS] #B13 team 7 maps to its stall and garage
+[PASS] #B13 team 8 maps to its stall and garage
+[PASS] #B13 team 9 maps to its stall and garage
+[PASS] #B13 existing pit remaps active teams
+[PASS] #B13 garage contains standby crew
+[PASS] #B12 sim_layout() defines 410 m GP lane (entry=5530m, exit=150m)
+[PASS] #B13 10 stalls at 20.0 m pitch
+[PASS] #B14 all 10 Socket_PitStall_0..9 exist for pitstop choreography
+[PASS] #B15 shared paddock buildings exist (PitBuilding, MainGrandstand, RaceControlTower)
+[PASS] #B16 Environment controller node exists
+[PASS] #B17 Environment builds successfully and activates Sopraelevata landmark
+[PASS] #B18 Parco Reale vegetation has at least 2 MultiMesh tree batches
+[PASS] #B19 HeroLandmark_Sopraelevata viaduct mesh is mounted
+[PASS] #B20 HeroLandmarks_MonzaHeritage exists (Villa Reale & Torre Ascari)
+[PASS] #L1.1 ParcoRealeGroundRoot exists
+[PASS] #L1.2 ParcoRealeGroundMesh exists with a mesh
+[PASS] #L1.3 ground covers >= 3500 x 3000 m (got 4176 x 3600)
+[PASS] #L1.4 first grass tone is #3c7a38 (got 3c7a38)
+[PASS] #L1.5 stepped cel grass uses 3 tones (got 3 surfaces)
+[PASS] #L1.6 ParkPathways gravel apron exists
+[PASS] #L1.7 MuraDelParco wall is >= 3.0 m tall
+[PASS] #L1.8 road is supported: ground 0.05..3.0 m below every sample (got 0.09..0.13)
+[PASS] #L2.1 Sopraelevata deck mesh exists
+[PASS] #L2.2 deck chord spans >= 400 m (got 404 m)
+[PASS] #L2.3 deck arc >= 400 m banked 28 deg
+[PASS] #L2.4 banked deck rises >= 6 m edge to edge (got 8.2 m)
+[PASS] #L2.5 deck clears the straight by >= 12 m (got 13.5 m)
+[PASS] #L2.6 at least 4 dual-pier portals (got 4)
+[PASS] #L2.7 every portal stands >= 12 m
+[PASS] #L2.8 rusty guardrail runs along the upper lip
+[PASS] #L3.1 RettifiloGrandstand exists
+[PASS] #L3.2 RettifiloGrandstand sits in its corner (s=718)
+[PASS] #L3.3 RettifiloGrandstand is >= 100 m long
+[PASS] #L3.4 RettifiloGrandstand has an instanced crowd (>= 200 spectators)
+[PASS] #L3.5 RettifiloGrandstand has a roof canopy
+[PASS] #L3.6 RettifiloGrandstand stands on the ground (gap 0.0 m)
+[PASS] #L3.1 AscariGrandstand exists
+[PASS] #L3.2 AscariGrandstand sits in its corner (s=4213)
+[PASS] #L3.3 AscariGrandstand is >= 120 m long
+[PASS] #L3.4 AscariGrandstand has an instanced crowd (>= 200 spectators)
+[PASS] #L3.5 AscariGrandstand has a roof canopy
+[PASS] #L3.6 AscariGrandstand stands on the ground (gap 0.0 m)
+[PASS] #L3.7 TorreAscari and VillaRealeGatehouse are separate landmark nodes
+[PASS] #B24 car-height track corridor clear of stand structures and pit wall (0 hits)
+[PASS] #B24 track corridor clears conservative crowd footprints (0 hits)
+[PASS] #B24 probe detects original back-straight obstruction (36 hits)
+[PASS] #L3.8 Ascari and main-stand Jumbotrons exist
+[PASS] #L3.9 both Jumbotrons show the live standings
+[PASS] #L4.1 StonePines has >= 450 instances (got 668)
+[PASS] #L4.2 StonePines casts no shadow
+[PASS] #L4.1 ItalianCypresses has >= 250 instances (got 759)
+[PASS] #L4.2 ItalianCypresses casts no shadow
+[PASS] #L4.1 UndergrowthBushes has >= 300 instances (got 421)
+[PASS] #L4.2 UndergrowthBushes casts no shadow
+[PASS] #L4.3 pine umbrella canopy has 3 cel tones (found 3)
+[PASS] #L4.6 StonePines kept every pose (668)
+[PASS] #L4.6 ItalianCypresses kept every pose (759)
+[PASS] #L4.6 UndergrowthBushes kept every pose (421)
+[PASS] #L4.4 every sampled tree/bush stands on the ground (worst gap 0.00 m)
+[PASS] #L4.5 no foliage inside the corner grandstands (0 found)
+[PASS] #L5.1 TracksideSafetyRoot exists
+[PASS] #L5.2 CatchFence is instanced (>= 150 panels, got 458)
+[PASS] #L5.3 catch fence stands >= 2.8 m
+[PASS] #L5.4 fence mesh is semi-transparent wire (alpha 0.35)
+[PASS] #L5.5 catch fence casts no shadow
+[PASS] #L5.6 fence runs along the Rettifilo stand (47 panels)
+[PASS] #L5.7 12 overhead brake boards: 200/150/100/50 m at 3 corners (got 12 boards, 4 distances, 3 corners)
+[PASS] #L5.8 gantry frames are one merged mesh
+[PASS] #L5.9 Pirelli, Brembo, Agip and Magneti Marelli boards (>= 8 each)
+[PASS] #L5.10 hero boards carry the brand names
+[PASS] #L5.11 marshal posts at the corner apexes (>= 8)
+[PASS] #L6.1 BrianzaVistaRing exists
+[PASS] #L6.2 ring spans ~4.5 km radius (got 9100 x 9100 m)
+[PASS] #L6.3 forest line + foothills + Alps layers, peaks >= 300 m (3 layers, 1089 m)
+[PASS] #L6.4 DAY sun is warm gold #fff3db (got fff3db)
+[PASS] #L6.5 sun pitch 42, yaw 215 (got (-42.0, 215.0, 0.0))
+[PASS] #L6.6 sun casts soft shadows
+[PASS] #L6.7 ambient #a3c2f0 and Mediterranean fog #dce8f5
+[PASS] #L6.8 ACES tonemap, glow and fog on
+[PASS] #L6.9 camera far plane reaches the vista ring (got 6500)
+[PASS] #L6.10 SUNSET sun drops low and turns orange
+[PASS] #L6.11 SUNSET floodlights start to glow
+[PASS] #L6.12 NIGHT is dark with floodlights fully lit
+[PASS] #L6.13 back to DAY restores light and switches floodlights off
+[PASS] #P1 environment budget: 70 draw calls (<= 160), 318264 triangles (<= 320000)
+[PASS] #B21 CircuitData for 'brianza' exists in registry
+[PASS] #B22 'brianza' is now officially PLAYABLE!
+[PASS] #B23 length is 5.79 km and type is GRAND PRIX (0)
+118 assertions, 0 failure(s)
+AUTODROMO DI BRIANZA TEST SUITE: PASS

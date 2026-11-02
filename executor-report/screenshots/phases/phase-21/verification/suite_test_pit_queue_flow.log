@@ -1,0 +1,36 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+  [whole field boxes in a train] serviced=20/20 time=55s decel=9.0 teleport=0.05 gap=-2.48 hold=45s release_wait=7.3s
+[PASS] whole field boxes in a train: every car is serviced and released
+[PASS] whole field boxes in a train: no car holds the pit lane longer than 100 s
+[PASS] whole field boxes in a train: service starts right after a car reaches its box (0.35 s)
+[PASS] whole field boxes in a train: no serviced car waits in its box longer than 20 s for the lane (7.3 s)
+[PASS] whole field boxes in a train: lane braking stays comfortable (9.0 m/s2)
+[PASS] whole field boxes in a train: no car is pushed or teleported (0.05 m)
+[PASS] whole field boxes in a train: no car drives into another: 5 car-pair ticks overlap by more than 1.0 m (deepest 1.43 m, closest bumper gap -2.48 m)
+  [whole field boxes bunched] serviced=20/20 time=53s decel=9.0 teleport=0.05 gap=-0.20 hold=44s release_wait=7.4s
+[PASS] whole field boxes bunched: every car is serviced and released
+[PASS] whole field boxes bunched: no car holds the pit lane longer than 100 s
+[PASS] whole field boxes bunched: service starts right after a car reaches its box (0.35 s)
+[PASS] whole field boxes bunched: no serviced car waits in its box longer than 20 s for the lane (7.4 s)
+[PASS] whole field boxes bunched: lane braking stays comfortable (9.0 m/s2)
+[PASS] whole field boxes bunched: no car is pushed or teleported (0.05 m)
+[PASS] whole field boxes bunched: no car drives into another: 0 car-pair ticks overlap by more than 1.0 m (deepest 0.20 m, closest bumper gap -0.20 m)
+  [late field calls in a wet race] serviced=20/20 time=55s decel=9.0 teleport=0.05 gap=1.28 hold=45s release_wait=6.7s
+[PASS] late field calls in a wet race: every car is serviced and released
+[PASS] late field calls in a wet race: no car holds the pit lane longer than 100 s
+[PASS] late field calls in a wet race: service starts right after a car reaches its box (0.35 s)
+[PASS] late field calls in a wet race: no serviced car waits in its box longer than 20 s for the lane (6.7 s)
+[PASS] late field calls in a wet race: lane braking stays comfortable (9.0 m/s2)
+[PASS] late field calls in a wet race: no car is pushed or teleported (0.05 m)
+[PASS] late field calls in a wet race: no car drives into another: 0 car-pair ticks overlap by more than 1.0 m (deepest 0.00 m, closest bumper gap 1.28 m)
+  [field spread around the lap boxes on the same lap] serviced=20/20 time=114s decel=9.0 teleport=0.05 gap=-2.41 hold=34s release_wait=2.4s
+[PASS] field spread around the lap boxes on the same lap: every car is serviced and released
+[PASS] field spread around the lap boxes on the same lap: no car holds the pit lane longer than 100 s
+[PASS] field spread around the lap boxes on the same lap: service starts right after a car reaches its box (0.35 s)
+[PASS] field spread around the lap boxes on the same lap: no serviced car waits in its box longer than 20 s for the lane (2.4 s)
+[PASS] field spread around the lap boxes on the same lap: lane braking stays comfortable (9.0 m/s2)
+[PASS] field spread around the lap boxes on the same lap: no car is pushed or teleported (0.05 m)
+[PASS] field spread around the lap boxes on the same lap: no car drives into another: 4 car-pair ticks overlap by more than 1.0 m (deepest 1.53 m, closest bumper gap -2.41 m)
+[PASS] late box call: too fast for the entry, the car stays out and boxes next lap (committed 4053 m on), serviced 1, no snap (0.05 m)

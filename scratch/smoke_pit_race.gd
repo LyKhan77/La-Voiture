@@ -71,7 +71,7 @@ func _run() -> void:
 			for _settle: int in range(SETTLE_FRAMES):
 				await process_frame
 			last_usec = Time.get_ticks_usec()
-	world.set_time_scale(16.0)
+	world.set_time_scale(8.0)
 	var guard: int = 0
 	while not world.race.is_finished() and guard < 12000:
 		await process_frame

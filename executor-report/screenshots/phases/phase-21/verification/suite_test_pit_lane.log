@@ -1,0 +1,24 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] #L1 the pit wall stands >= 1.0 m off the track edge (1.25) with a 0.55 m verge before the fast lane
+[PASS] #L2 the fast lane is 4.6 m wide and a car running down its middle clears a car parked in its box by 3.30 m (>= 3.0)
+[PASS] #L3 the crew has 2.05 m between the fast lane and the box car and 2.00 m between the box car and the garage fascia (>= 1.8 each)
+[PASS] #L4 the lane peels off and rejoins at lateral 5.2 (the right half of the track), not at the racing line: entry 5.20, exit 5.20, middle 11.60
+[PASS] #L5 the entry and exit roads change lateral by at most 0.120 m per m (<= 0.125)
+[PASS] #A1 the pit asphalt wears the track's own shader and never reaches past lateral 6.0 toward the racing line (1380 vertices)
+[PASS] #A2 the pit asphalt shares the road's weather material, so wetness and puddles match
+[PASS] #A3 the pit asphalt reaches the garage fascia (lateral >= 19.9) in front of every one of the 10 boxes (short at boxes [])
+[PASS] #W1 the 110 wall pieces all stand in the verge between track and fast lane (none in a lane: 0), end to end (largest gap 3.5 m)
+[PASS] #W2 the wall starts and ends in a crash cushion so a car entering or leaving does not meet a blunt end (2 cushions)
+[PASS] #M1 every one of the 10 pit boxes is painted and numbered, wider and longer than a car (10 painted)
+[PASS] #M2 a painted line separates the fast lane from the working lane in front of the boxes
+[PASS] #E1 every garage holds four tyre stacks, wheel guns, two jacks, a fuel rig, an extinguisher, a monitor desk and its lights ({ "tyre_stacks": 4, "wheel_guns": 4, "jacks": 2, "fuel_rigs": 1, "extinguishers": 2, "monitors": 3, "light_bars": 3, "engineers": 2 })
+[PASS] #C1 a full crew of 13 (4 gunners, 4 tyre handlers, 2 jack men, fueler, fire marshal, lollipop) stands by in every garage
+[PASS] #C2 with its car on the way the team steps out of the garage and waits ready in the working lane: state 2, 13 members clear of the fast lane (0.87 m from the box car at the closest), standby set hidden
+[PASS] #C3 once the car has gone the crew walks back into its garage (state 0, 0 animated members left, standby set shown again)
+[PASS] #C4 while the car pulls into its box the waiting crew keeps clear of it (1069 frames sampled, closest gap 0.51 m, body radius 0.25 m)
+[PASS] #C5 once the car has stopped each wheel-gun mechanic has stepped in beside his wheel (4 of 4 within 1.9 m: [0.58, 0.58, 0.58, 0.58])
+[PASS] #C6 the car drives the lane off the right half of the circuit and rejoins there, never across the racing line (lowest lateral in the lane 5.20 m, 5.20 m when it rejoins)
+19 assertions, 0 failure(s)
+PIT LANE REFINEMENT: PASS

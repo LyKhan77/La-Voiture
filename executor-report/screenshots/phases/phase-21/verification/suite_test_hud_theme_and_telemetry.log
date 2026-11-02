@@ -1,0 +1,37 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] style: the engineer colour is the first of cyan / pink / lime / yellow at least 55 degrees of hue from the team accent, grey accents get cyan (wrong: [])
+[PASS] style: set_accent keeps the engineer colour in step with the accent
+[PASS] theme: the HUD skin starts in the player team's livery colour
+[PASS] theme: switching to a crimson team repaints the skin and flips the type on it to white
+[PASS] theme: a light team colour keeps ink type
+[PASS] theme: data colours do not follow the team colour
+[PASS] telemetry state: gear, speed, shift lights and DRS mirror the car (#01 RYU // LIVE 60Hz, 252 km/h)
+[PASS] telemetry state: the pedal and G traces record the live sample
+[PASS] telemetry state: a blown and an overheated tyre are crimson, a healthy one lime, and the blister flag is carried
+[PASS] telemetry state: ERS charge, stress and confidence are 0..1
+[PASS] telemetry state: the tank level is the laps of fuel left over the race length (0.50)
+[PASS] telemetry state: another car starts with fresh traces and no onomatopoeia
+[PASS] telemetry state: onomatopoeia fire on rising edges only and at most two stay alive (brake true, held true, shift true, cap true)
+[PASS] telemetry state: onomatopoeia expire after 1.6 s
+[PASS] telemetry state: ERS overtake and a tyre passing 125 C raise their own onomatopoeia
+[PASS] telemetry state: two tyres passing 125 C on the same sample raise one onomatopoeia, not two (["tyre"])
+[PASS] telemetry state: the caption follows the situation by priority (RL TYRE 134°C — GRIP FADING AT THE REAR… | FL TYRE 140°C — GRIP FADING AT THE FRONT…)
+[PASS] telemetry state: a DNF car and extreme driver values still give a valid view
+[PASS] telemetry state: the caption types at 42 characters per second and restarts when the story changes, an upshift stamps shift_time
+[PASS] drawer: the layout box is unchanged
+[PASS] drawer: it paints from its state in _draw (1 draws)
+[PASS] drawer: hidden it neither paints nor collects samples, shown again it resumes
+[PASS] drawer: the skin follows the team accent
+[PASS] drawer: tyre heat colours stay fixed whatever the team colour
+[PASS] drawer: another car starts with fresh traces
+[PASS] drawer: the heartbeat trace keeps its QRS spike and T wave
+[PASS] painter: a panel line keeps only the part inside its polygon (the Geometry2D difference would keep the rest)
+[PASS] painter: the limiter flashes, and under reduce motion it holds one steady purple
+[PASS] painter: gear kick, heart pulse and onomatopoeia scale are all still under reduce motion
+[PASS] painter: stress halftone reuses nine instanced columns instead of rebuilding 576 circles per frame
+[PASS] painter: changing stress keeps canvas-owned batches and updates the original radius formula
+[PASS] painter: blown tyre, blisters, damage, limiter, kick, every onomatopoeia and every ERS mode paint with and without reduce motion (17 draws)
+32 assertions, 0 failure(s)
+FASE 11 LANGKAH 3B TEAM THEME + TELEMETRY: PASS

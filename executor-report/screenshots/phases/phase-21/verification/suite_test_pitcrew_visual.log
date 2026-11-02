@@ -1,0 +1,37 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] #P1 pitcrew_master.glb instantiates with unit scale and visible geometry (scale (1.0, 1.0, 1.0))
+[PASS] #P2 the master AnimationPlayer holds idle, walk, run and tire_service with tracks (found ["Armature|clip0|baselayer", "idle", "run", "tire_service", "walk"])
+[PASS] #P3 the skeleton has at least 24 bones (24) and a valid RightHand socket (index 23)
+[PASS] #P1 all five pit props instantiate at unit scale with geometry (wheel gun, quick jack, fuel nozzle, lollipop board, extinguisher)
+[PASS] #P4 res://shaders/pit_crew_uniform.gdshader loads with team_color, albedo_texture and normal_texture uniforms
+[PASS] #P4 a real ShaderMaterial of the uniform shader takes and returns team_color, albedo_texture and normal_texture
+[PASS] #P6 the team walks out of its garage in WALKING_OUT playing walk (2617 node-frames walking, arrived true)
+[PASS] #P6 the four gunners settle to idle on reaching their waiting spots
+[PASS] #P5 the crew of six roles walks out in its full roster (4 gunners, 4 handlers, 2 jacks, fueler, fire, lollipop): { "Gunner": 4, "Handler": 4, "Jack": 2, "Fueler": 1, "Fire": 1, "Lollipop": 1 }
+[PASS] #P5 every crew member carries the instantiated master model and its AnimationPlayer
+[PASS] #P5 all four wheel-gun mechanics carry the wheel gun prop
+[PASS] #P5 all four tyre handlers carry a visible fresh tyre
+[PASS] #P5 the fueler carries the fuel nozzle and the fire marshal the extinguisher
+[PASS] #P5 the lollipop man carries his board on its pole
+[PASS] #P4 every crew member's master mesh wears the uniform shader with its team colour (team 4, 0 without a uniform material)
+[PASS] #R1 the tyre a handler carries rides at chest height while walking out: 0.750-0.750 m over 810 walking frames (required 0.7-0.8)
+[PASS] #R2 no artificial pitch/bob/float while walking: max lean 0.0 deg, max lift 0.000 m
+[PASS] #R2 no artificial pitch/bob/float while waiting at idle: max lean 0.0 deg, max lift 0.000 m
+[PASS] #P6 present() opens the stop with the gunners still idling while the car is lifted
+[PASS] #P5 the two jack men wait empty-handed; the two quick-jack props exist only while the job is active
+[PASS] #P6 the gunners switch to tire_service while the car is being serviced
+[PASS] #P6 the gunners return to idle as the car is lowered
+[PASS] #R2 the servicing crew node stays upright and on the ground instead of leaning 0.0 deg / bobbing 0.000 m (the animation poses the body)
+[PASS] #R2 after the service the node still stands upright on the asphalt (max lean 0.0 deg, lift 0.000 m)
+[PASS] #P6 present(in_service = false) closes the job and records the finished car
+[PASS] #P6 the crew walks back playing walk, is freed, and the garage shows its standing crew again (walk seen true, dismissed true)
+[PASS] #R3 all 13 members' animated boot soles contact asphalt within 1 cm across all four clips (208 poses, worst 0.000000 m)
+[PASS] #R4 settled tool/tyre grips stay inside the 5 cm glove envelope (worst 0.007802 m)
+[PASS] #R5 all four gun sockets meet the lifted wheel hubs within 1 cm (worst 0.000008 m)
+[PASS] #R6 both jack cradles follow the 15 cm chassis lift without stretching their meshes (worst 0.001167 m)
+[PASS] #R7 all four removed wheels are carried by handlers, leaving gunner hands free
+[PASS] #R8 ending a stop releases the gunner service pose immediately
+32 assertions, 0 failure(s)
+PIT CREW VISUAL: PASS

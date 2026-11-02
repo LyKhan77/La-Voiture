@@ -1,0 +1,79 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] Configured laps and selected team reach the real race
+[PASS] Independent teammate starting tires survive qualifying grid order
+[PASS] Initial chase camera follows the selected team's first driver
+[PASS] Full monsoon starts wet, not as a late-race dry preset
+[PASS] Configured night overrides weather seed
+[PASS] Monsoon rivals start on wet tires rather than inherited dry-grid slicks
+[PASS] Race restart and weather use the exhibition draft's own seed
+[PASS] Comic fly-through cannot consume the starting lights or simulate hidden racing
+[PASS] Fly-through releases exactly the existing FIA countdown
+[PASS] Low VFX density survives dynamic rain and spray updates
+[PASS] Low quality disables actual race shadows
+[PASS] Unavailable career mode cannot enter an unfinished race path
+[PASS] Master slider applies its gain to the actual audio bus
+[PASS] Master slider reaches genuine silence
+[PASS] Music slider applies its gain to the actual audio bus
+[PASS] Music slider reaches genuine silence
+[PASS] SFX slider applies its gain to the actual audio bus
+[PASS] SFX slider reaches genuine silence
+[PASS] Radio slider applies its gain to the actual audio bus
+[PASS] Radio slider reaches genuine silence
+[PASS] UI slider applies its gain to the actual audio bus
+[PASS] UI slider reaches genuine silence
+[PASS] Halftone Off survives construction of fresh setup panels
+[PASS] Quick Sprint remains selectable through setup's public action
+[PASS] Setup selections survive replacement by the 3D garage
+[PASS] All occupied stalls exist before team switching
+[PASS] Rear-view orbit can dolly to the next stall without crossing its steel partition
+[PASS] Team-switch arrows work even while Launch owns keyboard focus
+[PASS] Stall 00 rides its race chassis at its dolly stop
+[PASS] Stall 01 rides its race chassis at its dolly stop
+[PASS] Stall 02 rides its race chassis at its dolly stop
+[PASS] Stall 03 rides its race chassis at its dolly stop
+[PASS] Stall 04 rides its race chassis at its dolly stop
+[PASS] Stall 05 rides its race chassis at its dolly stop
+[PASS] Stall 06 rides its race chassis at its dolly stop
+[PASS] Stall 07 rides its race chassis at its dolly stop
+[PASS] Stall 08 rides its race chassis at its dolly stop
+[PASS] Stall 09 rides its race chassis at its dolly stop
+[PASS] Stall 10 rides its race chassis at its dolly stop
+[PASS] Stall 11 rides its race chassis at its dolly stop
+[PASS] Stall 12 rides its race chassis at its dolly stop
+[PASS] Team 0 garage card names the Mercedes-AMG and points at its full GLB
+[PASS] Driver 01 has the original sharp radio portrait
+[PASS] Driver 02 has the original sharp radio portrait
+[PASS] Driver 03 has the original sharp radio portrait
+[PASS] Driver 04 has the original sharp radio portrait
+[PASS] Driver 05 has the original sharp radio portrait
+[PASS] Driver 06 has the original sharp radio portrait
+[PASS] Driver 07 has the original sharp radio portrait
+[PASS] Driver 08 has the original sharp radio portrait
+[PASS] Driver 09 has the original sharp radio portrait
+[PASS] Driver 10 has the original sharp radio portrait
+[PASS] Driver 11 has the original sharp radio portrait
+[PASS] Driver 12 has the original sharp radio portrait
+[PASS] Driver 13 has the original sharp radio portrait
+[PASS] Driver 14 has the original sharp radio portrait
+[PASS] Driver 15 has the original sharp radio portrait
+[PASS] Driver 16 has the original sharp radio portrait
+[PASS] Driver 17 has the original sharp radio portrait
+[PASS] Driver 18 has the original sharp radio portrait
+[PASS] Driver 19 has the original sharp radio portrait
+[PASS] Driver 20 has the original sharp radio portrait
+[PASS] Driver 21 has the original sharp radio portrait
+[PASS] Driver 22 has the original sharp radio portrait
+[PASS] Driver 23 has the original sharp radio portrait
+[PASS] Driver 24 has the original sharp radio portrait
+[PASS] Driver 25 has the original sharp radio portrait
+[PASS] Driver 26 has the original sharp radio portrait
+[PASS] Bento Tanaka's wet mastery retains its canonical 96 percent rating
+[PASS] Team Principal tire selectors never overwrite the other teammate
+[PASS] Changing car one again preserves car two's wet strategy
+[PASS] Animated launch reaches the selected team's configured live race
+[PASS] Transition preserves independent tires into actual race actors
+[PASS] Dedicated winning scene owns the viewport after freeing the race world
+[PASS] Studio Exit to HQ returns to a clean main menu
+MAIN MENU FLOW: 75 assertions, 0 FAIL

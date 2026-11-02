@@ -1,0 +1,14 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] Menu and podium tracks both play on the Music bus
+[PASS] One Music slider value gives the same bus level for both tracks
+[PASS] Music slider caption reads MUSIC
+[PASS] Track trims differ by the measured 2.2 dB
+[PASS] An unknown track gets no trim
+[PASS] The music player level follows the active track's trim
+[PASS] A podium request made before the hub is ready still gets its trim
+[PASS] Ducking sits DUCK_DB under the Music config
+[PASS] Releasing the duck returns to the current Music config, not the level seen at start
+[PASS] Ducking never unmutes a muted Music bus
+MUSIC SINGLE CONFIG: 10 assertions, 0 FAIL

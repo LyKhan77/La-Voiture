@@ -1,0 +1,43 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] ribbon: before the start it reads LAP 01/50 and GRID, on a stage scaled evenly (1.00)
+[PASS] layout: the tactical deck is one full-width strip ([P: (16.0, 880.0), S: (1888.0, 140.0)]) under the tower ([P: (16.0, 88.0), S: (320.0, 780.0)]) and the telemetry drawer ([P: (1598.0, 372.0), S: (312.0, 496.0)]), with no overlap and no empty bottom corner
+[PASS] bars: stepped blocks go lime, yellow, crimson as the value drops (0.55 lights 6 of 10), and an inverted bar turns crimson when high
+[PASS] tower: 20 rows in race order, each with number, code and the S/M/H/I/W tyre letter (leader #13 SOK)
+[PASS] tower: Tab cycles the column INT -> GAP -> LAST -> INT (+0.2, +0.4)
+[PASS] tower: a retired car shows DNF
+[PASS] tower: clicking a row makes that car the followed car
+[PASS] tower: clicking a row then pressing N moves the highlight to the new car, exactly one row stays lit (lit rows: [0])
+[PASS] deck: pace, fuel mix, ERS and tactic desk buttons write straight into the sim
+[PASS] deck: the active button follows the sim state
+[PASS] deck: the second driver tab selects that car and the camera follows it
+[PASS] deck: choosing W and REQUEST BOX calls the car in for wets and the button turns into CANCEL BOX
+[PASS] deck: M folds the deck to its header with the bottom edge fixed, and M opens it again
+[PASS] keys: E toggles ERS overtake and restores the old mode, ] and [ step the pace
+[PASS] keys: N cycles through the cars of the player team
+[PASS] keys: H hides the whole HUD (other keys sleep) and brings it back
+[PASS] telemetry: gear 5, 252 km/h and the shift lights full at the limiter (#01 RYU // LIVE 60Hz)
+[PASS] telemetry: the DRS chip reads open while the wing is open
+[PASS] telemetry: the pedal trace and the G trace record the live throttle, brake and G samples
+[PASS] telemetry: a blown tyre and an overheated one are crimson, a healthy one lime, and the blister flag is carried
+[PASS] telemetry: ERS overtake with its charge, stress and confidence on one pair of bars
+[PASS] telemetry: another car starts with fresh traces, T hides and shows the drawer
+[PASS] telemetry: tyre temperature colour is cold cyan, ideal lime, hot yellow, critical crimson
+[PASS] telemetry: the heartbeat trace has its QRS spike and T wave
+[PASS] suggestion: the desk shows a card, ACCEPT executes the box call and hides it
+[PASS] suggestion: DISMISS hides the card and leaves the car alone
+[PASS] radio: an engineer call cuts in with the anime banner and runs through the race control marquee
+[PASS] flags: the caution tape runs under the ribbon during the safety car and clears on green
+[PASS] weather: the ribbon radar reads heavy rain with a five lap forecast (🌧️ RAIN (WET 85%)  29°C)
+[PASS] weather: drying, drizzle and dry map onto the pit wall radar states
+[PASS] ribbon exposes only 1x, 2x, 4x and 8x
+[PASS] weekend API caps speed at 8x
+[PASS] key 5 no longer changes race speed
+[PASS] key 1 selects supported race speed
+[PASS] key 2 selects supported race speed
+[PASS] key 3 selects supported race speed
+[PASS] key 4 selects supported race speed
+[PASS] ribbon: the sim rate buttons set the world time scale, lap times read m:ss.mmm
+38 assertions, 0 failure(s)
+FASE 5.8 FUSED HUD: PASS

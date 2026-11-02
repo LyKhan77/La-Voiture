@@ -1,0 +1,40 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] #1 all 20 driver slots resolve a radio_portrait.png (missing: [])
+[PASS] #2 every slot has its own portrait path (20 distinct)
+[PASS] #3 a driver call shows that driver's own portrait on the driver banner
+[PASS] #4 the engineer banner keeps the engineer portrait
+[PASS] #5 the soundwave is idle before a transmission
+[PASS] #6 a transmission switches the soundwave on
+[PASS] #7 the equalizer bars pulse while transmitting (energy 0.89)
+[PASS] #8 the banner leaving switches the soundwave off
+[PASS] #9 the bars decay to a flat baseline when idle (energy 0.000)
+[PASS] #10 a quiet car may call the pit wall
+[PASS] #11 a routine driver call starts a 15 s cooldown for that car
+[PASS] #12 the cooldown is per car
+[PASS] #13 still muted after 14 s
+[PASS] #14 free again after 15 s
+[PASS] #15 an urgent call bypasses and does not start the cooldown
+[PASS] #16 engineer calls do not mute the driver
+[PASS] #17 wear past 75 % reports the tyre cliff
+[PASS] #18 the tyre cliff is reported once per set of tyres
+[PASS] #19 a completed pass reports on both cars (["Pass made on CRU! Clean move down the inside!", "Lost the spot to RYU! Defending now!"])
+[PASS] #20 the cooldown keeps a second pass quiet
+[PASS] #20b the AI driver who lost the place to the player's car answers on the radio as a rival (["Pass made on CRU! Clean move down the inside!", "Lost the spot to RYU! Defending now!"])
+[PASS] #20c a pass between two AI cars stays off the radio
+[PASS] #20d the HUD shows the rival driver's banner with that driver's portrait
+[PASS] #21 an ERS overtake deployment is called on the radio
+[PASS] #22 contact is an urgent driver call (["We touched with CRU! Check the telemetry!", "We touched with RYU! Check the telemetry!"])
+[PASS] #23 only Freja Berg's slot (7) is cast with the female voice
+[PASS] #24 a new driver call resolves a male clip and Freja's own female clip
+[PASS] #25 every new driver line has a voice clip
+[PASS] #27 three character standees stand in the podium triptych
+[PASS] #28 P1 art and name belong to the actual finisher
+[PASS] P1 character wears the die-cut sticker outline
+[PASS] #28 P2 art and name belong to the actual finisher
+[PASS] P2 character wears the die-cut sticker outline
+[PASS] #28 P3 art and name belong to the actual finisher
+[PASS] P3 character wears the die-cut sticker outline
+35 assertions, 0 failure(s)
+FASE 8.4 RADIO AND PODIUM: PASS

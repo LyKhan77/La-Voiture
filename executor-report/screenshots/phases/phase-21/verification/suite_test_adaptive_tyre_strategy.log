@@ -1,0 +1,37 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] forecast: the same seed builds the same real weather and the same forecast
+[PASS] forecast: the real weather strays from the forecast (47 races), the cone widens far out (near 0.36, far 4.82 summed rain error)
+[PASS] forecast: on lap 7 the next lap's forecast is nearly the real weather (error 0.110 -> 0.020)
+[PASS] forecast: the WET preset's steady rain is the real weather the race runs (mean real rain 0.35, live 0.21)
+[PASS] strategist: every team has its own deterministic strategist (9 trust levels, 3 reaction delays)
+[PASS] strategist: building profiles never draws from the race rng (determinism of the rest of the race)
+[PASS] strategy: wets on a drying track (8% water, dry forecast) box for slicks ({ "compound": 1, "urgent": false, "kind": "dry", "gain_s": 192.510557379875 })
+[PASS] strategy: wets on a damp track (30% water, no more heavy rain) box for intermediates ({ "compound": 3, "urgent": false, "kind": "easing", "gain_s": 21.5447936838447 })
+[PASS] strategy: inters on a dry-ish track stay out when the forecast brings heavy rain next lap ({ "compound": -1, "urgent": false, "kind": "", "gain_s": 0.0 })
+[PASS] strategy: a fresh slick on a dry track stays out ({ "compound": -1, "urgent": false, "kind": "", "gain_s": 0.0 })
+[PASS] strategy: slicks on a flooded track box for rain tyres ({ "compound": 4, "urgent": false, "kind": "rain", "gain_s": 152.400417829129 })
+[PASS] strategy: wets that would blow out before the pit entry are boxed urgently ({ "compound": 1, "urgent": true, "kind": "cooking", "gain_s": 0.0 })
+[PASS] strategy: nobody boxes for the weather on the final lap ({ "compound": -1, "urgent": false, "kind": "", "gain_s": 0.0 })
+[PASS] strategy: CREW PICK is WET in standing water, INTER on a steady damp track, slicks when dry or drying next lap ([4, 3, 1, 1])
+[PASS] strategy: the AI wall boxes its wets for inters at 28% water (request 3)
+  seed 4: 20 cars called slicks, track water at the call 0..19 %, 5 lap.sector slots
+  seed 11: 20 cars called slicks, track water at the call 0..29 %, 6 lap.sector slots
+  seed 18: 20 cars called slicks, track water at the call 0..22 %, 6 lap.sector slots
+[PASS] drying race: no car blows a wet or intermediate tyre on the drying track (0 blow-outs in 3 races)
+[PASS] drying race: the walls call the slick crossover at different track conditions and moments (3 of 3 races spread >= 5 % water over >= 3 lap.sector slots)
+[PASS] puncture: the car calls its own box stop the moment the tyre goes
+[PASS] puncture: the car limps up to ~100 km/h on the straights, not a 55 km/h crawl (peak 100 km/h)
+[PASS] puncture: from half a lap out the car reaches its box and leaves on new tyres (106 s)
+[PASS] puncture: driving on the flat wrecks the suspension and retires the car (Suspension Failure, damage 90)
+[PASS] puncture: the car stopped on track brings out the VSC (flag 2)
+[PASS] puncture: a blow-out that spins the car leaves debris and brings out the VSC
+[PASS] puncture: on the final lap the car limps to the flag instead of boxing
+[PASS] desk: AUTO calls the stop itself at once, without a decision card (request 2)
+[PASS] desk: MANUAL with COACH raises the BOX decision card and waits for the player
+[PASS] desk: MANUAL without COACH gets the facts only, no card and no advice (Race Control: DRS has been ENABLED. | Tyre wear at 70%.)
+[PASS] desk: without COACH the weather radar update is information only (Radar update: rain front approaching in about 1 lap.)
+[PASS] desk: with COACH the radar update carries the engineer's advice (Radar update: rain front approaching in about 1 lap. Prepare INTERMEDIATE tyres.)
+29 assertions, 0 failure(s)
+FASE 19 ADAPTIVE TYRE STRATEGY: PASS

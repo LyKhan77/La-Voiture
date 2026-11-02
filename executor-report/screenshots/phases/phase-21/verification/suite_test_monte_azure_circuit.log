@@ -1,0 +1,31 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+--- Running Monte Azure Marina circuit suite ---
+[PASS] #M1 'monte_azure' is in the calendar registry
+[PASS] #M2 the registry points at the circuits/monte_azure module scene (got res://scenes/race_world/circuits/monte_azure/monte_azure_circuit.tscn)
+[PASS] #M3 Monte Azure is playable once its scene exists
+[PASS] #M4 round 4, SPRINT, 2.85 km
+[PASS] #M5 MonteAzureCircuitBuilder script exists at res://scripts/world/circuits/monte_azure/monte_azure_circuit_builder.gd
+[PASS] #M6 the circuit scene loads
+[PASS] #M7 the scene root is the MonteAzureCircuitBuilder
+[PASS] #M8 TrackRibbon and its Curve3D exist
+[PASS] #M9 the builder records the frozen blueprint geometry_hash
+[PASS] #M10 baked length is 2850 m +-15 (got 2850.00)
+[PASS] #M11 the 3D ribbon is exactly 2850 m so every blueprint station is a ribbon distance; the flat plan is ~2.3 m shorter (ribbon 2850.002, plan 2847.75)
+[PASS] #M12 road is 11 m wide (half width 5.50)
+[PASS] #M13 plan_scale is ~1.0997, the 1.1006 flat scale less the climb (got 1.099684)
+[PASS] #M14 the ribbon is closed (first point repeated last)
+[PASS] #M15 19 numbered turns (got 19)
+[PASS] #M16 turn names are the blueprint's with T7 Tunnel In, T8 Tunnel Out, T11 Marina Sweep, T12 Yacht Club
+[PASS] #M17 turn directions follow the blueprint (+1 right, -1 left)
+[PASS] #M18 turns are numbered in travel order
+[PASS] #M19 Sainte Devote sits at s~658 (got 658)
+[PASS] #M20 tightest world radius is >= 23 m (got 23.66)
+[PASS] #M21 16 of the 19 turns turn >= 15 deg and take kerbs and braking boards (got 16)
+[PASS] #M22 the lowest point is at or above sea level (0.50 m)
+[PASS] #M23 peak >= 41.5 m and delta >= 41 m (peak 42.4, delta 41.9)
+[PASS] #M24 steepest grade is <= 12 % (got 9.5 %)
+[PASS] #M25 three sectors split the lap in thirds (950 / 1900 / 2850)
+[PASS] #M26 tearing the circuit down leaves no orphan nodes
+MONTE AZURE CIRCUIT TEST SUITE: PASS

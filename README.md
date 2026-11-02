@@ -124,7 +124,7 @@ Get-ChildItem tests\test_*.gd | ForEach-Object {
 * **N**: Focus Next Rival Car in Telemetry & Chase Cam
 * **E**: Trigger ERS Overtake Boost
 * **H**: Hide/Unhide Entire HUD (Photo / Cinema Mode)
-* **1 - 5**: Adjust Simulation Speed (1x, 2x, 4x, 8x, 16x Fast-Forward)
+* **1 - 4**: Adjust Simulation Speed (1x, 2x, 4x, 8x Fast-Forward)
 
 ---
 

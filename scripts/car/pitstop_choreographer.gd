@@ -737,6 +737,9 @@ func _assign_corners(job: Job, crew: Crew) -> void:
 
 
 func _close(job: Job) -> void:
+	# Fast sim frames may skip the final servicing pose; complete the physical wheel swap before releasing its props.
+	if not job.hands_off:
+		_service_wheels_at(job, 1.0)
 	if job.chassis != null:
 		job.chassis.position.y = 0.0
 	for jack: MeshInstance3D in job.jacks:

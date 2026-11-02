@@ -1,0 +1,119 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] apex_ring: the pit lane is a CircuitPitComplex
+[PASS] apex_ring: the complex reports it is built
+[PASS] apex_ring: one box and one garage per racing team (10)
+[PASS] apex_ring: the garages stand behind the boxes (box 17.0 m, garage front 20.6 m)
+[PASS] apex_ring: a team without a box has no box, garage or park point
+[PASS] apex_ring: the crew is the standard 13, lined up across the garage mouth
+[PASS] apex_ring: the sim's pit layout has entry_s
+[PASS] apex_ring: the sim's pit layout has exit_s
+[PASS] apex_ring: the sim's pit layout has stall_first_s
+[PASS] apex_ring: the sim's pit layout has stall_pitch_m
+[PASS] apex_ring: the sim's pit layout has stall_lane_m
+[PASS] apex_ring: the sim's pit layout has fast_lane_m
+[PASS] apex_ring: the sim's pit layout has edge_lateral_m
+[PASS] apex_ring: the sim's pit layout has queue_gap_m
+[PASS] apex_ring: the sim's pit layout has lane_ramp_in_m
+[PASS] apex_ring: the sim's pit layout has lane_ramp_out_m
+[PASS] apex_ring: the sim parks cars where the complex draws the boxes (17.0 m)
+[PASS] apex_ring: seat_teams re-seats the boxes and the garages follow
+[PASS] apex_ring: seating the original order puts every team back
+[PASS] neo_wangan: the pit lane is a CircuitPitComplex
+[PASS] neo_wangan: the complex reports it is built
+[PASS] neo_wangan: one box and one garage per racing team (10)
+[PASS] neo_wangan: the garages stand behind the boxes (box 13.0 m, garage front 16.0 m)
+[PASS] neo_wangan: a team without a box has no box, garage or park point
+[PASS] neo_wangan: the crew is the standard 13, lined up across the garage mouth
+[PASS] neo_wangan: the sim's pit layout has entry_s
+[PASS] neo_wangan: the sim's pit layout has exit_s
+[PASS] neo_wangan: the sim's pit layout has stall_first_s
+[PASS] neo_wangan: the sim's pit layout has stall_pitch_m
+[PASS] neo_wangan: the sim's pit layout has stall_lane_m
+[PASS] neo_wangan: the sim's pit layout has fast_lane_m
+[PASS] neo_wangan: the sim's pit layout has edge_lateral_m
+[PASS] neo_wangan: the sim's pit layout has queue_gap_m
+[PASS] neo_wangan: the sim's pit layout has lane_ramp_in_m
+[PASS] neo_wangan: the sim's pit layout has lane_ramp_out_m
+[PASS] neo_wangan: the sim parks cars where the complex draws the boxes (13.0 m)
+[PASS] neo_wangan: seat_teams re-seats the boxes and the garages follow
+[PASS] neo_wangan: seating the original order puts every team back
+[PASS] brianza: the pit lane is a CircuitPitComplex
+[PASS] brianza: the complex reports it is built
+[PASS] brianza: one box and one garage per racing team (10)
+[PASS] brianza: the garages stand behind the boxes (box 17.0 m, garage front 20.6 m)
+[PASS] brianza: a team without a box has no box, garage or park point
+[PASS] brianza: the crew is the standard 13, lined up across the garage mouth
+[PASS] brianza: the sim's pit layout has entry_s
+[PASS] brianza: the sim's pit layout has exit_s
+[PASS] brianza: the sim's pit layout has stall_first_s
+[PASS] brianza: the sim's pit layout has stall_pitch_m
+[PASS] brianza: the sim's pit layout has stall_lane_m
+[PASS] brianza: the sim's pit layout has fast_lane_m
+[PASS] brianza: the sim's pit layout has edge_lateral_m
+[PASS] brianza: the sim's pit layout has queue_gap_m
+[PASS] brianza: the sim's pit layout has lane_ramp_in_m
+[PASS] brianza: the sim's pit layout has lane_ramp_out_m
+[PASS] brianza: the sim parks cars where the complex draws the boxes (17.0 m)
+[PASS] brianza: seat_teams re-seats the boxes and the garages follow
+[PASS] brianza: seating the original order puts every team back
+[PASS] monte_azure: the pit lane is a CircuitPitComplex
+[PASS] monte_azure: the complex reports it is built
+[PASS] monte_azure: one box and one garage per racing team (10)
+[PASS] monte_azure: the garages stand behind the boxes (box 13.0 m, garage front 16.0 m)
+[PASS] monte_azure: a team without a box has no box, garage or park point
+[PASS] monte_azure: the crew is the standard 13, lined up across the garage mouth
+[PASS] monte_azure: the sim's pit layout has entry_s
+[PASS] monte_azure: the sim's pit layout has exit_s
+[PASS] monte_azure: the sim's pit layout has stall_first_s
+[PASS] monte_azure: the sim's pit layout has stall_pitch_m
+[PASS] monte_azure: the sim's pit layout has stall_lane_m
+[PASS] monte_azure: the sim's pit layout has fast_lane_m
+[PASS] monte_azure: the sim's pit layout has edge_lateral_m
+[PASS] monte_azure: the sim's pit layout has queue_gap_m
+[PASS] monte_azure: the sim's pit layout has lane_ramp_in_m
+[PASS] monte_azure: the sim's pit layout has lane_ramp_out_m
+[PASS] monte_azure: the sim parks cars where the complex draws the boxes (13.0 m)
+[PASS] monte_azure: seat_teams re-seats the boxes and the garages follow
+[PASS] monte_azure: seating the original order puts every team back
+[PASS] ardennes: the pit lane is a CircuitPitComplex
+[PASS] ardennes: the complex reports it is built
+[PASS] ardennes: one box and one garage per racing team (10)
+[PASS] ardennes: the garages stand behind the boxes (box 17.0 m, garage front 20.6 m)
+[PASS] ardennes: a team without a box has no box, garage or park point
+[PASS] ardennes: the crew is the standard 13, lined up across the garage mouth
+[PASS] ardennes: the sim's pit layout has entry_s
+[PASS] ardennes: the sim's pit layout has exit_s
+[PASS] ardennes: the sim's pit layout has stall_first_s
+[PASS] ardennes: the sim's pit layout has stall_pitch_m
+[PASS] ardennes: the sim's pit layout has stall_lane_m
+[PASS] ardennes: the sim's pit layout has fast_lane_m
+[PASS] ardennes: the sim's pit layout has edge_lateral_m
+[PASS] ardennes: the sim's pit layout has queue_gap_m
+[PASS] ardennes: the sim's pit layout has lane_ramp_in_m
+[PASS] ardennes: the sim's pit layout has lane_ramp_out_m
+[PASS] ardennes: the sim parks cars where the complex draws the boxes (17.0 m)
+[PASS] ardennes: seat_teams re-seats the boxes and the garages follow
+[PASS] ardennes: seating the original order puts every team back
+[stoke-crown-env] built in 1.28s | terrain tris 44096 | trees 1600 | grass 600 | hedges 633 | landmarks 5/5 | env tris 120328 (budget 320000)
+[stoke-runtime] armco posts: 2549 (121 interpolated)
+[PASS] stoke_crown: the pit lane is a CircuitPitComplex
+[PASS] stoke_crown: the complex reports it is built
+[PASS] stoke_crown: one box and one garage per racing team (10)
+[PASS] stoke_crown: the garages stand behind the boxes (box 16.5 m, garage front 25.0 m)
+[PASS] stoke_crown: a team without a box has no box, garage or park point
+[PASS] stoke_crown: the crew is the standard 13, lined up across the garage mouth
+[PASS] stoke_crown: the sim's pit layout has entry_s
+[PASS] stoke_crown: the sim's pit layout has exit_s
+[PASS] stoke_crown: the sim's pit layout has stall_first_s
+[PASS] stoke_crown: the sim's pit layout has stall_pitch_m
+[PASS] stoke_crown: the sim's pit layout has stall_lane_m
+[PASS] stoke_crown: the sim's pit layout has fast_lane_m
+[PASS] stoke_crown: the sim's pit layout has edge_lateral_m
+[PASS] stoke_crown: the sim's pit layout has queue_gap_m
+[PASS] stoke_crown: the sim's pit layout has lane_ramp_in_m
+[PASS] stoke_crown: the sim's pit layout has lane_ramp_out_m
+[PASS] stoke_crown: the sim parks cars where the complex draws the boxes (16.5 m)
+[PASS] stoke_crown: seat_teams re-seats the boxes and the garages follow
+[PASS] stoke_crown: seating the original order puts every team back

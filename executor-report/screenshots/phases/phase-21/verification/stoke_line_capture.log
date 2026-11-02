@@ -1,0 +1,12 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+D3D12 12_0 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 3050 Laptop GPU
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[stoke-crown-env] built in 0.71s | terrain tris 76558 | trees 1600 | grass 600 | hedges 633 | landmarks 5/5 | env tris 152790 (budget 320000)
+[stoke-runtime] armco posts: 2549 (121 interpolated)
+CAPTURE res://executor-report/screenshots/phases/phase-21/racing-line/stoke_crown-corner1-plan.png status=0
+CAPTURE res://executor-report/screenshots/phases/phase-21/racing-line/stoke_crown-corner1-worker.png status=0
+CAPTURE res://executor-report/screenshots/phases/phase-21/racing-line/stoke_crown-corner1-lines.png status=0 (red = pre-FASE-18 line, blue = racing line, grey = centreline)
+CAPTURE res://executor-report/screenshots/phases/phase-21/racing-line/stoke_crown-corner2-plan.png status=0
+CAPTURE res://executor-report/screenshots/phases/phase-21/racing-line/stoke_crown-corner2-worker.png status=0
+CAPTURE res://executor-report/screenshots/phases/phase-21/racing-line/stoke_crown-corner2-lines.png status=0 (red = pre-FASE-18 line, blue = racing line, grey = centreline)

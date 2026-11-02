@@ -133,17 +133,25 @@ func _test_reserved_rounds_and_wrap() -> void:
 	check(ardennes_ok,
 		"#S4c Round 05, Ardennes Valley Ring is fully built and playable (GP, 5.40 km, Continue enabled)")
 
-	# Step 4: Round 06, Stoke Crown Circuit is a reserved round that is not built yet.
+	# Step 4: Round 06, Stoke Crown is now playable with its own homologated map.
 	_press("TrackNextButton")
 	await process_frame
-	var reserved_ok: bool = _label("CircuitNameLabel") == "Stoke Crown Circuit" \
+	var stoke_ok: bool = _label("CircuitNameLabel") == "Stoke Crown Circuit" \
 		and _label("CircuitTypeLabel") == "GRAND PRIX" \
-		and float(radar.stats()["length_m"]) == 0.0 and radar.circuit_id == "stoke_crown" \
+		and absf(float(radar.stats()["length_m"]) - 5200.0) <= 1.0 and radar.circuit_id == "stoke_crown" \
+		and not continue_button.disabled
+	check(stoke_ok, "#S4d Round 06 Stoke Crown is playable with its own 5.2km map and Continue enabled")
+	# Round 07 is still reserved; selecting an unbuilt round remains safe.
+	_press("TrackNextButton")
+	await process_frame
+	var reserved_ok: bool = _label("CircuitNameLabel") == "Pacific Coast Corkscrew" \
+		and float(radar.stats()["length_m"]) == 0.0 and radar.circuit_id == "pacific_corkscrew" \
 		and continue_button.disabled and continue_button.text.contains("IN PREPARATION")
 	check(reserved_ok,
-		"#S4d a round whose layout is not built yet (Round 06, Stoke Crown) says so: the map is empty and Continue is disabled")
+		"#S4e unbuilt Round 07 remains empty with Continue disabled")
 
 	# Return to Apex Ring
+	_press("TrackPrevButton")
 	_press("TrackPrevButton")
 	_press("TrackPrevButton")
 	_press("TrackPrevButton")

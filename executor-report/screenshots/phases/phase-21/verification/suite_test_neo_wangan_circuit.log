@@ -1,0 +1,53 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] #W1 the spline is a closed 3 150 m loop: 3150.1 m baked, first and last point within 1 cm, 856 control points
+[PASS] #W2 twelve numbered turns in travel order, every one at or above 18 m radius, each turning the way its curvature says (tightest 22.7 m)
+[PASS] #W3 every turn is named, eight turn right and four turn left — 12 in all (T1 Shuto 27.5 m, T2 Bay 37.7 m, T3 Daiba 51.1 m, T4 Underpass 33.0 m, T5 Tunnel 29.9 m, T6 Cyber 25.2 m, T7 Cyber 25.2 m, T8 Shibuya 37.7 m, T9 Harbor 22.8 m, T10 Dock 25.2 m, T11 Container 40.9 m, T12 Pit 33.0 m)
+[PASS] #W4 T1 is the Shuto Gate, T9 the double-arc Harbor Hairpin spanning 76.3 m
+[PASS] #W5 the Shuto Bay Bridge peaks at +6.50 m and the underpass floor drops to -3.20 m, inside the designed +6.5 / -3.2 envelope
+[PASS] #W6 the bridge section itself is elevated (6.50 m) and the 180 m tunnel section is below grade (-3.20 m)
+[PASS] #W7 the tunnel and bridge spans answer for their own arc distances, so the environment can build them there
+[PASS] #W8 the racing surface is 11.5 m wide and wears the road_asphalt.gdshader (wet gloss and puddles)
+[PASS] #W10 Pit Entry sits 335 m before the line at +5.2 m on the right, and the lane runs 400.0 m to Pit Exit
+[PASS] #W11 ten team boxes Socket_PitStall_0..9 stand 20 m apart outside the fast lane at +13.0 m
+[PASS] #W12 a 1.2 m pit wall carries an orange FIA impact attenuator on its nose, and the fast lane is exactly 4.5 m
+[PASS] #W13 the pit wall leaves 1.16 m to a car on the fast lane and a boxed car leaves 2.50 m to one passing (2.4 m FIA racing room)
+[PASS] #W14 an 80 m solid blend line guards a 65 m bypass ramp that rejoins 25 m past Turn 1's 120 m apex
+[PASS] #W15 the lane is limited to 80 km/h and hands the sim its own entry, exit and lateral layout
+[PASS] #W41 first stall has at least 24 m of straight fast lane after entry blend and before pull-in; the boxes stand at s=3015 to 3195 m
+[PASS] #W42 asphalt working apron supports the full width of a car at every team box
+[PASS] #W43 five shadowless garage fill lights cover all ten garage floors and crew work areas
+[PASS] #W44 instanced ceiling strips, garage floors, two entry lights and an 80 km/h entry sign complete the lit pit approach
+[PASS] #W45 roadside barriers and streetlights leave the extended pit entry mouth clear
+[PASS] #W47 each service box has a shadowless canopy task light above car and crew, separate from garage interior fill
+[PASS] #W48 extended pit wall stands on the surface with the full 1.2 m visible height, not half buried below it (-0.000 to 1.200 m)
+[PASS] #W26 land sectors have continuous ground, seawalls and tunnel rooftop plaza
+[PASS] #W27 Blender pylons, tunnel portals, four instanced harbor cranes and side trusses integrated
+[PASS] #W28 street canyon contains at least 48 GLB buildings (77)
+[PASS] #W29 24 instanced neon billboards face the road
+[PASS] #W30 9 x 5.5 m light pools centred at +/-3.2 m on asphalt
+[PASS] #W31 GLB palette uses shared cel vertex-color material
+[PASS] #W32 all corridor footprints clear every road segment and lie 14–45 m laterally
+[PASS] #W34 all four harbor crane foundations clear all road legs
+[PASS] #W35 bridge steel cables anchor to the curved deck
+[PASS] #W36 bridge piers run from seabed to underside of the deck
+[PASS] #W38 shared FIA 150/100/50 m braking boards cover all twelve corners
+[PASS] #W39 emissive facade details avoid redundant hull and shadow passes; building shells retain ink
+[PASS] #W16 1930 concrete barriers and 269 hazard caps down both sides, every one a MultiMesh instance (138 double-arm lamps)
+[PASS] #W17 the 180 m Cyber City underpass has a concrete shell and 20 ceiling neon strips
+[PASS] #W18 a 110-tower skyline glows through the window shader, and 54 harbor containers are instanced in three colours
+[PASS] #W19 the circuit submits 148 draw calls and 302160 triangles — inside the 160 / 320 000 budget
+[PASS] #W20 the set carries a night sky and fog, and its neon breathes between frames (2.20 -> 2.11)
+[PASS] #W33 1008 land-road samples have support below asphalt, never above
+[PASS] #W9 the Apex Ring keeps its own 4 158.8 m spline and 303 control points — Neo-Wangan is a separate scene (303 points)
+[PASS] #W40 Neo-Wangan sky owns an Environment copy and cannot mutate the shared Apex weekend resource
+[PASS] #W21 a Neo-Wangan race weekend loads the street scene: 3150 m ribbon, 11.5 m wide, 20 cars, and the sim pits on the street layout
+[PASS] #W37 Neo-Wangan Jumbotron displays the live leading team's color and ten standing bars
+[PASS] #W22 the HUD radar binds the active circuit's own ribbon and its 127-point 2D trace
+[PASS] #W23 all 20 GT3 cars line up on the street circuit's grid, around the start line
+[PASS] #W24 the weekend steps ten frames on the new circuit without losing a car or the radar
+[PASS] #W25 a three-lap street race runs to the flag (20 cars finished, 5705 sim ticks), and a car that boxes is serviced in the 10-stall lane (1 stops)
+[PASS] #W46 first-team car completes a centered straight run after entry before turning to its box, with both tyres supported by pit asphalt (14 samples)
+48 assertions, 0 failure(s)
+NEO-WANGAN CIRCUIT: PASS

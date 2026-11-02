@@ -1,0 +1,22 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] #S1 the screen opens on Round 01, Apex Ring International (GRAND PRIX, 4.16 km), with the real Apex map traced (4159 m, 9 corners) and Continue live
+[PASS] #S2 the right arrow selects Round 02, Neo-Wangan Shuto Express (SPRINT, 3.15 km, 12 turns), and it is written into RaceConfigData
+[PASS] #S3 the hero map re-traces Neo-Wangan itself: 3150 m, 12 corners, 9.7 m of elevation
+[PASS] #S4 Round 03, Autodromo di Brianza is now fully built and playable (GP, 5.79 km, Continue enabled)
+[PASS] #S4b Round 04, Monte Azure Marina is fully built and playable (Sprint, 2.85 km, Continue enabled)
+[PASS] #S4c Round 05, Ardennes Valley Ring is fully built and playable (GP, 5.40 km, Continue enabled)
+[stoke-crown-env] built in 1.12s | terrain tris 44096 | trees 1600 | grass 600 | hedges 633 | landmarks 5/5 | env tris 120328 (budget 320000)
+[stoke-runtime] armco posts: 2549 (121 interpolated)
+[PASS] #S4d Round 06 Stoke Crown is playable with its own 5.2km map and Continue enabled
+[PASS] #S4e unbuilt Round 07 remains empty with Continue disabled
+[stoke-crown-env] built in 1.10s | terrain tris 44096 | trees 1600 | grass 600 | hedges 633 | landmarks 5/5 | env tris 120328 (budget 320000)
+[stoke-runtime] armco posts: 2549 (121 interpolated)
+[stoke-crown-env] built in 1.13s | terrain tris 44096 | trees 1600 | grass 600 | hedges 633 | landmarks 5/5 | env tris 120328 (budget 320000)
+[stoke-runtime] armco posts: 2549 (121 interpolated)
+[PASS] #S5 the arrows walk the calendar both ways and ten steps wrap October back to January
+[PASS] #S6 select_circuit() is the public entry point (other screens and the career use it) and the summary names Round 02; an unknown id is refused
+[PASS] #S7 the 2D radar redraws whichever circuit it is handed: Neo-Wangan (127 points, 256 px wide) fits the panel, and the Apex Ring traces a different shape
+11 assertions, 0 failure(s)
+TRACK SELECTOR UI: PASS

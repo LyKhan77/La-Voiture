@@ -188,7 +188,7 @@ func _smoke() -> void:
 	var race: GtRace = world.race
 	var verdicts: Array[String] = []
 	race.steward_event.connect(func(event: Dictionary) -> void: verdicts.append(String(event["text"])))
-	world.set_time_scale(16.0)
+	world.set_time_scale(8.0)
 	while race.time < GtStewards.START_GRACE_S + 5.0 and not world.race.is_finished():
 		await process_frame
 	world.set_time_scale(1.0)
@@ -231,7 +231,7 @@ func _smoke() -> void:
 	print("NATIVE 1x INCIDENT SAMPLE: %d frames avg %.3f ms / %.2f FPS p95 %.3f ms max %.3f ms" % [frames.size(), total_ms / frames.size(), avg_fps, p95_ms, frames[-1]])
 	check(avg_fps >= 50.0 and p95_ms <= 32.0, "Performance gate: avg FPS %.2f >=50.0, p95 %.2f <=32.0 ms" % [avg_fps, p95_ms])
 	check(race.stewards.cases.size() >= 1, "Native smoke: the staged rear-end hit reached the stewards (%d cases, %s)" % [race.stewards.cases.size(), verdicts])
-	world.set_time_scale(16.0)
+	world.set_time_scale(8.0)
 	start_ms = Time.get_ticks_msec()
 	var studio: WinningStudio = null
 	var cars_seen: int = race.cars.size()

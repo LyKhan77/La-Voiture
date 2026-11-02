@@ -152,11 +152,11 @@ func _test_presentation() -> void:
 	world.set_process(false)
 	world.race.incidents_enabled = false
 	_test_smooth_motion(world)
-	world.set_time_scale(16.0)
+	world.set_time_scale(8.0)
 	world.step(1.0 / 60.0)
 	var state: Dictionary = world.race.safety_car
 	var previous_tick_s: float = float(state["prev_s"])
-	check(float(state["s"]) - previous_tick_s < 2.0, "16x presentation keeps final two simulation ticks, not whole rendered-frame movement")
+	check(float(state["s"]) - previous_tick_s < 2.0, "8x presentation keeps final two simulation ticks, not whole rendered-frame movement")
 	world.vfx.update(0.001, 0.25)
 	world.vfx.update(0.001, 0.75)
 	check(is_equal_approx(float(state["prev_s"]), previous_tick_s), "Presentation never overwrites simulation snapshots")

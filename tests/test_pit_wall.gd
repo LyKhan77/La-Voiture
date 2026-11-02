@@ -71,11 +71,16 @@ func _run() -> void:
 	await create_timer(.3).timeout
 	check(dashboard.radio.speech.text.contains("NEW TRANSMISSION"),"rapid radio preserves newest transmission")
 	check(dashboard.radio.layer == 30 and dashboard.radio.banner.visible,"radio enters reactive layer")
-	for scale: float in [1.0,2.0,4.0,8.0,16.0]:
+	check(dashboard._speed_buttons.size() == 4, "dashboard exposes only four speed choices")
+	for scale: float in [1.0,2.0,4.0,8.0]:
 		session.set_speed(scale)
 		check(session.engine.time_scale == scale,"session speed %dx" % int(scale))
+	session.set_speed(16)
+	check(session.engine.time_scale == 8.0,"removed 16x speed leaves last valid speed unchanged")
 	session.set_speed(3)
-	check(session.engine.time_scale == 16.0,"invalid speed leaves last valid speed unchanged")
+	check(session.engine.time_scale == 8.0,"invalid speed leaves last valid speed unchanged")
+	session.engine.set_time_scale(16.0)
+	check(session.engine.time_scale == 8.0,"simulation API caps speed at 8x")
 	await create_timer(.7).timeout
 	check(dashboard._workspace_root.position.is_equal_approx(Vector2.ZERO),"micro-shake returns to exact base position")
 	await create_timer(4.0).timeout

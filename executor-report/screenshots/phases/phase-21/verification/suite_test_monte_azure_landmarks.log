@@ -1,0 +1,28 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+[PASS] #L0 five GLBs and an asset_manifest.json with five entries
+[PASS] #L1 the environment has a HeroLandmarks layer
+[PASS] #L2 CasinoPalace stands in the layer
+[PASS] #L2 GrandHotelFairmont stands in the layer
+[PASS] #L2 CliffTunnel stands in the layer
+[PASS] #L2 YachtPack stands in the layer
+[PASS] #L2 HarborSkybridge stands in the layer
+[PASS] #L3 the casino stands at s=980, 90 m off the road on the right (centre 120 m)
+[PASS] #L3 the hotel stands at s=1010, 20 m off the road on the left (centre 47.5 m)
+[PASS] #L4 the tunnel is centred on the road at s=1330 (the middle of its straight)
+[PASS] #L5 the skybridge is centred on the road at s=2180
+[PASS] #L6 the yachts are moored off the left quay around s=2050
+[PASS] #L7 the 150 m tunnel (s 1255..1405) stands inside the straight s 1247..1413 with 6 m to spare
+[PASS] #L8 the bore is clear: 11 m of road, 5 m of headroom along the tunnel (0 hits)
+[PASS] #L8c both mouths are open: no geometry plugs the bore lengthwise (0 of 40 rays blocked, first )
+[PASS] #L9 a roof closes the bore: the mid-tunnel road is covered at all three probe lines (3 of 3)
+[PASS] #L8b the bore carries >= 30 lamp strips under its roof (got 32)
+[PASS] #L10 the road has 6 m of clearance under the skybridge (0 hits)
+[PASS] #L11 the skybridge deck spans the road (15 probes hit it)
+[PASS] #L12 no part of the skybridge below 6 m stands within 9 m of the racing line (0 vertices)
+[PASS] #L13 casino, hotel and yachts keep 10.5 m from every road (nearest corner 19.8 m)
+[PASS] #L14 the casino and the hotel never float: at every footprint corner the base is at or under the ground and at most 3 m into it (floating -0.25 m, buried 1.29 m)
+[PASS] #L15 the yacht hulls sit in the water, 0..1.5 m below the surface (lowest -0.80 m)
+[PASS] #L16 all 22 landmark surfaces are cel-shaded with an ink outline, except the tunnel liner (1 without)
+MONTE AZURE LANDMARKS TEST SUITE: PASS
