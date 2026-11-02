@@ -32,6 +32,7 @@ var quality_option: OptionButton
 var halftone_check: CheckButton
 var reduce_motion_check: CheckButton
 var vfx_check: CheckButton
+var race_music_option: OptionButton
 var outline_label: Label
 var sliders: Dictionary = {} # bus name -> HSlider
 var value_labels: Dictionary = {} # bus name -> Label
@@ -163,6 +164,9 @@ func _build_panel() -> void:
 
 	for index: int in range(PS.BUSES.size()):
 		_add_audio_row(panel, index)
+	race_music_option = _option(PS.RACE_MUSIC_NAMES, "RaceMusicOption")
+	_row(panel, "RACE MUSIC", race_music_option, 606.0, RIGHT_X)
+	race_music_option.item_selected.connect(_on_race_music)
 
 	var hint := UI.label(
 		"CHANGES APPLY IMMEDIATELY  //  ESC CLOSES",
@@ -271,6 +275,7 @@ func _chain_focus() -> void:
 	]
 	for bus: StringName in PS.BUSES:
 		chain.append(sliders[bus])
+	chain.append(race_music_option)
 	for index: int in range(chain.size()):
 		chain[index].focus_neighbor_top = chain[posmod(index - 1, chain.size())].get_path()
 		chain[index].focus_neighbor_bottom = chain[posmod(index + 1, chain.size())].get_path()
@@ -288,6 +293,7 @@ func _sync() -> void:
 	halftone_check.set_pressed_no_signal(PS.halftone)
 	vfx_check.set_pressed_no_signal(PS.vfx_high)
 	reduce_motion_check.set_pressed_no_signal(PS.reduce_motion)
+	race_music_option.select(PS.race_music)
 	_refresh_labels()
 	for bus: StringName in PS.BUSES:
 		var slider: HSlider = sliders[bus]
@@ -341,6 +347,14 @@ func _on_halftone(pressed: bool) -> void:
 func _on_reduce_motion(pressed: bool) -> void:
 	PS.reduce_motion = pressed
 	_refresh_labels()
+	PS.save()
+
+
+func _on_race_music(index: int) -> void:
+	PS.race_music = index
+	var hub: AudioManager = AudioManager.of(self)
+	if hub != null:
+		hub.refresh_race_music()
 	PS.save()
 
 

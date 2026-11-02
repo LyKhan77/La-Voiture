@@ -11,6 +11,8 @@ const T := preload("res://scripts/ui/ui_theme_tokens.gd")
 const PS := preload("res://scripts/core/presentation_settings.gd")
 const ConfigData := preload("res://scripts/core/race_config_data.gd")
 const GarageBuilder := preload("res://scripts/world/garage/garage_environment_builder.gd")
+const StreetStyle := preload("res://scripts/ui/street_style.gd")
+const NOW_PLAYING_S: float = 3.0
 const GarageOrbit := preload("res://scripts/ui/garage_car_orbit.gd")
 const SettingsScene := preload("res://scenes/ui/settings_modal.tscn")
 const HEADER := preload("res://assets/fonts/BarlowCondensed.ttf")
@@ -76,7 +78,30 @@ func _ready() -> void:
 	_build_garage()
 	_build_stage()
 	PS.apply_to_tree(self)
-	AudioManager.of(self).start_music()
+	var hub: AudioManager = AudioManager.of(self)
+	hub.track_started.connect(_on_track_started)
+	var was_menu: bool = hub.music_track == AudioManager.TRACK_MENU
+	hub.start_music()
+	if was_menu: # no switch, so no signal: show the track that keeps playing
+		_on_track_started(hub.music_track, hub.now_playing)
+
+
+## NOW PLAYING sticker, bottom right, for a few seconds per menu track.
+func _on_track_started(context: StringName, title: String) -> void:
+	if context != AudioManager.TRACK_MENU or stage == null:
+		return
+	var old: Node = stage.get_node_or_null("NowPlaying")
+	if old != null:
+		old.name = "NowPlayingOld"
+		old.queue_free()
+	var toast: Label = StreetStyle.badge("NOW PLAYING //  " + title, T.ACCENT_ACID_LIME, 20)
+	toast.name = "NowPlaying"
+	toast.position = Vector2(1380.0, 1000.0)
+	stage.add_child(toast)
+	var tween: Tween = toast.create_tween()
+	tween.tween_interval(NOW_PLAYING_S)
+	tween.tween_property(toast, "modulate:a", 0.0, 0.4)
+	tween.tween_callback(toast.queue_free)
 
 
 func _process(_delta: float) -> void:

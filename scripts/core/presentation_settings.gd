@@ -17,6 +17,10 @@ const DISPLAY_MODE_NAMES: Array[String] = ["WINDOWED", "BORDERLESS", "FULLSCREEN
 const RESOLUTIONS: Array[Vector2i] = [Vector2i(1920, 1080), Vector2i(1280, 720), Vector2i(2560, 1440)]
 const RESOLUTION_NAMES: Array[String] = ["1920 x 1080", "1280 x 720", "2560 x 1440"]
 
+## Music while racing: none, quiet under the cars (default), or at the menu level.
+enum RaceMusic { OFF, AMBIENT, FULL }
+const RACE_MUSIC_NAMES: Array[String] = ["OFF", "AMBIENT", "FULL"]
+
 const BUSES: Array[StringName] = [&"Master", &"SFX", &"Radio", &"Music", &"UI"]
 const BUS_LABELS: Array[String] = ["MASTER", "ENGINE SFX", "PIT RADIO", "MUSIC", "UI CLICK"]
 
@@ -41,6 +45,7 @@ static var reduce_motion: bool = false
 static var volumes: Dictionary = {
 	&"Master": 1.0, &"SFX": 1.0, &"Radio": 1.0, &"Music": 0.63, &"UI": 0.79,
 }
+static var race_music: int = RaceMusic.AMBIENT
 
 static var _saved_display: bool = false
 
@@ -68,6 +73,7 @@ static func load_saved() -> void:
 	_saved_display = true
 	for bus: StringName in BUSES:
 		volumes[bus] = clampf(float(cfg.get_value("audio", String(bus), volumes[bus])), 0.0, 1.0)
+	race_music = clampi(int(cfg.get_value("audio", "race_music", race_music)), 0, RACE_MUSIC_NAMES.size() - 1)
 
 
 static func save() -> void:
@@ -81,6 +87,7 @@ static func save() -> void:
 	cfg.set_value("display", "vsync", vsync)
 	for bus: StringName in BUSES:
 		cfg.set_value("audio", String(bus), float(volumes.get(bus, 1.0)))
+	cfg.set_value("audio", "race_music", race_music)
 	cfg.save(SAVE_PATH)
 
 

@@ -36,6 +36,7 @@ const CircuitDataScript := preload("res://scripts/core/circuit_data.gd")
 const TIME_SCALES: Array[float] = [1.0, 2.0, 4.0, 8.0]
 ## Engine and tyre voices stay on up to this time scale; faster than that they are just noise.
 const AUDIBLE_MAX_TIME_SCALE: float = 2.0
+const MUSIC_POLL_S: float = 0.5
 ## The podium comes up this long after the chequered flag falls, so the cars get over the line first.
 const PODIUM_REVEAL_S: float = 2.5
 const MAX_TICKS_PER_FRAME: int = 40
@@ -73,6 +74,7 @@ var grid_intro_progress: float = 0.0
 
 var _tick_accumulator: float = 0.0
 var _chequered_clock_s: float = -1.0 # seconds since the flag fell, -1 until it does
+var _music_poll_s: float = 0.0
 
 @onready var ribbon: RibbonScript = $TrackCircuit
 ## The set and the pit lane are typed by contract (CircuitEnvironment, CircuitPitComplex): the Apex Ring ships its own (ApexEnvironment,
@@ -141,7 +143,25 @@ func _ready() -> void:
 	if race_config != null:
 		SettingsScript.apply_to_tree(self)
 	camera_director.update(0.0)
-	AudioManager.of(self).start_music()
+	AudioManager.of(self).play_race_music(_race_is_wet())
+
+
+## Raining now (drizzle or heavy); a drying track plays the dry race track.
+func _race_is_wet() -> bool:
+	var state: int = GtWeatherOutlook.state_of(race.weather.rain_intensity, race.weather.track_water_pct)
+	return state == 1 or state == 2
+
+
+## Reports rain, safety car and final lap to the music a few times a second (leader_lap sorts the field).
+func _update_music_mood(delta: float) -> void:
+	_music_poll_s += delta
+	if _music_poll_s < MUSIC_POLL_S:
+		return
+	var flag: int = int(race.race_control["flag"])
+	var safety_car: bool = flag == Types.Flag.SC or flag == Types.Flag.VSC
+	var final_lap: bool = GtWeatherOutlook.leader_lap(race, ribbon.length_m) >= total_laps
+	AudioManager.of(self).set_race_mood(_race_is_wet(), safety_car, final_lap, _music_poll_s)
+	_music_poll_s = 0.0
 
 
 func _exit_tree() -> void:
@@ -294,6 +314,7 @@ func step(delta: float) -> void:
 	# After RaceVfx: the set lighting scales the sun, ambient and sky values it just wrote.
 	environment.update(delta, race)
 	hud.update(delta)
+	_update_music_mood(delta)
 
 
 ## The trackside digital panels show the flag race control shows, on the sector it applies to.

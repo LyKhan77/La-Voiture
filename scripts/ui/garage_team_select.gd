@@ -170,7 +170,7 @@ func _ready() -> void:
 	get_viewport().size_changed.connect(_fit)
 	launch_button.grab_focus()
 	SettingsScript.apply_to_tree(self)
-	AudioManager.of(self).start_music()
+	AudioManager.of(self).play_context(AudioManager.TRACK_GARAGE)
 ## Selects a stall (wraps around the ten teams); the camera dollies, nothing reloads.
 func select_team(index: int) -> void:
 	if config == null:
