@@ -2,8 +2,8 @@
 
 **Tanggal:** 2026-11-02  
 **Agen:** OpenAI Codex — Executor  
-**Branch:** `fase-21-4-garage-transition-engine`  
-**Status:** implementasi fungsional dan 99/99 suite PASS; gate native performa/no-warning penuh belum lulus (rincian di bawah).  
+**Branch pengembangan:** `fase-21-4-garage-transition-engine`; terintegrasi fast-forward ke `main` sebagai `328385e`.  
+**Status:** implementasi fungsional, Engine Test W dan 100/100 suite PASS setelah merge; gate native performa/no-warning tetap terbuka dengan pengecualian developer.  
 **Biaya aset:** 0 kredit; tidak ada generation atau dependensi baru.
 
 ## Izin dan prasyarat
@@ -12,7 +12,7 @@
 - Fase 21.3 di-commit sebagai `9c043a5` (`feat(audio): add per-family GT3 engine voices`), lalu dibuat branch 21.4.
 - Commit 21.3 hanya mencakup kode/audio profil/generator/test/laporan terkait serta prompt 21.4. Perubahan `AGENTS.md` dan `.import` lain yang sudah ada tidak ikut di-stage atau ditimpa.
 - Developer memilih **tanpa blip** saat ganti tim.
-- Perubahan 21.4 tidak di-commit: izin commit yang diminta dan diberikan khusus untuk 21.3.
+- Commit 21.4 awalnya ditunda karena izin pertama khusus untuk 21.3; developer kemudian menyetujui commit → merge → push setelah playtest OK. Hasil integrasi dicatat di bagian akhir.
 
 ## Implementasi
 
@@ -145,7 +145,7 @@ Log diagnostik berada di `temp/phase214_*`; laporan ini menyimpan temuan penting
 
 Developer memilih **“Pertahankan engine; catat gate terbuka”**: menerima deliverable fungsional Fase 21.4 dan 99/99 PASS dengan pengecualian native eksplisit, tanpa mengubah pin Godot 4.7.2. Evaluasi engine berpatch dan investigasi outlier performa dilanjutkan sebagai tugas terpisah, bukan pekerjaan terselubung di fase audio ini.
 
-Status akhir: **Fase 21.4 diterima secara fungsional dengan pengecualian native yang disetujui developer**. Gate locked-60/no-warning global tetap terbuka; tidak disamakan dengan sign-off DoD global. Seluruh checklist pekerjaan fase dan investigasi sudah ditutup berdasarkan hasil atau keputusan yang tercatat, sementara carry-over musik/pit crew tetap tertunda. Tidak ada commit/merge/push 21.4 yang dilakukan.
+Status checkpoint penerimaan: **Fase 21.4 diterima secara fungsional dengan pengecualian native yang disetujui developer**. Gate locked-60/no-warning global tetap terbuka; tidak disamakan dengan sign-off DoD global. Carry-over musik/pit crew tetap tertunda. Pada checkpoint ini integrasi belum dilakukan; hasil integrasi berikutnya tercatat di bagian akhir.
 
 ## Tambahan yang disetujui — Engine Test / Free Rev dengan W
 
@@ -210,10 +210,33 @@ Log smoke: `temp/phase214_engine_test_native.out` dan `.err` (gitignored). Probe
 
 Run capture native tambahan ini kembali mencetak **7 Texture RID** dan **44 ObjectDB instances** pada shutdown, meskipun kembali HQ 0 orphan dan exit 0. Jadi warning 44 objek yang tidak terulang pada beberapa probe investigasi sebelumnya **muncul lagi pada probe capture tambahan ini**; tidak diklaim sudah diperbaiki atau seluruhnya terisolasi. Tidak ada klaim performa locked-60 baru atau persetujuan dengar subjektif.
 
-Keputusan developer sebelumnya tetap dipertahankan: Godot dipin 4.7.2, gate native global terbuka secara eksplisit, tanpa menghapus refleksi/menurunkan kualitas. Fitur W terverifikasi secara fungsional; bukan sign-off DoD global tanpa pengecualian. Perubahan 21.4 beserta tambahan W belum di-commit/merge/push.
+Keputusan developer sebelumnya tetap dipertahankan: Godot dipin 4.7.2, gate native global terbuka secara eksplisit, tanpa menghapus refleksi/menurunkan kualitas. Fitur W terverifikasi secara fungsional; bukan sign-off DoD global tanpa pengecualian. Integrasi Git dilakukan setelah persetujuan developer yang dirinci di bawah.
 
 ## Integrasi Git — persetujuan developer
 
 Developer menyetujui commit → merge → push setelah playtest dinyatakan OK. Target integrasi `main`, basis `c4bacf5`; saat preflight, `main` dan `origin/main` tidak divergen. Commit hanya memuat kode/test/laporan/bukti Fase 21.4 dan Engine Test; Fase 21.3 (`9c043a5`) ikut sebagai ancestor saat merge.
 
 `todo.md` merupakan task board lokal yang sengaja di-ignore oleh `.gitignore:51`, sehingga tidak dipaksa masuk Git. Perubahan lokal `AGENTS.md` dan `.import` lain di luar lingkup fase dipertahankan tanpa ikut di-stage. Gate native yang diterima dengan pengecualian tetap berlaku.
+
+### Hasil merge dan verifikasi
+
+- Commit implementasi Fase 21.4 dan Engine Test: **`328385e`** — `feat(audio): add garage rev and team transitions` (19 file).
+- Merge ke `main`: **fast-forward `c4bacf5` → `328385e`**, tanpa konflik, termasuk commit Fase 21.3 **`9c043a5`**. Tidak melakukan reset, stash, force checkout, atau menghapus perubahan lokal lain.
+- Pemeriksaan tepat sebelum commit: `tools/run_tests.ps1 -Filter engine`, **3/3 suite PASS**.
+- Suite penuh dijalankan **ulang pada `main` setelah merge**, serial di latar depan, maksimal 10 suite per irisan:
+
+| Irisan | Suite | Durasi runner (detik) | Gagal |
+| --- | ---: | ---: | ---: |
+| 0–9 | 10 | 195 | 0 |
+| 10–19 | 10 | 355 | 0 |
+| 20–29 | 10 | 50 | 0 |
+| 30–39 | 10 | 107 | 0 |
+| 40–49 | 10 | 51 | 0 |
+| 50–59 | 10 | 361 | 0 |
+| 60–69 | 10 | 104 | 0 |
+| 70–79 | 10 | 370 | 0 |
+| 80–89 | 10 | 134 | 0 |
+| 90–99 | 10 | 79 | 0 |
+| **Total** | **100** | **1806** | **0** |
+
+Setelah verifikasi ini hanya laporan integrasi yang diperbarui, tanpa perubahan kode runtime/test. Target push adalah `origin/main` (`https://github.com/LyKhan77/La-Voiture.git`); hasil ack push dicatat pada task board lokal setelah perintah Git selesai.
