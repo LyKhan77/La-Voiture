@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/circuits/eifel_forest/eifel_forest_pit_complex.gd" id="1"]
+
+[node name="PitLane" type="Node3D"]
+script = ExtResource("1")

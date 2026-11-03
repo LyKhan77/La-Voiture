@@ -1,0 +1,128 @@
+{
+	"complete_static_triangles": 6675406,
+	"environment_stats": {
+		"boulder_count": 320,
+		"boulder_triangles": 3840,
+		"build_ms": 1557,
+		"built": true,
+		"circuit_id": "eifel_forest",
+		"draw_calls": 69,
+		"environment_triangles": 397596,
+		"grass_count": 796,
+		"grass_triangles": 4776,
+		"helipad": true,
+		"kerb_runs": 14,
+		"landmark_triangles": 15874,
+		"landmarks": [
+			{
+				"anchor": "terrain",
+				"glb": "res://assets/tracks/eifel_forest/models/eifel_nurburg_castle.glb",
+				"id": "eifel_nurburg_castle",
+				"note": "Burg Nurburg castle on the volcanic crag above the T10 RTL-Kurve crest",
+				"offset_m": 120.0,
+				"placed": true,
+				"placed_lateral_m": 120.0,
+				"position": [
+					91.03,
+					49.52,
+					995.6
+				],
+				"s": 2750.0,
+				"side": "L",
+				"triangles": 1254
+			},
+			{
+				"anchor": "ground",
+				"glb": "res://assets/tracks/eifel_forest/models/eifel_mercedes_arena_amphitheater.glb",
+				"id": "eifel_mercedes_arena_amphitheater",
+				"note": "curved cantilever-canopy Mercedes-Arena grandstand around T2-T4",
+				"offset_m": 35.0,
+				"placed": true,
+				"placed_lateral_m": 35.0,
+				"position": [
+					840.9,
+					11.86,
+					61.79
+				],
+				"s": 850.0,
+				"side": "L",
+				"triangles": 10588
+			},
+			{
+				"anchor": "deck",
+				"glb": "res://assets/tracks/eifel_forest/models/eifel_warsteiner_flyover_bridge.glb",
+				"id": "eifel_warsteiner_flyover_bridge",
+				"note": "spec anchor L offset 0 m; the suspension deck spans the Fordkurve descent, piers outside the asphalt",
+				"offset_m": 0.0,
+				"placed": true,
+				"placed_lateral_m": 0.0,
+				"position": [
+					865.45,
+					7.88,
+					567.51
+				],
+				"s": 1580.0,
+				"side": "L",
+				"triangles": 2820
+			},
+			{
+				"anchor": "terrain",
+				"glb": "res://assets/tracks/eifel_forest/models/eifel_historic_paddock_archway.glb",
+				"id": "eifel_historic_paddock_archway",
+				"note": "1927 red-brick paddock gateway to the old Nordschleife, right of the main straight",
+				"offset_m": 45.0,
+				"placed": true,
+				"placed_lateral_m": 45.0,
+				"position": [
+					350.0,
+					14.01,
+					45.0
+				],
+				"s": 350.0,
+				"side": "R",
+				"triangles": 1212
+			}
+		],
+		"landmarks_placed": 4,
+		"multimeshes": 13,
+		"paddock_boards": 8,
+		"paddock_generators": 4,
+		"paddock_motorhomes": 8,
+		"paddock_parking_cars": 25,
+		"paddock_people": 120,
+		"paddock_pines": 9,
+		"paddock_tents": 6,
+		"paddock_transporters": 10,
+		"paddock_umbrellas": 12,
+		"paddock_vehicles": 6,
+		"pine_count": 1080,
+		"roadbed_drop_m": 0.16,
+		"shrub_count": 548,
+		"shrub_triangles": 16440,
+		"spruce_count": 720,
+		"terrain_max_y": 57.04,
+		"terrain_min_y": -1.48,
+		"terrain_triangles": 78622,
+		"tree_count": 1800,
+		"tree_triangles": 97200,
+		"triangle_budget": 430000,
+		"triangles": 424808,
+		"valley_mist": {
+			"centre": [
+				755.7,
+				803.3
+			],
+			"floor_y": 1.23,
+			"size": [
+				320.0,
+				26.0,
+				320.0
+			]
+		}
+	},
+	"failures": 0,
+	"fps": 16.0,
+	"orphans": 0.0,
+	"set": "pit",
+	"tod": 0
+}
