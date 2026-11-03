@@ -88,7 +88,7 @@ static func neighbour(circuit_id: String, step: int) -> CircuitDataScript:
 static func _ensure_built() -> void:
 	if not _circuits.is_empty():
 		return
-	var preview_root: String = "res://reference-assets/tracks/%s/concept_key_visual.png"
+	var preview_root: String = "res://assets/ui/circuit_posters/%s.png"
 	for row: Array in TABLE:
 		var circuit := CircuitDataScript.new()
 		circuit.circuit_id = String(row[0])

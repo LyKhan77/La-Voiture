@@ -32,7 +32,7 @@ func _run() -> void:
 	check(Registry.get_circuit("pacific_corkscrew").scene_path == SCENE, "Calendar round 7 loads the production module")
 	check(Registry.get_circuit("pacific_corkscrew").turns_count == 11 and Registry.get_circuit("pacific_corkscrew").length_km == 4.1, "Calendar identity stays 4.10 km / 11 turns")
 	var preview := load(Registry.get_circuit("pacific_corkscrew").preview_image_path) as Texture2D
-	check(preview != null and preview.get_width() == 1920, "Race setup loads the native 1920px Pacific preview image")
+	check(preview != null and preview.get_size() == Vector2(640, 360), "Race setup loads the optimized 640x360 Pacific poster")
 	var layout: Dictionary = pit.sim_layout()
 	check(layout.stall_pitch_m == 20.0 and layout.queue_gap_m == 8.0, "Production pit uses the Fase 0 20 m pitch and 8 m queue gap")
 	check(layout.stall_lane_m > layout.fast_lane_m and layout.fast_lane_m > 6.5, "Service boxes stand beyond the fast lane and racing road")

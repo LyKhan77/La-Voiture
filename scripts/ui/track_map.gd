@@ -1,12 +1,12 @@
 class_name TrackMapView
 extends Control
 
-## The circuit map of the race setup screen, traced live from the round's own scene instead of a
+## The circuit map of the race setup screen, baked offline from the round's own scene instead of a
 ## hand-drawn picture: the real length, the real corners numbered from curvature, three sector
 ## colours and the real elevation profile. It follows whichever round the Track Selector picks —
 ## Apex Ring, Neo-Wangan, or a calendar round whose layout is not built yet (then it says so).
 
-const CircuitScene := preload("res://scenes/race_world/circuits/apex_ring/apex_circuit.tscn")
+const MAP_DATA := preload("res://assets/ui/circuit_maps/previews.res")
 const CircuitDataScript := preload("res://scripts/core/circuit_data.gd")
 const DEFAULT_SCENE_PATH := "res://scenes/race_world/circuits/apex_ring/apex_circuit.tscn"
 const T := preload("res://scripts/ui/ui_theme_tokens.gd")
@@ -80,6 +80,21 @@ func load_circuit(circuit: CircuitDataScript) -> void:
 
 
 func _load_track() -> void:
+	var data: Dictionary = MAP_DATA.get_meta("circuits", {}).get(scene_path, {})
+	length_m = float(data.get("length_m", 0.0))
+	min_elevation = float(data.get("min_elevation", 0.0))
+	max_elevation = float(data.get("max_elevation", 0.0))
+	_total_turn = float(data.get("total_turn", 0.0))
+	turns.assign(data.get("turns", []))
+	official_turns.assign(data.get("official_turns", []))
+	drs_zones.assign(data.get("drs_zones", []))
+	_raw = data.get("raw", PackedVector2Array())
+	_elevation = data.get("elevation", PackedFloat32Array())
+	queue_redraw()
+
+
+## Offline only: tools/bake_circuit_map_previews.gd rebuilds this data when a layout changes.
+func bake_track() -> Dictionary:
 	length_m = 0.0
 	min_elevation = 0.0
 	max_elevation = 0.0
@@ -90,8 +105,7 @@ func _load_track() -> void:
 	_raw = PackedVector2Array()
 	_elevation = PackedFloat32Array()
 	if scene_path == "" or not ResourceLoader.exists(scene_path):
-		queue_redraw()
-		return
+		return {}
 	var node: Node = (load(scene_path) as PackedScene).instantiate()
 	var ribbon := node as TrackRibbonScript
 	add_child(node) # the ribbon builds its sample table when it enters the tree
@@ -100,8 +114,7 @@ func _load_track() -> void:
 	if ribbon == null:
 		remove_child(node)
 		node.free()
-		queue_redraw()
-		return
+		return {}
 	var curve: Curve3D = ribbon.curve.duplicate() as Curve3D
 	drs_zones = GtTrack.new(ribbon).drs_zones
 	# A circuit that ships its own numbered turn list (Neo-Wangan) is drawn from that list, so the
@@ -114,7 +127,7 @@ func _load_track() -> void:
 	remove_child(node)
 	node.free()
 	if curve == null:
-		return
+		return {}
 	curve.bake_interval = SAMPLE_STEP_M
 	length_m = curve.get_baked_length()
 	var count: int = maxi(24, ceili(length_m / SAMPLE_STEP_M))
@@ -132,7 +145,12 @@ func _load_track() -> void:
 	_detect_corners()
 	if not official_turns.is_empty():
 		turns = official_turns.duplicate()
-	queue_redraw()
+	return {
+		"length_m": length_m, "min_elevation": min_elevation, "max_elevation": max_elevation,
+		"total_turn": _total_turn, "turns": turns.duplicate(true),
+		"official_turns": official_turns.duplicate(true), "drs_zones": drs_zones.duplicate(true),
+		"raw": _raw, "elevation": _elevation,
+	}
 
 
 ## Corners from the heading change along the baked line: contiguous turning stretches whose

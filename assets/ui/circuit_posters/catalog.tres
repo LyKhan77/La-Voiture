@@ -1,0 +1,26 @@
+[gd_resource type="Resource" load_steps=11 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/ui/circuit_posters/apex_ring.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/ui/circuit_posters/neo_wangan.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/ui/circuit_posters/brianza.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/ui/circuit_posters/monte_azure.png" id="4"]
+[ext_resource type="Texture2D" path="res://assets/ui/circuit_posters/ardennes.png" id="5"]
+[ext_resource type="Texture2D" path="res://assets/ui/circuit_posters/stoke_crown.png" id="6"]
+[ext_resource type="Texture2D" path="res://assets/ui/circuit_posters/pacific_corkscrew.png" id="7"]
+[ext_resource type="Texture2D" path="res://assets/ui/circuit_posters/eifel_forest.png" id="8"]
+[ext_resource type="Texture2D" path="res://assets/ui/circuit_posters/paulistano.png" id="9"]
+[ext_resource type="Texture2D" path="res://assets/ui/circuit_posters/kurogane.png" id="10"]
+
+[resource]
+metadata/posters = {
+"res://assets/ui/circuit_posters/apex_ring.png": ExtResource("1"),
+"res://assets/ui/circuit_posters/neo_wangan.png": ExtResource("2"),
+"res://assets/ui/circuit_posters/brianza.png": ExtResource("3"),
+"res://assets/ui/circuit_posters/monte_azure.png": ExtResource("4"),
+"res://assets/ui/circuit_posters/ardennes.png": ExtResource("5"),
+"res://assets/ui/circuit_posters/stoke_crown.png": ExtResource("6"),
+"res://assets/ui/circuit_posters/pacific_corkscrew.png": ExtResource("7"),
+"res://assets/ui/circuit_posters/eifel_forest.png": ExtResource("8"),
+"res://assets/ui/circuit_posters/paulistano.png": ExtResource("9"),
+"res://assets/ui/circuit_posters/kurogane.png": ExtResource("10")
+}

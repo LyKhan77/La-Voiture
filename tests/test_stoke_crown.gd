@@ -28,7 +28,7 @@ func _run() -> void:
 	check(circuit.turns.size() == 18, "All 18 named turns exposed")
 	check(Registry.get_circuit("stoke_crown").scene_path == SCENE, "Calendar round 6 loads production module")
 	var preview := load(Registry.get_circuit("stoke_crown").preview_image_path) as Texture2D
-	check(preview != null and preview.get_width() == 1920, "Race setup loads the native1920px Stoke Crown preview image")
+	check(preview != null and preview.get_size() == Vector2(640, 360), "Race setup loads the optimized 640x360 Stoke Crown poster")
 	var layout: Dictionary = pit.sim_layout()
 	check(layout.stall_pitch_m == 20.0 and layout.queue_gap_m == 8.0, "Production pit uses 20 m pitch and 8 m queue gap")
 	check(layout.stall_lane_m > layout.fast_lane_m and layout.fast_lane_m > 7.0, "Service boxes stand beyond fast lane and racing road")

@@ -1,0 +1,126 @@
+{
+  "created": "2026-11-03",
+  "notes": "Generated environment artwork, not an exact circuit layout. Previous reference assets preserved.",
+  "posters": [
+    {
+      "circuit_id": "apex_ring",
+      "generator": "Codex built-in image_gen",
+      "backend_model": "not exposed",
+      "prompt": "Create one finished landscape 16:9 environment illustration for a small racing circuit selection poster in the game La Voiture. Cohesive premium motorsport anime travel-poster art: decisive black manga contour ink, cel shaded flat shadow shapes, subtly printed halftone sky and shadows, tasteful screenprint grain, sophisticated restrained palette, vivid clean lighting, broad readable graphic shapes, detailed environment without clutter. View from a gently elevated trackside camera: asphalt sweeping from foreground into a distinctive circuit landmark and landscape. Circuit architecture and terrain are the subject. Empty venue: no cars, no people, no drivers, no text, no typography, no logos, no watermark, no panel borders. Fill the entire image edge to edge. Composition must remain immediately legible at 300x166 pixels. Not a screenshot, not photorealism, not a track layout diagram. Japanese international circuit inspired by Fuji and Motegi, immense main straight leading toward green foothills and a distant iconic blue volcanic mountain, modern low paddock, red white kerbs, pale mist lifting in bright morning sunlight, teal blue with warm cream and lime green.",
+      "source_image": "sources/apex_ring.png",
+      "runtime_image": "apex_ring.png",
+      "runtime_size": [
+        640,
+        360
+      ]
+    },
+    {
+      "circuit_id": "neo_wangan",
+      "generator": "Codex built-in image_gen",
+      "backend_model": "not exposed",
+      "prompt": "Create one finished landscape 16:9 environment illustration for a small racing circuit selection poster in the game La Voiture. Cohesive premium motorsport anime travel-poster art: decisive black manga contour ink, cel shaded flat shadow shapes, subtly printed halftone sky and shadows, tasteful screenprint grain, sophisticated restrained palette, vivid clean lighting, broad readable graphic shapes, detailed environment without clutter. View from a gently elevated trackside camera: asphalt sweeping from foreground into a distinctive circuit landmark and landscape. Circuit architecture and terrain are the subject. Empty venue: no cars, no people, no drivers, no text, no typography, no logos, no watermark, no panel borders. Fill the entire image edge to edge. Composition must remain immediately legible at 300x166 pixels. Not a screenshot, not photorealism, not a track layout diagram. Japanese neon harbor expressway street circuit at blue hour night inspired by Tokyo Shuto, a smooth elevated sweeping asphalt bend and layered steel highway flyovers, modern dense skyline and blue bay visible between buildings, warm streetlamps and restrained cyan magenta light reflections on wet asphalt, circuit barriers with simple colored panels without writing. Stylized skyline silhouette and road remain readable in small thumbnail.",
+      "source_image": "sources/neo_wangan.png",
+      "runtime_image": "neo_wangan.png",
+      "runtime_size": [
+        640,
+        360
+      ]
+    },
+    {
+      "circuit_id": "brianza",
+      "generator": "Codex built-in image_gen",
+      "backend_model": "not exposed",
+      "prompt": "Create one finished landscape 16:9 environment illustration for a small racing circuit selection poster in the game La Voiture. Cohesive premium motorsport anime travel-poster art: decisive black manga contour ink, cel shaded flat shadow shapes, subtly printed halftone sky and shadows, tasteful screenprint grain, sophisticated restrained palette, vivid clean lighting, broad readable graphic shapes, detailed environment without clutter. View from a gently elevated trackside camera: asphalt sweeping from foreground into a distinctive circuit landmark and landscape. Circuit architecture and terrain are the subject. Empty venue: no cars, no people, no drivers, no text, no typography, no logos, no watermark, no panel borders. Fill the entire image edge to edge. Composition must remain immediately legible at 300x166 pixels. Not a screenshot, not photorealism, not a track layout diagram. Italian high-speed forest Grand Prix circuit inspired by Monza, an elegant fast asphalt bend with red white green kerbs, distinctive old steeply banked concrete oval structure arching over the distant circuit, tall umbrella pines and lush broadleaf parkland, simple historic low grandstands, warm Mediterranean late morning light, pine green terracotta and cream.",
+      "source_image": "sources/brianza.png",
+      "runtime_image": "brianza.png",
+      "runtime_size": [
+        640,
+        360
+      ]
+    },
+    {
+      "circuit_id": "monte_azure",
+      "generator": "Codex built-in image_gen",
+      "backend_model": "not exposed",
+      "prompt": "Create one finished landscape 16:9 environment illustration for a small racing circuit selection poster in the game La Voiture. Cohesive premium motorsport anime travel-poster art: decisive black manga contour ink, cel shaded flat shadow shapes, subtly printed halftone sky and shadows, tasteful screenprint grain, sophisticated restrained palette, vivid clean lighting, broad readable graphic shapes, detailed environment without clutter. View from a gently elevated trackside camera: asphalt sweeping from foreground into a distinctive circuit landmark and landscape. Circuit architecture and terrain are the subject. Empty venue: no cars, no people, no drivers, no text, no typography, no logos, no watermark, no panel borders. Fill the entire image edge to edge. Composition must remain immediately legible at 300x166 pixels. Not a screenshot, not photorealism, not a track layout diagram. Mediterranean glamorous harbor street racing circuit inspired by Monaco and Macau, a tight asphalt bend with red white kerbs and close safety barriers along turquoise yacht marina, white yachts moored safely beyond the circuit, stacked pastel peach cream city buildings climbing a steep rocky hill and a coastal tunnel portal, luminous warm Riviera sun, turquoise coral and ivory. No vehicles on the roadway.",
+      "source_image": "sources/monte_azure.png",
+      "runtime_image": "monte_azure.png",
+      "runtime_size": [
+        640,
+        360
+      ]
+    },
+    {
+      "circuit_id": "ardennes",
+      "generator": "Codex built-in image_gen",
+      "backend_model": "not exposed",
+      "prompt": "Create one finished landscape 16:9 environment illustration for a small racing circuit selection poster in the game La Voiture. Cohesive premium motorsport anime travel-poster art: decisive black manga contour ink, cel shaded flat shadow shapes, subtly printed halftone sky and shadows, tasteful screenprint grain, sophisticated restrained palette, vivid clean lighting, broad readable graphic shapes, detailed environment without clutter. View from a gently elevated trackside camera: asphalt sweeping from foreground into a distinctive circuit landmark and landscape. Circuit architecture and terrain are the subject. Empty venue: no cars, no people, no drivers, no text, no typography, no logos, no watermark, no panel borders. Fill the entire image edge to edge. Composition must remain immediately legible at 300x166 pixels. Not a screenshot, not photorealism, not a track layout diagram. Belgian Ardennes forest Grand Prix circuit inspired by Spa, dramatic Eau Rouge-like dip then steep uphill S sweep, asphalt climbs between thick dark fir forest, green and red yellow kerbs, a small distant paddock building at ridge, layered misty hills beneath luminous overcast cloud, cool forest green and blue with warm cream highlights.",
+      "source_image": "sources/ardennes.png",
+      "runtime_image": "ardennes.png",
+      "runtime_size": [
+        640,
+        360
+      ]
+    },
+    {
+      "circuit_id": "stoke_crown",
+      "generator": "Codex built-in image_gen",
+      "backend_model": "not exposed",
+      "prompt": "Create one finished landscape 16:9 environment illustration for a small racing circuit selection poster in the game La Voiture. Cohesive premium motorsport anime travel-poster art: decisive black manga contour ink, cel shaded flat shadow shapes, subtly printed halftone sky and shadows, tasteful screenprint grain, sophisticated restrained palette, vivid clean lighting, broad readable graphic shapes, detailed environment without clutter. View from a gently elevated trackside camera: asphalt sweeping from foreground into a distinctive circuit landmark and landscape. Circuit architecture and terrain are the subject. Empty venue: no cars, no people, no drivers, no text, no typography, no logos, no watermark, no panel borders. Fill the entire image edge to edge. Composition must remain immediately legible at 300x166 pixels. Not a screenshot, not photorealism, not a track layout diagram. English airfield Grand Prix circuit inspired by Silverstone, fast linked sweeping S curves, flat open grasslands, a striking angular silver wing-shaped pit building in the mid-distance, low grandstands, red white kerbs, dramatic broken clouds with luminous cool daylight, sage green teal and ivory.",
+      "source_image": "sources/stoke_crown.png",
+      "runtime_image": "stoke_crown.png",
+      "runtime_size": [
+        640,
+        360
+      ]
+    },
+    {
+      "circuit_id": "pacific_corkscrew",
+      "generator": "Codex built-in image_gen",
+      "backend_model": "not exposed",
+      "prompt": "Create one finished landscape 16:9 environment illustration for a small racing circuit selection poster in the game La Voiture. Cohesive premium motorsport anime travel-poster art: decisive black manga contour ink, cel shaded flat shadow shapes, subtly printed halftone sky and shadows, tasteful screenprint grain, sophisticated restrained palette, vivid clean lighting, broad readable graphic shapes, detailed environment without clutter. View from a gently elevated trackside camera: asphalt sweeping from foreground into a distinctive circuit landmark and landscape. Circuit architecture and terrain are the subject. Empty venue: no cars, no people, no drivers, no text, no typography, no logos, no watermark, no panel borders. Fill the entire image edge to edge. Composition must remain immediately legible at 300x166 pixels. Not a screenshot, not photorealism, not a track layout diagram. Californian coastal hill racing circuit inspired by Laguna Seca, dramatic blind descending corkscrew S bend seen from slightly elevated trackside, dusty ochre rolling hills and sparse sculptural oak trees, blue white kerbs, distant hazy blue coastline and mountains, crisp dry afternoon sun, ochre terracotta and cyan.",
+      "source_image": "sources/pacific_corkscrew.png",
+      "runtime_image": "pacific_corkscrew.png",
+      "runtime_size": [
+        640,
+        360
+      ]
+    },
+    {
+      "circuit_id": "eifel_forest",
+      "generator": "Codex built-in image_gen",
+      "backend_model": "not exposed",
+      "prompt": "Create one finished landscape 16:9 environment illustration for a small racing circuit selection poster in the game La Voiture. Cohesive premium motorsport anime travel-poster art: decisive black manga contour ink, cel shaded flat shadow shapes, subtly printed halftone sky and shadows, tasteful screenprint grain, sophisticated restrained palette, vivid clean lighting, broad readable graphic shapes, detailed environment without clutter. View from a gently elevated trackside camera: asphalt sweeping from foreground into a distinctive circuit landmark and landscape. Circuit architecture and terrain are the subject. Empty venue: no cars, no people, no drivers, no text, no typography, no logos, no watermark, no panel borders. Fill the entire image edge to edge. Composition must remain immediately legible at 300x166 pixels. Not a screenshot, not photorealism, not a track layout diagram. German Eifel forest Grand Prix circuit inspired by Nurburgring GP, a technical broad S bend on rolling grassy hills enclosed by dense spruce forest, restrained angular grey pit buildings and a modest distant medieval hilltop castle silhouette, red white kerbs, soft drifting morning mist, cold teal pine green pale yellow sunlight.",
+      "source_image": "sources/eifel_forest.png",
+      "runtime_image": "eifel_forest.png",
+      "runtime_size": [
+        640,
+        360
+      ]
+    },
+    {
+      "circuit_id": "paulistano",
+      "generator": "Codex built-in image_gen",
+      "backend_model": "not exposed",
+      "prompt": "Create one finished landscape 16:9 environment illustration for a small racing circuit selection poster in the game La Voiture. Cohesive premium motorsport anime travel-poster art: decisive black manga contour ink, cel shaded flat shadow shapes, subtly printed halftone sky and shadows, tasteful screenprint grain, sophisticated restrained palette, vivid clean lighting, broad readable graphic shapes, detailed environment without clutter. View from a gently elevated trackside camera: asphalt sweeping from foreground into a distinctive circuit landmark and landscape. Circuit architecture and terrain are the subject. Empty venue: no cars, no people, no drivers, no text, no typography, no logos, no watermark, no panel borders. Fill the entire image edge to edge. Composition must remain immediately legible at 300x166 pixels. Not a screenshot, not photorealism, not a track layout diagram. Brazilian Sao Paulo Grand Prix circuit inspired by Interlagos, descending Senna S bend opening toward an undulating bowl-shaped circuit, vibrant emerald grassy banks and blue white kerbs, distant dense city skyline with a few apartment towers, warm humid late-afternoon sunlight after rain, golden coral sky and deep green infield.",
+      "source_image": "sources/paulistano.png",
+      "runtime_image": "paulistano.png",
+      "runtime_size": [
+        640,
+        360
+      ]
+    },
+    {
+      "circuit_id": "kurogane",
+      "generator": "Codex built-in image_gen",
+      "backend_model": "not exposed",
+      "prompt": "Create one finished landscape 16:9 environment illustration for a small racing circuit selection poster in the game La Voiture. Cohesive premium motorsport anime travel-poster art: decisive black manga contour ink, cel shaded flat shadow shapes, subtly printed halftone sky and shadows, tasteful screenprint grain, sophisticated restrained palette, vivid clean lighting, broad readable graphic shapes, detailed environment without clutter. View from a gently elevated trackside camera: asphalt sweeping from foreground into a distinctive circuit landmark and landscape. Circuit architecture and terrain are the subject. Empty venue: no cars, no people, no drivers, no text, no typography, no logos, no watermark, no panel borders. Fill the entire image edge to edge. Composition must remain immediately legible at 300x166 pixels. Not a screenshot, not photorealism, not a track layout diagram. Japanese Grand Prix circuit inspired by Suzuka, flowing rhythmic Esses in the foreground and a clear figure-eight circuit crossover bridge in middle distance, iconic tall red-white amusement ferris wheel beyond grandstands, green wooded hills, red white kerbs, bright cream clouds and rich indigo sky, vermilion red teal and fresh grass green.",
+      "source_image": "sources/kurogane.png",
+      "runtime_image": "kurogane.png",
+      "runtime_size": [
+        640,
+        360
+      ]
+    }
+  ]
+}

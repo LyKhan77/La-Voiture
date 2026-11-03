@@ -2,7 +2,7 @@ class_name RaceSetupMenu
 extends Control
 
 ## Exhibition configuration (spec §2.3), Concept 01 "hero map" layout: the selected round's own
-## circuit map fills the left of the screen (traced live from that circuit's spline, with sectors,
+## circuit map fills the left of the screen (baked from that circuit's spline, with sectors,
 ## the real DRS zones and numbered corners) beside the venue artwork and the track's demand bars. One
 ## carousel under the map walks the 12-round championship calendar (arrows, or click a round), and
 ## laps / weather / time / race dynamics are skewed chips on the right. Sprint rounds lock the race to
@@ -17,6 +17,7 @@ const ConfigData := preload("res://scripts/core/race_config_data.gd")
 const CircuitDataScript := preload("res://scripts/core/circuit_data.gd")
 const CircuitRegistry := preload("res://scripts/core/circuit_calendar_registry.gd")
 const MapView := preload("res://scripts/ui/track_map.gd")
+const POSTER_CATALOG := preload("res://assets/ui/circuit_posters/catalog.tres")
 const SettingsScript := preload("res://scripts/core/presentation_settings.gd")
 const StreetStyle := preload("res://scripts/ui/street_style.gd")
 const ChipRow := preload("res://scripts/ui/chip_row.gd")
@@ -99,7 +100,7 @@ var demand_bars: Array[ProgressBar] = []
 var lap_rule_badge: Label
 var meteo_strip: Control
 
-var _art_cache: Dictionary = {} # preview path -> Texture2D, so paging the calendar never reloads a file
+var _art_cache: Dictionary = POSTER_CATALOG.get_meta("posters") # Small imported textures prepared with the menu.
 
 
 func _ready() -> void:
@@ -572,28 +573,7 @@ func _show_venue(selected: CircuitDataScript) -> void:
 
 
 func _preview_texture(selected: CircuitDataScript) -> Texture2D:
-	var path: String = selected.preview_image_path
-	if path == "" or not FileAccess.file_exists(path):
-		return null
-	if not _art_cache.has(path):
-		_art_cache[path] = _decode_image(path)
-	return _art_cache[path]
-
-
-## Decodes venue artwork from the file's own bytes. The reference concept art is JPEG data saved with a
-## .png name, which Godot's importer rejects (valid=false), so ResourceLoader cannot be trusted here.
-## A round with no readable art simply shows the fallback plate.
-static func _decode_image(path: String) -> Texture2D:
-	var bytes: PackedByteArray = FileAccess.get_file_as_bytes(path)
-	var image := Image.new()
-	var error: Error = ERR_FILE_UNRECOGNIZED
-	if bytes.size() > 4 and bytes[0] == 0xFF and bytes[1] == 0xD8:
-		error = image.load_jpg_from_buffer(bytes)
-	elif bytes.size() > 4 and bytes[0] == 0x89 and bytes[1] == 0x50:
-		error = image.load_png_from_buffer(bytes)
-	if error != OK:
-		return null
-	return ImageTexture.create_from_image(image)
+	return _art_cache.get(selected.preview_image_path)
 
 
 ## What a round asks of a car, each 0..1, in DEMAND_NAMES order, from its length, corner density and
