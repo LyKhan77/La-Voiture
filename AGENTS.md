@@ -221,6 +221,12 @@ Sebelum suatu tugas atau fase dinyatakan **SELESAI**, agen wajib memenuhi seluru
 * Simpan skrip probe sementara, GLB precut, atau tangkapan layar uji coba ke dalam folder `temp/`.
 * Gunakan GPU instancing (`MultiMeshInstance3D`) untuk objek 3D yang berulang lebih dari 3 kali.
 * Pastikan file `.gdignore` selalu ada pada folder non-game (`executor-report/`, `temp/`, `meshy_output/`, `docs/`, `design/`).
+* **Saring uncommitted changes sebelum commit.** Jalankan `git status -s` dan `git diff --ignore-cr-at-eol --stat`, lalu stage file **per path** (dilarang `git add -A` / `git add .`). Yang boleh di-commit: kode, scene, shader, aset runtime, test, serta laporan & screenshot DoD di `executor-report/`. Yang tidak di-commit:
+  - File yang berubah hanya karena line ending atau re-import Godot (`git diff --ignore-cr-at-eol` kosong). Pulihkan dengan `git checkout -- <file>` hanya bila diff-nya memang kosong.
+  - Probe sementara, render uji, backup, dan log: simpan di `temp/`, bukan di `scratch/` atau root repo.
+  - File `.uid` atau `.import` yang tidak terkait tugas yang sedang dikerjakan.
+  - Cache `.godot/`, kredensial `.meshy_ai/`, dan crash dump `*.stackdump`.
+  Sebutkan file yang sengaja tidak di-commit dalam laporan akhir ke developer.
 
 ### ASK FIRST:
 * Mengubah koordinat titik kontrol atau handle tangent pada `Curve3D` di `scenes/race_world/circuits/apex_ring/apex_circuit.tscn`.
