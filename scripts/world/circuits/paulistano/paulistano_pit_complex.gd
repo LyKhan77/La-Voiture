@@ -197,7 +197,11 @@ func _on_teams_assigned() -> void:
 		crew.mesh = crew_batch.commit()
 		crew.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		# Box paint carries the seven-segment number: turned frame, so it reads from the lane.
-		PitKit.paint_box(paint, material, stalls[i], Layout.side_frame(ribbon, float(stalls[i].s), SIDE, BOX_LATERAL_M), BOX_LATERAL_M, stall_markings)
+		# The apron pavement is flat at centreline grade + PIT_APRON_LIFT_M; the kit paints 3.5 cm over the frame it
+		# is given, and the side frame follows the road's cross-fall (under the pavement), so rest it on the apron.
+		var box_frame := Layout.side_frame(ribbon, float(stalls[i].s), SIDE, BOX_LATERAL_M)
+		box_frame.origin.y = ribbon.get_point_at_offset(float(stalls[i].s), 0.0).origin.y + Layout.PIT_APRON_LIFT_M
+		PitKit.paint_box(paint, material, stalls[i], box_frame, BOX_LATERAL_M, stall_markings)
 		plates.append(Signage.add_plate(signs, material, team, Signage.fascia_pose(garage.transform, -0.2, 6.2), 15.5, Liveries.color_for(team)))
 	var ids: Array[int] = building_team_order()
 	pit_building.apply_teams(ids)

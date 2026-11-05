@@ -99,6 +99,29 @@ func _run() -> void:
 	var original: Array[int] = []
 	original.assign(range(10))
 	pit.seat_teams(ribbon, original)
+	# The painted boxes lie on the apron pavement (not under it): measured against the apron mesh itself.
+	var paint := pit.get_node_or_null("PitBoxPaint") as MeshInstance3D
+	var apron := pit.get_node_or_null("PitApron") as MeshInstance3D
+	var painted: int = 0
+	var buried_paint: int = 0
+	if paint != null and paint.mesh != null and apron != null:
+		var paint_verts: PackedVector3Array = paint.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+		var apron_verts: PackedVector3Array = apron.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+		for stall: Dictionary in pit.stalls:
+			var origin: Vector3 = Transform3D(stall.pose).origin
+			var top: float = -INF
+			var floor_y: float = -INF
+			for vertex: Vector3 in paint_verts:
+				var world: Vector3 = paint.global_transform * vertex
+				if Vector2(world.x - origin.x, world.z - origin.z).length() < 4.0:
+					top = maxf(top, world.y)
+			for vertex: Vector3 in apron_verts:
+				var world: Vector3 = apron.global_transform * vertex
+				if Vector2(world.x - origin.x, world.z - origin.z).length() < 4.0:
+					floor_y = maxf(floor_y, world.y)
+			painted += 1 if top > -INF else 0
+			buried_paint += 1 if top < floor_y + 0.03 else 0
+	check(painted == 10 and buried_paint == 0, "Every team's painted box lies above the apron pavement (%d of 10 painted, %d buried)" % [painted, buried_paint])
 	var gantry = circuit.find_child("StartGantry", true, false)
 	var gantry_ok: bool = gantry != null and gantry.pit_side < 0.0 and gantry.lamps.size() == 10
 	if gantry_ok:
