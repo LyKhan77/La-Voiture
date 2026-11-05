@@ -165,8 +165,17 @@ func _test_reserved_rounds_and_wrap() -> void:
 		and absf(float(radar.stats()["length_m"]) - 4313.0) <= 50.0 and radar.circuit_id == "paulistano" \
 		and not continue_button.disabled
 	check(paulistano_ok, "#S4g Round 09 Paulistano Speed Arena is playable with its own 4.31km map and Continue enabled")
+	# Round 10, Kurogane Twin-Cross, is now playable with its own homologated figure-8 map.
+	_press("TrackNextButton")
+	await process_frame
+	var kurogane_ok: bool = _label("CircuitNameLabel") == "Kurogane Twin-Cross" \
+		and _label("CircuitTypeLabel") == "GRAND PRIX" \
+		and absf(float(radar.stats()["length_m"]) - 5801.0) <= 50.0 and radar.circuit_id == "kurogane" \
+		and not continue_button.disabled
+	check(kurogane_ok, "#S4h Round 10 Kurogane Twin-Cross is playable with its own 5.80km map and Continue enabled")
 
 	# Return to Apex Ring
+	_press("TrackPrevButton")
 	_press("TrackPrevButton")
 	_press("TrackPrevButton")
 	_press("TrackPrevButton")

@@ -13,6 +13,7 @@ const SCENES := {
 	"Monte Azure": "res://scenes/race_world/circuits/monte_azure/monte_azure_circuit.tscn",
 	"Eifel Forest": "res://scenes/race_world/circuits/eifel_forest/eifel_forest_circuit.tscn",
 	"Paulistano": "res://scenes/race_world/circuits/paulistano/paulistano_circuit.tscn",
+	"Kurogane": "res://scenes/race_world/circuits/kurogane/kurogane_circuit.tscn",
 }
 const TEAM_COUNT: int = 10
 ## Past the first and last box centre: the building tails (a few metres of Brianza's runs onto the lap-closure bend) are not the box row.

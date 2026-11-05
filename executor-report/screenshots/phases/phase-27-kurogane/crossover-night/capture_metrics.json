@@ -1,0 +1,175 @@
+{
+	"complete_static_triangles": 6589396,
+	"environment_stats": {
+		"armco_pruned": 31,
+		"bridge_span": [
+			3888.0,
+			3957.0
+		],
+		"build_ms": 1178,
+		"built": true,
+		"catch_fence_panels": 422,
+		"circuit_id": "kurogane",
+		"draw_calls": 65,
+		"environment_triangles": 313322,
+		"kerb_runs": 19,
+		"landmark_triangles": 5232,
+		"landmarks": [
+			{
+				"anchor": "Back Straight deck over the Degner trench",
+				"glb": "res://assets/tracks/kurogane/models/kurogane_crossover_truss_bridge.glb",
+				"id": "kurogane_crossover_truss_bridge",
+				"offset_m": 0.0,
+				"placed": true,
+				"position": [
+					-262.54,
+					37.84,
+					723.13
+				],
+				"s": 3922.5,
+				"side": "R",
+				"span_m": 69.0,
+				"triangles": 1032
+			},
+			{
+				"anchor": "high ground east of the Esses",
+				"glb": "res://assets/tracks/kurogane/models/kurogane_giant_ferris_wheel.glb",
+				"id": "kurogane_giant_ferris_wheel",
+				"offset_m": 175.0,
+				"placed": true,
+				"position": [
+					952.08,
+					16.76,
+					817.56
+				],
+				"s": 1480.0,
+				"side": "L",
+				"triangles": 3000
+			},
+			{
+				"anchor": "Casio Triangle chicane apex (T17/T18, s 4764-4898)",
+				"glb": "res://assets/tracks/kurogane/models/kurogane_grand_reverse_tower.glb",
+				"id": "kurogane_grand_reverse_tower",
+				"offset_m": 62.0,
+				"placed": true,
+				"position": [
+					149.81,
+					14.24,
+					237.49
+				],
+				"s": 4830.0,
+				"side": "L",
+				"triangles": 372
+			},
+			{
+				"anchor": "Spoon summit terrace, +40 m",
+				"glb": "res://assets/tracks/kurogane/models/kurogane_suzuka_ridge_shrine.glb",
+				"id": "kurogane_suzuka_ridge_shrine",
+				"offset_m": 120.0,
+				"placed": true,
+				"position": [
+					-419.94,
+					39.84,
+					655.1
+				],
+				"s": 3800.0,
+				"side": "L",
+				"triangles": 828
+			}
+		],
+		"landmarks_placed": 4,
+		"momiji_count": 1500,
+		"multimeshes": 15,
+		"pine_count": 950,
+		"roadbed_drop_m": 0.16,
+		"rock_count": 120,
+		"terrain_lowered_cells": 4,
+		"terrain_max_y": 75.55,
+		"terrain_min_y": -3.34,
+		"terrain_triangles": 42896,
+		"towers_pruned": 0,
+		"tree_count": 2450,
+		"triangle_budget": 320000,
+		"triangles": 313440,
+		"verge_tufts": 900
+	},
+	"failures": 0,
+	"fps": 32.0,
+	"orphans": 0.0,
+	"set": "crossover",
+	"shots": {
+		"Abutment_End-night": {
+			"draw_calls": 105,
+			"environment_draw_calls": 100,
+			"environment_primitives": 315146,
+			"primitives": 373186
+		},
+		"Abutment_Start-night": {
+			"draw_calls": 447,
+			"environment_draw_calls": 106,
+			"environment_primitives": 324912,
+			"primitives": 2089196
+		},
+		"Bridge_Aerial-night": {
+			"draw_calls": 431,
+			"environment_draw_calls": 93,
+			"environment_primitives": 306742,
+			"primitives": 2071026
+		},
+		"Bridge_Deck-night": {
+			"draw_calls": 266,
+			"environment_draw_calls": 93,
+			"environment_primitives": 322534,
+			"primitives": 1096440
+		},
+		"Bridge_Side-night": {
+			"draw_calls": 417,
+			"environment_draw_calls": 85,
+			"environment_primitives": 313256,
+			"primitives": 2077468
+		},
+		"Crossover_Bridge-night": {
+			"draw_calls": 252,
+			"environment_draw_calls": 75,
+			"environment_primitives": 313124,
+			"primitives": 1264312
+		},
+		"Pier_Close_A-night": {
+			"draw_calls": 92,
+			"environment_draw_calls": 87,
+			"environment_primitives": 317788,
+			"primitives": 375828
+		},
+		"Pier_Close_B-night": {
+			"draw_calls": 73,
+			"environment_draw_calls": 68,
+			"environment_primitives": 314306,
+			"primitives": 372346
+		},
+		"SideSlope_2940-night": {
+			"draw_calls": 70,
+			"environment_draw_calls": 65,
+			"environment_primitives": 308556,
+			"primitives": 366596
+		},
+		"Trench_Entrance-night": {
+			"draw_calls": 74,
+			"environment_draw_calls": 69,
+			"environment_primitives": 311836,
+			"primitives": 369876
+		},
+		"Trench_Exit-night": {
+			"draw_calls": 82,
+			"environment_draw_calls": 77,
+			"environment_primitives": 308956,
+			"primitives": 366996
+		},
+		"Trench_Underpass-night": {
+			"draw_calls": 309,
+			"environment_draw_calls": 69,
+			"environment_primitives": 311836,
+			"primitives": 1669616
+		}
+	},
+	"tod": 2
+}

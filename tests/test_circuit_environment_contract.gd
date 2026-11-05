@@ -8,7 +8,7 @@ extends SceneTree
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
 const Config := preload("res://scripts/core/race_config_data.gd")
 const WeatherScript := preload("res://scripts/gt/gt_weather.gd")
-const CIRCUITS: Array[String] = ["apex_ring", "neo_wangan", "brianza", "monte_azure", "ardennes", "stoke_crown", "pacific_corkscrew", "eifel_forest", "paulistano"]
+const CIRCUITS: Array[String] = ["apex_ring", "neo_wangan", "brianza", "monte_azure", "ardennes", "stoke_crown", "pacific_corkscrew", "eifel_forest", "paulistano", "kurogane"]
 const STATS_KEYS: Array[String] = ["circuit_id", "built", "draw_calls", "triangles", "multimeshes"]
 
 var failures: int = 0

@@ -1,0 +1,169 @@
+{
+	"complete_static_triangles": 6589396,
+	"environment_stats": {
+		"armco_pruned": 31,
+		"bridge_span": [
+			3888.0,
+			3957.0
+		],
+		"build_ms": 1181,
+		"built": true,
+		"catch_fence_panels": 422,
+		"circuit_id": "kurogane",
+		"draw_calls": 64,
+		"environment_triangles": 313322,
+		"kerb_runs": 19,
+		"landmark_triangles": 5232,
+		"landmarks": [
+			{
+				"anchor": "Back Straight deck over the Degner trench",
+				"glb": "res://assets/tracks/kurogane/models/kurogane_crossover_truss_bridge.glb",
+				"id": "kurogane_crossover_truss_bridge",
+				"offset_m": 0.0,
+				"placed": true,
+				"position": [
+					-262.54,
+					37.84,
+					723.13
+				],
+				"s": 3922.5,
+				"side": "R",
+				"span_m": 69.0,
+				"triangles": 1032
+			},
+			{
+				"anchor": "high ground east of the Esses",
+				"glb": "res://assets/tracks/kurogane/models/kurogane_giant_ferris_wheel.glb",
+				"id": "kurogane_giant_ferris_wheel",
+				"offset_m": 175.0,
+				"placed": true,
+				"position": [
+					952.08,
+					16.76,
+					817.56
+				],
+				"s": 1480.0,
+				"side": "L",
+				"triangles": 3000
+			},
+			{
+				"anchor": "Casio Triangle chicane apex (T17/T18, s 4764-4898)",
+				"glb": "res://assets/tracks/kurogane/models/kurogane_grand_reverse_tower.glb",
+				"id": "kurogane_grand_reverse_tower",
+				"offset_m": 62.0,
+				"placed": true,
+				"position": [
+					149.81,
+					14.24,
+					237.49
+				],
+				"s": 4830.0,
+				"side": "L",
+				"triangles": 372
+			},
+			{
+				"anchor": "Spoon summit terrace, +40 m",
+				"glb": "res://assets/tracks/kurogane/models/kurogane_suzuka_ridge_shrine.glb",
+				"id": "kurogane_suzuka_ridge_shrine",
+				"offset_m": 120.0,
+				"placed": true,
+				"position": [
+					-419.94,
+					39.84,
+					655.1
+				],
+				"s": 3800.0,
+				"side": "L",
+				"triangles": 828
+			}
+		],
+		"landmarks_placed": 4,
+		"momiji_count": 1500,
+		"multimeshes": 14,
+		"pine_count": 950,
+		"roadbed_drop_m": 0.16,
+		"rock_count": 120,
+		"terrain_lowered_cells": 4,
+		"terrain_max_y": 75.55,
+		"terrain_min_y": -3.34,
+		"terrain_triangles": 42896,
+		"towers_pruned": 0,
+		"tree_count": 2450,
+		"triangle_budget": 320000,
+		"triangles": 311640,
+		"verge_tufts": 900
+	},
+	"failures": 0,
+	"fps": 33.0,
+	"orphans": 0.0,
+	"set": "pit",
+	"shots": {
+		"Garage_Close-day": {
+			"draw_calls": 142,
+			"environment_draw_calls": 99,
+			"environment_primitives": 317222,
+			"primitives": 576588
+		},
+		"Grandstand-day": {
+			"draw_calls": 69,
+			"environment_draw_calls": 26,
+			"environment_primitives": 300748,
+			"primitives": 630310
+		},
+		"Paddock_Aerial-day": {
+			"draw_calls": 195,
+			"environment_draw_calls": 32,
+			"environment_primitives": 300960,
+			"primitives": 1709090
+		},
+		"Paddock_Front-day": {
+			"draw_calls": 203,
+			"environment_draw_calls": 88,
+			"environment_primitives": 316502,
+			"primitives": 1042816
+		},
+		"Pit_Entry-day": {
+			"draw_calls": 481,
+			"environment_draw_calls": 63,
+			"environment_primitives": 311352,
+			"primitives": 4632604
+		},
+		"Pit_Entry_Aerial-day": {
+			"draw_calls": 434,
+			"environment_draw_calls": 36,
+			"environment_primitives": 301008,
+			"primitives": 5221010
+		},
+		"Pit_Exit-day": {
+			"draw_calls": 96,
+			"environment_draw_calls": 37,
+			"environment_primitives": 310008,
+			"primitives": 674640
+		},
+		"Pit_Exit_Aerial-day": {
+			"draw_calls": 71,
+			"environment_draw_calls": 28,
+			"environment_primitives": 304720,
+			"primitives": 632960
+		},
+		"Pit_Lane-day": {
+			"draw_calls": 467,
+			"environment_draw_calls": 63,
+			"environment_primitives": 311352,
+			"primitives": 4215226
+		},
+		"Race_Control-day": {
+			"draw_calls": 500,
+			"environment_draw_calls": 61,
+			"environment_primitives": 306158,
+			"primitives": 5419512
+		},
+		"Start_Gantry-day": {
+			"draw_calls": 492,
+			"environment_draw_calls": 48,
+			"environment_primitives": 303884,
+			"primitives": 5594174
+		}
+	},
+	"tod": 0
+}

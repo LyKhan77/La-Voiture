@@ -39,7 +39,7 @@ const TABLE: Array[Array] = [
 	["paulistano", "SEP", "Paulistano Speed Arena", "", "Interlagos (Carlos Pace)", "BRA", 0, 4.31, 15, false, 40.0,
 		"res://scenes/race_world/circuits/paulistano/paulistano_circuit.tscn", 0.70, "Anti-clockwise, Senna S descent, bowl finish climb."],
 	["kurogane", "OCT", "Kurogane Twin-Cross", "", "Suzuka International", "JPN", 0, 5.80, 20, true, 40.0,
-		"res://scenes/race_world/kurogane_circuit.tscn", 0.20, "Figure-8 crossover bridge, rhythmic Esses, grand finale."],
+		"res://scenes/race_world/circuits/kurogane/kurogane_circuit.tscn", 0.20, "Figure-8 crossover bridge, rhythmic Esses, grand finale."],
 ]
 
 static var _circuits: Array[CircuitDataScript] = []

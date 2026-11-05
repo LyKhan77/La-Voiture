@@ -37,6 +37,8 @@ var trace_overlaps: bool = false
 var race_seed: int = 31
 ## A circuit may raise the release bound only with a recorded, user-approved deviation (see its flood test).
 var release_max_s: float = RELEASE_MAX_S
+## Likewise for the deep-overlap tick budget of the raced-field scenarios.
+var deep_overlap_ticks_max: int = DEEP_OVERLAP_TICKS_MAX
 var live_laps: int = 2
 var failures: int = 0
 var track: TrackScript
@@ -220,7 +222,7 @@ func _measure(label: String, race: RaceScript, bound_flush: bool, still_max: flo
 		check(flushed_at > 0.0 and flushed_at <= FLUSH_MAX_S, "%s: the lane is clear within %.0f s of the first call (%.0f s)" % [label, FLUSH_MAX_S, flushed_at])
 	check(max_decel <= LANE_DECEL_MAX, "%s: lane braking stays comfortable (%.1f m/s2)" % [label, max_decel])
 	check(max_teleport <= TELEPORT_MAX_M, "%s: no car is pushed or teleported (%.2f m)" % [label, max_teleport])
-	check(deep_overlap_ticks <= DEEP_OVERLAP_TICKS_MAX, "%s: no car drives into another: %d car-pair ticks overlap by more than %.1f m (deepest %.2f m)" % [label, deep_overlap_ticks, OVERLAP_MAX_M, deepest_overlap])
+	check(deep_overlap_ticks <= deep_overlap_ticks_max, "%s: no car drives into another: %d car-pair ticks overlap by more than %.1f m (deepest %.2f m)" % [label, deep_overlap_ticks, OVERLAP_MAX_M, deepest_overlap])
 	if bound_release:
 		var longest_release: float = 0.0
 		var total_release: float = 0.0

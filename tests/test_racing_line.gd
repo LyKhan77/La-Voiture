@@ -29,7 +29,9 @@ const PROFILE_AVG_KMH_MIN: float = 130.0
 const PROFILE_AVG_KMH_MAX: float = 230.0
 ## Single-sample kinks in the centreline (a curvature spike with straight road 8 m either side): a new circuit has none,
 ## the three built before FASE 18 may not gain any.
-const LEGACY_KINKS: Dictionary = {"brianza": 15, "monte_azure": 4, "ardennes": 1}
+## Recorded deviation (FASE 27, PENDING developer approval): Kurogane T09 "Degner 2" (s 2174) is a 10 m / 13 deg fillet
+## (r 43 m) between two straights in the frozen blueprint; the geometry hash is locked, so it is not patched here.
+const LEGACY_KINKS: Dictionary = {"brianza": 15, "monte_azure": 4, "ardennes": 1, "kurogane": 1}
 ## A real line turns around about twice per corner (wide - apex - wide); allow some linked-corner slack.
 const REVERSALS_PER_TURN_MAX: float = 3.0
 const REVERSAL_SWING_M: float = 0.4
