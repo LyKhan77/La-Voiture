@@ -50,6 +50,7 @@ func _run() -> void:
 	_test_road_surface()
 	_test_pit_connection()
 	_test_pit_polish()
+	_test_pit_boxes()
 	_test_urban_set()
 	await _test_ground_clearance()
 	_test_apex_preserved()
@@ -261,6 +262,35 @@ func _test_pit_polish() -> void:
 	check(min_y >= -0.001 and absf(max_y - PitScript.WALL_HEIGHT_M) < 0.01,
 		"#W48 extended pit wall stands on the surface with the full 1.2 m visible height, not half buried below it (%.3f to %.3f m)" % [min_y, max_y])
 
+
+## Every team has a painted box on the working apron: colour pad, white outline, yellow nose bar, number.
+func _test_pit_boxes() -> void:
+	var pit: Node3D = circuit.get_node("PitLane")
+	var seats: Array[int] = []
+	seats.assign(range(10))
+	pit.assign_teams(seats)
+	var paint := pit.get_node_or_null("PitBoxPaint") as MeshInstance3D
+	var asphalt := pit.get_node_or_null("PitAsphalt") as MeshInstance3D
+	var painted: int = 0
+	var bad: int = 0
+	if paint != null and paint.mesh != null and asphalt != null:
+		var paint_verts: PackedVector3Array = paint.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+		var asphalt_verts: PackedVector3Array = asphalt.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+		for stall: Dictionary in pit.stalls:
+			var origin: Vector3 = Transform3D(stall["pose"]).origin
+			var top: float = -INF
+			var floor_y: float = -INF
+			for vertex: Vector3 in paint_verts:
+				var world: Vector3 = paint.global_transform * vertex
+				if Vector2(world.x - origin.x, world.z - origin.z).length() < 4.0:
+					top = maxf(top, world.y)
+			for vertex: Vector3 in asphalt_verts:
+				var world: Vector3 = asphalt.global_transform * vertex
+				if Vector2(world.x - origin.x, world.z - origin.z).length() < 4.0:
+					floor_y = maxf(floor_y, world.y)
+			painted += 1 if top > -INF else 0
+			bad += 1 if floor_y == -INF or top < floor_y + 0.015 or top > floor_y + 0.08 else 0
+	check(painted == 10 and bad == 0 and pit.stall_markings.size() == 10, "#W49 ten numbered team boxes are painted on the asphalt, 1.5-8 cm above it (%d painted, %d off, %d recorded)" % [painted, bad, pit.stall_markings.size()])
 
 ## Task 4: the night set — MultiMesh street furniture, the 180 m underpass, the harbor and the
 ## Tokyo skyline, inside the 160 draw call / 320 000 triangle budget.

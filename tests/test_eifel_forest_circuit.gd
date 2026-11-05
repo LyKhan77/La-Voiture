@@ -73,6 +73,32 @@ func _run() -> void:
 			pit_buried += 1 if bed > p.y + 0.02 else 0
 			pit_floating += 1 if bed < p.y - 0.4 else 0
 	check(pit_buried == 0 and pit_floating == 0, "Rendered terrain supports the pit and working apron (%d buried, %d floating)" % [pit_buried, pit_floating])
+	# The working apron lies under the boxes and the painted boxes lie on it (not under it, not hovering over bare terrain).
+	var seats: Array[int] = []
+	seats.assign(range(10))
+	pit.seat_teams(ribbon, seats)
+	var paint := pit.get_node_or_null("PitBoxPaint") as MeshInstance3D
+	var apron := pit.get_node_or_null("PitApron") as MeshInstance3D
+	var painted: int = 0
+	var off_apron: int = 0
+	if paint != null and paint.mesh != null and apron != null:
+		var paint_verts: PackedVector3Array = paint.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+		var apron_verts: PackedVector3Array = apron.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+		for stall: Dictionary in pit.stalls:
+			var origin: Vector3 = Transform3D(stall.pose).origin
+			var top: float = -INF
+			var floor_y: float = -INF
+			for vertex: Vector3 in paint_verts:
+				var world: Vector3 = paint.global_transform * vertex
+				if Vector2(world.x - origin.x, world.z - origin.z).length() < 4.0:
+					top = maxf(top, world.y)
+			for vertex: Vector3 in apron_verts:
+				var world: Vector3 = apron.global_transform * vertex
+				if Vector2(world.x - origin.x, world.z - origin.z).length() < 4.0:
+					floor_y = maxf(floor_y, world.y)
+			painted += 1 if top > -INF else 0
+			off_apron += 1 if floor_y == -INF or top < floor_y + 0.02 or top > floor_y + 0.08 else 0
+	check(painted == 10 and off_apron == 0, "Every team's painted box lies on the working apron, 2-8 cm above it (%d of 10 painted, %d off the apron)" % [painted, off_apron])
 	for mode: int in [Weather.TimeOfDay.DAY, Weather.TimeOfDay.SUNSET, Weather.TimeOfDay.NIGHT, Weather.TimeOfDay.DAY]:
 		env.apply_time_of_day(Weather.compute_time_of_day(mode, 0.0), 0.0)
 	env.apply_time_of_day(Weather.compute_time_of_day(Weather.TimeOfDay.DAY, 0.0), 0.6)

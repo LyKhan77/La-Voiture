@@ -175,7 +175,11 @@ func _on_teams_assigned() -> void:
 			Figure.add(crew_batch, material, Transform3D(Basis(Vector3.UP, PI * 0.5), PitKit.standby_spot(slot)), int(roles[slot]), Liveries.color_for(team))
 		crew.mesh = crew_batch.commit()
 		crew.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		PitKit.paint_box(paint, material, stalls[i], stalls[i].pose, BOX_LATERAL_M, stall_markings)
+		# The apron pavement is flat at centreline grade + PIT_APRON_LIFT_M; the kit paints 3.5 cm over the frame it
+		# is given, and the box pose follows the road's cross-fall (under the pavement), so rest it on the apron.
+		var box_frame: Transform3D = stalls[i].pose
+		box_frame.origin.y = ribbon.get_point_at_offset(float(stalls[i].s), 0.0).origin.y + Layout.PIT_APRON_LIFT_M
+		PitKit.paint_box(paint, material, stalls[i], box_frame, BOX_LATERAL_M, stall_markings)
 		plates.append(Signage.add_plate(signs, material, team, Signage.fascia_pose(garage.transform, -0.2, 6.2), 15.5, Liveries.color_for(team)))
 	pit_building.apply_teams(ids)
 	Signage.commit_node(self, signs, plates)
@@ -199,8 +203,9 @@ func set_lights_on(on: bool) -> void:
 func _build_pavement() -> void:
 	var batch := Batch.new()
 	var material: Material = Toon.vertex_colored(false)
-	var first := Layout.bay_station(0) - STALL_PITCH_M * 0.5
-	var last := Layout.bay_station(team_count - 1) + STALL_PITCH_M * 0.5
+	# get_pit_transform takes a distance along the pit lane (from ENTRY_S), not a lap station.
+	var first := u_from_s(Layout.bay_station(0) - STALL_PITCH_M * 0.5)
+	var last := first + STALL_PITCH_M * float(team_count)
 	var u := first
 	while u < last:
 		var a := u
@@ -243,8 +248,9 @@ func _build_signs_and_triggers() -> void:
 ## Outer edge of the paved apron for the terrain gate: the garage front across
 ## the boxes, the lane's outer edge at both mouths.
 func _outer_edge(u: float) -> float:
-	var first := Layout.bay_station(0) - STALL_PITCH_M * 0.5
-	var last := Layout.bay_station(team_count - 1) + STALL_PITCH_M * 0.5
+	# get_pit_transform takes a distance along the pit lane (from ENTRY_S), not a lap station.
+	var first := u_from_s(Layout.bay_station(0) - STALL_PITCH_M * 0.5)
+	var last := first + STALL_PITCH_M * float(team_count)
 	var apron := smoothstep(first - 35.0, first - 15.0, u) * (1.0 - smoothstep(last + 18.0, last + 40.0, u))
 	return lerpf(Layout.PIT_LANE_OUTER_X, Layout.PIT_FACADE_X, apron)
 

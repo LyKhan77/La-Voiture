@@ -93,6 +93,8 @@ var bypass_ramp: Node3D
 var blend_line: MeshInstance3D
 var asphalt: MeshInstance3D
 var garage_zone_length_m: float = GARAGE_ZONE_M
+## The painted team boxes (colour, number): one record per seated team, rebuilt whenever the teams are seated.
+var stall_markings: Array[Dictionary] = []
 
 
 func _init() -> void:
@@ -166,6 +168,7 @@ func get_pit_transform(u: float, lateral_m: float) -> Transform3D:
 
 ## The transporters and the crews in the garages follow the teams seated in the boxes.
 func _on_teams_assigned() -> void:
+	_paint_team_boxes()
 	if transporters != null:
 		transporters.apply_teams(stalls)
 	if not garages.is_empty():
@@ -293,12 +296,6 @@ func _build_markings() -> void:
 	for u: float in [28.0, 40.0]:
 		batch.quad(paint, PAINT_WHITE, _at(u - 2.0, 8.3, LINE_Y), _at(u + 0.5, 8.3, LINE_Y), _at(u + 0.5, 8.7, LINE_Y), _at(u - 2.0, 8.7, LINE_Y), Vector3.UP)
 		batch.triangle(paint, PAINT_WHITE, _at(u + 3.0, FAST_LANE_M, LINE_Y), _at(u, 7.6, LINE_Y), _at(u, 9.4, LINE_Y), Vector3.UP)
-	for stall: Dictionary in stalls:
-		var u: float = float(stall["u"])
-		add_band.call(u - 3.0, u + 3.0, func(_u: float) -> float: return 11.6, func(_u: float) -> float: return 11.75, PAINT_WHITE, LINE_Y)
-		add_band.call(u - 3.0, u + 3.0, func(_u: float) -> float: return 14.25, func(_u: float) -> float: return 14.4, PAINT_WHITE, LINE_Y)
-		for end: float in [-3.0, 2.85]:
-			add_band.call(u + end, u + end + 0.15, func(_u: float) -> float: return 11.6, func(_u: float) -> float: return 14.4, PAINT_WHITE, LINE_Y)
 	var mesh := MeshInstance3D.new()
 	mesh.name = "PitMarkings"
 	mesh.mesh = batch.commit()
@@ -318,6 +315,25 @@ func _build_markings() -> void:
 	blend_line.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	blend_line.set_meta(&"blend_line_m", BLEND_LINE_M)
 	add_child(blend_line)
+
+
+## The team boxes: coloured pad, white outline, yellow nose bar and the box number (the kit every circuit shares),
+## painted over the asphalt in the colours of whichever teams are seated.
+func _paint_team_boxes() -> void:
+	var batch := MeshBatchScript.new()
+	var material: Material = ToonMaterials.vertex_colored(false)
+	stall_markings.clear()
+	for stall: Dictionary in stalls:
+		if int(stall["team"]) < 0:
+			continue
+		PitKit.paint_box(batch, material, stall, stall["pose"] as Transform3D, BOX_LATERAL_M, stall_markings)
+	var markings := get_node_or_null("PitBoxPaint") as MeshInstance3D
+	if markings == null:
+		markings = MeshInstance3D.new()
+		markings.name = "PitBoxPaint"
+		add_child(markings)
+	markings.mesh = batch.commit()
+	markings.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
 
 ## The concrete pit wall between the circuit and the fast lane, on the 1.2 m regulation height, plus
