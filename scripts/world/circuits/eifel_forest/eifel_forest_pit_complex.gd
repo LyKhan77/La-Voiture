@@ -222,7 +222,7 @@ func _build_pavement() -> void:
 	apron.mesh = batch.commit()
 	apron.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(apron)
-	Corridor.build(self, ribbon, {"entry_s": ENTRY_S, "exit_s": EXIT_S, "side": "right", "fast_lane_m": FAST_LANE_INNER_M})
+	Corridor.build(self, ribbon, {"entry_s": ENTRY_S, "exit_s": EXIT_S, "side": "right", "fast_lane_m": FAST_LANE_INNER_M}, sim_layout())
 
 
 func _build_signs_and_triggers() -> void:

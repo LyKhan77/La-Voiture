@@ -37,7 +37,7 @@ const TABLE: Array[Array] = [
 	["eifel_forest", "AUG", "Eifel Forest Ring", "", "Nurburgring GP", "GER", 0, 5.15, 16, true, 30.0,
 		"res://scenes/race_world/circuits/eifel_forest/eifel_forest_circuit.tscn", 0.60, "Misty pine forest, technical Schumacher S."],
 	["paulistano", "SEP", "Paulistano Speed Arena", "", "Interlagos (Carlos Pace)", "BRA", 0, 4.31, 15, false, 40.0,
-		"res://scenes/race_world/paulistano_circuit.tscn", 0.70, "Anti-clockwise, Senna S descent, bowl finish climb."],
+		"res://scenes/race_world/circuits/paulistano/paulistano_circuit.tscn", 0.70, "Anti-clockwise, Senna S descent, bowl finish climb."],
 	["kurogane", "OCT", "Kurogane Twin-Cross", "", "Suzuka International", "JPN", 0, 5.80, 20, true, 40.0,
 		"res://scenes/race_world/kurogane_circuit.tscn", 0.20, "Figure-8 crossover bridge, rhythmic Esses, grand finale."],
 ]

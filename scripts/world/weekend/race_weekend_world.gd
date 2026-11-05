@@ -117,13 +117,21 @@ func _ready() -> void:
 	director.lights_out.connect(_on_lights_out)
 	director.light_lit.connect(_on_light_lit)
 	director.state_changed.connect(_on_director_state)
-	gantry.global_transform = ribbon.get_point_on_ribbon(0.0, 1)
 	pit_lane.seat_teams(ribbon, race.active_teams)
+	# A circuit that authors its own start gantry (its pit side, its venue board) replaces the world's: two at
+	# one line would double the steel and leave the circuit's lamps lit through lights-out.
+	var own_gantry := pit_lane.get_node_or_null("StartGantry") as GantryScript
+	if own_gantry != null and own_gantry != gantry:
+		gantry.queue_free()
+		gantry = own_gantry
+		gantry.set_lights(0, true)
+	else:
+		gantry.global_transform = ribbon.get_point_on_ribbon(0.0, 1)
 	if circuit_root == null:
 		environment.build(ribbon, track.line)
 	for building: Node in find_children("PitBuilding", "", true, false):
 		if building.has_method("apply_teams"):
-			building.apply_teams(race.active_teams)
+			building.apply_teams(pit_lane.building_team_order())
 	environment.bind_world($WorldEnvironment, $Sun, camera)
 	camera.doppler_tracking = Camera3D.DOPPLER_TRACKING_IDLE_STEP # cars move on render frames (step in _process)
 	choreographer.setup(pit_lane, ActorScript.WHEEL_SCENES)

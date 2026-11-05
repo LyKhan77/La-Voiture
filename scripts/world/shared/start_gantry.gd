@@ -35,6 +35,11 @@ const LAMP_OFF_COLOR := Color("#3a0a0e")
 const LAMP_ON_COLOR := Color("#ff0a12")
 const TIMING_COLOR := Color("#00f0ff")
 
+## +1 when the pit lane runs off the right of the grid, -1 off the left: the pit wing and its board cover that side.
+@export var pit_side: float = 1.0
+## Venue line on the pit-wing board.
+@export var venue_name: String = "APEX RING INTERNATIONAL"
+
 var lamps: Array[MeshInstance3D] = [] # two per pair: upper then lower, pair by pair
 var lit_pairs: int = 0
 var structure: MeshInstance3D
@@ -53,8 +58,9 @@ func _ready() -> void:
 func build() -> void:
 	var batch := MeshBatchScript.new()
 	var steel: ShaderMaterial = ToonMaterials.vertex_colored(true)
-	var left: float = -SPAN_M * 0.5
-	var right: float = SPAN_M * 0.5 + WING_M
+	# The pylons straddle the road; the wing carries the far pylon out over the pit lane on `pit_side`.
+	var left: float = -SPAN_M * 0.5 - (WING_M if pit_side < 0.0 else 0.0)
+	var right: float = SPAN_M * 0.5 + (WING_M if pit_side >= 0.0 else 0.0)
 	var panel_z: float = TRUSS_GAP_M * 0.5 + 0.45 # in front of the front truss, so no lamp hides behind a diagonal
 	_build_pylons(batch, steel, left, right)
 	_build_trusses(batch, steel, left, right)
@@ -95,11 +101,11 @@ func _build_panel(batch: MeshBatchScript, steel: ShaderMaterial, panel_z: float)
 
 ## Series board over the pit wing, facing the approaching cars.
 func _build_wing_sign(batch: MeshBatchScript, steel: ShaderMaterial, panel_z: float) -> void:
-	var centre_x: float = SPAN_M * 0.5 + WING_M * 0.5 + 0.5
+	var centre_x: float = signf(pit_side) * (SPAN_M * 0.5 + WING_M * 0.5 + 0.5)
 	var y: float = BEAM_HEIGHT_M - 0.5
 	batch.box(steel, SIGN_COLOR, Transform3D(Basis.IDENTITY, Vector3(centre_x, y, panel_z - 0.05)), Vector3(7.4, 1.7, 0.18))
 	batch.box(steel, TIMING_COLOR, Transform3D(Basis.IDENTITY, Vector3(centre_x, y - 0.95, panel_z - 0.05)), Vector3(7.4, 0.12, 0.2))
-	for label_data: Array in [["LA VOITURE GT", 0.22, 90, 0.011], ["APEX RING INTERNATIONAL", -0.5, 48, 0.0075]]:
+	for label_data: Array in [["LA VOITURE GT", 0.22, 90, 0.011], [venue_name, -0.5, 48, 0.0075]]:
 		var label := Label3D.new()
 		label.name = "Sign%s" % str(label_data[0]).replace(" ", "")
 		label.text = label_data[0]
@@ -113,7 +119,7 @@ func _build_wing_sign(batch: MeshBatchScript, steel: ShaderMaterial, panel_z: fl
 
 ## Digital lap-time display over the racing line, left of the light panel.
 func _build_timing_display(panel_z: float) -> void:
-	timing_display = ToonMaterials.box(self, "TimingDisplay", Vector3(4.4, 0.95, 0.14), Vector3(-5.0, BEAM_HEIGHT_M - 0.9, panel_z + 0.05), ToonMaterials.emissive(TIMING_COLOR, 1.4))
+	timing_display = ToonMaterials.box(self, "TimingDisplay", Vector3(4.4, 0.95, 0.14), Vector3(-5.0 * signf(pit_side), BEAM_HEIGHT_M - 0.9, panel_z + 0.05), ToonMaterials.emissive(TIMING_COLOR, 1.4))
 	var label := Label3D.new()
 	label.name = "TimingText"
 	label.text = "LAP 0:00.000"
@@ -121,7 +127,7 @@ func _build_timing_display(panel_z: float) -> void:
 	label.pixel_size = 0.0085
 	label.modulate = PANEL_COLOR
 	label.outline_size = 0
-	label.position = Vector3(-5.0, BEAM_HEIGHT_M - 0.9, panel_z + 0.13)
+	label.position = Vector3(-5.0 * signf(pit_side), BEAM_HEIGHT_M - 0.9, panel_z + 0.13)
 	add_child(label)
 
 
@@ -154,10 +160,12 @@ func _build_lamps(panel_z: float) -> void:
 
 
 ## Lights the first `pairs` red-light pairs and darkens the rest; 0 is lights out.
-func set_lights(pairs: int) -> void:
+## `silent` resets the panel without the start beeps or the lights-out buzzer (a gantry being set up).
+func set_lights(pairs: int, silent: bool = false) -> void:
 	var before: int = lit_pairs
 	lit_pairs = clampi(pairs, 0, LIGHT_PAIRS)
-	_sound_lights(before, lit_pairs)
+	if not silent:
+		_sound_lights(before, lit_pairs)
 	for index: int in range(lamps.size()):
 		lamps[index].material_override = _on_material if index / 2 < lit_pairs else _off_material
 	if _glow != null:

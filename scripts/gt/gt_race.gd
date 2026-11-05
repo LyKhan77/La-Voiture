@@ -86,6 +86,12 @@ static func default_pit_layout() -> Dictionary:
 	return GtPitLayout.default_layout()
 
 
+## +1 when the pit lane runs off the right of the circuit, -1 off the left: a left-side circuit publishes its
+## pit laterals negative, and every "further toward the garages" comparison runs through this sign.
+static func pit_side_of(layout: Dictionary) -> float:
+	return -1.0 if float(layout["stall_lane_m"]) < 0.0 else 1.0
+
+
 ## Lateral of the pit path at `u` metres from Pit Entry: off the right edge, onto the fast lane, and
 ## back. `length` is the lane's own length (Pit Exit minus Pit Entry).
 static func lane_lateral_at(u: float, length: float, layout: Dictionary) -> float:
@@ -579,7 +585,8 @@ func _update_race_control(dt: float) -> void:
 		var target_v: float = 25.0 if gap_to_leader > 28.0 else 27.0
 		if not bool(safety_car.get("picked_up", false)):
 			target_v = 18.0
-		if peeling and float(safety_car["lateral"]) >= float(pit_layout["edge_lateral_m"]):
+		var side: float = pit_side_of(pit_layout)
+		if peeling and float(safety_car["lateral"]) * side >= float(pit_layout["edge_lateral_m"]) * side:
 			target_v = 80.0 / 3.6
 		safety_car["v"] = move_toward(float(safety_car["v"]), target_v, (3.0 if target_v > float(safety_car["v"]) else 4.5) * dt)
 		safety_car["s"] = float(safety_car["s"]) + float(safety_car["v"]) * dt

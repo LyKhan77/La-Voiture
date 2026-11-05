@@ -157,8 +157,17 @@ func _test_reserved_rounds_and_wrap() -> void:
 		and absf(float(radar.stats()["length_m"]) - 5150.73) <= 50.0 and radar.circuit_id == "eifel_forest" \
 		and not continue_button.disabled
 	check(eifel_ok, "#S4f Round 08 Eifel Forest Ring is playable with its own 5.15km map and Continue enabled")
+	# Round 09, Paulistano Speed Arena, is now playable with its own homologated map.
+	_press("TrackNextButton")
+	await process_frame
+	var paulistano_ok: bool = _label("CircuitNameLabel") == "Paulistano Speed Arena" \
+		and _label("CircuitTypeLabel") == "GRAND PRIX" \
+		and absf(float(radar.stats()["length_m"]) - 4313.0) <= 50.0 and radar.circuit_id == "paulistano" \
+		and not continue_button.disabled
+	check(paulistano_ok, "#S4g Round 09 Paulistano Speed Arena is playable with its own 4.31km map and Continue enabled")
 
 	# Return to Apex Ring
+	_press("TrackPrevButton")
 	_press("TrackPrevButton")
 	_press("TrackPrevButton")
 	_press("TrackPrevButton")

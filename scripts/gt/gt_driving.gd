@@ -1110,11 +1110,13 @@ func _pit_logic(car: GtCar, dt: float) -> void:
 			_target_lateral = lerpf(float(race.pit_layout["stall_lane_m"]), fast_lane_at(rel), pull_out)
 			# Never swing onto a car alongside on the fast lane: keep a lane's width off it (still rolling) until it has passed.
 			# A slower car just behind is not waited for: this one merges ahead of it and it follows.
+			# Measured in the pit side's frame (side * lateral grows toward the garages) so a left-side lane mirrors it.
+			var side: float = GtRace.pit_side_of(race.pit_layout)
 			for other: GtCar in race.cars:
 				if other != car and other.pit != null and absf(other.s - car.s) < GtTypes.CAR_LENGTH_M + GtTypes.PIT_FOLLOW_GAP_M \
-						and absf(other.lateral - fast_lane_at(rel)) < PIT_LANE_BAND_M and other.lateral < car.lateral \
+						and absf(other.lateral - fast_lane_at(rel)) < PIT_LANE_BAND_M and other.lateral * side < car.lateral * side \
 						and (other.s >= car.s or other.v > car.v):
-					_target_lateral = maxf(_target_lateral, minf(car.lateral, other.lateral + PIT_LANE_BAND_M))
+					_target_lateral = side * maxf(_target_lateral * side, minf(car.lateral * side, other.lateral * side + PIT_LANE_BAND_M))
 			# No second wait half way out: the release in _service_car is the only gate. A car stopped mid-merge stood right
 			# behind the next box and held that car's release, which held it in turn (a mutual hold until the caps ran out).
 			if car.s - pit.box_s > 20.0:
@@ -1182,7 +1184,7 @@ func _queue_behind_teammate(car: GtCar, pit: GtPit, rel: float, steer: bool = tr
 	# Swing onto the working lane only once abreast of the box, never while the previous box is still alongside.
 	var join: float = 1.0 - clampf((pit.box_s - car.s - 7.0) / 3.5, 0.0, 1.0)
 	if steer:
-		_target_lateral = lerpf(fast_lane_at(rel), float(race.pit_layout["stall_lane_m"]) + 0.6, smoothstep(0.0, 1.0, join))
+		_target_lateral = lerpf(fast_lane_at(rel), float(race.pit_layout["stall_lane_m"]) + 0.6 * GtRace.pit_side_of(race.pit_layout), smoothstep(0.0, 1.0, join))
 	if room <= PARK_TOLERANCE_M:
 		_target = 0.0
 	else:

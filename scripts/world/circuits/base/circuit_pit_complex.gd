@@ -72,6 +72,16 @@ func stall_transform(team: int) -> Transform3D:
 	return stalls[index]["pose"] if index >= 0 else Transform3D.IDENTITY
 
 
+## The seated teams in the pit building's bay order (shutter i wears entry i). The kit building lays bay i at
+## box i, so this is the box order; a complex that turns its building (a left-hand lane) overrides it.
+func building_team_order() -> Array[int]:
+	var ids: Array[int] = []
+	for stall: Dictionary in stalls:
+		if int(stall.get("team", -1)) >= 0:
+			ids.append(int(stall["team"]))
+	return ids
+
+
 ## The crew standing in a box: 13 people, in the order they line up across the garage mouth.
 func crew_roles() -> Array:
 	return PitKit.standby_roles()

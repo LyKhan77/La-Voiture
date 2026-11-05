@@ -128,8 +128,8 @@ static func _emit_flat(st: SurfaceTool, vertices: Array[Vector3]) -> void:
 
 ## One plan per sharp corner: the free outside width sampled every PLAN_STEP_M.
 ## Dictionary: s0, s1, side (lateral sign of the outside), widths, length.
-## `pit_start_s`/`pit_len_m` close the right-hand side (the pit lane's) over that arc.
-static func plan_runoffs(ribbon: TrackRibbonScript, kerbs: Array[Dictionary], pit_start_s: float = 0.0, pit_len_m: float = 0.0) -> Array[Dictionary]:
+## `pit_start_s`/`pit_len_m` close the pit lane's side (`pit_side`: +1 right, -1 left) over that arc.
+static func plan_runoffs(ribbon: TrackRibbonScript, kerbs: Array[Dictionary], pit_start_s: float = 0.0, pit_len_m: float = 0.0, pit_side: float = 1.0) -> Array[Dictionary]:
 	var samples: Dictionary = hash_samples(ribbon)
 	var half: float = ribbon.road_half_width_m
 	var plans: Array[Dictionary] = []
@@ -147,7 +147,7 @@ static func plan_runoffs(ribbon: TrackRibbonScript, kerbs: Array[Dictionary], pi
 			# road's side of the middle, so the trap gets what is left of that room after the rail's own share.
 			var free: float = max_extent(samples, ribbon, s, side, RUNOFF_WIDTH_M + GRAVEL_WIDTH_M + BARRIER_ROOM_M) - BARRIER_ROOM_M
 			var taper: float = smoothstep(a, a + TAPER_M, s) * smoothstep(b, b - TAPER_M, s)
-			var gate: float = _pit_gate(s, ribbon.length_m, pit_start_s, pit_len_m) if side > 0.0 and pit_len_m > 0.0 else 1.0
+			var gate: float = _pit_gate(s, ribbon.length_m, pit_start_s, pit_len_m) if side == pit_side and pit_len_m > 0.0 else 1.0
 			var total: float = clampf(free, 0.0, RUNOFF_WIDTH_M + GRAVEL_WIDTH_M) * taper * gate
 			widths[index] = total if total >= MIN_STRIP_M else 0.0
 		plans.append({"s0": a, "s1": b, "side": side, "widths": widths, "length": ribbon.length_m})

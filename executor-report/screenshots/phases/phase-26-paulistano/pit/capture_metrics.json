@@ -1,0 +1,132 @@
+{
+	"complete_static_triangles": 6659584,
+	"environment_stats": {
+		"boulder_count": 320,
+		"boulder_triangles": 3840,
+		"build_ms": 1082,
+		"built": true,
+		"circuit_id": "paulistano",
+		"draw_calls": 81,
+		"environment_triangles": 386592,
+		"grass_count": 520,
+		"grass_triangles": 3120,
+		"helipad": true,
+		"ipe_count": 784,
+		"kerb_runs": 15,
+		"lake_mist": {
+			"centre": [
+				85.4,
+				-1021.7
+			],
+			"size": [
+				460.0,
+				30.0,
+				460.0
+			],
+			"water_y": -2.2
+		},
+		"lake_water_y": -2.2,
+		"landmark_triangles": 11098,
+		"landmarks": [
+			{
+				"anchor": "ground",
+				"glb": "res://assets/tracks/paulistano/models/paulistano_senna_monument_terrace.glb",
+				"id": "paulistano_senna_monument_terrace",
+				"note": "terraced Senna S amphitheatre outside T1 with the yellow-green Brazilian canopy",
+				"offset_m": 78.0,
+				"placed": true,
+				"placed_lateral_m": 78.0,
+				"position": [
+					299.76,
+					34.89,
+					78.0
+				],
+				"s": 300.0,
+				"side": "R",
+				"triangles": 7172
+			},
+			{
+				"anchor": "terrain",
+				"glb": "res://assets/tracks/paulistano/models/paulistano_kartodromo_overlook.glb",
+				"id": "paulistano_kartodromo_overlook",
+				"note": "Ayrton Senna kartodromo complex on the infield plateau, paddock tents and karts",
+				"offset_m": 210.0,
+				"placed": true,
+				"placed_lateral_m": 210.0,
+				"position": [
+					458.65,
+					10.97,
+					-376.51
+				],
+				"s": 1000.0,
+				"side": "L",
+				"triangles": 1664
+			},
+			{
+				"anchor": "terrain",
+				"glb": "res://assets/tracks/paulistano/models/paulistano_guarapiranga_reservoir.glb",
+				"id": "paulistano_guarapiranga_reservoir",
+				"note": "Represa de Guarapiranga seawall promenade, sailing pontoons and moored boats",
+				"offset_m": 32.0,
+				"placed": true,
+				"placed_lateral_m": 32.0,
+				"position": [
+					53.96,
+					5.16,
+					-856.68
+				],
+				"s": 1800.0,
+				"side": "R",
+				"triangles": 1858
+			},
+			{
+				"anchor": "ground",
+				"glb": "res://assets/tracks/paulistano/models/paulistano_historic_paddock_tower.glb",
+				"id": "paulistano_historic_paddock_tower",
+				"note": "1970s Brutalist concrete race-control tower on the Subida dos Boxes climb",
+				"offset_m": 46.0,
+				"placed": true,
+				"placed_lateral_m": 46.0,
+				"position": [
+					-92.95,
+					32.28,
+					-46.0
+				],
+				"s": 4220.0,
+				"side": "L",
+				"triangles": 404
+			}
+		],
+		"landmarks_placed": 4,
+		"multimeshes": 13,
+		"paddock_apron_quads": 229,
+		"paddock_boards": 8,
+		"paddock_generators": 4,
+		"paddock_motorhomes": 8,
+		"paddock_palms": 9,
+		"paddock_parking_cars": 25,
+		"paddock_people": 120,
+		"paddock_tents": 6,
+		"paddock_transporters": 10,
+		"paddock_umbrellas": 12,
+		"paddock_vehicles": 6,
+		"paddock_wall_quads": 329,
+		"palm_count": 616,
+		"reservoir_quads": 65,
+		"roadbed_drop_m": 0.16,
+		"shrub_count": 400,
+		"shrub_triangles": 12000,
+		"terrain_max_y": 50.13,
+		"terrain_min_y": -6.03,
+		"terrain_triangles": 81896,
+		"tree_count": 1400,
+		"tree_triangles": 107352,
+		"triangle_budget": 430000,
+		"triangles": 415300
+	},
+	"failures": 0,
+	"fps": 18.0,
+	"orphans": 0.0,
+	"set": "pit",
+	"tod": 0
+}

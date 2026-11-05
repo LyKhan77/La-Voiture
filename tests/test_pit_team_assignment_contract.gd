@@ -6,7 +6,7 @@ extends SceneTree
 
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
 const Config := preload("res://scripts/core/race_config_data.gd")
-const CIRCUITS: Array[String] = ["apex_ring", "neo_wangan", "brianza", "monte_azure", "ardennes", "stoke_crown", "pacific_corkscrew", "eifel_forest"]
+const CIRCUITS: Array[String] = ["apex_ring", "neo_wangan", "brianza", "monte_azure", "ardennes", "stoke_crown", "pacific_corkscrew", "eifel_forest", "paulistano"]
 const PLAYER_TEAMS: Array[int] = [4, 11, 12]
 
 var failures: int = 0
@@ -82,6 +82,21 @@ func _audit(circuit: String, player_team: int) -> void:
 		for team: int in range(13):
 			shutters_ok = shutters_ok and _has_livery(building.structure.mesh, team) == race.active_teams.has(team)
 	check(shutters_ok, "%s: pit building shutters wear the colours of the teams in the boxes" % label)
+	# Each shutter stands at the box of the team it wears (a turned building lays its bays out backwards).
+	if building != null and "bay_stride_m" in building and "front_x" in building and building.team_ids.size() == building.bay_count:
+		var placed_ok: bool = true
+		for bay: int in range(building.bay_count):
+			var z: float = -float(building.bay_stride_m) * (float(bay) - float(building.bay_count - 1) * 0.5)
+			var door: Vector3 = building.global_transform * Vector3(float(building.front_x), 2.7, z)
+			var nearest: int = -1
+			var best: float = INF
+			for i: int in range(pit.garages.size()):
+				var d: float = pit.garages[i].global_position.distance_to(door)
+				if d < best:
+					best = d
+					nearest = i
+			placed_ok = placed_ok and nearest >= 0 and int(building.team_ids[bay]) == int(pit.stalls[nearest].team)
+		check(placed_ok, "%s: every shutter stands at the box of the team it wears" % label)
 	world.queue_free()
 	await process_frame
 

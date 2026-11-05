@@ -1,31 +1,38 @@
 extends RefCounted
 
-## Builder-local La Voiture-style pit corridor for the frozen Eifel Forest Ring stations:
-## a solid asphalt lane (no floating slab), white edge lines, closed skirts,
-## a painted pit wall with a red/white cap, entry/exit acceleration aprons and
-## PIT IN / 80 / PIT OUT signage. The lane mouth overlaps the racing surface by
-## 0.8 m so the entry/exit blends read as one continuous piece of pavement.
+## Eifel Forest pit corridor, drawn from the lane the GT sim drives (GtRace.lane_lateral_at on the
+## complex's sim layout) so the cars, the asphalt and the wall can never disagree: a solid
+## asphalt lane that follows the car path through the 80 m entry and 30 m exit blends, white
+## edge lines, closed skirts, a pit wall that starts and ends only where a car's flank clears
+## it (WALL_CLEARANCE_M), an impact attenuator on each wall nose, entry/exit aprons and
+## PIT IN / 80 / PIT OUT signage. The lane mouth overlaps the racing surface by 0.8 m.
 
 const Layout := preload("res://scripts/world/circuits/eifel_forest/eifel_forest_layout.gd")
 const Toon := preload("res://scripts/world/shared/toon_materials.gd")
 const PitKit := preload("res://scripts/world/shared/pit_kit.gd")
 const LANE_ASPHALT := Color("#26282e")
 const WALL_HEIGHT_M := 1.35
+## Half the wall's cap width plus air: a car's flank must clear the wall line by this much.
+const WALL_CLEARANCE_M := 0.45
+const CAR_HALF_WIDTH_M := 1.04
 const SteelFence := preload("res://scripts/world/circuits/eifel_forest/eifel_forest_steel_fence.gd")
+const MeshBatchScript := preload("res://scripts/world/shared/mesh_batch.gd")
 
 
-static func build(root: Node3D, ribbon: Node3D, pit: Dictionary) -> void:
+## `sim` is the complex's sim_layout(): the lane is drawn where the cars drive it.
+static func build(root: Node3D, ribbon: Node3D, pit: Dictionary, sim: Dictionary) -> void:
 	var length: float = ribbon.length_m
 	var entry: float = float(pit.get("entry_s", Layout.PIT_ENTRY_S))
 	var span := fposmod(float(pit.get("exit_s", Layout.PIT_EXIT_S)) - entry, length)
 	var side := 1.0 if String(pit.get("side", "right")) == "right" else -1.0
 	var half := Layout.PIT_LANE_HALF_M
 	var road_half: float = ribbon.road_half_width_m
-	var center: float = float(pit.get("fast_lane_m", Layout.PIT_FAST_LANE_M)) + half
+	var wall_lat: float = road_half + 1.5
+	var wall_span: Vector2 = wall_range(span, sim, wall_lat)
 	var steps := ceili(span / 2.0)
 	var fence_frames: Array[Transform3D] = []
-	var fence_s := 48.0
-	while fence_s + 2.0 <= span - 45.0:
+	var fence_s := wall_span.x + 2.0
+	while fence_s + 2.0 <= wall_span.y:
 		var pose: Transform3D = ribbon.get_point_at_offset(fposmod(entry + fence_s, length), side * (road_half + 1.5))
 		pose.origin += Vector3.UP * WALL_HEIGHT_M
 		fence_frames.append(pose)
@@ -47,11 +54,9 @@ static func build(root: Node3D, ribbon: Node3D, pit: Dictionary) -> void:
 	var last: Array = []
 	for i in range(steps + 1):
 		var u := span * float(i) / float(steps)
-		var t := clampf(minf(u, span - u) / 40.0, 0.0, 1.0)
-		t = t * t * (3.0 - 2.0 * t)
-		var middle := lerpf(road_half + half - 0.8, center, t)
+		var lane: float = absf(GtRace.lane_lateral_at(u, span, sim))
 		var frame: Transform3D = ribbon.get_point_at_offset(fposmod(entry + u, length), 0.0)
-		if u >= 45.0 and u <= span - 45.0:
+		if u >= wall_span.x and u <= wall_span.y:
 			var wall_base: Vector3 = frame.origin + frame.basis.x * side * (road_half + 1.5)
 			if previous_wall != Vector3.INF:
 				_double_quad(wall, previous_wall, wall_base, wall_base + Vector3.UP * WALL_HEIGHT_M, previous_wall + Vector3.UP * WALL_HEIGHT_M)
@@ -64,7 +69,7 @@ static func build(root: Node3D, ribbon: Node3D, pit: Dictionary) -> void:
 				wall_segment += 1
 			previous_wall = wall_base
 		var edges: Array = []
-		for lateral in [middle - half, middle + half]:
+		for lateral in [maxf(lane - half, road_half - 0.8), maxf(lane + half, road_half + 0.75)]:
 			edges.append(frame.origin + frame.basis.x * (side * lateral) + Vector3.UP * Layout.PIT_APRON_LIFT_M)
 		if not last.is_empty():
 			_color_quad_flat(surfaces[0], last[0], last[1], edges[1], edges[0], LANE_ASPHALT)
@@ -81,7 +86,7 @@ static func build(root: Node3D, ribbon: Node3D, pit: Dictionary) -> void:
 		var u := 65.0 * float(i) / 33.0
 		var t := smoothstep(0.0, 65.0, u)
 		var frame: Transform3D = ribbon.get_point_at_offset(fposmod(entry - 65.0 + u, length), 0.0)
-		var outer := lerpf(road_half - 0.3, road_half + 2.0 * half - 0.3, t)
+		var outer := lerpf(road_half - 0.3, absf(GtRace.lane_lateral_at(0.0, span, sim)) + half, t)
 		var inner_point := frame.origin + frame.basis.x * side * (road_half - 0.3) + Vector3.UP * Layout.PIT_APRON_LIFT_M
 		var outer_point := frame.origin + frame.basis.x * side * outer + Vector3.UP * Layout.PIT_APRON_LIFT_M
 		if not last.is_empty():
@@ -95,7 +100,7 @@ static func build(root: Node3D, ribbon: Node3D, pit: Dictionary) -> void:
 		var u := 65.0 * float(i) / 33.0
 		var t := smoothstep(0.0, 65.0, u)
 		var frame: Transform3D = ribbon.get_point_at_offset(float(entry) + span + u, 0.0)
-		var outer := lerpf(road_half + 2.0 * half - 0.3, road_half - 0.3, t)
+		var outer := lerpf(absf(GtRace.lane_lateral_at(span, span, sim)) + half, road_half - 0.3, t)
 		var inner_point := frame.origin + frame.basis.x * side * (road_half - 0.3) + Vector3.UP * Layout.PIT_APRON_LIFT_M
 		var outer_point := frame.origin + frame.basis.x * side * outer + Vector3.UP * Layout.PIT_APRON_LIFT_M
 		if not last.is_empty():
@@ -146,6 +151,45 @@ static func build(root: Node3D, ribbon: Node3D, pit: Dictionary) -> void:
 	_sign(root, ribbon, entry - 24.0, side, "PIT IN", Color("#f4f5f7"), Color("#0c2b36"), 2.6)
 	_sign(root, ribbon, entry - 8.0, side, "80", Color("#f4f5f7"), Color("#d9232e"), 2.2)
 	_sign(root, ribbon, fposmod(entry + span + 16.0, length), side, "PIT OUT", Color("#f4f5f7"), Color("#1f8a4c"), 2.6)
+	_attenuator(root, ribbon, fposmod(entry + wall_span.x, length), side, wall_lat)
+	root.set_meta("pit_wall_span_u", wall_span)
+	root.set_meta("pit_wall_lateral_m", side * wall_lat)
+
+
+## The stretch of lane [u0, u1] where a car on the sim path keeps its flank WALL_CLEARANCE_M off
+## the wall line: the wall (and its fence) may stand only there.
+static func wall_range(span: float, sim: Dictionary, wall_lat: float) -> Vector2:
+	var need: float = wall_lat + CAR_HALF_WIDTH_M + WALL_CLEARANCE_M
+	var u0: float = span * 0.5
+	var u := 0.0
+	while u < span * 0.5:
+		if absf(GtRace.lane_lateral_at(u, span, sim)) >= need:
+			u0 = u
+			break
+		u += 0.5
+	var u1: float = span * 0.5
+	u = span
+	while u > span * 0.5:
+		if absf(GtRace.lane_lateral_at(u, span, sim)) >= need:
+			u1 = u
+			break
+		u -= 0.5
+	return Vector2(u0, u1)
+
+
+## Yellow/black water-filled attenuator on the wall nose facing the cars that stay on track.
+static func _attenuator(root: Node3D, ribbon: Node3D, s: float, side: float, wall_lat: float) -> void:
+	var batch := MeshBatchScript.new()
+	var material: Material = Toon.vertex_colored(false)
+	for index in 4:
+		var frame: Transform3D = ribbon.get_point_at_offset(fposmod(s + 0.4 + 0.75 * float(index), float(ribbon.get("length_m"))), side * wall_lat)
+		var color := Color("#f2c200") if index % 2 == 0 else Color("#1b1c20")
+		batch.box(material, color, Transform3D(frame.basis, frame.origin + frame.basis.y * 0.5), Vector3(0.7, 1.0, 0.72))
+	var node := MeshInstance3D.new()
+	node.name = "PitWallAttenuator"
+	node.mesh = batch.commit()
+	node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	root.add_child(node)
 
 
 static func _sign(root: Node3D, ribbon: Node3D, s: float, side: float, text: String, board_color: Color, text_color: Color, height: float) -> void:

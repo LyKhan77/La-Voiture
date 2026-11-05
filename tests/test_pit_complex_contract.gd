@@ -7,7 +7,7 @@ extends SceneTree
 
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
 const Config := preload("res://scripts/core/race_config_data.gd")
-const CIRCUITS: Array[String] = ["apex_ring", "neo_wangan", "brianza", "monte_azure", "ardennes", "stoke_crown", "pacific_corkscrew", "eifel_forest"]
+const CIRCUITS: Array[String] = ["apex_ring", "neo_wangan", "brianza", "monte_azure", "ardennes", "stoke_crown", "pacific_corkscrew", "eifel_forest", "paulistano"]
 const LAYOUT_KEYS: Array[String] = ["entry_s", "exit_s", "stall_first_s", "stall_pitch_m", "stall_lane_m", "fast_lane_m", "edge_lateral_m", "queue_gap_m", "lane_ramp_in_m", "lane_ramp_out_m"]
 
 var failures: int = 0
@@ -71,8 +71,17 @@ func _audit(circuit: String) -> void:
 
 	for key: String in LAYOUT_KEYS:
 		check(race.pit_layout.has(key), "%s: the sim's pit layout has %s" % [label, key])
-	check(is_equal_approx(float(race.pit_layout["stall_lane_m"]), pit.stall_lane_m), "%s: the sim parks cars where the complex draws the boxes (%.1f m)" % [label, pit.stall_lane_m])
+	# The complex keeps magnitudes in its box frame; the sim's lateral carries the side (negative = a left-hand lane).
+	var sim_lane: float = float(race.pit_layout["stall_lane_m"])
+	var box: Dictionary = pit.stalls[0]
+	var centre: Transform3D = world.ribbon.get_point_at_offset(float(box["s"]), 0.0)
+	var drawn_side: float = signf((Transform3D(box["pose"]).origin - centre.origin).dot(centre.basis.x))
+	check(is_equal_approx(absf(sim_lane), pit.stall_lane_m) and signf(sim_lane) == drawn_side, "%s: the sim parks cars where the complex draws the boxes (%.1f m, %s side)" % [label, sim_lane, "left" if drawn_side < 0.0 else "right"])
 
+	var gantries: Array[Node] = world.find_children("StartGantry", "", true, false)
+	var own_gantry: Node = pit.get_node_or_null("StartGantry")
+	check(gantries.size() == 1 and (own_gantry == null or world.gantry == own_gantry) and world.gantry.lit_lamp_count() == 0,
+		"%s: one start gantry on the line (the circuit's own when it has one), dark before the start (%d found)" % [label, gantries.size()])
 	# Re-seating: reversed order moves every team's box, and the original order puts them back.
 	var reversed: Array[int] = []
 	for i: int in range(active.size() - 1, -1, -1):

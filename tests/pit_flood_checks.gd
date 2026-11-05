@@ -35,6 +35,8 @@ const MERGE_STILL_MAX_S: float = 4.0
 var trace_overlaps: bool = false
 ## The raced-field scenario: seed and the lap count the leader has run when everyone boxes (probe scripts vary them).
 var race_seed: int = 31
+## A circuit may raise the release bound only with a recorded, user-approved deviation (see its flood test).
+var release_max_s: float = RELEASE_MAX_S
 var live_laps: int = 2
 var failures: int = 0
 var track: TrackScript
@@ -230,7 +232,7 @@ func _measure(label: String, race: RaceScript, bound_flush: bool, still_max: flo
 			longest_merge = maxf(longest_merge, wait)
 		var mean_release: float = total_release / float(race.cars.size())
 		check(mean_release <= RELEASE_MEAN_MAX_S, "%s: a serviced car waits on average at most %.1f s in its box for the lane (%.2f s)" % [label, RELEASE_MEAN_MAX_S, mean_release])
-		check(longest_release <= RELEASE_MAX_S, "%s: a serviced car waits at most %.0f s in its box for the lane (%.1f s)" % [label, RELEASE_MAX_S, longest_release])
+		check(longest_release <= release_max_s, "%s: a serviced car waits at most %.0f s in its box for the lane (%.1f s)" % [label, release_max_s, longest_release])
 		check(longest_merge <= MERGE_STILL_MAX_S, "%s: a car pulling out stands at most %.0f s before the fast lane (%.1f s)" % [label, MERGE_STILL_MAX_S, longest_merge])
 
 

@@ -76,6 +76,7 @@ func _run() -> void:
 	while ticks < int(GUARD_S / DT):
 		race.step()
 		ticks += 1
+		_drive_hits += 1 if _overlaps(car, pit) else 0
 		if car.pit != null:
 			was_in_pit = true
 			if car.pit.phase == Types.PitPhase.IN and entry_station < 0.0:
@@ -127,8 +128,47 @@ func _run() -> void:
 		previous = station
 	check(ordered, "the 16 turn stations are ordered around the lap")
 	check(lap_start > 0.0, "the pit exit leaves the car on the racing surface")
+	check(_drive_hits == 0, "the serviced car never touches the pit wall (%d car-ticks)" % _drive_hits)
 	race.dispose()
+	check(_bunched_wall_hits(pit, track) == 0, "twenty cars boxing bunched never touch the pit wall (entry blend, queue or exit)")
 	circuit.free()
 	await process_frame
 	print("%d checks, %d failure(s)" % [checks, failures])
 	quit(1 if failures else 0)
+
+
+## Car-ticks whose body (car width) overlaps the pit wall line (cap width) along the walled stretch.
+func _overlaps(car, pit: Node) -> bool:
+	if car.pit == null:
+		return false
+	var span_u: Vector2 = pit.get_meta("pit_wall_span_u")
+	var wall_abs: float = absf(float(pit.get_meta("pit_wall_lateral_m")))
+	var u: float = car.s - car.pit.start_s
+	if u < span_u.x or u > span_u.y:
+		return false
+	var half: float = Types.CAR_WIDTH_M * 0.5
+	return absf(car.lateral) - half < wall_abs + 0.12 and absf(car.lateral) + half > wall_abs - 0.12
+
+
+var _drive_hits: int = 0
+
+
+func _bunched_wall_hits(pit: Node, track) -> int:
+	var race := RaceScript.new(track, 12, 31, WeatherScript.Archetype.DRY_SUNNY, 20, pit.sim_layout())
+	race.incidents_enabled = false
+	for index: int in range(race.cars.size()):
+		var car: CarScript = race.cars[index]
+		var s: float = fposmod(ENTRY_S - 150.0 - float(index) * 20.0, track.length) + track.length
+		car.s = s
+		car.prev_s = s
+		car.v = 32.0
+		car.lap = 1
+		race.request_pit(car.id, Types.Compound.MEDIUM)
+	var hits: int = 0
+	for _tick: int in range(int(140.0 / DT)):
+		race.step()
+		for car: CarScript in race.cars:
+			hits += 1 if _overlaps(car, pit) else 0
+	race.dispose()
+	print("  bunched pit wall overlap car-ticks: %d" % hits)
+	return hits

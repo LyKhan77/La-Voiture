@@ -171,11 +171,11 @@ func has_barrier_row_at(side: float, s: float, behind_m: float = 0.0) -> bool:
 	return behind_m <= 0.0 or SurfaceGeometry.max_extent(_centre_samples, ribbon, s, side, extent + behind_m) >= extent + behind_m - 0.01
 
 
-## Arc ranges that carry guardrail on `side`. The right side is the pit lane's, so it stays
+## Arc ranges that carry guardrail on `side`. The pit lane's side (right unless the zone says left) stays
 ## open from a little before Pit Entry to a little after Pit Exit.
 func armco_ranges_for(side: float) -> Array[Vector2]:
 	var length: float = ribbon.length_m
-	if side < 0.0:
+	if side != PitZoneScript.side_of(_pit_zone):
 		return [Vector2(0.0, length)]
 	return PitZoneScript.outside_ranges(_pit_zone, length)
 
@@ -504,7 +504,7 @@ func _build_flag_panels(kerbs: Array[Dictionary]) -> void:
 		var s: float = anchor["s"]
 		var side: float = anchor["side"]
 		if not has_armco_at(side, s):
-			side = -1.0
+			side = -PitZoneScript.side_of(_pit_zone)
 		anchor["side"] = side
 		poses.append(ribbon.get_point_at_offset(s, armco_lateral(side, s) + side * PANEL_BEHIND_RAIL_M))
 	flag_panels = FlagPanelSet.new()
