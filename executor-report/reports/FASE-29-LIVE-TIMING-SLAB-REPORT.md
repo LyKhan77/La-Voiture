@@ -38,7 +38,7 @@ Perubahan data: `GtRace.standings_entries()` +3 kunci (`tyre_life`, `tyre_age_la
 
 ## Belum / catatan
 
-- Smoke native penuh 3 lap sampai podium dan kembali ke HQ tidak dijalankan; yang diukur adalah 900 frame balapan, bukan tiga lap. Jangan dibaca sebagai gate DoD §8.2 yang sudah lulus.
+- Smoke native (`scratch/smoke_race.gd -- apex_ring`, `d3d12` 1080p, HUD Fase 29 aktif): 3 lap 20 mobil, 20/20 finis, frame rata-rata 16,67 ms, p95 16,74 ms, terburuk 17,07 ms, podium terbuka, **0 orphan** setelah dunia dan podium dibebaskan. Skrip ini tidak menekan tombol EXIT TO HQ, jadi pindah ke menu utama tidak diuji ulang di fase ini (jalur itu tidak disentuh Fase 29).
 - Wear per roda tidak ada di sim: keempat roda menampilkan tyre-life yang sama.
 - Keterbacaan font 11/17 px roda tick dinilai dari capture saja; tidak ada pengguna yang menguji.
 - Klik baris di bawah slab menggeser daftar 70 px saat slab lama runtuh; tidak diuji dengan tangan.
