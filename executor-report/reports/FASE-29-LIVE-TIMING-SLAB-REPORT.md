@@ -9,8 +9,9 @@
 
 | Area | Sebelum | Sekarang |
 |---|---|---|
-| Live Timing | `POS / DRIVER / INT / huruf kompon`; sorotan terpilih lime tetap | Baris ringkas 30 px (posisi, kode, nilai Tab, penanda tim, ring tyre-life). Mobil yang di-follow membuka slab 100 px berwarna tim: INT/GAP/LAST sekaligus, umur ban, stop, DRS, tiga bar sektor. Header, bingkai, bayangan, dan slab mengikuti `style.accent/on_accent/shadow`. |
+| Live Timing | `POS / DRIVER / INT / huruf kompon`; sorotan terpilih lime tetap | Baris ringkas 30 px (posisi, kode, nilai Tab, penanda tim, ring tyre-life). Mobil yang di-follow menjadi baris berwarna tim 46 px (opsi B): baris 30 px dengan kolom Tab, plus strip 16 px berisi tiga bar sektor, umur ban, stop, GAP, LAST, dan tag DRS. Header, bingkai, bayangan, dan slab mengikuti `style.accent/on_accent/shadow`. |
 | Elemen ban telemetri | Sumur panas 24×44 + enam blok tread | Roda tick: 16 tick = tyre-life, spoke dan hub warna suhu, kode roda + persen life + suhu di sisi luar. Brake disc, glow, blister, silang ban pecah dipertahankan. |
+| Radar | Caption dan chip sektor mobil yang di-follow | Caption dan chip sektor mobil deck; titik besar tetap di mobil kamera |
 | Sumber telemetri | Mobil yang di-follow (bisa rival) | `deck.deck_car_id`: hanya driver player yang aktif di Tactical Deck. |
 | Ambang merah tyre-life | 0,3 (blok tread lama) | `1 - GtTypes.TYRE_CLIFF_WEAR` = 0,25, sama dengan gauge TYRE LIFE di deck (satu statik, `TyreLifeRing.tint_for`). |
 
@@ -33,15 +34,16 @@ Perubahan data: `GtRace.standings_entries()` +3 kunci (`tyre_life`, `tyre_age_la
 6. Baris `tower.style = style` dimajukan dari Task 7 ke Task 6 (tes slab butuh tower ber-style).
 7. Header tower tetap tab chamfer berisi accent (seperti header deck), bukan header datar seperti preview HTML; catatan "LAP nn/nn" lewat `TimingTower.set_header_note`.
 8. Label kolom Tab berwarna accent hanya bila kontras ≥ 3:1 terhadap panel; selain itu putih (ditemukan dari capture tim gelap, tes ditambahkan merah dulu).
-9. Radar dibiarkan (belum ada keputusan developer): masih menampilkan warna sektor dan label mobil yang di-follow.
+9. Radar: semula dibiarkan, lalu diputuskan developer (opsi B) mengikuti mobil deck. `#R4` di `tests/test_circuit_minimap.gd` diubah karena menguji perilaku lama. Titik besar tetap di mobil kamera karena itu posisi, bukan status. Biaya: caption radar dan titik besar bisa menunjuk mobil berbeda saat rival diklik.
 10. Slab berganti dengan snap tanpa animasi.
+11. Setelah review, slab 100 px diganti opsi B (46 px, strip 16 px) dari tiga konsep compact di preview HTML; teks strip 9 px, hanya dinilai dari capture. Nomor mobil tidak lagi berplat sendiri (kode `#09 KAD` satu label). Biaya: teks strip kecil.
 
 ## Belum / catatan
 
 - Smoke native (`scratch/smoke_race.gd -- apex_ring`, `d3d12` 1080p, HUD Fase 29 aktif): 3 lap 20 mobil, 20/20 finis, frame rata-rata 16,67 ms, p95 16,74 ms, terburuk 17,07 ms, podium terbuka, **0 orphan** setelah dunia dan podium dibebaskan. Skrip ini tidak menekan tombol EXIT TO HQ, jadi pindah ke menu utama tidak diuji ulang di fase ini (jalur itu tidak disentuh Fase 29).
 - Wear per roda tidak ada di sim: keempat roda menampilkan tyre-life yang sama.
 - Keterbacaan font 11/17 px roda tick dinilai dari capture saja; tidak ada pengguna yang menguji.
-- Klik baris di bawah slab menggeser daftar 70 px saat slab lama runtuh; tidak diuji dengan tangan.
+- Klik baris di bawah slab menggeser daftar 16 px (sebelumnya 70 px); tidak diuji dengan tangan.
 - Peringatan ObjectDB leak muncul sekali pada satu run headless suite baru tepat setelah edit file (31–37 instance) dan tidak terulang pada run berikutnya maupun pada `test_race_hud`. Tidak ditemukan penyebabnya.
 - `slab_texts` dihitung untuk 20 entry tiap 6 frame padahal hanya satu yang dipakai (minor, ditunda).
 

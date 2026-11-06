@@ -13,7 +13,9 @@ const Liveries := preload("res://scripts/car/team_liveries.gd")
 const GarageStyleScript := preload("res://scripts/ui/manga/garage_style.gd")
 
 const ROW_H_COMPACT: float = 30.0
-const ROW_H_SLAB: float = 100.0
+## The selected row: the 30 px row plus a 16 px strip (sectors, tyre age, stops, gap, last lap, DRS).
+const STRIP_H: float = 16.0
+const ROW_H_SLAB: float = ROW_H_COMPACT + STRIP_H
 const SECTORS := 3
 const MINIS_PER_SECTOR := 4
 const MINI_DELTAS := SECTORS * MINIS_PER_SECTOR
@@ -30,14 +32,15 @@ const SNAP_OFFSET := 6.0
 class SectorBars extends Control:
 	## Height share by GtTypes.SectorColor (NONE, PURPLE, GREEN, YELLOW).
 	const HEIGHTS: Array[float] = [0.15, 1.0, 0.7, 0.4]
-	const BAR_W: float = 12.0
-	const GAP: float = 3.0
+	const GAP: float = 2.0
 
 	var colors: Array[int] = [0, 0, 0]
 	var edge: Color = T.INK_BORDER_BLACK
+	var bar_w: float = 10.0
 
-	func _init() -> void:
-		custom_minimum_size = Vector2(BAR_W * 3.0 + GAP * 2.0, 34.0)
+	func _init(p_height: float = 10.0, p_bar_w: float = 10.0) -> void:
+		bar_w = p_bar_w
+		custom_minimum_size = Vector2(bar_w * 3.0 + GAP * 2.0, p_height)
 		size = custom_minimum_size
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 
@@ -66,7 +69,7 @@ class SectorBars extends Control:
 	func _draw() -> void:
 		for index: int in range(3):
 			var height: float = size.y * height_of(colors[index])
-			var rect := Rect2(float(index) * (BAR_W + GAP), size.y - height, BAR_W, height)
+			var rect := Rect2(float(index) * (bar_w + GAP), size.y - height, bar_w, height)
 			draw_rect(rect, color_of(colors[index]))
 			draw_rect(rect, edge, false, 1.0)
 
@@ -98,19 +101,18 @@ var _active: StyleBoxFlat
 var _sector_line: String = ""
 var _entry: Dictionary = {}
 
-## The slab: the followed car's row, filled with the team accent (hidden until `set_expanded(true)`).
+## The selected row (the "slab"): the row on the team accent with a strip under it. Hidden until `set_expanded(true)`.
 var slab_style: StyleBoxFlat
 var _slab: Panel
-var _plate_box: StyleBoxFlat
 var _slab_pos: Label
-var _slab_plate: Label
 var _slab_code: Label
 var _slab_value: Label
-var _slab_times: Label
-var _slab_tyre: Label
 var _slab_note: Label
+var _slab_drs: Label
+var _slab_mark: ColorRect
 var _slab_ring: TyreLifeRing
 var _slab_bars: SectorBars
+var _drs_box: StyleBoxFlat
 
 
 func _ready() -> void:
@@ -157,6 +159,8 @@ func _slab_label(parent: Control, at: Vector2, font_size: int, font: Font = UI.M
 	return label
 
 
+## The slab mirrors the compact row on the accent (position, number and code, column value, team mark, ring) and adds a
+## darker strip under it: sector bars, then "S 8L . 2 STOPS . G +1.6 . L 1:26.118" and the DRS tag on the right.
 func _build_slab() -> void:
 	_slab = Panel.new()
 	_slab.name = "Slab"
@@ -164,59 +168,78 @@ func _build_slab() -> void:
 	_slab.visible = false
 	slab_style = StyleBoxFlat.new()
 	slab_style.shadow_size = 1
-	slab_style.shadow_offset = Vector2(4.0, 4.0)
+	slab_style.shadow_offset = Vector2(4.0, 0.0)
 	style.face(slab_style)
 	style.shade(slab_style)
 	_slab.add_theme_stylebox_override("panel", slab_style)
 	add_child(_slab)
 	_slab.anchor_right = 1.0
 	_slab.anchor_bottom = 1.0
-	_slab.offset_top = 2.0
 	_slab.offset_right = -6.0
-	_slab.offset_bottom = -8.0
-	_slab_pos = _slab_label(_slab, Vector2(10.0, 4.0), 22, UI.DISPLAY)
-	_plate_box = StyleBoxFlat.new()
-	_plate_box.set_content_margin_all(0.0)
-	_plate_box.content_margin_left = 6.0
-	_plate_box.content_margin_right = 6.0
-	_slab_plate = _slab_label(_slab, Vector2(50.0, 8.0), 13, UI.MONO, "accent")
-	_slab_plate.add_theme_stylebox_override("normal", _plate_box)
-	_slab_code = _slab_label(_slab, Vector2(92.0, 6.0), 18, UI.DISPLAY)
-	_slab_value = _slab_label(_slab, Vector2(0.0, 8.0), 15)
+	_slab_pos = _slab_label(_slab, Vector2(8.0, 4.0), 16, UI.DISPLAY)
+	_slab_code = _slab_label(_slab, Vector2(40.0, 6.0), 13)
+	_slab_value = _slab_label(_slab, Vector2(0.0, 6.0), 13)
 	_slab_value.anchor_left = 1.0
 	_slab_value.anchor_right = 1.0
-	_slab_value.offset_left = -110.0
-	_slab_value.offset_right = -16.0
+	_slab_value.offset_left = -126.0
+	_slab_value.offset_right = -58.0
 	_slab_value.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	var well := Panel.new()
-	well.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var well_box := StyleBoxFlat.new()
-	well_box.bg_color = T.SURFACE_PANEL_DARK
-	well_box.set_corner_radius_all(25)
-	well.add_theme_stylebox_override("panel", well_box)
-	_slab.add_child(well)
-	well.position = Vector2(10.0, 40.0)
-	well.size = Vector2(50.0, 50.0)
-	_slab_ring = TyreLifeRing.new(46.0)
-	well.add_child(_slab_ring)
-	_slab_ring.position = Vector2(2.0, 2.0)
-	_slab_times = _slab_label(_slab, Vector2(68.0, 40.0), 10)
-	_slab_tyre = _slab_label(_slab, Vector2(150.0, 40.0), 10)
-	_slab_note = _slab_label(_slab, Vector2(68.0, 82.0), 9)
-	_slab_bars = SectorBars.new()
-	_slab.add_child(_slab_bars)
-	_slab_bars.anchor_left = 1.0
-	_slab_bars.anchor_right = 1.0
-	_slab_bars.offset_left = -58.0
-	_slab_bars.offset_right = -16.0
-	_slab_bars.position.y = 44.0
+	var outline := ColorRect.new()
+	outline.color = Color(T.INK_BORDER_BLACK, 0.7)
+	outline.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_slab.add_child(outline)
+	outline.anchor_left = 1.0
+	outline.anchor_right = 1.0
+	outline.offset_left = -55.0
+	outline.offset_right = -39.0
+	outline.offset_top = 12.0
+	outline.offset_bottom = 20.0
+	_slab_mark = ColorRect.new()
+	_slab_mark.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	outline.add_child(_slab_mark)
+	_slab_mark.position = Vector2(1.0, 1.0)
+	_slab_mark.size = MARK_SIZE
+	_slab_ring = TyreLifeRing.new(22.0)
+	_slab.add_child(_slab_ring)
+	_slab_ring.anchor_left = 1.0
+	_slab_ring.anchor_right = 1.0
+	_slab_ring.offset_left = -34.0
+	_slab_ring.offset_right = -12.0
+	_slab_ring.offset_top = 4.0
+	_slab_ring.offset_bottom = 26.0
+	var strip := ColorRect.new()
+	strip.color = Color(0.0, 0.0, 0.0, 0.15)
+	strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_slab.add_child(strip)
+	strip.anchor_right = 1.0
+	strip.offset_top = ROW_H_COMPACT
+	strip.offset_bottom = ROW_H_COMPACT + STRIP_H
+	_slab_bars = SectorBars.new(10.0, 10.0)
+	strip.add_child(_slab_bars)
+	_slab_bars.position = Vector2(42.0, 3.0)
+	_slab_note = _slab_label(strip, Vector2(86.0, 2.0), 9)
+	_slab_note.clip_text = true
+	_slab_note.anchor_right = 1.0
+	_slab_note.offset_left = 80.0
+	_slab_note.offset_right = -44.0
+	_slab_drs = UI.label("DRS", 9, T.ACCENT_ACID_LIME, UI.MONO)
+	_drs_box = StyleBoxFlat.new()
+	_drs_box.bg_color = T.INK_BORDER_BLACK
+	_drs_box.content_margin_left = 4.0
+	_drs_box.content_margin_right = 4.0
+	_slab_drs.add_theme_stylebox_override("normal", _drs_box)
+	strip.add_child(_slab_drs)
+	_slab_drs.anchor_left = 1.0
+	_slab_drs.anchor_right = 1.0
+	_slab_drs.offset_left = -40.0
+	_slab_drs.offset_right = -12.0
+	_slab_drs.position.y = 2.0
 	style.changed.connect(_repaint_slab)
 	_repaint_slab()
 
 
-## The plate is inked in the face's type colour: `on_accent` as its fill, the accent as its text.
+## The sector bars are edged in the type colour of the accent (ink on a light team, white on a dark one).
 func _repaint_slab() -> void:
-	_plate_box.bg_color = style.on_accent
 	_slab_bars.edge = style.on_accent
 	_slab_bars.queue_redraw()
 
@@ -317,12 +340,13 @@ func _update_slab(entry: Dictionary) -> void:
 	if entry.is_empty():
 		return
 	_slab_pos.text = _pos.text
-	_slab_plate.text = "%d" % int(entry.get("number", 0))
-	_slab_code.text = String(entry.get("code", _driver.text)).to_upper()
+	_slab_code.text = _driver.text
 	_slab_value.text = _interval.text
-	_slab_times.text = "INT %s\nGAP %s\nLAST %s" % [String(entry.get("slab_int", "--")), String(entry.get("slab_gap", "--")), String(entry.get("slab_last", "--"))]
-	_slab_tyre.text = "AGE %dL\nSTOPS %d%s" % [int(entry.get("tyre_age_laps", 0)), int(entry.get("stops", 0)), "\nDRS" if bool(entry.get("drs", false)) else ""]
-	_slab_note.text = _sector_line
+	var stops: int = int(entry.get("stops", 0))
+	_slab_note.text = "%s %dL · %d STOP%s · G %s · L %s" % [_ring.letter, int(entry.get("tyre_age_laps", 0)), stops, "" if stops == 1 else "S",
+		String(entry.get("slab_gap", "--")), String(entry.get("slab_last", "--"))]
+	_slab_drs.visible = bool(entry.get("drs", false))
+	_slab_mark.color = _mark.color
 	_slab_ring.set_tyre(_ring.life, _ring.letter, _ring.letter_color)
 	_slab_bars.set_colors(entry.get("sector_colors", []))
 

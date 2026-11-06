@@ -764,7 +764,8 @@ func _update_panels() -> void:
 			fastest = car
 		if car.speed_trap_speed > 0.0 and (trap == null or car.speed_trap_speed > trap.speed_trap_speed):
 			trap = car
-	var watched: GtCar = race.get_car(world.followed_id)
+	# The radar caption and sector chips are status, so they follow the deck car like the telemetry; the big dot stays on the camera car.
+	var watched: GtCar = race.get_car(deck.deck_car_id)
 	var yellow_sector: int = int(race.race_control["sector"]) if int(race.race_control["flag"]) == GtTypes.Flag.YELLOW else 0
 	radar.update_snapshot({
 		"cars": cars, "yellow_sector": yellow_sector,

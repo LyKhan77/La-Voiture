@@ -12,7 +12,7 @@ extends Control
 ##
 ## Snapshot: {"cars": [{"car_id", "team_id", "spline_distance"} + optional "number", "position", "followed",
 ## "player", "in_pit", "retired"], optional "sector_colors" [3 GtTypes.SectorColor], "sector" (0-based
-## sector of the followed car), "yellow_sector" (1-based, 0 = none), "followed_text"}. Callers that send only the
+## sector of the deck car), "yellow_sector" (1-based, 0 = none), "followed_text"}. Callers that send only the
 ## three required fields still get numbered dots (number = car_id + 1).
 
 const TrackRibbonScript := preload("res://scripts/car/track_ribbon.gd")

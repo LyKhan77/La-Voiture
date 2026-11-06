@@ -48,6 +48,7 @@ func _run() -> void:
 	race.step_ticks(200)
 	hud.refresh_all()
 	_test_telemetry_follows_deck_car()
+	_test_radar_reads_deck_car_only()
 	_test_entries_carry_tyre_life()
 	_test_tyre_life_ring_rules()
 	_test_painter_wheel_uses_shared_rules()
@@ -214,6 +215,13 @@ func _test_slab_layout() -> void:
 		"slab: exactly one row, the followed car's, opens into the %d px slab" % int(DriverRow.ROW_H_SLAB))
 	check(slabs[0]._slab_code.text.contains(mine[0].code) and slabs[0]._slab_value.text == slabs[0]._interval.text and is_equal_approx(slabs[0]._slab_ring.life, TyreLifeRing.life_of(mine[0].wear)),
 		"slab: code, column value and the big ring come from the same entry (%s)" % slabs[0]._slab_code.text)
+	check(is_equal_approx(DriverRow.ROW_H_SLAB, 46.0) and is_equal_approx(DriverRow.ROW_H_SLAB - DriverRow.ROW_H_COMPACT, 16.0),
+		"slab: the selected row is a 30 px row plus a 16 px strip, so the list below moves 16 px")
+	var entry: Dictionary = _entry_of(mine[0].id)
+	var texts: Dictionary = RaceHud.slab_texts(entry)
+	var strip: String = slabs[0]._slab_note.text
+	check(strip.contains("%dL" % int(entry["tyre_age_laps"])) and strip.contains("%d STOP" % int(entry["stops"])) and strip.contains(String(texts["gap"])) and strip.contains(String(texts["last"])),
+		"slab: the strip reads tyre age, stops, gap and last lap (%s)" % strip)
 	var rival: GtCar = _first_rival()
 	var old_slab: Control = slabs[0]
 	var clicked: Control = _row_of(rival.id)
@@ -279,3 +287,30 @@ func _test_slab_texts_and_team_colour() -> void:
 		"hud: a team colour repaints the slab, type flips ink/white, a near-crimson team gets the cyan shadow, data colours stay fixed (%s %s %s)" % [light_ok, near_crimson_ok, dark_ok])
 	check(dark_header >= DriverRow.MIN_MARK_CONTRAST and lime_header == Liveries.color_for(0),
 		"hud: the Tab column label stays readable on a dark team colour (contrast %.1f) and wears the accent when it is bright" % dark_header)
+
+
+# --- radar source ---------------------------------------------------------------------------------------------
+
+func _test_radar_reads_deck_car_only() -> void:
+	var deck: TacticalDeck = hud.deck
+	var rival: GtCar = _first_rival()
+	deck.tabs[0].pressed.emit()
+	for sector: int in range(3):
+		rival.sector_colors[sector] = GtTypes.SectorColor.PURPLE
+		mine[0].sector_colors[sector] = GtTypes.SectorColor.GREEN
+	world.followed_id = rival.id
+	hud.refresh_all()
+	var radar_text: String = hud.radar.followed_text
+	check(radar_text.contains(mine[0].code) and not radar_text.contains(rival.code),
+		"radar: a rival followed in the tower leaves the caption on the deck car (%s)" % radar_text)
+	var all_deck_colour: bool = hud.radar.chips.size() == 3
+	for chip: Dictionary in hud.radar.chips:
+		all_deck_colour = all_deck_colour and int(chip["status"]) == GtTypes.SectorColor.GREEN
+	check(all_deck_colour, "radar: the sector chips show the deck car's results, not the followed rival's")
+	deck.tabs[1].pressed.emit()
+	hud.refresh_all()
+	check(hud.radar.followed_text.contains(mine[1].code),
+		"radar: switching the deck driver moves the caption to that car (%s)" % hud.radar.followed_text)
+	deck.tabs[0].pressed.emit()
+	world.followed_id = mine[0].id
+	hud.refresh_all()

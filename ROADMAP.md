@@ -7,10 +7,11 @@
 ## Status Fase 29 — 2026-11-05
 
 - [x] **Fase 29: Live Timing "Slab" + roda tyre-life — warna tower ikut tim player, telemetri hanya driver deck** (branch `fase-29-live-timing-slab`, belum di-merge)
-  - Tower: baris ringkas 30 px dengan ring tyre-life dan penanda tim; mobil yang di-follow membuka slab 100 px berwarna tim (INT/GAP/LAST sekaligus, umur ban, stop, DRS, tiga bar sektor). Chrome mengikuti `style.accent/on_accent/shadow`; label kolom Tab tetap terbaca di warna tim gelap.
+  - Tower: baris ringkas 30 px dengan ring tyre-life dan penanda tim; mobil yang di-follow menjadi baris berwarna tim 46 px (baris 30 px + strip 16 px: tiga bar sektor, umur ban, stop, GAP, LAST, DRS; kolom Tab tetap di baris). Daftar di bawahnya hanya bergeser 16 px. Chrome mengikuti `style.accent/on_accent/shadow`; label kolom Tab tetap terbaca di warna tim gelap.
+  - Radar: caption dan chip sektor kini membaca mobil deck (bukan mobil yang di-follow); titik besar di peta tetap mengikuti kamera.
   - Telemetri: elemen ban saja (`TelemetryPainter._tyre`) menjadi roda tick; sumber data sekarang `deck.deck_car_id`, tidak pernah mobil rival yang di-follow. Ambang merah tyre-life disatukan dengan gauge deck (`1 - TYRE_CLIFF_WEAR` = 0,25, semula 0,3).
   - Bukti: suite baru `tests/test_live_timing_slab.gd` (26 assertion, merah dulu), **115/115 suite headless, 0 FAIL** (irisan, latar depan); capture native 1080p di `executor-report/screenshots/phases/phase-29-live-timing-slab/`. Laporan: [`FASE-29-LIVE-TIMING-SLAB-REPORT.md`](executor-report/reports/FASE-29-LIVE-TIMING-SLAB-REPORT.md). Spec: [`2026-11-05-live-timing-slab-design.md`](docs/superpowers/specs/2026-11-05-live-timing-slab-design.md).
-  - Belum: smoke native 3 lap 20 mobil dengan FPS dan orphan node, wear per roda (perubahan sim), radar masih menampilkan info mobil yang di-follow.
+  - Smoke native Apex 3 lap 20 mobil: 20/20 finis, p95 16,74 ms, 0 orphan. Belum: wear per roda (perubahan sim).
 
 ---
 

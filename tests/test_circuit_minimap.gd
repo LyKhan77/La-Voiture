@@ -3,7 +3,7 @@ extends SceneTree
 ## In-game minimap (feedback round after FASE 10): the circuit radar of the race HUD reads at a glance.
 ## Every car is a team-coloured dot carrying its race number, the lap is split into three sector bands
 ## with their S1 / S2 / S3 labels and boundary ticks, the followed car is picked out, the player's team is
-## ringed, and the strip under the map shows the followed car's three sector results and the yellow flag sector.
+## ringed, and the strip under the map shows the deck car's three sector results and the yellow flag sector.
 ## Run: Godot --headless --path . -s res://tests/test_circuit_minimap.gd
 
 const WorldScene := preload("res://scenes/race_weekend_world.tscn")
@@ -144,7 +144,7 @@ func _test_followed_and_player() -> void:
 
 
 func _test_sector_chips() -> void:
-	var followed: GtCar = race.get_car(world.followed_id)
+	var followed: GtCar = race.get_car(hud.deck.deck_car_id) # status follows the deck car, not the camera car
 	followed.sector_colors[0] = Types.SectorColor.PURPLE
 	followed.sector_colors[1] = Types.SectorColor.GREEN
 	followed.sector_colors[2] = Types.SectorColor.YELLOW
@@ -163,7 +163,7 @@ func _test_sector_chips() -> void:
 				order_ok = order_ok and index == followed.current_sector
 	var caption: String = str(hud.radar.get("followed_text"))
 	check(order_ok and fills.size() == 3 and current_count == 1 and caption == "#%d %s" % [followed.number, followed.code],
-		"#R4 the strip under the map shows the followed car's S1 purple, S2 green, S3 yellow, marks the sector it is in (S%d) and names the car (%s)" % [followed.current_sector + 1, caption])
+		"#R4 the strip under the map shows the deck car's S1 purple, S2 green, S3 yellow, marks the sector it is in (S%d) and names the car (%s)" % [followed.current_sector + 1, caption])
 
 
 func _test_yellow_sector() -> void:
