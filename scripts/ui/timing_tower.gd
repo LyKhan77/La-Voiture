@@ -8,6 +8,7 @@ signal driver_selected(car_id: int)
 const UI = preload("res://scripts/ui/pit_wall_ui.gd")
 const T = preload("res://scripts/ui/ui_theme_tokens.gd")
 const ROW_SCENE = preload("res://scenes/pit_wall/driver_row.tscn")
+const GarageStyleScript := preload("res://scripts/ui/manga/garage_style.gd")
 
 const ROW_COUNT := 20
 
@@ -23,18 +24,39 @@ const ROW_COUNT := 20
 
 var rows: Array = []
 var selected_car_id: int = -1
+## The team skin, assigned before the tower enters the tree. Null keeps the old pit wall look (lime header, ink shadow).
+var style: GarageStyleScript
+
+var _header_shape: ColorRect
+var _header_note: Label
+var _shadow: ColorRect
 
 var _connected := false
 var _pending: Array = []
 
 func _ready() -> void:
+	var themed: bool = style != null
+	if not themed:
+		style = GarageStyleScript.new()
 	UI.surface(_chrome)
-	var header := UI.header("LIVE TIMING")
+	var header := UI.header("LIVE TIMING", style.accent)
 	_header_slot.add_child(header)
 	header.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_header_shape = header.get_child(0) as ColorRect
+	_header_note = UI.label("", 12, style.on_accent)
+	header.add_child(_header_note)
+	_header_note.anchor_left = 1.0
+	_header_note.anchor_right = 1.0
+	_header_note.offset_left = -120.0
+	_header_note.offset_right = -14.0
+	_header_note.offset_top = 5.0
+	_header_note.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	if themed:
+		_skin_chrome(header)
 	_style_chrome()
 	for index: int in range(ROW_COUNT):
 		var row = ROW_SCENE.instantiate()
+		row.style = style if themed else null
 		row.name = "Row%02d" % (index + 1)
 		_rows_box.add_child(row)
 		row.visible = false
@@ -46,11 +68,42 @@ func _ready() -> void:
 		_pending = []
 		_apply_standings(queued)
 
+
+
+## The team skin: a 3 px accent frame, a hard shadow in the skin's shadow colour, the header in the accent with type
+## that flips between ink and white. `style.changed` repaints it all in place.
+func _skin_chrome(header: Control) -> void:
+	var outline := _chrome.get_node("InkOutline") as Panel
+	var frame := outline.get_theme_stylebox("panel") as StyleBoxFlat
+	frame.set_expand_margin_all(3.0)
+	style.face(frame)
+	_shadow = _chrome.get_node("HardOffsetShadow") as ColorRect
+	style.tint(header.get_child(1) as Label, "font_color", "on")
+	style.tint(_header_note, "font_color", "on")
+	style.changed.connect(_on_style_changed)
+	_on_style_changed()
+
+
+func _on_style_changed() -> void:
+	_shadow.color = style.shadow
+	# The Tab column label wears the accent unless that is too dark for the panel.
+	var readable: bool = DriverRow.contrast_ratio(style.accent, T.SURFACE_PANEL_DARK) >= DriverRow.MIN_MARK_CONTRAST
+	_col_int.add_theme_color_override("font_color", style.accent if readable else T.TEXT_PRIMARY)
+	(_header_shape.material as ShaderMaterial).set_shader_parameter("fill_color", style.accent)
+
+
+## The header's small note on the right (the race HUD writes the lap).
+func set_header_note(text: String) -> void:
+	_header_note.text = text
+
+
 func _style_chrome() -> void:
 	for column: Label in [_col_pos, _col_driver, _col_int, _col_t]:
 		column.add_theme_font_override("font", UI.MONO)
 		column.add_theme_font_size_override("font_size", 10)
 		column.add_theme_color_override("font_color", T.TEXT_MUTED)
+	if style != null and _shadow != null:
+		_col_int.add_theme_font_size_override("font_size", 11)
 	_footer_status.add_theme_font_override("font", UI.MONO)
 	_footer_status.add_theme_font_size_override("font_size", 10)
 	_footer_status.add_theme_color_override("font_color", T.TEXT_MUTED)

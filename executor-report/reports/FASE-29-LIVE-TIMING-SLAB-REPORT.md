@@ -1,0 +1,53 @@
+# FASE 29 — Live Timing "Slab" + roda tyre-life: laporan eksekutor
+
+**Tanggal:** 2026-11-05
+**Agen:** Claude Code (Sonnet 5.5), Planner + Executor
+**Branch:** `fase-29-live-timing-slab` (belum di-commit, belum di-merge)
+**Spec:** [`2026-11-05-live-timing-slab-design.md`](../../docs/superpowers/specs/2026-11-05-live-timing-slab-design.md) · **Rencana:** [`2026-11-05-live-timing-slab.md`](../../docs/superpowers/plans/2026-11-05-live-timing-slab.md)
+
+## Hasil
+
+| Area | Sebelum | Sekarang |
+|---|---|---|
+| Live Timing | `POS / DRIVER / INT / huruf kompon`; sorotan terpilih lime tetap | Baris ringkas 30 px (posisi, kode, nilai Tab, penanda tim, ring tyre-life). Mobil yang di-follow membuka slab 100 px berwarna tim: INT/GAP/LAST sekaligus, umur ban, stop, DRS, tiga bar sektor. Header, bingkai, bayangan, dan slab mengikuti `style.accent/on_accent/shadow`. |
+| Elemen ban telemetri | Sumur panas 24×44 + enam blok tread | Roda tick: 16 tick = tyre-life, spoke dan hub warna suhu, kode roda + persen life + suhu di sisi luar. Brake disc, glow, blister, silang ban pecah dipertahankan. |
+| Sumber telemetri | Mobil yang di-follow (bisa rival) | `deck.deck_car_id`: hanya driver player yang aktif di Tactical Deck. |
+| Ambang merah tyre-life | 0,3 (blok tread lama) | `1 - GtTypes.TYRE_CLIFF_WEAR` = 0,25, sama dengan gauge TYRE LIFE di deck (satu statik, `TyreLifeRing.tint_for`). |
+
+Perubahan data: `GtRace.standings_entries()` +3 kunci (`tyre_life`, `tyre_age_laps`, `stops`). Tidak ada perubahan sim.
+
+## Verifikasi
+
+- **TDD:** `tests/test_live_timing_slab.gd` (26 assertion). Tiap kelompok tes dilihat **gagal** terhadap kode lama sebelum implementasi (telemetri rival, kunci entry, kelas ring belum ada, `wheel_ticks` belum ada, `DriverRow` belum punya `class_name`, tidak ada baris `expanded`, `slab_texts` belum ada, kontras label Tab 1,8).
+- **Regresi penuh:** `tools/run_tests.ps1` per irisan, latar depan: `0-19`, `20-34`, `35-52`, `53-72`, `73-92`, `93-114` → **115 suite, 0 failing**. Setelah perbaikan terakhir (label Tab) suite terkait dijalankan ulang: `live_timing`, `race_hud`, `hud_theme`, `pit_wall`, `weather_and_ai`, `deck`, `circuit_minimap`, `visual_polish` → 0 failing.
+- **Native 1080p** (`d3d12`, High, Apex Ring, seed 29): `temp/capture_live_timing.gd`, 11 capture di `executor-report/screenshots/phases/phase-29-live-timing-slab/` (`team_lime|light|near_crimson|dark|player`, `tab_gap|last|int`, `rival_clicked`, `deck_second_driver`, `worn_tyres_and_dnf`). Terbaca di capture: rival diklik → slab pindah, telemetri tetap `#09 KAD`; ban aus 82% → tick crimson, ring slab crimson, gauge deck 18% DANGER (konsisten); tim terang → slab terang, teks ink; tim gelap `#1E3A8A` → teks putih.
+- **Frame time native** (`temp/probe_hud_frames.gd`, 900 frame, balapan 20 mobil 1x, 3 kali): avg 16,67 ms, p95 16,80 / 16,90 / 16,92 ms, p99 18,3 / 19,1 / 19,7 ms, max 23 sampai 25 ms; **0 orphan node** setelah dunia dibebaskan. Pembacaan Fase 20 adalah p95 16,839 ms (ambang 16,8). Pita yang sama; baseline `main` tidak diukur ulang di sesi ini.
+
+## Keputusan builder (Ruling)
+
+1. Tanpa commit per task: aturan repo (commit hanya bila developer meminta) mengalahkan langkah Checkpoint di rencana. Biaya bila salah: tidak ada rentang review per task.
+2. `DriverRow` mempertahankan tampilan lama (baris terbalik + snap 6 px) bila tidak diberi `style` (`_legacy_lit`): `tests/test_pit_wall.gd` (PitWallDashboard, Fase 2) mengunci tampilan itu. HUD balapan memberi `style`, jadi mendapat tampilan baru. Biaya: dua tampilan lit di kode.
+3. Nomor mobil tidak diwarnai terpisah (label `_driver` tetap satu teks `#09 KAD` karena tes membacanya); penanda tim dan `*` membawa identitas tim.
+4. Ambang life 0,3 → 0,25 (spec diamandemen). Biaya: ring merah sedikit lebih lambat dari blok tread lama.
+5. `TyreLifeRing.change_count` menggantikan `draw_count` di rencana (tes headless tanpa frame).
+6. Baris `tower.style = style` dimajukan dari Task 7 ke Task 6 (tes slab butuh tower ber-style).
+7. Header tower tetap tab chamfer berisi accent (seperti header deck), bukan header datar seperti preview HTML; catatan "LAP nn/nn" lewat `TimingTower.set_header_note`.
+8. Label kolom Tab berwarna accent hanya bila kontras ≥ 3:1 terhadap panel; selain itu putih (ditemukan dari capture tim gelap, tes ditambahkan merah dulu).
+9. Radar dibiarkan (belum ada keputusan developer): masih menampilkan warna sektor dan label mobil yang di-follow.
+10. Slab berganti dengan snap tanpa animasi.
+
+## Belum / catatan
+
+- Smoke native penuh 3 lap sampai podium dan kembali ke HQ tidak dijalankan; yang diukur adalah 900 frame balapan, bukan tiga lap. Jangan dibaca sebagai gate DoD §8.2 yang sudah lulus.
+- Wear per roda tidak ada di sim: keempat roda menampilkan tyre-life yang sama.
+- Keterbacaan font 11/17 px roda tick dinilai dari capture saja; tidak ada pengguna yang menguji.
+- Klik baris di bawah slab menggeser daftar 70 px saat slab lama runtuh; tidak diuji dengan tangan.
+- Peringatan ObjectDB leak muncul sekali pada satu run headless suite baru tepat setelah edit file (31–37 instance) dan tidak terulang pada run berikutnya maupun pada `test_race_hud`. Tidak ditemukan penyebabnya.
+- `slab_texts` dihitung untuk 20 entry tiap 6 frame padahal hanya satu yang dipakai (minor, ditunda).
+
+## File
+
+Diubah: `scenes/pit_wall/driver_row.tscn`, `scenes/pit_wall/timing_tower.tscn`, `scripts/gt/gt_race.gd`, `scripts/hud/race_hud.gd`, `scripts/hud/telemetry_painter.gd`, `scripts/ui/driver_row.gd`, `scripts/ui/timing_tower.gd`, `tests/test_race_hud.gd`, `AGENTS.md` (irisan suite), `ROADMAP.md`.
+Baru: `scripts/hud/tyre_life_ring.gd` (+ `.uid`), `tests/test_live_timing_slab.gd` (+ `.uid`), spec, rencana, laporan ini, capture di `executor-report/screenshots/phases/phase-29-live-timing-slab/`.
+
+**Sengaja tidak di-commit:** `.uid` yang dibuat impor Godot untuk pekerjaan lain (`scratch/capture_kurogane_views.gd.uid`, `scratch/smoke_kurogane_race.gd.uid`, `scripts/world/circuits/kurogane/kurogane_environment.gd.uid`, `tests/test_garage_engine_test.gd.uid`, `tests/test_garage_transition_engine.gd.uid`, `tests/test_kurogane_circuit.gd.uid`, `tests/test_kurogane_pit_drive.gd.uid`, `tests/test_kurogane_pit_flood.gd.uid`, `tests/test_pit_mouth_pavement.gd.uid`), `temp/` (skrip capture dan probe, preview HTML), `.superpowers/` (ledger).

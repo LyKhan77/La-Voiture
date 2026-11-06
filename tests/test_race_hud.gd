@@ -127,7 +127,7 @@ func _test_tower() -> void:
 	var gap_header: String = hud._tower_column.text
 	hud.handle_key(KEY_TAB)
 	hud.handle_key(KEY_TAB)
-	check(visible_rows == 20 and leader_row != null and leader_row._driver.text.contains(leader.code) and leader_row._compound.text == GtTypes.COMPOUND_LABEL[leader.compound],
+	check(visible_rows == 20 and leader_row != null and leader_row._driver.text.contains(leader.code) and leader_row._ring.letter == GtTypes.COMPOUND_LABEL[leader.compound],
 		"tower: 20 rows in race order, each with number, code and the S/M/H/I/W tyre letter (leader %s)" % leader_row._driver.text)
 	check(int_text.begins_with("+") and gap_text.begins_with("+") and gap_text.to_float() > int_text.to_float() and gap_header == "GAP" and hud._tower_column.text == "INT",
 		"tower: Tab cycles the column INT -> GAP -> LAST -> INT (%s, %s)" % [int_text, gap_text])

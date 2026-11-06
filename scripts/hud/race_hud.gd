@@ -265,6 +265,7 @@ func _build_ribbon() -> void:
 
 func _build_tower_and_radar() -> void:
 	tower = TowerScene.instantiate()
+	tower.style = style
 	tower.name = "TimingTower"
 	stage.add_child(tower)
 	tower.position = Vector2(16.0, 88.0)
@@ -666,6 +667,10 @@ func _update_tower() -> void:
 		entry["compound_letter"] = GtTypes.COMPOUND_LABEL[int(entry["compound"])]
 		entry["compound_color"] = GtTypes.COMPOUND_COLOR[int(entry["compound"])]
 		_tower_right_text(entry)
+		var slab: Dictionary = slab_texts(entry)
+		entry["slab_int"] = slab["int"]
+		entry["slab_gap"] = slab["gap"]
+		entry["slab_last"] = slab["last"]
 	tower.update_standings(entries)
 	tower.select_car(world.followed_id)
 	# A clicked row keeps the keyboard focus, which lights it like a selection. When the
@@ -706,6 +711,28 @@ func _tower_right_text(entry: Dictionary) -> void:
 	entry["right_color"] = tint
 
 
+## The three numbers of the followed car's slab, whatever column Tab shows: INT, GAP and the last lap. A status
+## (DNF, FIN, penalty hold, PIT) replaces all three, as it replaces the column value.
+static func slab_texts(entry: Dictionary) -> Dictionary:
+	var status: String = ""
+	if bool(entry.get("is_dnf", false)):
+		status = "DNF"
+	elif bool(entry.get("is_finished", false)):
+		status = "FIN"
+	elif float(entry.get("penalty_hold_s", 0.0)) > 0.0:
+		status = "PEN %.1f" % float(entry["penalty_hold_s"])
+	elif bool(entry.get("in_pit", false)):
+		status = "PIT"
+	if status != "":
+		return {"int": status, "gap": status, "last": status}
+	var leader: bool = int(entry.get("position", 0)) <= 1
+	return {
+		"int": "LEAD" if leader else "+%.1f" % float(entry.get("interval_s", 0.0)),
+		"gap": "LEAD" if leader else "+%.1f" % float(entry.get("gap_s", 0.0)),
+		"last": lap_text(float(entry.get("last_lap_time", 0.0))),
+	}
+
+
 ## 83.456 -> "1:23.456", no lap yet -> "--".
 static func lap_text(seconds: float) -> String:
 	if seconds <= 0.0:
@@ -717,6 +744,7 @@ func _update_panels() -> void:
 	var order: Array[GtCar] = race.standings()
 	var leader: GtCar = order[0]
 	lap_label.text = "LAP %02d/%02d" % [clampi(leader.lap + 1, 1, race.laps), race.laps]
+	tower.set_header_note(lap_label.text)
 	_update_flag_banner()
 	rate_row.set_active(TIME_SCALES.find(world.time_scale))
 	cam_label.text = String(world.camera_director.get_mode_name()).to_upper()
@@ -750,11 +778,12 @@ func _update_panels() -> void:
 	]
 	deck.refresh()
 	var followed: GtCar = race.get_car(world.followed_id)
-	if followed != null:
-		if followed.team_id == race.player_team_id:
-			deck.deck_car_id = followed.id
-		if drawer.visible:
-			drawer.show_car(followed, race.laps)
+	if followed != null and followed.team_id == race.player_team_id:
+		deck.deck_car_id = followed.id
+	# Telemetry watches the deck car only; a rival picked in the tower is read from the live timing.
+	var deck_car: GtCar = race.get_car(deck.deck_car_id)
+	if deck_car != null and drawer.visible:
+		drawer.show_car(deck_car, race.laps)
 
 
 func _update_flag_banner() -> void:

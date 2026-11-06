@@ -60,15 +60,19 @@ horizontal_alignment = 2
 vertical_alignment = 1
 text = "INT"
 
+[node name="MarkGap" type="Control" parent="Body/ColHeader"]
+custom_minimum_size = Vector2(18, 0)
+mouse_filter = 2
+
 [node name="Tyre" type="Label" parent="Body/ColHeader"]
-custom_minimum_size = Vector2(22, 0)
+custom_minimum_size = Vector2(30, 0)
 mouse_filter = 2
 horizontal_alignment = 1
 vertical_alignment = 1
-text = "T"
+text = "TYRE"
 
 [node name="PadR" type="Control" parent="Body/ColHeader"]
-custom_minimum_size = Vector2(14, 0)
+custom_minimum_size = Vector2(15, 0)
 mouse_filter = 2
 
 [node name="RowsScroll" type="ScrollContainer" parent="Body"]

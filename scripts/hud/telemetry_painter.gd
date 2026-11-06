@@ -36,6 +36,8 @@ const CAR_HALF: Array[Vector2] = [
 	Vector2(33.0, 135.0), Vector2(40.0, 168.0), Vector2(40.0, 200.0), Vector2(30.0, 224.0), Vector2(0.0, 226.0),
 ]
 const WHEEL_CODE: Array[String] = ["FL", "FR", "RL", "RR"]
+const WHEEL_TICKS: int = 16
+const WHEEL_RADIUS: float = 22.0
 
 
 static func paint(canvas: CanvasItem, state: TelemetryState, accent: Color, on_accent: Color, reduce_motion: bool) -> void:
@@ -273,11 +275,19 @@ static func _tank(canvas: CanvasItem, fuel: float, clock: float, reduce_motion: 
 	_text_centered(canvas, UI.MONO, "FUEL", tank.get_center(), 10, INK)
 
 
+## Ticks around a wheel; `tread` lights `TyreLifeRing.lit_ticks(tread, wheel_ticks())` of them.
+static func wheel_ticks() -> int:
+	return WHEEL_TICKS
+
+
+## One tyre as a wheel: tread ticks round the rim (lit = life left), spokes and hub in the heat colour, the wheel
+## code with the life and the temperature beside it. It sits 8 px outside the old tyre so the brake disc stays clear.
 static func _tyre(canvas: CanvasItem, state: TelemetryState, index: int, clock: float, reduce_motion: bool) -> void:
 	var left: bool = index % 2 == 0
-	var center_x: float = -56.0 if left else 56.0
+	var disc_anchor: float = -56.0 if left else 56.0
+	var center_x: float = disc_anchor + (-8.0 if left else 8.0)
 	var center_y: float = 34.0 if index < 2 else 176.0
-	var rect := Rect2(center_x - 12.0, center_y - 22.0, 24.0, 44.0)
+	var center := Vector2(center_x, center_y)
 	var temp: float = state.heat[index]
 	var tint: Color = state.heat_tint[index]
 	var critical: bool = temp > 125.0
@@ -285,34 +295,36 @@ static func _tyre(canvas: CanvasItem, state: TelemetryState, index: int, clock: 
 		var pulse: float = 0.5 + 0.5 * sin(clock * (10.0 if critical else 4.0) + float(index))
 		var glow: float = ((0.35 if critical else 0.18) * pulse + 0.06)
 		for ring: int in range(3):
-			canvas.draw_circle(Vector2(center_x, center_y), 44.0 - float(ring) * 14.0, Color(tint, glow * (0.2 + 0.3 * float(ring))))
-	canvas.draw_rect(rect, WELL)
-	var height: float = rect.size.y * clampf((temp - 40.0) / 100.0, 0.06, 1.0)
+			canvas.draw_circle(center, 44.0 - float(ring) * 14.0, Color(tint, glow * (0.2 + 0.3 * float(ring))))
+	var lit: int = TyreLifeRing.lit_ticks(state.tread, WHEEL_TICKS)
+	var lit_tint: Color = TyreLifeRing.tint_for(state.tread)
+	for tick: int in range(WHEEL_TICKS):
+		var direction := Vector2.from_angle(float(tick) / float(WHEEL_TICKS) * TAU - PI * 0.5)
+		canvas.draw_line(center + direction * (WHEEL_RADIUS - 6.0), center + direction * WHEEL_RADIUS, lit_tint if tick < lit else WELL, 3.0)
+	canvas.draw_circle(center, WHEEL_RADIUS - 8.0, INK)
 	var blink: bool = critical and not reduce_motion and int(clock * 5.0) % 2 == 0
-	for column: int in range(0, 24, 3):
-		var wobble: float = 0.0 if (temp <= 105.0 or reduce_motion) else sin(clock * 7.0 + float(column) * 0.5 + float(index)) * 1.5
-		canvas.draw_rect(Rect2(rect.position.x + float(column), rect.end.y - height - wobble, 3.0, height + wobble), Color(tint, 0.5 if blink else 1.0))
+	var spoke_tint := Color(tint, 0.5 if blink else 1.0)
+	for spoke: int in range(5):
+		canvas.draw_line(center, center + Vector2.from_angle(float(spoke) / 5.0 * TAU + 0.3) * (WHEEL_RADIUS - 9.0), spoke_tint, 2.5)
+	canvas.draw_circle(center, 3.0, spoke_tint)
 	if state.blister[index] > 25.0:
 		for dash: int in range(3):
-			var dy: float = rect.position.y + 4.0 + float(dash) * 12.0
-			canvas.draw_line(Vector2(rect.position.x + 3.0, dy + 5.0), Vector2(rect.end.x - 3.0, dy), INK, 2.0)
-	canvas.draw_rect(rect, INK, false, 2.0)
+			var dy: float = center_y - 7.0 + float(dash) * 7.0
+			canvas.draw_line(Vector2(center_x - 8.0, dy + 3.0), Vector2(center_x + 8.0, dy), Color(1.0, 1.0, 1.0, 0.85), 2.0)
 	if index == state.blown:
-		canvas.draw_line(rect.position, rect.end, INK, 3.0)
-		canvas.draw_line(Vector2(rect.end.x, rect.position.y), Vector2(rect.position.x, rect.end.y), INK, 3.0)
+		var reach: float = WHEEL_RADIUS * 0.7
+		canvas.draw_line(center - Vector2(reach, reach), center + Vector2(reach, reach), Color.WHITE, 3.0)
+		canvas.draw_line(center + Vector2(reach, -reach), center + Vector2(-reach, reach), Color.WHITE, 3.0)
 	var disc: Color = _disc_color(state.disc_temp[index])
 	var disc_heat: float = clampf((state.disc_temp[index] - 300.0) / 500.0, 0.0, 1.0)
-	var disc_x: float = center_x + 14.0 if left else center_x - 18.0
-	canvas.draw_rect(Rect2(disc_x - 2.0, rect.position.y + 6.0, 8.0, 32.0), Color(disc, 0.3 * disc_heat))
-	canvas.draw_rect(Rect2(disc_x, rect.position.y + 8.0, 4.0, 28.0), disc)
+	var disc_x: float = disc_anchor + 14.0 if left else disc_anchor - 18.0
+	canvas.draw_rect(Rect2(disc_x - 2.0, center_y - 22.0 + 6.0, 8.0, 32.0), Color(disc, 0.3 * disc_heat))
+	canvas.draw_rect(Rect2(disc_x, center_y - 22.0 + 8.0, 4.0, 28.0), disc)
 	var label_x: float = center_x - 26.0 if left else center_x + 26.0
 	var align: HorizontalAlignment = HORIZONTAL_ALIGNMENT_RIGHT if left else HORIZONTAL_ALIGNMENT_LEFT
 	var box_x: float = label_x - 80.0 if left else label_x
-	canvas.draw_string(UI.MONO, Vector2(box_x, center_y - 8.0), WHEEL_CODE[index], align, 80.0, 11, MUTED)
-	canvas.draw_string(UI.MONO, Vector2(box_x, center_y + 10.0), "%d°" % roundi(temp), align, 80.0, 19, tint)
-	var life: int = ceili(state.tread * 6.0 - 0.0001)
-	for block: int in range(6):
-		canvas.draw_rect(Rect2((label_x - 42.0 if left else label_x) + float(block) * 7.0, center_y + 16.0, 5.0, 4.0), LIME if block < life else WELL)
+	canvas.draw_string(UI.MONO, Vector2(box_x, center_y - 6.0), "%s %d%%" % [WHEEL_CODE[index], roundi(state.tread * 100.0)], align, 80.0, 11, MUTED)
+	canvas.draw_string(UI.MONO, Vector2(box_x, center_y + 13.0), "%d°" % roundi(temp), align, 80.0, 17, tint)
 
 
 static func _g_arrow(canvas: CanvasItem, state: TelemetryState) -> void:

@@ -252,7 +252,7 @@ Sebelum suatu tugas atau fase dinyatakan **SELESAI**, agen wajib memenuhi seluru
 | **Git Push ke GitHub ditolak (`GH001: Large files detected`)** | Terdapat file model mentah di `assets/cars/*/raw/*.glb` yang melebihi batas 100 MB. | Daftarkan file tersebut ke Git LFS (`git lfs track "assets/cars/*/raw/*.glb"`) dan commit `.gitattributes`. |
 | **Lampu start langsung padam saat kamera transisi selesai** | Panggilan start balapan dieksekusi sebelum wipe manga tuntas. | Tahan countdown melalui `pre_grid_hold` di `RaceWeekendWorld`, dan panggil `finish_grid_intro()` tepat setelah wipe selesai. |
 | **Nama pengemudi terpotong elipsis di tag panel podium** | Tag nama memakai batas lebar yang terlalu sempit untuk nama nyata terpanjang ("#26 R. TAKAHASHI"). | Lebar maksimum tag 640 px dan diskalakan ke ruang di kiri bubble; `tests/test_winning_panel.gd` memeriksa semua `GtData.DRIVER_NAMES`. |
-| **Suite penuh di latar belakang dihentikan sistem (RAM kritis)** | `tools/run_tests.ps1` penuh sebagai perintah latar belakang dibunuh saat memori hampir habis. | Jalankan di latar depan dalam irisan di bawah 10 menit: `-From 0 -To 19`, `20-39`, `40-59`, `60-74`, `75-92` (93 suite). |
+| **Suite penuh di latar belakang dihentikan sistem (RAM kritis)** | `tools/run_tests.ps1` penuh sebagai perintah latar belakang dibunuh saat memori hampir habis. | Jalankan di latar depan dalam irisan di bawah 10 menit: `-From 0 -To 19`, `20-34`, `35-52`, `53-72`, `73-82`, `83-92`, `93-114` (115 suite; irisan 73-92 sekaligus melewati 10 menit). |
 
 ---
 
