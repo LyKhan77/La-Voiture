@@ -203,13 +203,13 @@ func _test_voice_casting() -> void:
 	var patterns: Dictionary = {}
 	for row: Dictionary in rows:
 		patterns[String(row["speaker"])] = true
-	# The roster's five women (DRIVER-CHARACTERIZATION-ROSTER.md): Novak, Aoki, Weiss, Rossi, Takahashi.
-	var women: Array[int] = [9, 13, 15, 21, 25]
+	# The three women, matching their portraits: Silva, Rossi, Takahashi. Every other driver is a man.
+	var women: Array[int] = [7, 21, 25]
 	var miscast: Array[String] = []
 	for slot: int in range(GtData.DRIVER_NAMES.size()):
 		if RadioVoice.is_female_driver(slot) != women.has(slot):
 			miscast.append(GtData.DRIVER_NAMES[slot])
-	check(miscast.is_empty(), "#23 exactly the roster's five women are cast with female voices%s" % ("" if miscast.is_empty() else " (miscast: %s)" % ", ".join(PackedStringArray(miscast))))
+	check(miscast.is_empty(), "#23 exactly Silva, Rossi and Takahashi are cast with female voices%s" % ("" if miscast.is_empty() else " (miscast: %s)" % ", ".join(PackedStringArray(miscast))))
 	var shared: Array[String] = []
 	for team: int in range(GtData.DRIVER_NAMES.size() / 2):
 		if RadioVoice.voice_of(team * 2) == RadioVoice.voice_of(team * 2 + 1):

@@ -11,17 +11,17 @@ const MANIFEST := "res://assets/audio/radio/voice/manifest.json"
 const DEFAULT_DRIVER_VOICE := "am_eric"
 
 ## Kokoro voice per driver slot, in GtData.DRIVER_NAMES order. Teammates (slots 2t and 2t+1) never share a
-## voice; the roster's five women (DRIVER-CHARACTERIZATION-ROSTER.md) take the af_/bf_ voices. Every voice
+## voice; the three women (Silva, Rossi, Takahashi, as in their portraits) take the af_/bf_ voices. Every voice
 ## here must be in DRIVER_VOICES of tools/audio/radio_lines.mjs (test_radio_and_podium #24b checks).
 const DRIVER_VOICES: Array[String] = [
 	"am_puck", "am_michael", # Ryu (prodigy), Ren (calculator)
 	"am_eric", "bm_george", # Ito, Vale (Camden)
 	"am_fenrir", "am_michael", # Cruz (matador), Sato (silent ronin)
-	"am_eric", "am_puck", # Moreau, Silva (storm)
-	"am_michael", "af_heart", # Kade, Novak
+	"am_eric", "bf_emma", # Moreau, Silva (storm)
+	"am_michael", "bm_george", # Kade, Novak
 	"am_fenrir", "am_puck", # Mori (brawler), Reyes (bull)
-	"am_fenrir", "af_bella", # Sokol (frost), Aoki (kitsune)
-	"am_eric", "bf_emma", # Alves, Weiss
+	"am_fenrir", "am_eric", # Sokol (frost), Aoki (kitsune)
+	"am_eric", "am_puck", # Alves, Weiss
 	"am_michael", "bm_george", # Tanaka, Duval (Riviera)
 	"am_michael", "am_fenrir", # Petrov (ghost), Mbeki
 	"am_eric", "af_heart", # Bellini, Rossi
