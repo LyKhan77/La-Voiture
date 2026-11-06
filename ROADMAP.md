@@ -4,6 +4,14 @@
 
 ---
 
+## Status Fase 30 — 2026-11-06
+
+- [x] **Fase 30: kamera Hood, Side, Front-to-Rear** (branch `fase-30-camera-views`, belum di-merge)
+  - `COCKPIT` menjadi `HOOD`: mata di garis tengah hood, diukur per mobil dari mesh (`CarCameraRig`), tidak menembus bodi. `SIDE` di sisi dalam tikungan (hold 1 s, berputar mengitari hidung saat berganti) dan `FRONT_TO_REAR` di depan hidung menghadap mundur. Siklus `C`: Chase, Hood, Side, Front-to-Rear, Heli, Trackside TV.
+  - `tests/test_camera_views.gd` 72 assertion; regresi penuh **116/116 suite, 0 failing**. Laporan: [`FASE-30-CAMERA-VIEWS-REPORT.md`](file:///D:/Occupation/Porto/genex/La_Voiture/executor-report/reports/FASE-30-CAMERA-VIEWS-REPORT.md).
+  - Perbaikan speedlines "menempel": pusat sinar tidak diperbarui saat mobil di belakang lensa (Hood Cam, Trackside TV setelah lewat); kini memancar dari titik heading 60 m di depan mobil, cadangan tengah layar.
+  - Belum: smoke native 3 lap dan 60 FPS untuk fase ini.
+
 ## Status Fase 29 — 2026-11-05
 
 - [x] **Fase 29: Live Timing "Slab" + roda tyre-life — warna tower ikut tim player, telemetri hanya driver deck** (branch `fase-29-live-timing-slab`, belum di-merge)

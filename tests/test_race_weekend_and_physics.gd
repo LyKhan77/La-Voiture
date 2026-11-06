@@ -498,14 +498,14 @@ func _test_wheels_and_brakes(world: Node3D) -> void:
 		"#22 the brake disc glows (%.2f) after 3 G braking, stays cold at 1.4 G and cools down again" % peak)
 
 
-## #26 (beyond the 25): five cameras, C cycles them, the pit camera takes over by itself.
+## #26 (beyond the 25): the broadcast cameras, C cycles them, the pit camera takes over by itself.
 func _test_broadcast_cameras(world: Node3D) -> void:
 	var cameras = world.camera_director
 	var camera: Camera3D = world.camera
 	cameras.set_mode(cameras.Mode.CHASE)
 	var order: Array[int] = []
 	var spots: Array[Vector3] = []
-	for _press: int in range(4):
+	for _press: int in range(6):
 		var event := InputEventKey.new()
 		event.keycode = KEY_C
 		event.pressed = true
@@ -514,9 +514,11 @@ func _test_broadcast_cameras(world: Node3D) -> void:
 		order.append(cameras.mode)
 		spots.append(camera.global_position)
 	var followed: Node3D = world.actor_of(world.followed_id)
-	var cockpit_inside: bool = spots[0].distance_to(followed.global_position) < 1.5
-	var heli_high: bool = spots[1].y > 30.0
-	var tv_beside: bool = absf(spots[2].y - cameras.TV_HEIGHT_M) < 0.01 and spots[2].distance_to(followed.global_position) > 5.0
+	var hood_on_car: bool = spots[0].distance_to(followed.global_position) < 3.0
+	var side_beside: bool = spots[1].distance_to(followed.global_position) > 1.5 and spots[1].distance_to(followed.global_position) < 6.0
+	var rear_ahead: bool = spots[2].distance_to(followed.global_position) > 3.0 and spots[2].distance_to(followed.global_position) < 9.0
+	var heli_high: bool = spots[3].y > 30.0
+	var tv_beside: bool = absf(spots[4].y - cameras.TV_HEIGHT_M) < 0.01 and spots[4].distance_to(followed.global_position) > 5.0
 	var distinct: bool = true
 	for a: int in range(spots.size()):
 		for b: int in range(a + 1, spots.size()):
@@ -528,9 +530,10 @@ func _test_broadcast_cameras(world: Node3D) -> void:
 	var pit_near: bool = camera.global_position.distance_to(stall.origin) < 6.0
 	cameras.pit_focus = null
 	cameras.set_mode(cameras.Mode.CHASE)
-	check(order == [cameras.Mode.COCKPIT, cameras.Mode.HELI, cameras.Mode.TRACKSIDE_TV, cameras.Mode.CHASE] and cockpit_inside and heli_high and tv_beside and distinct
-		and pit_mode == cameras.Mode.PITSTOP and pit_near and cameras.active_mode() == cameras.Mode.CHASE and cameras.MODE_NAMES.size() == 6,
-		"#26 broadcast cameras: C cycles chase > cockpit > heli > trackside TV, the pit close-up cuts in on its own and hands back")
+	check(order == [cameras.Mode.HOOD, cameras.Mode.SIDE, cameras.Mode.FRONT_TO_REAR, cameras.Mode.HELI, cameras.Mode.TRACKSIDE_TV, cameras.Mode.CHASE]
+		and hood_on_car and side_beside and rear_ahead and heli_high and tv_beside and distinct
+		and pit_mode == cameras.Mode.PITSTOP and pit_near and cameras.active_mode() == cameras.Mode.CHASE and cameras.MODE_NAMES.size() == 8,
+		"#26 broadcast cameras: C cycles chase > hood > side > front-to-rear > heli > trackside TV, the pit close-up cuts in on its own and hands back")
 
 	# The pit close-up belongs to the selected car only: another team's stop must not steal the shot.
 	var chosen: Object = world.race.cars[0]

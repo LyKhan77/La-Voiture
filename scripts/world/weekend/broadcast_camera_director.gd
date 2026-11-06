@@ -2,24 +2,38 @@ class_name BroadcastCameraDirector
 extends Node
 
 ## TV broadcast cameras: C cycles normal views and the active Safety Car.
+## HOOD, SIDE and FRONT_TO_REAR sit on the followed car; CarCameraRig measures each body so no lens ends up inside it.
 ## Automatic pit close-ups and the SC deployment cut restore the chosen view afterwards.
 
-enum Mode { CHASE, COCKPIT, HELI, TRACKSIDE_TV, PITSTOP, SAFETY_CAR }
+## New modes are appended: other code and tests address the older ones by number.
+enum Mode { CHASE, HOOD, HELI, TRACKSIDE_TV, PITSTOP, SAFETY_CAR, SIDE, FRONT_TO_REAR }
 
-const MODE_NAMES: Array[String] = ["CHASE CAM", "COCKPIT CAM", "HELI CAM", "TRACKSIDE TV", "PIT CLOSE-UP", "SAFETY CAR CAM"]
+const MODE_NAMES: Array[String] = ["CHASE CAM", "HOOD CAM", "HELI CAM", "TRACKSIDE TV", "PIT CLOSE-UP", "SAFETY CAR CAM", "SIDE CAM", "FRONT-TO-REAR CAM"]
 const SC_CAM_FOV: float = 65.0
 const TrackRibbonScript := preload("res://scripts/car/track_ribbon.gd")
 const PitZoneScript := preload("res://scripts/world/shared/pit_zone.gd")
 
 ## Normal C cycle; active Safety Car follows TRACKSIDE_TV. PITSTOP is automatic.
-const CYCLE: Array[int] = [Mode.CHASE, Mode.COCKPIT, Mode.HELI, Mode.TRACKSIDE_TV]
+const CYCLE: Array[int] = [Mode.CHASE, Mode.HOOD, Mode.SIDE, Mode.FRONT_TO_REAR, Mode.HELI, Mode.TRACKSIDE_TV]
 
 const CHASE_BACK_M: float = 8.5
 const CHASE_UP_M: float = 2.6
 const CHASE_SMOOTH: float = 7.0
 const CHASE_FOV: float = 70.0
-const COCKPIT_EYE := Vector3(0.0, 1.05, -0.15) # in the car's frame, -Z forward
-const COCKPIT_FOV: float = 88.0
+const CarCameraRigScript := preload("res://scripts/world/weekend/car_camera_rig.gd")
+const HOOD_FOV: float = 82.0
+const HOOD_PITCH_DEG: float = 7.0 # looks this far below the horizon so the bonnet fills the bottom of the frame
+const SIDE_FOV: float = 62.0
+const SIDE_LATERAL_M: float = 2.6 # beyond the car's half width
+const SIDE_HEIGHT_M: float = 0.7
+const SIDE_ORBIT_RATE: float = 2.5 # the camera swings round the nose to the other side at this ease rate
+const SIDE_CURVE_MIN: float = 0.0025 # 1/m; a bend tighter than 400 m radius picks the inside
+const SIDE_HOLD_S: float = 1.0 # the new inside must hold this long before the camera swaps (S-bends)
+const SIDE_LOOKAHEAD_M: Array[float] = [10.0, 25.0, 40.0, 55.0]
+const REAR_FOV: float = 62.0
+const REAR_AHEAD_M: float = 4.2 # in front of the nose
+const REAR_HEIGHT_M: float = 0.9
+const HEADING_EASE: float = 5.0 # side and front-to-rear cameras swing behind the car's heading at this rate
 const HELI_RADIUS_M: float = 85.0
 const HELI_HEIGHT_M: float = 60.0
 const HELI_ORBIT_RAD_S: float = 0.12
@@ -60,6 +74,12 @@ var _punch_age_s: float = INF # seconds since punch_fov(); INF when the lens is 
 var _fov_punch_deg: float = 0.0
 var _manual_mode: int = Mode.CHASE
 var _snap: bool = true # next update jumps instead of easing, after a cut
+var _rig: CarCameraRig = null
+var _rig_of: Node3D = null
+var _cam_yaw: float = 0.0
+var _side: float = 1.0 # +1 right of travel, -1 left
+var _side_angle: float = PI * 0.5 # 0 = dead ahead of the nose, +-PI/2 = beside the car
+var _side_flip_s: float = 0.0
 
 
 func setup(p_camera: Camera3D, p_ribbon: TrackRibbonScript, pit_zone: Dictionary = {}) -> void:
@@ -129,8 +149,12 @@ func update(dt: float) -> void:
 	match active_mode():
 		Mode.CHASE:
 			_update_chase(dt)
-		Mode.COCKPIT:
-			_update_cockpit()
+		Mode.HOOD:
+			_update_hood()
+		Mode.SIDE:
+			_update_side(dt)
+		Mode.FRONT_TO_REAR:
+			_update_front_to_rear(dt)
 		Mode.HELI:
 			_update_heli(dt)
 		Mode.TRACKSIDE_TV:
@@ -159,11 +183,82 @@ func _update_chase(dt: float) -> void:
 	camera.look_at(pose.origin - pose.basis.z * 6.0 + Vector3.UP * 0.9, Vector3.UP)
 
 
-func _update_cockpit() -> void:
-	_set_lens(COCKPIT_FOV, 0.05)
+## On the bonnet's centre line, just above the highest body point ahead of the eye, so the hood stays in frame.
+func _update_hood() -> void:
+	_set_lens(HOOD_FOV, 0.05)
 	var pose: Transform3D = target.global_transform
-	camera.global_position = pose * COCKPIT_EYE
-	camera.look_at(camera.global_position - pose.basis.z * 30.0 + Vector3.UP * 0.2, Vector3.UP)
+	var chassis := target.get("chassis") as Node3D
+	var rig: CarCameraRig = _rig_for_target()
+	var eye: Vector3 = chassis.to_global(rig.eye) if chassis != null else pose * Vector3(rig.eye.x, rig.eye.y, -rig.eye.z)
+	camera.global_position = eye
+	camera.look_at(eye - pose.basis.z * 30.0 - Vector3.UP * 30.0 * tan(deg_to_rad(HOOD_PITCH_DEG)), Vector3.UP)
+
+
+## Low in front of the nose, looking back at the car. The position rides the car exactly; only its heading
+## is eased, so the lens swings a little through corners instead of being bolted on.
+func _update_front_to_rear(dt: float) -> void:
+	_set_lens(REAR_FOV, 0.1)
+	var pose: Transform3D = target.global_transform
+	_ease_heading(pose, dt)
+	var ahead := Vector3(sin(_cam_yaw), 0.0, cos(_cam_yaw))
+	camera.global_position = pose.origin + ahead * (_rig_for_target().nose_z + REAR_AHEAD_M) + Vector3.UP * REAR_HEIGHT_M
+	camera.look_at(pose.origin + Vector3.UP * 0.7, Vector3.UP)
+
+
+## Beside the front fender, on the inside of the bend. A change of side orbits round the nose, never through the car.
+func _update_side(dt: float) -> void:
+	_set_lens(SIDE_FOV, 0.1)
+	var pose: Transform3D = target.global_transform
+	_ease_heading(pose, dt)
+	_choose_side(dt)
+	var wanted: float = _side * PI * 0.5
+	_side_angle = wanted if _snap else _side_angle + (wanted - _side_angle) * (1.0 - exp(-SIDE_ORBIT_RATE * dt))
+	var rig: CarCameraRig = _rig_for_target()
+	var ahead := Vector3(sin(_cam_yaw), 0.0, cos(_cam_yaw))
+	var right := Vector3(-ahead.z, 0.0, ahead.x)
+	# x clears the body beside the car; z clears the nose while the camera is near the centre line.
+	var x: float = sin(_side_angle) * (rig.half_width + SIDE_LATERAL_M)
+	var z: float = rig.axle_z + (rig.nose_z + 3.0 - rig.axle_z) * pow(cos(_side_angle), 2.0)
+	camera.global_position = pose.origin + ahead * z + right * x + Vector3.UP * SIDE_HEIGHT_M
+	camera.look_at(pose.origin + ahead * rig.axle_z * 0.3 + Vector3.UP * 0.5, Vector3.UP)
+
+
+func _ease_heading(pose: Transform3D, dt: float) -> void:
+	var yaw: float = atan2(-pose.basis.z.x, -pose.basis.z.z)
+	_cam_yaw = yaw if _snap else lerp_angle(_cam_yaw, yaw, 1.0 - exp(-HEADING_EASE * dt))
+
+
+## Inside of the bend ahead: a left turn (curvature > 0) puts the camera on the left (-1). A swap needs a clear
+## bend and SIDE_HOLD_S of it; straights keep the last side.
+func _choose_side(dt: float) -> void:
+	if ribbon == null:
+		return
+	var s: float = _target_s()
+	var curvature: float = 0.0
+	for ahead_m: float in SIDE_LOOKAHEAD_M:
+		curvature += ribbon.get_curvature_at(s + ahead_m)
+	curvature /= float(SIDE_LOOKAHEAD_M.size())
+	if absf(curvature) < SIDE_CURVE_MIN:
+		_side_flip_s = 0.0
+		return
+	var inside: float = -signf(curvature)
+	if inside == _side:
+		_side_flip_s = 0.0
+	elif _snap:
+		_side = inside
+	else:
+		_side_flip_s += dt
+		if _side_flip_s >= SIDE_HOLD_S:
+			_side = inside
+			_side_flip_s = 0.0
+
+
+func _rig_for_target() -> CarCameraRig:
+	if _rig == null or _rig_of != target:
+		var chassis := target.get("chassis") as Node3D
+		_rig = CarCameraRigScript.measure(chassis) if chassis != null else CarCameraRigScript.new()
+		_rig_of = target
+	return _rig
 
 
 func _update_heli(dt: float) -> void:

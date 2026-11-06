@@ -192,7 +192,7 @@ func _test_presentation() -> void:
 	director.update(0.21)
 	check(director.active_mode() == 4, "Pit camera resumes after cinematic")
 	director.pit_focus = null
-	for _i: int in range(5):
+	for _i: int in range(7):
 		director.cycle()
 		if director.active_mode() == 5:
 			break

@@ -58,6 +58,8 @@ const SPEEDLINES_FULL_RADIUS: float = 0.34
 const SPEEDLINES_END_RADIUS: float = 0.62
 const SPEEDLINES_EDGE_FADE: float = 0.06
 const SPEEDLINES_CAR_LIFT_M: float = 0.7
+## Car behind the lens (hood cam): the rays leave the point this far down the car's heading instead.
+const SPEEDLINES_HEADING_AHEAD_M: float = 60.0
 const SPEEDLINES_PAINT_SHARE: float = 0.2
 const SPEEDLINES_TONE: float = 0.75
 const SPEEDLINES_SECTORS: float = 54.0
@@ -389,8 +391,12 @@ func _update_speedlines() -> void:
 	var actor: Node3D = world.actor_of(followed.id)
 	var camera: Camera3D = world.camera
 	var anchor: Vector3 = actor.global_position + Vector3.UP * SPEEDLINES_CAR_LIFT_M
+	if camera.is_position_behind(anchor):
+		anchor -= actor.global_transform.basis.z * SPEEDLINES_HEADING_AHEAD_M
 	if not camera.is_position_behind(anchor):
 		material.set_shader_parameter("center", camera.unproject_position(anchor) / get_viewport().get_visible_rect().size)
+	else:
+		material.set_shader_parameter("center", Vector2(0.5, 0.5))
 
 
 # --- input ---------------------------------------------------------------------------------

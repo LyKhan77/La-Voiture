@@ -47,6 +47,7 @@ func _run() -> void:
 	_test_reactive_brake_lights()
 	_test_manga_speedlines_trigger()
 	_test_speedlines_stay_around_the_car()
+	_test_speedlines_follow_when_the_car_is_behind_the_lens()
 	_test_boost_fov_punch()
 	_test_kerb_strike_sparks()
 	_test_graffiti_backfire()
@@ -359,6 +360,32 @@ func _test_speedlines_stay_around_the_car() -> void:
 	var window: Vector4 = safe
 	check((center as Vector2).distance_to(expected) < 0.02 and window.x >= tower_edge - 0.001 and window.x > 0.15 and window.z < 0.9 and window.w < 0.85,
 		"speedlines: centred on the car (%s) and clipped to the HUD-free window (%s)" % [str(center), str(window)])
+	car.v = 0.0
+	hud.update(FRAME)
+
+
+## Hood cam: the car origin sits behind the lens, so it cannot be projected. The rays used to keep the centre of the
+## previous camera (stuck on screen); now they radiate from where the car is heading.
+func _test_speedlines_follow_when_the_car_is_behind_the_lens() -> void:
+	var hud: RaceHud = world.hud
+	var car: GtCar = world.race.get_car(world.followed_id)
+	var director: CameraDirectorScript = world.camera_director
+	var material := hud.speedlines_rect.material as ShaderMaterial
+	car.v = 80.0
+	director.set_mode(CameraDirectorScript.Mode.CHASE)
+	director.update(FRAME)
+	hud.update(FRAME)
+	var chase_centre: Vector2 = material.get_shader_parameter("center")
+	director.set_mode(CameraDirectorScript.Mode.HOOD)
+	director.update(FRAME)
+	hud.update(FRAME)
+	var hood_centre: Vector2 = material.get_shader_parameter("center")
+	var actor: ActorScript = world.actor_of(world.followed_id)
+	var behind: bool = world.camera.is_position_behind(actor.global_position + Vector3.UP * 0.7)
+	check(behind and hood_centre.distance_to(Vector2(0.5, 0.5)) < 0.2 and hood_centre.distance_to(chase_centre) > 0.05,
+		"speedlines: on the hood cam (car behind the lens) the rays leave the heading point (%s), not the chase-cam spot (%s)" % [str(hood_centre), str(chase_centre)])
+	director.set_mode(CameraDirectorScript.Mode.CHASE)
+	director.update(FRAME)
 	car.v = 0.0
 	hud.update(FRAME)
 
