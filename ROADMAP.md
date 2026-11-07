@@ -4,6 +4,15 @@
 
 ---
 
+## Status Fase 31 — 2026-11-06
+
+- [x] **Fase 31: standee driver baru (satu angle depan + pose menang) dan suara comms** (branch `fase-31-driver-standee`, belum di-merge)
+  - Suara comms: wanita hanya Silva, Rossi, Takahashi (commit `f8c940a` di `main`).
+  - 26 `full_body_base.png` + 26 `pose_win.png` dibuat dari portrait kanon (web ElevenLabs, GPT Image 2.6 Sunburst, 9:16); standee baru dibuat oleh `tools/build_driver_standees.py` (720 x 1328 RGBA, telapak sejajar antar pose).
+  - Podium: `WinningPanel.set_celebrating` menukar standee ke pose menang pada cut fokus P3, P2, P1; FINAL dan reduce motion langsung semua menang.
+  - `test_winning_scene_and_standee` 124 assertion, `test_winning_panel` 29. Laporan: [`FASE-31-DRIVER-STANDEES-REPORT.md`](file:///D:/Occupation/Porto/genex/La_Voiture/executor-report/reports/FASE-31-DRIVER-STANDEES-REPORT.md).
+  - Regresi 116/116 suite, 0 failing; 52 berkas `full_body_concept` dihapus. Tata letak podium diperbaiki (tag nama, kanji, julukan, telapak kaki); catatan errata gender di roster. Smoke native 3 lap 20 mobil: 20/20 finis, 60 FPS, podium, 0 orphan.
+
 ## Status Fase 30 — 2026-11-06
 
 - [x] **Fase 30: kamera Hood, Side, Front-to-Rear** (branch `fase-30-camera-views`, belum di-merge)

@@ -18,11 +18,14 @@ const SLANT_PX: float = 90.0
 const INK_PX: float = 16.0
 const PANEL_HEIGHT: float = 940.0
 const NAME_MAX_WIDTH: float = 640.0
-const NAME_FONT_PX: int = 80
+const NAME_FONT_PX: int = 68
 const CAR_WIDTH_FRACTION: float = 0.76
 const CAR_MAX_WIDTH: float = 760.0
 const CAR_FLOOR_GAP: float = 34.0
-const STANDEE_HEIGHT: float = 640.0
+## The standee art is 720 x 1328: the 1280 px figure plus 48 px of headroom for a raised fist, so the figure stays 640 px tall.
+const STANDEE_HEIGHT: float = 570.0
+## The soles sit this far above the panel bottom, so they hide behind the car instead of poking out under it.
+const STANDEE_FOOT_LIFT: float = 36.0
 const BUBBLE_PX: float = 230.0
 ## The standee stands left of centre so the name tag, right-aligned under the bubble, does not cover its face.
 const STANDEE_CENTER_FRACTION: float = 0.40
@@ -33,11 +36,14 @@ const NAME_LEFT_LIMIT: float = 230.0
 const REFERENCE_WIDTH: float = 700.0
 const MIN_FIT: float = 0.6
 const ELLIPSIS: String = "…"
-const EPITHET_Y: float = 436.0
+const NAME_Y: float = 246.0
 const OUTLINE_PX: float = 5.0
 const STICKER_PAD_PX: float = 40.0
 const BREATH_PERIOD: float = 2.4
 const BREATH_SCALE: float = 0.015
+## The tilt the standee gives when it strikes its victory pose (one beat of the 150 BPM anthem is 0.4 s).
+const WOBBLE_DEGREES: float = 4.0
+const WOBBLE_SECONDS: float = 0.4
 const DIM_BRIGHTNESS: float = 0.5
 ## Rank colours (index = place), their dark burst base and the lighter ray tint.
 const COLORS: Array[Color] = [Color("#D8FF00"), Color("#00F0FF"), Color("#FF6B00")]
@@ -86,6 +92,9 @@ var right_inset: float = 0.0
 var _animate: bool = false
 var _content: Control
 var _breath: Tween
+var _wobble: Tween
+var _idle_texture: Texture2D
+var _win_texture: Texture2D
 var _fill: Polygon2D
 var _ink: Line2D
 var _ghost: Label
@@ -93,7 +102,11 @@ var _bubble_layers: Array[Control] = []
 var _kanji_box: Control
 
 
-## `textures` holds "standee", "car" and "portrait" (any may be null: that element is simply not drawn).
+## True while the standee shows its victory pose.
+var is_celebrating: bool = false
+
+## `textures` holds "standee", "standee_win", "car" and "portrait" (any may be null: that element is simply not
+## drawn; a missing "standee_win" just means the standee keeps its idle pose).
 func setup(finisher_place: int, entry: Dictionary, gap_text: String, fastest_bonus: bool, textures: Dictionary, animate: bool) -> void:
 	place = clampi(finisher_place, 0, 2)
 	_animate = animate
@@ -109,7 +122,9 @@ func setup(finisher_place: int, entry: Dictionary, gap_text: String, fastest_bon
 	_content.add_child(rank_label)
 	_build_kanji_box(color)
 	_build_bubble(color, textures.get("portrait") as Texture2D)
-	standee = _sticker(textures.get("standee") as Texture2D)
+	_idle_texture = textures.get("standee") as Texture2D
+	_win_texture = textures.get("standee_win") as Texture2D
+	standee = _sticker(_idle_texture)
 	_content.add_child(standee)
 	car = _sticker(textures.get("car") as Texture2D)
 	_content.add_child(car)
@@ -145,6 +160,7 @@ func _ready() -> void:
 
 func _exit_tree() -> void:
 	stop_breathing()
+	_stop_wobble()
 
 
 ## Lays every element out for a panel `panel_size` big (the triptych changes the width while it focuses).
@@ -172,33 +188,33 @@ func relayout(panel_size: Vector2) -> void:
 	_content.size = layout
 	var inset: float = right_inset / content_scale
 	rank_label.position = Vector2(140.0, 6.0)
-	_kanji_box.position = Vector2(150.0, 190.0)
+	_kanji_box.position = Vector2(150.0, 170.0)
 	var bubble_at := Vector2(layout.x - inset - 64.0 - BUBBLE_PX, 22.0)
 	for layer: Control in _bubble_layers:
 		layer.position = bubble_at + layer.get_meta(&"offset", Vector2.ZERO) as Vector2
 
 	if standee.texture != null:
 		var standee_size := Vector2(STANDEE_HEIGHT * _aspect(standee.texture), STANDEE_HEIGHT)
-		_fit_sticker(standee, standee_size, Vector2(layout.x * STANDEE_CENTER_FRACTION - standee_size.x * 0.5, layout.y - STANDEE_HEIGHT))
+		_fit_sticker(standee, standee_size, Vector2(layout.x * STANDEE_CENTER_FRACTION - standee_size.x * 0.5, layout.y - STANDEE_FOOT_LIFT - STANDEE_HEIGHT))
 		standee.pivot_offset = Vector2(standee_size.x * 0.5, standee_size.y)
 	if car.texture != null:
 		var car_width: float = minf(layout.x * CAR_WIDTH_FRACTION, CAR_MAX_WIDTH)
 		var car_size := Vector2(car_width, car_width / _aspect(car.texture))
 		_fit_sticker(car, car_size, Vector2((layout.x - car_width) * 0.5, layout.y - CAR_FLOOR_GAP - car_size.y))
 	if crown != null:
-		crown.position = Vector2(standee.position.x + standee.size.x * 0.5 - crown.size.x * 0.5, layout.y - STANDEE_HEIGHT - crown.size.y + 24.0)
+		crown.position = Vector2(standee.position.x + standee.size.x * 0.5 - crown.size.x * 0.5, standee.position.y - crown.size.y + 24.0)
 
 	var right_edge: float = layout.x - inset
-	name_label.position = Vector2(right_edge - 36.0 - name_label.size.x, 262.0)
+	name_label.position = Vector2(right_edge - 36.0 - name_label.size.x, NAME_Y)
 	# A tag wider than the room left of the bubble shrinks towards its right edge instead of running over the kanji box.
 	var room: float = right_edge - 36.0 - NAME_LEFT_LIMIT
 	var shrink: float = clampf(room / maxf(name_label.size.x, 1.0), 0.6, 1.0)
 	name_label.pivot_offset = Vector2(name_label.size.x, name_label.size.y * 0.5)
 	name_label.scale = Vector2(shrink, shrink)
 	result_label.position = Vector2(120.0, layout.y - 70.0)
-	epithet_box.position = Vector2(130.0, EPITHET_Y)
-	engine_plate.position = Vector2(right_edge - 30.0 - engine_plate.size.x, 352.0)
-	sfx_label.position = Vector2(right_edge - 44.0 - sfx_label.size.x, 450.0)
+	epithet_box.position = Vector2(130.0, result_label.position.y - epithet_box.size.y - 44.0)
+	engine_plate.position = Vector2(right_edge - 40.0 - engine_plate.size.x, NAME_Y + 84.0)
+	sfx_label.position = Vector2(right_edge - 44.0 - sfx_label.size.x, NAME_Y + 180.0)
 
 
 ## "#NN NAME" in capitals, cut with an ellipsis so it stays on one line at the smallest tag font.
@@ -225,6 +241,32 @@ func start_breathing() -> void:
 	_breath = create_tween().set_loops()
 	_breath.tween_property(standee, "scale:y", 1.0 + BREATH_SCALE, BREATH_PERIOD * 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	_breath.tween_property(standee, "scale:y", 1.0, BREATH_PERIOD * 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+
+## Swaps the standee between its idle and victory art. Both images share one canvas with the soles on the same
+## row, so the swap needs no relayout; with `animate` the standee also gives a short tilt on the beat.
+func set_celebrating(on: bool, animate: bool) -> void:
+	if on == is_celebrating or standee == null:
+		return
+	if on and _win_texture == null:
+		return
+	is_celebrating = on
+	standee.texture = _win_texture if on else _idle_texture
+	_stop_wobble()
+	if not (animate and _animate and is_inside_tree()):
+		return
+	_wobble = create_tween()
+	_wobble.tween_property(standee, "rotation_degrees", -WOBBLE_DEGREES, WOBBLE_SECONDS * 0.25).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_wobble.tween_property(standee, "rotation_degrees", WOBBLE_DEGREES * 0.6, WOBBLE_SECONDS * 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	_wobble.tween_property(standee, "rotation_degrees", 0.0, WOBBLE_SECONDS * 0.4).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
+func _stop_wobble() -> void:
+	if _wobble != null and _wobble.is_valid():
+		_wobble.kill()
+	_wobble = null
+	if standee != null:
+		standee.rotation_degrees = 0.0
 
 
 func stop_breathing() -> void:
