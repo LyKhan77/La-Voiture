@@ -58,7 +58,13 @@ static func start_fuel_verdict(kg: float, total_laps: int, fuel_use: float) -> i
 
 
 ## Laps of burn under which a car that has a stop ahead is told it will not last to it.
-const FUEL_ALARM_LAPS: float = 1.5
+const FUEL_ALARM_LAPS: float = 2.5
+
+
+## Whether `car` still has a mandatory stop it can make: the race needs one, it has not made it and the window (the same
+## laps the deck shows) has not closed.
+static func stop_ahead(race: GtRace, car: GtCar) -> bool:
+	return race.mandatory_stop_required() and not car.mandatory_stop_done and maxi(car.lap, 0) + 1 <= race.stop_window_laps().y
 
 
 ## The "fuel critical" call: the car cannot reach the finish and has no stop left to fix that (or has a stop pending
@@ -67,10 +73,7 @@ static func fuel_alarm(race: GtRace, car: GtCar) -> bool:
 	var margin: float = fuel_margin_laps(car, car.pace_mode, car.fuel_mode, laps_left(race, car))
 	if margin >= 0.0:
 		return false
-	var progress: float = car.s / (float(race.laps) * race.track.length)
-	var stop_ahead: bool = race.laps >= GtTypes.MANDATORY_MIN_LAPS and not car.mandatory_stop_done \
-			and progress < GtTypes.STOP_WINDOW_CLOSE - 0.05
-	if not stop_ahead:
+	if not stop_ahead(race, car):
 		return true
 	return car.fuel / maxf(burn_per_lap(car, car.pace_mode, car.fuel_mode), 0.01) < FUEL_ALARM_LAPS
 

@@ -20,8 +20,8 @@ enum CollisionKind { RUB, MINOR, HEAVY }
 enum TacticType { PIT, PACE, FUEL, ERS }
 enum Wheel { FL, FR, RL, RR }
 
-const COMPOUND_GRIP: Array[float] = [1.0, 0.97, 0.94, 0.91, 0.87]
-const COMPOUND_WEAR_PER_LAP: Array[float] = [0.045, 0.032, 0.022, 0.028, 0.024]
+const COMPOUND_GRIP: Array[float] = [1.0, 0.995, 0.99, 0.91, 0.87]
+const COMPOUND_WEAR_PER_LAP: Array[float] = [0.060, 0.045, 0.020, 0.028, 0.024]
 const COMPOUND_LABEL: Array[String] = ["S", "M", "H", "I", "W"]
 const COMPOUND_NAME: Array[String] = ["SOFT", "MEDIUM", "HARD", "INTERMEDIATE", "WET"]
 const COMPOUND_COLOR: Array[Color] = [
@@ -31,16 +31,22 @@ const PACE_NAME: Array[String] = ["CONSERVE", "LIGHT", "STANDARD", "AGGRESSIVE",
 const FUEL_NAME: Array[String] = ["CONSERVE", "STANDARD", "PUSH"]
 const ERS_NAME: Array[String] = ["HARVEST", "NEUTRAL", "DEPLOY", "OVERTAKE"]
 ## Multipliers by PaceMode (CONSERVE..ATTACK): speed, tyre wear, fuel burn, and the tyre temperature the pace aims at.
-const PACE_SPEED_MULT: Array[float] = [0.948, 0.978, 1.0, 1.025, 1.048]
-const PACE_WEAR_MULT: Array[float] = [0.45, 0.72, 1.0, 1.45, 2.1]
+const PACE_SPEED_MULT: Array[float] = [0.948, 0.978, 1.0, 1.031, 1.058]
+const PACE_WEAR_MULT: Array[float] = [0.45, 0.72, 1.0, 1.45, 3.0]
 const PACE_FUEL_MULT: Array[float] = [0.85, 0.93, 1.0, 1.12, 1.25]
-const PACE_TARGET_TEMP: Array[float] = [80.0, 86.0, 92.0, 104.0, 116.0]
+const PACE_TARGET_TEMP: Array[float] = [80.0, 86.0, 92.0, 104.0, 104.0]
 ## Fuel burn multiplier by FuelMode (CONSERVE, STANDARD, PUSH).
 const FUEL_MODE_BURN_MULT: Array[float] = [0.80, 1.0, 1.25]
+## Pace multiplier by FuelMode: PUSH is worth real lap time (CONSERVE already costs it through its top speed cut).
+const FUEL_PACE_MULT: Array[float] = [1.0, 1.0, 1.007]
+## Pace multiplier while the battery is deploying, by ErsMode (HARVEST, NEUTRAL, DEPLOY, OVERTAKE).
+const ERS_DEPLOY_PACE_MULT: Array[float] = [1.0, 1.0, 1.014, 1.022]
+## Battery gained per second of braking when not deploying (HARVEST charges faster, see GtDriving).
+const ERS_REGEN_BRAKE_PER_S: float = 8.5
 ## Fuel tank, refuel speed and the pace a kilogram of fuel costs (start values, Fase 32 balance tuning).
 const TANK_CAP_KG: float = 110.0
-const REFUEL_S_PER_KG: float = 0.06
-const FUEL_WEIGHT_PACE_PER_KG: float = 0.0004
+const REFUEL_S_PER_KG: float = 0.10
+const FUEL_WEIGHT_PACE_PER_KG: float = 0.0003
 ## Races of this many laps or more carry a mandatory pit stop, done inside this share of the distance.
 const MANDATORY_MIN_LAPS: int = 10
 const STOP_WINDOW_OPEN: float = 0.20

@@ -37,6 +37,8 @@ var mandatory_stop_done: bool = false
 ## The flag penalty for a missing mandatory stop has been added; the engineer's "window closes" call has been made.
 var mandatory_penalty_applied: bool = false
 var mandatory_reminded: bool = false
+## The engineer has already told this car that its fuel will not last to the stop it still owes.
+var fuel_stop_reminded: bool = false
 var position: int = 0
 ## Own control-line crossing required after a Safety Car restart; -1 outside restart.
 var sc_restart_line_s: float = -1.0

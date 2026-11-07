@@ -306,10 +306,12 @@ func update_car(car: GtCar, ctx: Variant, dt: float) -> void:
 		top_speed_bonus += 2.6
 		accel_bonus += 1.5
 	fuel_burn_mult *= GtTypes.FUEL_MODE_BURN_MULT[car.fuel_mode]
+	pace_mult *= GtTypes.FUEL_PACE_MULT[car.fuel_mode]
 	var deploying: bool = (car.ers_mode == GtTypes.ErsMode.DEPLOY or car.ers_mode == GtTypes.ErsMode.OVERTAKE) and car.ers_battery > 0.0 and car.v > 12.0 and car.pit == null
 	if deploying:
 		var drain_rate: float = GtTypes.ERS_DRAIN_PER_S[car.ers_mode]
 		car.ers_battery -= minf(car.ers_battery, drain_rate * dt)
+		pace_mult *= GtTypes.ERS_DEPLOY_PACE_MULT[car.ers_mode]
 		if car.ers_mode == GtTypes.ErsMode.OVERTAKE:
 			top_speed_bonus += 6.0
 			accel_bonus += 4.5
@@ -453,7 +455,7 @@ func update_car(car: GtCar, ctx: Variant, dt: float) -> void:
 
 	_drs_detection(car, lead)
 	if is_braking and not deploying and car.ers_battery < 100.0:
-		car.ers_battery = minf(100.0, car.ers_battery + (14.0 if car.ers_mode == GtTypes.ErsMode.HARVEST else 8.5) * dt)
+		car.ers_battery = minf(100.0, car.ers_battery + (14.0 if car.ers_mode == GtTypes.ErsMode.HARVEST else GtTypes.ERS_REGEN_BRAKE_PER_S) * dt)
 	_wear_and_fuel(car, ds, wear_rate_mult, fuel_burn_mult, target_temp, is_braking, curv_now, dt)
 
 	_update_transmission(car)
@@ -805,7 +807,7 @@ func _wear_and_fuel(car: GtCar, ds: float, wear_rate_mult: float, fuel_burn_mult
 	elif car.fuel < 1.2 and absf(curv_now) > 0.008:
 		car.fuel_stage = GtTypes.FuelStage.SPUTTER
 	elif GtForecast.fuel_alarm(race, car):
-		if car.fuel_stage == GtTypes.FuelStage.OPTIMAL:
+		if car.fuel_stage == GtTypes.FuelStage.OPTIMAL and not GtForecast.stop_ahead(race, car):
 			race.push_radio(car, "engineer", "Fuel critical! Switch to CONSERVE immediately or we won't see the chequered flag!")
 		car.fuel_stage = GtTypes.FuelStage.WARNING
 	else:
@@ -1013,11 +1015,13 @@ func enter_pit_lane(car: GtCar, compound: int = -1) -> void:
 	pit.start_s = car.s - u # absolute s of the Pit Entry line on this lap
 	pit.box_s = pit.start_s + stall_offset(car.team_id)
 	pit.compound = chosen
-	pit.forced = car.is_punctured or car.damage > 0.0 or GtTypes.is_slick(car.compound) != GtTypes.is_slick(chosen)
+	pit.entry_progress = clampf(pit.start_s / (float(race.laps) * race.track.length), 0.0, 1.0)
+	pit.forced = car.is_punctured or car.damage > 0.0 or GtTypes.is_slick(car.compound) != GtTypes.is_slick(chosen) \
+			or (chosen != car.compound and not GtTypes.is_slick(chosen))
 	var has_damage: bool = car.damage > 0.0
 	var extra: float = minf(4.2, 1.4 + car.damage / 100.0 * 3.0) if has_damage else 0.0
 	var refuel_kg: float = maxf(0.0, GtFuelPlan.refuel_target_kg(float(race.laps - car.lap + 1), car.fuel_use) - car.fuel)
-	pit.duration = GtTypes.PIT_STOP_TIME + extra + refuel_kg * GtTypes.REFUEL_S_PER_KG
+	pit.duration = (GtTeamStats.pit_stop_time(car.team_id, race.race_seed, car.id * 16 + car.stops) if race.crew_times_enabled else GtTypes.PIT_STOP_TIME) + extra + refuel_kg * GtTypes.REFUEL_S_PER_KG
 	pit.repairing_damage = has_damage
 	pit.initial_damage = car.damage
 	pit.initial_fuel = car.fuel
@@ -1293,7 +1297,7 @@ func _service_car(car: GtCar, pit: GtPit, dt: float) -> void:
 		car.fuel = needed
 		car.fuel_stage = GtTypes.FuelStage.OPTIMAL
 		car.stops += 1
-		race.note_stop_completed(car, pit.forced)
+		race.note_stop_completed(car, pit.forced, pit.entry_progress)
 		pit.lift_y = 0.0
 		pit.wheel_swap_progress = 1.0
 		pit.holding_release = false

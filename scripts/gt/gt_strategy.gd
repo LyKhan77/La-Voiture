@@ -40,17 +40,10 @@ const NEUTRAL_PROFILE: Dictionary = {"forecast_trust": 1.0, "risk_bias": 0.0, "r
 const REFERENCE_LAP_S: float = 90.0
 
 
-## The strategist of `team_id` for this race seed, from its own rng stream (hashing the ids directly gave teams
-## next to each other near-identical strategists).
-static func profile(race_seed: int, team_id: int) -> Dictionary:
-	var rng := GtRng.new(((race_seed * 1103515245) ^ ((team_id + 1) * 0x9E3779B1) ^ 0x51ED270B) & 0x7FFFFFFF)
-	return {
-		"forecast_trust": lerpf(0.45, 1.0, rng.next()),
-		"risk_bias": lerpf(-MAX_RISK_BIAS_PCT, MAX_RISK_BIAS_PCT, rng.next()),
-		"reaction_sectors": mini(2, int(rng.next() * 3.0)),
-		"read_noise": rng.next(),
-		"herd": rng.next(),
-	}
+## The strategist of `team_id`: its Engineer rating and personality, constant per team (GtTeamStats). Before Fase 32
+## this was drawn from the race seed; `race_seed` stays in the signature so callers do not change, and no longer matters.
+static func profile(_race_seed: int, team_id: int) -> Dictionary:
+	return GtTeamStats.engineer_profile(team_id)
 
 
 ## The tyre call for `car`: {"compound" (-1 = stay out), "urgent", "kind" (why: "cooking", "dry", "easing", "damp",
@@ -78,7 +71,7 @@ static func plan(race: GtRace, car: GtCar, prof: Dictionary) -> Dictionary:
 	# Weather: staying out against each other tyre over the horizon (the current lap is run either way).
 	var wear_next: float = car.wear + wear_per_lap(car, car.compound, live) * to_line / length
 	var stay_cost: float = stint_cost(car, car.compound, wear_next, beliefs, lap_s)
-	var stop_cost: float = pit_loss_s(race, lap_s) + stint_cost(car, fresh, 0.0, beliefs, lap_s)
+	var stop_cost: float = pit_loss_s(race, lap_s, car.team_id) + stint_cost(car, fresh, 0.0, beliefs, lap_s)
 	# Slick to slick is a wear call, not a weather call.
 	var weather_change: bool = fresh != car.compound and not (GtTypes.is_slick(fresh) and GtTypes.is_slick(car.compound))
 	if weather_change and stay_cost - stop_cost > CALL_MARGIN_S:
@@ -152,10 +145,12 @@ static func wear_per_lap(car: GtCar, compound: int, water: float) -> float:
 
 
 ## Seconds a stop costs against staying out: the lane at the limiter instead of racing speed, the stop, in and out.
-static func pit_loss_s(race: GtRace, lap_s: float) -> float:
+## `team_id` >= 0 uses that team's mean crew time (GtTeamStats), -1 the constant GtTypes.PIT_STOP_TIME.
+static func pit_loss_s(race: GtRace, lap_s: float, team_id: int = -1) -> float:
 	var lane: float = fposmod(float(race.pit_layout["exit_s"]) - float(race.pit_layout["entry_s"]), race.track.length)
 	var race_speed: float = race.track.length / maxf(lap_s, 1.0)
-	return lane / GtTypes.PIT_SPEED - lane / race_speed + GtTypes.PIT_STOP_TIME + PIT_SLOW_IN_OUT_S
+	var stop_s: float = GtTypes.PIT_STOP_TIME if team_id < 0 else GtTeamStats.mean_stop_time(team_id)
+	return lane / GtTypes.PIT_SPEED - lane / race_speed + stop_s + PIT_SLOW_IN_OUT_S
 
 
 ## Track water this wall believes `k` laps ahead: the forecast weighed against the track now by its trust, read
@@ -189,3 +184,198 @@ static func _field_rain_share(race: GtRace) -> float:
 		if not GtTypes.is_slick(other.compound):
 			rain += 1
 	return 0.5 if running == 0 else float(rain) / float(running)
+
+
+# --- pace, fuel and ERS: the one chooser rivals and the AUTO desk share (Fase 32) -----------------------------------
+
+## The attitude AUTO takes: every rival's profile is a variation of this one (same keys, same function reads them).
+const NEUTRAL_TACTIC: Dictionary = {"aggression": 0.5, "fuel_save": 0.5, "ers_greed": 0.5, "cover_gap_s": 2.0, "stop_bias": 0.0}
+## Seconds behind a car (or in front of one) that counts as a fight.
+const BATTLE_GAP_S: float = 1.5
+## Road distance within which another car counts as ahead or behind.
+const NEIGHBOUR_RANGE_M: float = 200.0
+
+
+## The attitude of `team_id` for this race seed, from its own hash stream (never the race rng): how hard it pushes
+## (`aggression`), how much fuel it saves (`fuel_save`), how freely it spends the battery (`ers_greed`), how close
+## behind a stopping rival it covers (`cover_gap_s`) and whether it stops early (-1) or late (+1) (`stop_bias`).
+static func tactic_profile(race_seed: int, team_id: int) -> Dictionary:
+	var rng := GtRng.new(((race_seed * 1103515245) ^ ((team_id + 1) * 0x9E3779B1) ^ 0x2B7E1516) & 0x7FFFFFFF)
+	return {
+		"aggression": rng.next(), "fuel_save": rng.next(), "ers_greed": rng.next(),
+		"cover_gap_s": lerpf(1.0, 3.0, rng.next()), "stop_bias": lerpf(-1.0, 1.0, rng.next()),
+	}
+
+
+## Seconds to the nearest racing car ahead of `car` within NEIGHBOUR_RANGE_M of road; INF when there is none.
+static func gap_ahead_s(race: GtRace, car: GtCar) -> float:
+	return _neighbour_gap_s(race, car, true)
+
+
+## Seconds to the nearest racing car behind `car` within NEIGHBOUR_RANGE_M of road; INF when there is none.
+static func gap_behind_s(race: GtRace, car: GtCar) -> float:
+	return _neighbour_gap_s(race, car, false)
+
+
+static func _neighbour_gap_s(race: GtRace, car: GtCar, ahead: bool) -> float:
+	var length: float = race.track.length
+	var nearest: float = INF
+	for other: GtCar in race.cars:
+		if other == car or other.is_dnf or other.pit != null or other.finished_at >= 0.0:
+			continue
+		var distance: float = fposmod(other.s - car.s, length) if ahead else fposmod(car.s - other.s, length)
+		if distance > 0.01 and distance < NEIGHBOUR_RANGE_M and distance < nearest:
+			nearest = distance
+	return INF if nearest == INF else nearest / maxf(car.v, 25.0)
+
+
+## Laps the current tyres and fuel have to last: to the finish, or only to the middle of the stop window while the
+## mandatory stop is still ahead.
+static func stint_laps_left(race: GtRace, car: GtCar) -> float:
+	var left: float = GtForecast.laps_left(race, car)
+	var progress: float = race.race_progress(car)
+	if race.mandatory_stop_required() and not car.mandatory_stop_done and progress < GtTypes.STOP_WINDOW_CLOSE - 0.05:
+		var to_mid_window: float = maxf(1.0, (0.5 * (GtTypes.STOP_WINDOW_OPEN + GtTypes.STOP_WINDOW_CLOSE) - progress) * float(race.laps))
+		return minf(left, to_mid_window)
+	return left
+
+
+## Wear multiplier a wall budgets for running hot: AGGRESSIVE and ATTACK sit past 112 C where GtDriving wears tyres 1.4
+## times faster (measured: ATTACK 0.195 a lap against the table's 0.135). The deck's GtForecast leaves it out.
+const HOT_PACE_WEAR_FACTOR: float = 1.5
+
+
+## Tyre life (0..1) left after `laps` laps at `pace_mode`, with the heat of AGGRESSIVE and ATTACK counted.
+static func tyre_life_at_finish(car: GtCar, pace_mode: int, laps: float) -> float:
+	var hot: float = HOT_PACE_WEAR_FACTOR if pace_mode >= GtTypes.PaceMode.AGGRESSIVE else 1.0
+	return clampf(1.0 - car.wear - GtForecast.wear_per_lap(car, pace_mode) * hot * laps, 0.0, 1.0)
+
+
+## Pace, fuel and ERS mode for `car` as a pit wall with attitude `tp` would set them now:
+## {"pace": PaceMode, "fuel": FuelMode, "ers": ErsMode}. Tyres that cannot take a push are never pushed.
+static func choose_modes(race: GtRace, car: GtCar, tp: Dictionary) -> Dictionary:
+	var stint: float = stint_laps_left(race, car)
+	var left: float = GtForecast.laps_left(race, car)
+	var ahead_s: float = gap_ahead_s(race, car)
+	var behind_s: float = gap_behind_s(race, car)
+	var battling: bool = ahead_s < BATTLE_GAP_S
+	var aggression: float = float(tp["aggression"])
+	var pace: int = GtTypes.PaceMode.STANDARD
+	if tyre_life_at_finish(car, GtTypes.PaceMode.STANDARD, stint) < GtForecast.TYRE_WATCH_LIFE:
+		pace = GtTypes.PaceMode.LIGHT
+	elif battling and aggression > 0.5 and tyre_life_at_finish(car, GtTypes.PaceMode.AGGRESSIVE, stint) >= GtForecast.TYRE_WATCH_LIFE:
+		pace = GtTypes.PaceMode.AGGRESSIVE
+	if left <= 2.0 and aggression > 0.7 and tyre_life_at_finish(car, GtTypes.PaceMode.ATTACK, left) >= GtForecast.TYRE_DANGER_LIFE \
+			and GtForecast.fuel_margin_laps(car, GtTypes.PaceMode.ATTACK, GtTypes.FuelMode.STANDARD, left) >= 0.3:
+		pace = GtTypes.PaceMode.ATTACK
+	var margin: float = GtForecast.fuel_margin_laps(car, pace, GtTypes.FuelMode.STANDARD, stint)
+	var fuel: int = GtTypes.FuelMode.STANDARD
+	if margin < 0.3:
+		fuel = GtTypes.FuelMode.CONSERVE
+	elif battling and margin > 1.0 and float(tp["fuel_save"]) < 0.5:
+		fuel = GtTypes.FuelMode.PUSH
+	var battery_floor: float = 35.0 - (float(tp["ers_greed"]) - 0.5) * 20.0
+	var ers: int = GtTypes.ErsMode.NEUTRAL
+	if ahead_s <= 1.2 and car.ers_battery > battery_floor:
+		ers = GtTypes.ErsMode.OVERTAKE
+	elif behind_s <= 0.8 and car.ers_battery > battery_floor:
+		ers = GtTypes.ErsMode.DEPLOY
+	elif car.ers_battery < battery_floor - 5.0 and not battling:
+		ers = GtTypes.ErsMode.HARVEST
+	return {"pace": pace, "fuel": fuel, "ers": ers}
+
+
+# --- the mandatory stop: when a wall calls it, covers a rival's stop, pits under caution (Fase 32) ---------------------
+
+## Fuel laps under which a car with its stop still ahead is called in (the pit entry can be up to a lap away).
+const STOP_FUEL_DUE_LAPS: float = 2.2
+## Wear above which a stop under caution is always taken.
+const CAUTION_WEAR_STOP: float = 0.45
+## Chance a team with its stop still ahead uses a safety car or VSC for it.
+const CAUTION_STOP_CHANCE: float = 0.7
+
+
+static func _fresh_for(race: GtRace, car: GtCar) -> int:
+	var lap_s: float = car.best_lap if car.best_lap > 0.0 else race.track.length / 45.0
+	var laps_after: int = maxi(1, race.laps - car.lap - 1)
+	return best_fresh_compound(car, [race.weather.track_water_pct], laps_after, lap_s)
+
+
+## The tyre to fit when `car` is due its mandatory stop, -1 when it is not: inside the laps whose calls count (GtRace.
+## stop_window_laps), once the wall's planned share of the distance (attitude `tp`, 25 to 45 %) is run, or the fuel will
+## not last to a later stop, or only two laps of the window are left. Never after the window has closed: a stop then no
+## longer counts (a car that needs fuel is called by `fuel_call`).
+static func mandatory_call(race: GtRace, car: GtCar, tp: Dictionary) -> int:
+	if not race.mandatory_stop_required() or car.mandatory_stop_done or car.pit != null or car.pit_request >= 0 \
+			or car.is_dnf or car.finished_at >= 0.0 or car.is_punctured:
+		return -1
+	var window: Vector2i = race.stop_window_laps()
+	var lap_number: int = maxi(car.lap, 0) + 1
+	if lap_number < window.x or lap_number > window.y:
+		return -1
+	var planned: float = lerpf(0.25, 0.45, (float(tp["stop_bias"]) + 1.0) * 0.5)
+	var burn: float = maxf(GtForecast.burn_per_lap(car, car.pace_mode, car.fuel_mode), 0.01)
+	if race.race_progress(car) < planned and car.fuel / burn >= STOP_FUEL_DUE_LAPS and lap_number < window.y - 1:
+		return -1
+	return _fresh_for(race, car)
+
+
+## The tyre to fit when `car` will not reach the flag on the fuel it has, -1 otherwise.
+static func fuel_call(race: GtRace, car: GtCar) -> int:
+	if car.pit != null or car.pit_request >= 0 or car.is_dnf or car.finished_at >= 0.0 or car.is_punctured:
+		return -1
+	var left: float = GtForecast.laps_left(race, car)
+	var burn: float = maxf(GtForecast.burn_per_lap(car, car.pace_mode, car.fuel_mode), 0.01)
+	if left > 1.0 and car.fuel / burn < STOP_FUEL_DUE_LAPS and GtForecast.fuel_margin_laps(car, car.pace_mode, car.fuel_mode, left) < 0.0:
+		return _fresh_for(race, car)
+	return -1
+
+
+## Whether `car` should answer a stop of the car just behind it (within the wall's cover gap) by boxing too: its own
+## stop is still ahead, the window is open and its tyres are three laps old or more.
+static func should_cover(race: GtRace, car: GtCar, tp: Dictionary) -> bool:
+	if not race.mandatory_stop_required() or car.mandatory_stop_done or car.pit_request >= 0 or car.pit != null or car.tyre_age_laps < 3:
+		return false
+	var window: Vector2i = race.stop_window_laps()
+	var lap_number: int = maxi(car.lap, 0) + 1
+	if lap_number < window.x or lap_number > window.y - 1:
+		return false
+	for other: GtCar in race.cars:
+		if other == car or other.pit == null or other.is_dnf:
+			continue
+		var behind_m: float = fposmod(car.s - other.s, race.track.length)
+		if behind_m > 0.0 and behind_m / maxf(car.v, 25.0) <= float(tp["cover_gap_s"]):
+			return true
+	return false
+
+
+## The tyre to fit when a safety car or VSC is out and this team uses it for a stop, -1 otherwise: a worn car always
+## does, a car with its mandatory stop ahead does with CAUTION_STOP_CHANCE (a roll from its own hash stream, the same for
+## the whole caution).
+static func caution_call(race: GtRace, car: GtCar) -> int:
+	var flag: int = int(race.race_control["flag"])
+	if (flag != GtTypes.Flag.SC and flag != GtTypes.Flag.VSC) or car.pit != null or car.pit_request >= 0 or car.is_punctured:
+		return -1
+	if race.laps - car.lap - 1 < 2:
+		return -1
+	var wants: bool = car.wear > CAUTION_WEAR_STOP
+	if not wants and race.mandatory_stop_required() and not car.mandatory_stop_done:
+		var window: Vector2i = race.stop_window_laps()
+		var lap_number: int = maxi(car.lap, 0) + 1
+		if lap_number >= window.x and lap_number <= window.y:
+			var rng := GtRng.new(((race.race_seed * 1103515245) ^ ((car.team_id + 1) * 0x9E3779B1) ^ (race.sc_serial() * 0x85EBCA6B) ^ 0x3C6EF372) & 0x7FFFFFFF)
+			wants = rng.next() < CAUTION_STOP_CHANCE
+	return _fresh_for(race, car) if wants else -1
+
+
+## A rival wall's stop call this sector, -1 for none: the mandatory stop when due, a cover, or a stop under caution.
+static func rival_stop_call(race: GtRace, car: GtCar, tp: Dictionary) -> int:
+	var due: int = mandatory_call(race, car, tp)
+	if due >= 0:
+		return due
+	if should_cover(race, car, tp):
+		return _fresh_for(race, car)
+	var cautious: int = caution_call(race, car)
+	if cautious >= 0:
+		return cautious
+	return fuel_call(race, car)

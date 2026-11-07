@@ -17,7 +17,8 @@ static func clamp_kg(kg: float) -> float:
 
 
 ## The crew's start load: the full distance in a race too short for a mandatory stop, otherwise a light start that
-## carries the car to the middle of the stop window (the stop then tops it up for the rest).
+## carries the car to the middle of the stop window (the stop then tops it up for the rest). A car that forgets its stop
+## is told to box for fuel in time (GtRace._check_stop_reminders); a heavier start is the player's choice in the garage.
 static func crew_pick_kg(total_laps: int, fuel_use: float) -> float:
 	var laps_carried: float = float(total_laps)
 	if total_laps >= GtTypes.MANDATORY_MIN_LAPS:

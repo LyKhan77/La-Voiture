@@ -58,6 +58,11 @@ var latest_collision: Dictionary = {}
 var incidents_enabled: bool = true
 ## Scales every incident roll (contacts, solo spins, mistakes): 1.0 is the stock rate, the setup's STREET CHAOS raises it.
 var incident_rate: float = 1.0
+## Rivals and the AUTO desk set pace, fuel and ERS at the sector lines (GtStrategy.choose_modes). Tests that isolate one car for a
+## physics scenario turn it off so the car keeps the modes the scenario gave it.
+var rival_tactics_enabled: bool = true
+## Each stop lasts its team crew's time (GtTeamStats.pit_stop_time). Tests of the pit-lane flow turn it off so every stop takes GtTypes.PIT_STOP_TIME.
+var crew_times_enabled: bool = true
 
 var race_control: Dictionary = {
 	"flag": GtTypes.Flag.GREEN, "sector": 1, "message": "TRACK CLEAR - GREEN FLAG",
@@ -85,6 +90,7 @@ var _pending_replies: Array[Dictionary] = [] # {"due", "car_id", "reply_to", "dr
 var _flood_called: Dictionary = {} # car id -> true while a flood episode has been called
 var _suggestion_cooldowns: Dictionary = {} # "car-type" -> time
 var _strategy_profiles: Dictionary = {} # team id -> GtStrategy.profile
+var _tactic_profiles: Dictionary = {} # team id -> GtStrategy.tactic_profile
 var _strategy_votes: Dictionary = {} # car id -> sector calls in a row that wanted the same stop
 var contacts: GtContacts
 var stewards: GtStewards
@@ -221,29 +227,40 @@ func race_progress(car: GtCar) -> float:
 	return clampf(car.s / (float(laps) * track.length), 0.0, 1.0)
 
 
-## A stop was completed: it counts as the mandatory one inside the window, or at any time before it closes when forced.
-func note_stop_completed(car: GtCar, forced: bool) -> void:
+## A stop was completed: it counts as the mandatory one when its Pit Entry line was crossed inside the window, or at any
+## time before it closes when forced. `entry_progress` < 0 reads the car's own progress (tests that place a car).
+func note_stop_completed(car: GtCar, forced: bool, entry_progress: float = -1.0) -> void:
 	if not mandatory_stop_required():
 		return
-	var progress: float = race_progress(car)
+	var progress: float = entry_progress if entry_progress >= 0.0 else race_progress(car)
 	if progress > GtTypes.STOP_WINDOW_CLOSE:
 		return
 	if progress >= GtTypes.STOP_WINDOW_OPEN or forced:
 		car.mandatory_stop_done = true
 
 
+## The first and last lap (1-based, x = first, y = last) in which calling a stop makes it count. A stop called in lap L
+## crosses the Pit Entry line at the end of that lap, so the window is read at the entry line's place in the lap.
+func stop_window_laps() -> Vector2i:
+	var entry_fraction: float = fposmod(float(pit_layout["entry_s"]), track.length) / track.length
+	return Vector2i(
+		ceili(GtTypes.STOP_WINDOW_OPEN * float(laps) - entry_fraction + 1.0 - 1.0e-6),
+		floori(GtTypes.STOP_WINDOW_CLOSE * float(laps) - entry_fraction + 1.0 + 1.0e-6))
+
+
 ## Seconds added to a car that finished without a counting stop: never cheaper than 1.5 pit losses.
 func mandatory_penalty_s() -> float:
-	return maxf(GtTypes.MANDATORY_PENALTY_FLOOR_S, GtTypes.MANDATORY_PENALTY_PIT_LOSS_MULT * GtStrategy.pit_loss_s(self, track.length / 45.0))
+	return maxf(GtTypes.MANDATORY_PENALTY_FLOOR_S, GtTypes.MANDATORY_PENALTY_PIT_LOSS_MULT * GtStrategy.pit_loss_s(self, track.length / 45.0, GtTeamStats.slowest_crew_team()))
 
 
 ## What the deck and the pit wall show about the stop: {"required", "done", "window_open", "open_lap", "close_lap", "penalty_s"}.
 func mandatory_stop_status(car: GtCar) -> Dictionary:
-	var progress: float = race_progress(car)
+	var window: Vector2i = stop_window_laps()
+	var lap_number: int = maxi(car.lap, 0) + 1
 	return {
 		"required": mandatory_stop_required(), "done": car.mandatory_stop_done,
-		"window_open": progress >= GtTypes.STOP_WINDOW_OPEN and progress <= GtTypes.STOP_WINDOW_CLOSE,
-		"open_lap": ceili(GtTypes.STOP_WINDOW_OPEN * float(laps) - 1.0e-6), "close_lap": floori(GtTypes.STOP_WINDOW_CLOSE * float(laps) + 1.0e-6),
+		"window_open": lap_number >= window.x and lap_number <= window.y,
+		"open_lap": window.x, "close_lap": window.y,
 		"penalty_s": mandatory_penalty_s(),
 	}
 
@@ -252,11 +269,17 @@ func mandatory_stop_status(car: GtCar) -> Dictionary:
 func _check_stop_reminders() -> void:
 	if not mandatory_stop_required():
 		return
-	var remind_at: float = GtTypes.STOP_WINDOW_CLOSE - 2.0 / float(laps)
+	var window: Vector2i = stop_window_laps()
 	for car: GtCar in cars:
-		if car.team_id != player_team_id or car.mandatory_stop_done or car.mandatory_reminded or car.is_dnf or car.finished_at >= 0.0 or car.pit != null:
+		if car.team_id != player_team_id or car.mandatory_stop_done or car.is_dnf or car.finished_at >= 0.0 or car.pit != null:
 			continue
-		if race_progress(car) >= remind_at:
+		var lap_number: int = maxi(car.lap, 0) + 1
+		var burn: float = maxf(GtForecast.burn_per_lap(car, car.pace_mode, car.fuel_mode), 0.01)
+		if not car.fuel_stop_reminded and lap_number <= window.y and car.fuel / burn < GtForecast.FUEL_ALARM_LAPS:
+			car.fuel_stop_reminded = true
+			push_radio(car, "engineer", "Fuel is short. Box this lap for fuel.", true)
+			continue
+		if not car.mandatory_reminded and lap_number >= window.y - 1:
 			car.mandatory_reminded = true
 			push_radio(car, "engineer", "Window closes in two laps. Box now.", true)
 
@@ -979,6 +1002,36 @@ func strategy_profile(team_id: int) -> Dictionary:
 	return _strategy_profiles[team_id]
 
 
+## The attitude of a team's pit wall for pace, fuel and ERS (GtStrategy.tactic_profile), made once per race.
+func tactic_profile_of(team_id: int) -> Dictionary:
+	if not _tactic_profiles.has(team_id):
+		_tactic_profiles[team_id] = GtStrategy.tactic_profile(race_seed, team_id)
+	return _tactic_profiles[team_id]
+
+
+## Pace, fuel and ERS at every sector line, from the one chooser (GtStrategy.choose_modes): a rival takes its team's
+## attitude and the sim sets the modes; a player car on AUTO takes the neutral attitude and goes through the desk
+## (radio, cooldown); a MANUAL player car is the player's. Nothing changes in the pits or under caution.
+func decide_modes(car: GtCar) -> void:
+	if not rival_tactics_enabled or car.pit != null or car.finished_at >= 0.0 or car.is_dnf or car.lap < 0 or is_under_caution(car):
+		return
+	var is_player: bool = car.team_id == player_team_id
+	if is_player and tactic_mode != GtTypes.TacticMode.AUTO:
+		return
+	var call: Dictionary = GtStrategy.choose_modes(self, car, GtStrategy.NEUTRAL_TACTIC if is_player else tactic_profile_of(car.team_id))
+	if is_player:
+		if int(call["pace"]) != car.pace_mode:
+			suggest_tactic(car, GtTypes.TacticType.PACE, int(call["pace"]), "PACE: %s" % GtTypes.PACE_NAME[int(call["pace"])], "Suggest pace %s." % GtTypes.PACE_NAME[int(call["pace"])])
+		if int(call["fuel"]) != car.fuel_mode:
+			suggest_tactic(car, GtTypes.TacticType.FUEL, int(call["fuel"]), "FUEL: %s" % GtTypes.FUEL_NAME[int(call["fuel"])], "Suggest fuel mode %s." % GtTypes.FUEL_NAME[int(call["fuel"])])
+		if int(call["ers"]) != car.ers_mode:
+			suggest_tactic(car, GtTypes.TacticType.ERS, int(call["ers"]), "ERS: %s" % GtTypes.ERS_NAME[int(call["ers"])], "Suggest ERS %s." % GtTypes.ERS_NAME[int(call["ers"])])
+		return
+	set_pace_mode(car.id, int(call["pace"]))
+	set_fuel_mode(car.id, int(call["fuel"]))
+	set_ers_mode(car.id, int(call["ers"]))
+
+
 ## Strategy desk, at every sector line: the rivals' walls make their own tyre calls (GtStrategy), acting once their
 ## strategist has seen the same call `reaction_sectors` times running; the player's call goes to the desk
 ## (suggest_tactic: AUTO executes it, MANUAL + COACH raises a card, MANUAL alone reports the facts).
@@ -990,6 +1043,7 @@ func decide_strategy(car: GtCar) -> void:
 	var target: int = int(call["compound"])
 	if target < 0:
 		_strategy_votes.erase(car.id)
+		_decide_stop(car)
 		return
 	if car.team_id == player_team_id:
 		var info: String = "Tyre wear at %d%%." % roundi(car.wear * 100.0) if call["kind"] == "wear" \
@@ -1002,6 +1056,31 @@ func decide_strategy(car: GtCar) -> void:
 	if bool(call["urgent"]) or votes > int(prof["reaction_sectors"]):
 		car.pit_request = target
 		_strategy_votes.erase(car.id)
+
+
+## Nothing in the weather asks for a stop: the mandatory stop, a cover and a stop under caution (GtStrategy). A rival
+## wall boxes its car; the player's engineer calls the mandatory stop through the desk (AUTO executes it, MANUAL + COACH
+## raises a card).
+func _decide_stop(car: GtCar) -> void:
+	if car.team_id == player_team_id:
+		var due: int = GtStrategy.mandatory_call(self, car, GtStrategy.NEUTRAL_TACTIC)
+		if due >= 0:
+			suggest_tactic(car, GtTypes.TacticType.PIT, due, "BOX (MANDATORY) FOR %s" % GtTypes.COMPOUND_NAME[due],
+				"Mandatory stop window is open. Suggest box this lap for %s tyres." % GtTypes.COMPOUND_NAME[due])
+		elif tactic_mode == GtTypes.TacticMode.AUTO:
+			# The engineer on AUTO also boxes a car that cannot reach the flag on its fuel (a MANUAL desk gets the fuel alarm).
+			var for_fuel: int = GtStrategy.fuel_call(self, car)
+			if for_fuel >= 0:
+				suggest_tactic(car, GtTypes.TacticType.PIT, for_fuel, "BOX (FUEL) FOR %s" % GtTypes.COMPOUND_NAME[for_fuel], "")
+		return
+	var call: int = GtStrategy.rival_stop_call(self, car, tactic_profile_of(car.team_id))
+	if call >= 0:
+		car.pit_request = call
+
+
+## How many heavy crashes have been raised so far (keys the caution-stop roll of the teams).
+func sc_serial() -> int:
+	return _sc_serial
 
 
 ## The engineer's words for a strategist call: one fixed sentence per kind, so every call has its recorded voice
@@ -1116,6 +1195,7 @@ func update_sector_and_speed_trap(car: GtCar) -> void:
 		car.sector_entry_time = time
 		car.current_sector = new_sector
 		decide_strategy(car)
+		decide_modes(car)
 	elif new_sector < car.current_sector and floori(car.s / track.length) <= car.lap:
 		car.current_sector = new_sector
 
@@ -1147,3 +1227,4 @@ func track_laps(car: GtCar) -> void:
 		mark_finished(car)
 		return
 	decide_strategy(car)
+	decide_modes(car)
