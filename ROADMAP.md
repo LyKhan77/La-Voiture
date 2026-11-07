@@ -4,6 +4,16 @@
 
 ---
 
+## Status Fase 32 — 2026-11-07
+
+- [x] **Fase 32: keseimbangan Tactical Deck, Safety Car, pit wajib, dan fondasi stat tim** (branch `fase-32-tactical-balance`, belum di-merge)
+  - Diagnosa terukur (`temp/probe_balance.gd`): balapan kering 0 pit stop, fuel `1.05 x laps`, PUSH dan ERS tanpa nilai di waktu lap, ATTACK +8 s, SC menjemput leader sampai 434 s.
+  - SC: leader mengejar SC yang menunggu (434 s turun ke 143 s kasus terburuk di Apex, 155 s Paulistano, 167 s Ardennes), VSC 8-15 s sebelum SC pada kecelakaan berat.
+  - Pit wajib di balapan 10 dan 15 lap (jendela 20-80%, penalti 30 s), fuel awal dipilih pemain di garasi dengan Crew Pick, waktu isi ulang proporsional, peringatan fuel berdasar proyeksi.
+  - Ekonomi mode diperbaiki (PUSH, ERS, ATTACK) dan lima rencana satu stop seimbang (selisih 1,3-4,6 s di tiga sirkuit); rival dan AUTO memakai satu pemilih mode; rival mengambil stop wajib, cover, dan pit saat SC; stat Engineer dan pit crew per tim.
+  - Sebelas suite baru; regresi penuh **127/127 suite, 0 gagal**; smoke native 10 lap 20 mobil: 60,0 FPS, p95 16,89 ms, 0 orphan. Laporan: [`FASE-32-TACTICAL-BALANCE-REPORT.md`](file:///D:/Occupation/Porto/genex/La_Voiture/executor-report/reports/FASE-32-TACTICAL-BALANCE-REPORT.md).
+  - Terbuka: Crew Pick ringan membuat mobil MANUAL yang lupa pit kehabisan fuel (DNF) di 10/15 lap; keputusan developer di laporan.
+
 ## Status Fase 31 — 2026-11-06
 
 - [x] **Fase 31: standee driver baru (satu angle depan + pose menang) dan suara comms** (branch `fase-31-driver-standee`, belum di-merge)
