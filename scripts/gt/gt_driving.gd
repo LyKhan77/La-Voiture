@@ -543,17 +543,32 @@ func _apply_flags(car: GtCar, lead: Dictionary, ideal_lateral: float) -> void:
 		car.defend_timer = 0.0
 		car.overtake_phase = GtTypes.Overtake.NONE
 	elif flag == GtTypes.Flag.SC or race.restart_pending(car):
-		_target = minf(_target, 110.0 / 3.6)
-		# Hold the queue leader's pace even while the deployed SC is beyond the local 24 m sensor.
-		if car.position == 1 and int(race.safety_car["phase"]) == GtTypes.SafetyCarPhase.DEPLOYED:
-			_target = minf(_target, 27.0)
-		elif car.position == 1:
-			_target = minf(_target, 27.0 * GtTypes.PACE_SPEED_MULT[car.pace_mode])
+		var gap_to_sc: float = fposmod(float(race.safety_car["s"]) - car.s, race.track.length)
+		# Fase 32: until the safety car has collected the leader every car may run up to it, the cap easing down
+		# to the 27 m/s caution pace as it closes (a flat 27 m/s against a 22 m/s SC took 434 s from a lap away).
+		var catching_up: bool = flag == GtTypes.Flag.SC and int(race.safety_car["phase"]) == GtTypes.SafetyCarPhase.DEPLOYED \
+				and not bool(race.safety_car.get("picked_up", false)) and car.pit == null
+		if catching_up:
+			# The pack follows the leader's gap, so it closes on the safety car as one block (own gap only for a car nearer than that).
+			var leader: GtCar = race.get_car(int(race.safety_car.get("leader_id", -1)))
+			var block_gap: float = fposmod(float(race.safety_car["s"]) - leader.s, race.track.length) if leader != null else gap_to_sc
+			_target = minf(_target, GtRace.sc_catchup_cap(minf(gap_to_sc, block_gap)))
+		else:
+			var caution_cap: float = 110.0 / 3.6
+			if flag == GtTypes.Flag.SC and car.position > 1 and car.pit == null and int(race.safety_car["phase"]) == GtTypes.SafetyCarPhase.DEPLOYED:
+				# Collected: the cars behind the leader close up on the car ahead (a stretched field would delay the in-lap).
+				var gap_ahead: float = float(lead["dist"]) if not lead.is_empty() else 1000.0
+				caution_cap = lerpf(caution_cap, GtRace.SC_CLOSEUP_MAX_MPS, smoothstep(30.0, 65.0, gap_ahead))
+			_target = minf(_target, caution_cap)
+			# Hold the queue leader's pace even while the deployed SC is beyond the local 24 m sensor.
+			if car.position == 1 and int(race.safety_car["phase"]) == GtTypes.SafetyCarPhase.DEPLOYED:
+				_target = minf(_target, 27.0)
+			elif car.position == 1:
+				_target = minf(_target, 27.0 * GtTypes.PACE_SPEED_MULT[car.pace_mode])
 		car.pass_timer = 0.0
 		car.defend_timer = 0.0
 		car.overtake_phase = GtTypes.Overtake.NONE
 		_target_lateral = ideal_lateral * 0.35
-		var gap_to_sc: float = fposmod(float(race.safety_car["s"]) - car.s, race.track.length)
 		if race.sc_blocks_car(car) and gap_to_sc < 24.0:
 			_target = minf(_target, maxf(0.0, float(race.safety_car["v"]) * 0.90) if gap_to_sc < 11.0 else float(race.safety_car["v"]))
 		if not lead.is_empty() and float(lead["dist"]) < 14.0:

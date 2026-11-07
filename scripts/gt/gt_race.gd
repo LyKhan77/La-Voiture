@@ -19,6 +19,17 @@ signal steward_event(event: Dictionary)
 const GRID_ROW_M: float = 8.0
 const SC_QUEUE_GAP_M: float = 46.0
 const SC_PICKUP_GAP_M: float = 50.0
+## Safety car speed until it has collected the leader (a leader a lap behind has to be able to catch it).
+const SC_CATCHUP_SPEED_MPS: float = 18.0
+## Cars may run this fast while the uncollected safety car is more than SC_CATCHUP_FAR_M ahead, easing to the
+## normal 27 m/s caution pace inside SC_CATCHUP_NEAR_M.
+const SC_LEADER_CATCHUP_MAX_MPS: float = 70.0
+const SC_CATCHUP_NEAR_M: float = 250.0
+const SC_CATCHUP_FAR_M: float = 900.0
+## The uncollected safety car idles at this speed while the leader is still far behind it, so the leader closes quickly.
+const SC_WAIT_SPEED_MPS: float = 12.0
+## After pickup the cars behind the leader may close up on the car ahead up to this speed.
+const SC_CLOSEUP_MAX_MPS: float = 55.0
 const GRID_COLUMN_M: float = 2.5
 ## Race seconds a suggestion card stays open: MANUAL closes it, AUTO executes it when the window ends.
 const SUGGESTION_WINDOW_S: float = 10.0
@@ -427,6 +438,12 @@ static func sc_pit_entry_lateral_in(s_lap: float, layout: Dictionary) -> float:
 	return lerpf(edge, fast, smoothstep(0.0, 60.0, s_rel))
 
 
+## Speed cap of a car racing up to the uncollected safety car `gap_to_sc` metres ahead: 27 m/s close in, up to
+## SC_LEADER_CATCHUP_MAX_MPS when far away.
+static func sc_catchup_cap(gap_to_sc: float) -> float:
+	return lerpf(27.0, SC_LEADER_CATCHUP_MAX_MPS, smoothstep(SC_CATCHUP_NEAR_M, SC_CATCHUP_FAR_M, gap_to_sc))
+
+
 func restart_pending(car: GtCar) -> bool:
 	return car.sc_restart_line_s >= 0.0 and car.s < car.sc_restart_line_s and car.finished_at < 0.0 and not car.is_dnf
 
@@ -584,7 +601,7 @@ func _update_race_control(dt: float) -> void:
 		var peeling: bool = pit_start >= 0.0 and float(safety_car["s"]) >= pit_start
 		var target_v: float = 25.0 if gap_to_leader > 28.0 else 27.0
 		if not bool(safety_car.get("picked_up", false)):
-			target_v = 18.0
+			target_v = lerpf(SC_CATCHUP_SPEED_MPS, SC_WAIT_SPEED_MPS, smoothstep(SC_CATCHUP_NEAR_M, SC_CATCHUP_FAR_M, gap_to_leader))
 		var side: float = pit_side_of(pit_layout)
 		if peeling and float(safety_car["lateral"]) * side >= float(pit_layout["edge_lateral_m"]) * side:
 			target_v = 80.0 / 3.6
