@@ -62,7 +62,8 @@ func _run() -> void:
 ## A car with known numbers: MEDIUM, 28 % worn, 13 laps of fuel, full battery.
 func _known(car: GtCar) -> void:
 	car.compound = GtTypes.Compound.MEDIUM
-	car.tyre_wear_rate = 1.0
+	# Fase 32: keeps the car at 3.2 % wear a lap on MEDIUM whatever the compound table says (the verdict logic is under test).
+	car.tyre_wear_rate = 0.032 / GtTypes.COMPOUND_WEAR_PER_LAP[GtTypes.Compound.MEDIUM]
 	car.wear = 0.28
 	car.fuel_use = 3.0
 	car.fuel = 39.0
@@ -75,11 +76,12 @@ func _known(car: GtCar) -> void:
 func _test_forecast() -> void:
 	var car: GtCar = mine[0]
 	_known(car)
-	check(GtTypes.PACE_WEAR_MULT == [0.45, 0.72, 1.0, 1.45, 2.1] and GtTypes.PACE_FUEL_MULT == [0.85, 0.93, 1.0, 1.12, 1.25]
+	# Fase 32: the ATTACK row of PACE_SPEED_MULT / PACE_WEAR_MULT / PACE_TARGET_TEMP was retuned (a short push, not a blow-out).
+	check(GtTypes.PACE_WEAR_MULT == [0.45, 0.72, 1.0, 1.45, 3.0] and GtTypes.PACE_FUEL_MULT == [0.85, 0.93, 1.0, 1.12, 1.25]
 			and GtTypes.FUEL_MODE_BURN_MULT == [0.8, 1.0, 1.25] and GtTypes.ERS_DRAIN_PER_S[GtTypes.ErsMode.OVERTAKE] == 24.0
 			and GtTypes.ERS_DRAIN_PER_S[GtTypes.ErsMode.DEPLOY] == 12.0 and GtTypes.TYRE_CLIFF_WEAR == 0.75,
 		"forecast: the multiplier tables carry the numbers gt_driving always used")
-	check(is_equal_approx(GtForecast.wear_per_lap(car, GtTypes.PaceMode.ATTACK), 0.032 * 2.1)
+	check(is_equal_approx(GtForecast.wear_per_lap(car, GtTypes.PaceMode.ATTACK), 0.032 * 3.0)
 			and is_equal_approx(GtForecast.burn_per_lap(car, GtTypes.PaceMode.STANDARD, GtTypes.FuelMode.PUSH), 3.75)
 			and is_equal_approx(GtForecast.tyre_life_at_finish(car, GtTypes.PaceMode.STANDARD, 10.0), 0.40)
 			and is_equal_approx(GtForecast.fuel_margin_laps(car, GtTypes.PaceMode.STANDARD, GtTypes.FuelMode.STANDARD, 10.0), 3.0)
@@ -401,7 +403,7 @@ func _test_review_fixes() -> void:
 	deck.pace_row.buttons[GtTypes.PaceMode.ATTACK].pressed.emit()
 	var after_click: String = deck.tip.numbers_label.text
 	deck.pace_row.unhovered.emit()
-	check(before_click.contains("SPEED +4.8%") and after_click.contains("SPEED +0.0%") and deck.tip.visible == false,
+	check(before_click.contains("SPEED +5.8%") and after_click.contains("SPEED +0.0%") and deck.tip.visible == false,
 		"review: the tooltip and forecast line are recomputed after a fader click (%s -> %s)" % [before_click, after_click])
 	_known(car)
 	deck.refresh()

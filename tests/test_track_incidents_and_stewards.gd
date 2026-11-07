@@ -81,6 +81,7 @@ func _run() -> void:
 func _quiet_race(laps: int = 10) -> RaceScript:
 	var race := RaceScript.new(track, laps, 5, DRY)
 	race.incidents_enabled = false
+	race.rival_tactics_enabled = false # Fase 32: the scenarios isolate one car, which must keep the modes they give it
 	return race
 
 

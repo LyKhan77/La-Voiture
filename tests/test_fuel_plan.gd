@@ -42,6 +42,7 @@ func _run() -> void:
 func _test_plan_functions() -> void:
 	check(is_equal_approx(GtFuelPlan.crew_pick_kg(5, 3.0), 5.0 * 3.0 * 1.08), "crew pick below the mandatory-stop length is the full distance plus 8%")
 	check(is_equal_approx(GtFuelPlan.crew_pick_kg(15, 3.0), 0.5 * 15.0 * 3.0 * 1.08), "crew pick from the mandatory-stop length is a light start for a mid-window stop")
+	check(is_equal_approx(GtFuelPlan.crew_pick_kg(10, 3.0), 0.5 * 10.0 * 3.0 * 1.08), "and for 10 laps")
 	check(GtFuelPlan.crew_pick_kg(15, 30.0) <= GtTypes.TANK_CAP_KG, "crew pick never exceeds the tank")
 	check(GtFuelPlan.clamp_kg(-4.0) == 0.0, "negative fuel clamps to empty")
 	check(GtFuelPlan.clamp_kg(500.0) == GtTypes.TANK_CAP_KG, "huge fuel clamps to the tank cap")
@@ -65,6 +66,8 @@ func _test_refuel_time_in_the_stop(track: TrackScript) -> void:
 	var car: GtCar = race.cars[0]
 	car.lap = 3
 	var needed: float = GtFuelPlan.refuel_target_kg(float(race.laps - car.lap + 1), car.fuel_use)
+	# Fase 32: the base of a stop is the team's crew time
+	var crew_s: float = GtTeamStats.pit_stop_time(car.team_id, race.race_seed, car.id * 16 + car.stops)
 	car.fuel = 10.0
 	race._driving.enter_pit_lane(car, Types.Compound.MEDIUM)
 	var duration_low: float = car.pit.duration
@@ -72,8 +75,8 @@ func _test_refuel_time_in_the_stop(track: TrackScript) -> void:
 	car.fuel = needed - 2.0
 	race._driving.enter_pit_lane(car, Types.Compound.MEDIUM)
 	var duration_high: float = car.pit.duration
-	check(is_equal_approx(duration_low, Types.PIT_STOP_TIME + (needed - 10.0) * Types.REFUEL_S_PER_KG), "a 10 kg car adds refuel time for the fuel it takes (%.2f s)" % duration_low)
-	check(is_equal_approx(duration_high, Types.PIT_STOP_TIME + 2.0 * Types.REFUEL_S_PER_KG), "a nearly full car adds almost no refuel time (%.2f s)" % duration_high)
+	check(is_equal_approx(duration_low, crew_s + (needed - 10.0) * Types.REFUEL_S_PER_KG), "a 10 kg car adds refuel time for the fuel it takes (%.2f s)" % duration_low)
+	check(is_equal_approx(duration_high, crew_s + 2.0 * Types.REFUEL_S_PER_KG), "a nearly full car adds almost no refuel time (%.2f s)" % duration_high)
 	check(duration_low > duration_high, "the emptier car stands longer in the box")
 	race.dispose()
 

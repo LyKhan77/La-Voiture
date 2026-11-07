@@ -49,6 +49,7 @@ func _run() -> void:
 	# Fase 32: a stop now includes refuel time, which shifts the stop timing; on Monte Azure this pick no longer forces a
 	# hold (0 held frames). The hold animation is still asserted on apex_ring, neo_wangan, brianza and ardennes.
 	await _scenario("monte_azure", "six cars box at once", func(cars: Array) -> Array: return [cars[0].id, cars[1].id, cars[2].id, cars[3].id, cars[4].id, cars[5].id], false)
+	# (Fase 32 note: crew times and rival tactics are off in this suite; the refuel time stays.)
 	# Every third car held 0-1 frames here (frame timing makes the world run vary); nose to tail holds ~11.
 	await _scenario("ardennes", "six cars box at once", func(cars: Array) -> Array: return [cars[0].id, cars[1].id, cars[2].id, cars[3].id, cars[4].id, cars[5].id], true)
 	quit(1 if failures else 0)
@@ -73,6 +74,9 @@ func _scenario(circuit: String, label: String, pick: Callable, expect_hold: bool
 	config.race_seed = 19220903
 	world = WorldScene.instantiate()
 	root.add_child(world)
+	# Fase 32: this suite is about the crew and the lane, not the AI's modes; rival tactics shift stop timing and hold counts.
+	world.race.rival_tactics_enabled = false
+	world.race.crew_times_enabled = false # every stop takes the old constant, so the lane timing the hold counts were probed on holds
 	world.finish_grid_intro()
 	for _i: int in range(60):
 		await process_frame

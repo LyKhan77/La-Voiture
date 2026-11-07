@@ -41,6 +41,8 @@ func _run() -> void:
 	_test_reminder_radio()
 	_test_clips_exist()
 	_test_in_sim_stop_and_no_stop()
+	_test_the_label_matches_what_counts()
+	_test_a_forgotten_stop_is_called_in_time()
 	ribbon.queue_free()
 	await process_frame
 	await _test_deck_label()
@@ -62,9 +64,9 @@ func _test_rule_shape() -> void:
 	check(_race(15).mandatory_stop_required() and _race(10).mandatory_stop_required(), "10 and 15 lap races require a stop")
 	check(not _race(5).mandatory_stop_required() and not _race(3).mandatory_stop_required(), "3 and 5 lap races do not")
 	var status: Dictionary = _race(15).mandatory_stop_status(_race(15).cars[0])
-	check(int(status["open_lap"]) == 3 and int(status["close_lap"]) == 12, "a 15 lap window runs from lap 3 to lap 12 (%d to %d)" % [int(status["open_lap"]), int(status["close_lap"])])
+	check(int(status["open_lap"]) == 4 and int(status["close_lap"]) == 12, "a 15 lap window runs from lap 4 to lap 12 (%d to %d)" % [int(status["open_lap"]), int(status["close_lap"])])
 	status = _race(10).mandatory_stop_status(_race(10).cars[0])
-	check(int(status["open_lap"]) == 2 and int(status["close_lap"]) == 8, "a 10 lap window runs from lap 2 to lap 8 (%d to %d)" % [int(status["open_lap"]), int(status["close_lap"])])
+	check(int(status["open_lap"]) == 3 and int(status["close_lap"]) == 8, "a 10 lap window runs from lap 3 to lap 8 (%d to %d)" % [int(status["open_lap"]), int(status["close_lap"])])
 	var race: RaceScript = _race(15)
 	check(race.mandatory_penalty_s() >= Types.MANDATORY_PENALTY_FLOOR_S, "the penalty is at least the floor (%.1f s)" % race.mandatory_penalty_s())
 	check(race.mandatory_penalty_s() >= Types.MANDATORY_PENALTY_PIT_LOSS_MULT * GtStrategy.pit_loss_s(race, track.length / 45.0), "the penalty beats 1.5 times the pit loss")
@@ -143,6 +145,19 @@ func _test_forced_flag_on_pit_entry() -> void:
 	car.is_punctured = true
 	race._driving.enter_pit_lane(car, Types.Compound.MEDIUM)
 	check(car.pit.forced, "a stop with a puncture is forced")
+	car.pit = null
+	car.is_punctured = false
+	car.compound = Types.Compound.INTERMEDIATE
+	race._driving.enter_pit_lane(car, Types.Compound.WET)
+	check(car.pit.forced, "a weather stop from inters to wets is forced (rain tyre to rain tyre)")
+	car.pit = null
+	car.compound = Types.Compound.WET
+	race._driving.enter_pit_lane(car, Types.Compound.INTERMEDIATE)
+	check(car.pit.forced, "and from wets to inters")
+	car.pit = null
+	car.compound = Types.Compound.WET
+	race._driving.enter_pit_lane(car, Types.Compound.WET)
+	check(not car.pit.forced, "a fresh set of the same rain tyre is a voluntary stop")
 	race.dispose()
 
 
@@ -199,6 +214,66 @@ func _test_in_sim_stop_and_no_stop() -> void:
 	var no_stop: Dictionary = _solo(10, -1.0)
 	check(int(no_stop["stops"]) == 0 and not bool(no_stop["done"]), "a solo car that never boxes has no counting stop")
 	check(is_equal_approx(float(no_stop["classified"]), float(no_stop["finished_at"]) + float(no_stop["owed"])), "its classified time carries the penalty")
+
+
+## A stop called in lap L (1-based) enters the lane at the end of that lap, and that is when the window is read:
+## the laps the deck shows are exactly the laps whose calls count.
+func _call_in_lap(laps: int, lap_number: int) -> Dictionary:
+	var race: RaceScript = RaceScript.new(track, laps, 5, DRY, 1)
+	race.incidents_enabled = false
+	var car: GtCar = race.cars[0]
+	car.fuel = 80.0
+	var asked: bool = false
+	var ticks: int = 0
+	while car.finished_at < 0.0 and not car.is_dnf and ticks < 60000:
+		if not asked and car.lap + 1 >= lap_number:
+			race.request_pit(car.id, Types.Compound.MEDIUM)
+			asked = true
+		race.step()
+		ticks += 1
+		if car.stops >= 1 and car.pit == null and not car.is_dnf and car.finished_at < 0.0 and car.lap + 1 > lap_number + 1:
+			break
+	var out: Dictionary = {"done": car.mandatory_stop_done, "stops": car.stops}
+	race.dispose()
+	return out
+
+
+func _test_the_label_matches_what_counts() -> void:
+	var laps: int = 10
+	var window: Dictionary = _race(laps).mandatory_stop_status(_race(laps).cars[0])
+	var open_lap: int = int(window["open_lap"])
+	var close_lap: int = int(window["close_lap"])
+	check(bool(_call_in_lap(laps, close_lap)["done"]), "a stop called in the last lap the deck shows (lap %d) counts" % close_lap)
+	check(not bool(_call_in_lap(laps, close_lap + 1)["done"]), "a stop called one lap later does not")
+	check(bool(_call_in_lap(laps, open_lap)["done"]), "a stop called in the first lap the deck shows (lap %d) counts" % open_lap)
+	check(not bool(_call_in_lap(laps, open_lap - 1)["done"]), "a stop called one lap earlier does not")
+
+
+## A player who forgets the stop on the light crew pick runs short of fuel long before the window closes: the engineer says
+## so in time (while there is fuel to reach the box), with advice that works (box), not "switch to CONSERVE".
+func _test_a_forgotten_stop_is_called_in_time() -> void:
+	for laps: int in [10, 15]:
+		var race: RaceScript = RaceScript.new(track, laps, 5, DRY, 20)
+		race.incidents_enabled = false
+		var mine: GtCar = race.get_car(race.player_team_id * 2)
+		var called_at_fuel: float = -1.0
+		var conserve_advice: bool = false
+		var ticks: int = 0
+		while not mine.is_dnf and mine.finished_at < 0.0 and ticks < 40000:
+			race.step()
+			ticks += 1
+			for message: Dictionary in race.radio_history:
+				if int(message["car_id"]) != mine.id:
+					continue
+				if String(message["text"]) == "Fuel is short. Box this lap for fuel." and called_at_fuel < 0.0:
+					called_at_fuel = mine.fuel
+				if String(message["text"]).begins_with("Fuel critical!"):
+					conserve_advice = true
+			if called_at_fuel >= 0.0 or mine.is_dnf:
+				break
+		check(called_at_fuel > 0.0, "%d laps: the engineer calls the forgotten stop while the car still has fuel (%.1f kg left)" % [laps, called_at_fuel])
+		check(not conserve_advice, "%d laps: and does not tell a car with a stop ahead to switch to CONSERVE" % laps)
+		race.dispose()
 
 
 func _test_deck_label() -> void:

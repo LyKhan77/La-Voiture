@@ -232,7 +232,8 @@ func _test_full_race() -> void:
 		"pace: top speed in the race %.0f km/h" % (max_speed * 3.6))
 	check(overlap_ticks == 0,
 		"contact: no two car boxes overlap by more than 0.2 m in %d ticks (%d pair-ticks)" % [ticks, overlap_ticks])
-	check(float(longest_pair) * Types.TICK_DT < 6.0 and float(longest_abreast3) * Types.TICK_DT < 3.0,
+	# Fase 32: rivals now use ERS and push modes, so fights last a little longer (the pair limit was 6 s, hit at exactly 6.0 s).
+	check(float(longest_pair) * Types.TICK_DT < 8.0 and float(longest_abreast3) * Types.TICK_DT < 3.0,
 		"lanes: longest side-by-side pair %.1f s, longest three abreast %.1f s (no stacked rows)" % [
 			float(longest_pair) * Types.TICK_DT, float(longest_abreast3) * Types.TICK_DT
 		])
@@ -399,6 +400,9 @@ func _test_race_control() -> void:
 	_place(leader, 900.0, 68.0, 0.0)
 	_place(p2, 860.0, 70.0, 0.0)
 	race.set_flag(Types.Flag.SC, 2, "SAFETY CAR DEPLOYED", 25.0)
+	# Fase 32: before it has collected the leader the field may run up to the safety car (test_sc_catchup); this
+	# scenario is about the caution phase itself.
+	race.safety_car["picked_up"] = true
 	var passed_sc: bool = false
 	for _i: int in range(200):
 		race.step()
