@@ -11,7 +11,7 @@
   - 26 `full_body_base.png` + 26 `pose_win.png` dibuat dari portrait kanon (web ElevenLabs, GPT Image 2.6 Sunburst, 9:16); standee baru dibuat oleh `tools/build_driver_standees.py` (720 x 1328 RGBA, telapak sejajar antar pose).
   - Podium: `WinningPanel.set_celebrating` menukar standee ke pose menang pada cut fokus P3, P2, P1; FINAL dan reduce motion langsung semua menang.
   - `test_winning_scene_and_standee` 124 assertion, `test_winning_panel` 29. Laporan: [`FASE-31-DRIVER-STANDEES-REPORT.md`](file:///D:/Occupation/Porto/genex/La_Voiture/executor-report/reports/FASE-31-DRIVER-STANDEES-REPORT.md).
-  - Regresi 116/116 suite, 0 failing; 52 berkas `full_body_concept` dihapus. Belum: tag nama menutupi wajah standee pada panel fokus (sudah ada sebelumnya).
+  - Regresi 116/116 suite, 0 failing; 52 berkas `full_body_concept` dihapus. Tata letak podium diperbaiki (tag nama, kanji, julukan, telapak kaki); catatan errata gender di roster. Belum: smoke native 3 lap.
 
 ## Status Fase 30 — 2026-11-06
 
