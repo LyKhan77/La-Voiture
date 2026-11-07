@@ -68,6 +68,8 @@ var info_label: Label
 var radio_label: Label
 var desk_status: Label
 var forecast_label: Label
+## "STOP L3-L12 // REQUIRED" in a 10 or 15 lap race: the mandatory stop window and whether it is done (hidden otherwise).
+var stop_label: Label
 var window_label: Label
 ## The chamfered header plate and its title, repainted when the team accent changes.
 var header_shape: ColorRect
@@ -171,7 +173,11 @@ func _place(node: Control, at: Vector2, extent: Vector2, parent: Control = null)
 func _build_header() -> void:
 	forecast_label = UI.label("", 12, T.TEXT_SECONDARY)
 	forecast_label.clip_text = true
-	_place(forecast_label, Vector2(282.0, 11.0), Vector2(650.0, 18.0), self)
+	_place(forecast_label, Vector2(282.0, 11.0), Vector2(468.0, 18.0), self)
+	stop_label = UI.label("", 12, T.TEXT_SECONDARY)
+	stop_label.clip_text = true
+	stop_label.visible = false
+	_place(stop_label, Vector2(758.0, 11.0), Vector2(176.0, 18.0), self)
 	coach_button = UI.button("COACH ON")
 	coach_button.add_theme_font_size_override("font_size", 12)
 	coach_button.focus_mode = Control.FOCUS_NONE
@@ -599,10 +605,24 @@ func refresh() -> void:
 	wheel.auto_hint = GtForecast.auto_compound(car, race.weather.track_water_pct)
 	_update_gauges(car)
 	_update_window(car)
+	_update_stop_label(car)
 	if _hover_kind == "":
 		forecast_label.text = _forecast_text(car)
 	else:
 		_refresh_hover()
+
+
+func _update_stop_label(car: GtCar) -> void:
+	var status: Dictionary = race.mandatory_stop_status(car)
+	stop_label.visible = bool(status["required"])
+	if not stop_label.visible:
+		return
+	if bool(status["done"]):
+		stop_label.text = "STOP DONE"
+		stop_label.add_theme_color_override("font_color", T.ACCENT_ACID_LIME)
+		return
+	stop_label.text = "STOP L%d-L%d // REQUIRED" % [int(status["open_lap"]), int(status["close_lap"])]
+	stop_label.add_theme_color_override("font_color", T.ACCENT_CYBER_YELLOW if bool(status["window_open"]) else T.TEXT_SECONDARY)
 
 
 ## One verdict per option of the three faders, kept for the tooltips; marks, pills and big numbers follow.

@@ -45,6 +45,9 @@ const FUEL_WEIGHT_PACE_PER_KG: float = 0.0004
 const MANDATORY_MIN_LAPS: int = 10
 const STOP_WINDOW_OPEN: float = 0.20
 const STOP_WINDOW_CLOSE: float = 0.80
+## A car with no counting stop is penalised at the flag: the larger of this floor and this many pit losses.
+const MANDATORY_PENALTY_FLOOR_S: float = 30.0
+const MANDATORY_PENALTY_PIT_LOSS_MULT: float = 1.5
 ## ERS battery per second while deploying (index ErsMode: DEPLOY and OVERTAKE only), and harvest charge per second.
 const ERS_DRAIN_PER_S: Array[float] = [0.0, 0.0, 12.0, 24.0]
 const ERS_HARVEST_PER_S: float = 4.0

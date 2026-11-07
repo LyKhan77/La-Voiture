@@ -12,6 +12,8 @@ var duration: float = GtTypes.PIT_STOP_TIME
 var lift_y: float = 0.0
 var wheel_swap_progress: float = 0.0
 var repairing_damage: bool = false
+## A stop the car had to make (puncture, damage, slick to rain tyres or back): it counts as the mandatory stop at any time.
+var forced: bool = false
 var initial_damage: float = 0.0
 var initial_fuel: float = 0.0
 ## Steward penalty taken on arrival in the box: the stopped car waits this long before the crew starts work.

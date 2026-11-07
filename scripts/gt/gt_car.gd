@@ -34,6 +34,9 @@ var lap: int = -1
 var stops: int = 0
 ## A stop that counts as the mandatory one (10 and 15 lap races) has been completed.
 var mandatory_stop_done: bool = false
+## The flag penalty for a missing mandatory stop has been added; the engineer's "window closes" call has been made.
+var mandatory_penalty_applied: bool = false
+var mandatory_reminded: bool = false
 var position: int = 0
 ## Own control-line crossing required after a Safety Car restart; -1 outside restart.
 var sc_restart_line_s: float = -1.0

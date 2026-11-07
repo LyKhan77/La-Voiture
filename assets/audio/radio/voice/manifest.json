@@ -196,6 +196,20 @@
 		"spoken": "Tyre wear is critical. Suggest box this lap for wet tyres."
 	},
 	{
+		"id": "eng_mandatory_window",
+		"speaker": "engineer",
+		"pattern": "^Mandatory stop window is open\\. Suggest box this lap for \\w+ tyres\\.$",
+		"file": "res://assets/audio/radio/voice/eng_mandatory_window.wav",
+		"spoken": "Mandatory stop window is open. Suggest box this lap."
+	},
+	{
+		"id": "eng_mandatory_closing",
+		"speaker": "engineer",
+		"pattern": "^Window closes in two laps\\. Box now\\.$",
+		"file": "res://assets/audio/radio/voice/eng_mandatory_closing.wav",
+		"spoken": "Window closes in two laps. Box now."
+	},
+	{
 		"id": "eng_strat_easing_inter",
 		"speaker": "engineer",
 		"pattern": "^Rain easing \\(\\d+% water\\)\\. Suggest box this lap for INTERMEDIATE tyres\\.$",

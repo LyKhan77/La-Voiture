@@ -23,7 +23,7 @@ const SC_PICKUP_GAP_M: float = 50.0
 const SC_CATCHUP_SPEED_MPS: float = 18.0
 ## Cars may run this fast while the uncollected safety car is more than SC_CATCHUP_FAR_M ahead, easing to the
 ## normal 27 m/s caution pace inside SC_CATCHUP_NEAR_M.
-const SC_LEADER_CATCHUP_MAX_MPS: float = 70.0
+const SC_LEADER_CATCHUP_MAX_MPS: float = 55.0
 const SC_CATCHUP_NEAR_M: float = 250.0
 const SC_CATCHUP_FAR_M: float = 900.0
 ## The uncollected safety car idles at this speed while the leader is still far behind it, so the leader closes quickly.
@@ -206,6 +206,59 @@ func mark_finished(car: GtCar) -> void:
 	car.finished_at = time
 	if flag_time < 0.0:
 		flag_time = time
+	if mandatory_stop_required() and not car.mandatory_stop_done and not car.is_dnf and not car.mandatory_penalty_applied:
+		car.mandatory_penalty_applied = true
+		car.penalty_owed_s += mandatory_penalty_s()
+
+
+## Races of 10 laps or more carry one mandatory stop (spec 5a).
+func mandatory_stop_required() -> bool:
+	return laps >= GtTypes.MANDATORY_MIN_LAPS
+
+
+## Share of the race distance `car` has covered, 0..1.
+func race_progress(car: GtCar) -> float:
+	return clampf(car.s / (float(laps) * track.length), 0.0, 1.0)
+
+
+## A stop was completed: it counts as the mandatory one inside the window, or at any time before it closes when forced.
+func note_stop_completed(car: GtCar, forced: bool) -> void:
+	if not mandatory_stop_required():
+		return
+	var progress: float = race_progress(car)
+	if progress > GtTypes.STOP_WINDOW_CLOSE:
+		return
+	if progress >= GtTypes.STOP_WINDOW_OPEN or forced:
+		car.mandatory_stop_done = true
+
+
+## Seconds added to a car that finished without a counting stop: never cheaper than 1.5 pit losses.
+func mandatory_penalty_s() -> float:
+	return maxf(GtTypes.MANDATORY_PENALTY_FLOOR_S, GtTypes.MANDATORY_PENALTY_PIT_LOSS_MULT * GtStrategy.pit_loss_s(self, track.length / 45.0))
+
+
+## What the deck and the pit wall show about the stop: {"required", "done", "window_open", "open_lap", "close_lap", "penalty_s"}.
+func mandatory_stop_status(car: GtCar) -> Dictionary:
+	var progress: float = race_progress(car)
+	return {
+		"required": mandatory_stop_required(), "done": car.mandatory_stop_done,
+		"window_open": progress >= GtTypes.STOP_WINDOW_OPEN and progress <= GtTypes.STOP_WINDOW_CLOSE,
+		"open_lap": ceili(GtTypes.STOP_WINDOW_OPEN * float(laps) - 1.0e-6), "close_lap": floori(GtTypes.STOP_WINDOW_CLOSE * float(laps) + 1.0e-6),
+		"penalty_s": mandatory_penalty_s(),
+	}
+
+
+## Once per car: the engineer tells a player car with no counting stop that the window closes in two laps.
+func _check_stop_reminders() -> void:
+	if not mandatory_stop_required():
+		return
+	var remind_at: float = GtTypes.STOP_WINDOW_CLOSE - 2.0 / float(laps)
+	for car: GtCar in cars:
+		if car.team_id != player_team_id or car.mandatory_stop_done or car.mandatory_reminded or car.is_dnf or car.finished_at >= 0.0 or car.pit != null:
+			continue
+		if race_progress(car) >= remind_at:
+			car.mandatory_reminded = true
+			push_radio(car, "engineer", "Window closes in two laps. Box now.", true)
 
 
 func is_finished() -> bool:
@@ -308,6 +361,7 @@ func step(dt: float = GtTypes.TICK_DT) -> void:
 	if is_finished():
 		stewards.close_all()
 	_check_advisor_tactics()
+	_check_stop_reminders()
 	_expire_suggestion()
 	_check_flood_radio()
 	time += dt

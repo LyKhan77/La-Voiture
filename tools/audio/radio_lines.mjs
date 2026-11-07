@@ -59,6 +59,9 @@ for (const c of ["HARD", "SOFT", "MEDIUM"]) {
 for (const c of ["HARD", "MEDIUM", "SOFT", "INTERMEDIATE", "WET"]) {
 	add(`eng_strat_wear_${word(c)}`, "engineer", `^Tyre wear critical \\(\\d+%\\)\\. Suggest box this lap for ${c} tyres\\.$`, `Tyre wear is critical. Suggest box this lap for ${word(c)} tyres.`);
 }
+// FASE 32 mandatory stop (GtRace._check_stop_reminders and the stop-window suggestion of GtRace.decide_strategy).
+add("eng_mandatory_window", "engineer", "^Mandatory stop window is open\\. Suggest box this lap for \\w+ tyres\\.$", "Mandatory stop window is open. Suggest box this lap.");
+add("eng_mandatory_closing", "engineer", "^Window closes in two laps\\. Box now\\.$", "Window closes in two laps. Box now.");
 // FASE 19 strategist calls (GtRace._strategy_call_text).
 add("eng_strat_easing_inter", "engineer", "^Rain easing \\(\\d+% water\\)\\. Suggest box this lap for INTERMEDIATE tyres\\.$", "The rain is easing. Suggest box this lap for intermediate tyres.");
 add("eng_strat_cooking", "engineer", "^The (INTERMEDIATE|WET) tyres are cooking on the dry line\\. Box now for \\w+ tyres\\.$", "The rain tyres are cooking on the dry line. Box now, box now!");

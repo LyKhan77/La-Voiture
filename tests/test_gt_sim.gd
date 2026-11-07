@@ -369,6 +369,9 @@ func _test_race_control() -> void:
 	race.step()
 	var normal: float = car.v
 	race.set_flag(Types.Flag.SC, 1, "SAFETY CAR DEPLOYED", 20.0)
+	# Fase 32: until the safety car has collected the leader the field may run up to it (test_sc_catchup); once it
+	# has, the field is held at about 110 km/h.
+	race.safety_car["picked_up"] = true
 	for _i: int in range(120):
 		race.step()
 	check(normal > 45.0 and car.v <= 32.0 and car.v < normal,
@@ -438,6 +441,8 @@ func _test_power_and_aero() -> void:
 	while race.cars[0].lap < 1 and guard < 20 * 150:
 		race.step()
 		guard += 1
+	# Fase 32: race control sees the leader's lap one tick after it is run; do not depend on which tick car 0 crosses in.
+	race.step_ticks(5)
 	var enabled_lap_2: bool = bool(race.race_control["drs_enabled"])
 	_free(race)
 	race = _quiet_race(5, 42)

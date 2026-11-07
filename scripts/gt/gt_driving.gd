@@ -1013,6 +1013,7 @@ func enter_pit_lane(car: GtCar, compound: int = -1) -> void:
 	pit.start_s = car.s - u # absolute s of the Pit Entry line on this lap
 	pit.box_s = pit.start_s + stall_offset(car.team_id)
 	pit.compound = chosen
+	pit.forced = car.is_punctured or car.damage > 0.0 or GtTypes.is_slick(car.compound) != GtTypes.is_slick(chosen)
 	var has_damage: bool = car.damage > 0.0
 	var extra: float = minf(4.2, 1.4 + car.damage / 100.0 * 3.0) if has_damage else 0.0
 	var refuel_kg: float = maxf(0.0, GtFuelPlan.refuel_target_kg(float(race.laps - car.lap + 1), car.fuel_use) - car.fuel)
@@ -1292,6 +1293,7 @@ func _service_car(car: GtCar, pit: GtPit, dt: float) -> void:
 		car.fuel = needed
 		car.fuel_stage = GtTypes.FuelStage.OPTIMAL
 		car.stops += 1
+		race.note_stop_completed(car, pit.forced)
 		pit.lift_y = 0.0
 		pit.wheel_swap_progress = 1.0
 		pit.holding_release = false
