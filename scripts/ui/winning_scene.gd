@@ -84,11 +84,12 @@ static func format_time(seconds: float) -> String:
 	return "%d:%02d:%06.3f" % [hours, minutes, rest] if hours > 0 else "%d:%06.3f" % [minutes, rest]
 
 
-static func standee_path(slot: int) -> String:
+## `pose` is "" for the idle standee and "win" for the victory pose (assets/characters/standees/<driver>_win.png).
+static func standee_path(slot: int, pose: String = "") -> String:
 	var slug: String = Roster.DRIVER_SLUGS[slot].replace("-", "_")
 	if slug == "arthur_sterling_jr":
 		slug = "arthur_sterling"
-	return "res://assets/characters/standees/%s.png" % slug
+	return "res://assets/characters/standees/%s%s.png" % [slug, "" if pose.is_empty() else "_" + pose]
 
 
 static func capture_results(race: GtRace) -> Dictionary:
@@ -275,13 +276,24 @@ func _show_cut(cut: int) -> void:
 			triptych.play_intro()
 		WinningCutDirector.Cut.FOCUS_P3:
 			triptych.set_focus(2)
+			_celebrate(2, true)
 		WinningCutDirector.Cut.FOCUS_P2:
 			triptych.set_focus(1)
+			_celebrate(1, true)
 		WinningCutDirector.Cut.FOCUS_P1:
 			triptych.set_focus(0)
+			_celebrate(0, true)
 		_:
 			triptych.set_focus(-1)
+			for place: int in range(triptych.panels.size()):
+				_celebrate(place, false)
 	_cut_label.text = director.label()
+
+
+## The focused finisher strikes the victory pose on the cut and keeps it; a skip to the final lands everyone in it.
+func _celebrate(place: int, animate: bool) -> void:
+	if place < triptych.panels.size():
+		triptych.panels[place].set_celebrating(true, animate and not Settings.reduce_motion)
 
 
 func _restart() -> void:
@@ -434,6 +446,7 @@ func _optional_texture(path: String) -> Texture2D:
 func _panel_textures(entry: Dictionary) -> Dictionary:
 	return {
 		"standee": _optional_texture(standee_path(int(entry.id))),
+		"standee_win": _optional_texture(standee_path(int(entry.id), "win")),
 		"car": _optional_texture(Roster.podium_sprite_path(int(entry.team_id))),
 		"portrait": _optional_texture(Roster.portrait_path(int(entry.id))),
 	}

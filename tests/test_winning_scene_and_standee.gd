@@ -61,11 +61,17 @@ func _run() -> void:
 	race = null
 	ribbon.queue_free()
 	await process_frame
-	for slot: int in range(20):
-		var path: String = studio_script.standee_path(slot)
-		var image: Image = (load(path) as Texture2D).get_image()
-		check(image != null and image.get_format() == Image.FORMAT_RGBA8 and image.detect_alpha() != Image.ALPHA_NONE,
-			"Driver %02d has a genuine transparent RGBA cutout" % slot)
+	for slot: int in range(Roster.DRIVER_SLUGS.size()):
+		var idle: Image = (load(studio_script.standee_path(slot)) as Texture2D).get_image()
+		var win: Image = (load(studio_script.standee_path(slot, "win")) as Texture2D).get_image()
+		check(idle.get_format() == Image.FORMAT_RGBA8 and idle.detect_alpha() != Image.ALPHA_NONE
+				and win.get_format() == Image.FORMAT_RGBA8 and win.detect_alpha() != Image.ALPHA_NONE,
+			"Driver %02d has genuine transparent RGBA cutouts for the idle and the victory pose" % slot)
+		var idle_box: Rect2i = idle.get_used_rect()
+		var win_box: Rect2i = win.get_used_rect()
+		check(idle.get_size() == win.get_size() and absi(idle_box.end.y - win_box.end.y) <= 2
+				and idle.get_size().y - idle_box.end.y <= 8 and idle_box.position.y >= 2 and win_box.position.y >= 2,
+			"Driver %02d poses share one canvas with the soles planted on the same row and nothing clipped" % slot)
 
 	var studio: Node3D = load(SCENE).instantiate()
 	studio.setup_celebration(results)
@@ -112,10 +118,16 @@ func _test_cuts(studio: Node3D) -> void:
 	var tri: WinningTriptych = studio.triptych
 	check(studio.director.current_cut == Cut.INTRO and tri.focus_place == -1 and tri.panels[0].detail_amount == 0.0,
 		"The finale opens on the intro: equal panels, no details")
+	check(not tri.panels[0].is_celebrating and not tri.panels[1].is_celebrating and not tri.panels[2].is_celebrating,
+		"Every standee starts in its idle pose")
 	studio.director.tick(1.65)
 	check(studio.director.current_cut == Cut.FOCUS_P3 and tri.focus_place == 2, "The second cut focuses P3")
+	check(tri.panels[2].is_celebrating and not tri.panels[1].is_celebrating and not tri.panels[0].is_celebrating,
+		"Only P3 strikes the victory pose on its cut")
 	studio.director.tick(1.65)
 	check(studio.director.current_cut == Cut.FOCUS_P2 and tri.focus_place == 1, "The third cut focuses P2")
+	check(tri.panels[1].is_celebrating and tri.panels[2].is_celebrating and not tri.panels[0].is_celebrating,
+		"P2 joins in and P3 keeps its pose")
 	studio.director.tick(1.65)
 	check(studio.director.current_cut == Cut.FOCUS_P1 and tri.focus_place == 0, "The fourth cut focuses P1")
 	studio.director.tick(1.65)
@@ -123,6 +135,8 @@ func _test_cuts(studio: Node3D) -> void:
 	check(studio.director.is_final() and tri.focus_place == -1 and tri.panels[2].detail_amount == 1.0
 		and absf(tri.panels[0].size.x - tri.panels[2].size.x) < 1.0, "The final settles the panels equal with every detail shown")
 	check(studio.current_cut() == Cut.FINAL, "current_cut() follows the director")
+	check(tri.panels[0].is_celebrating and tri.panels[1].is_celebrating and tri.panels[2].is_celebrating
+			and tri.panels[0].standee.texture.resource_path.ends_with("_win.png"), "The final leaves all three in their victory pose")
 
 
 func _spawn(snapshot: Dictionary) -> Node3D:

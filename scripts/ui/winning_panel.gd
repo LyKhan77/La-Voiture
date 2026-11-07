@@ -22,7 +22,8 @@ const NAME_FONT_PX: int = 80
 const CAR_WIDTH_FRACTION: float = 0.76
 const CAR_MAX_WIDTH: float = 760.0
 const CAR_FLOOR_GAP: float = 34.0
-const STANDEE_HEIGHT: float = 640.0
+## The standee art is 720 x 1328: the 1280 px figure plus 48 px of headroom for a raised fist, so the figure stays 640 px tall.
+const STANDEE_HEIGHT: float = 664.0
 const BUBBLE_PX: float = 230.0
 ## The standee stands left of centre so the name tag, right-aligned under the bubble, does not cover its face.
 const STANDEE_CENTER_FRACTION: float = 0.40
@@ -38,6 +39,9 @@ const OUTLINE_PX: float = 5.0
 const STICKER_PAD_PX: float = 40.0
 const BREATH_PERIOD: float = 2.4
 const BREATH_SCALE: float = 0.015
+## The tilt the standee gives when it strikes its victory pose (one beat of the 150 BPM anthem is 0.4 s).
+const WOBBLE_DEGREES: float = 4.0
+const WOBBLE_SECONDS: float = 0.4
 const DIM_BRIGHTNESS: float = 0.5
 ## Rank colours (index = place), their dark burst base and the lighter ray tint.
 const COLORS: Array[Color] = [Color("#D8FF00"), Color("#00F0FF"), Color("#FF6B00")]
@@ -86,6 +90,9 @@ var right_inset: float = 0.0
 var _animate: bool = false
 var _content: Control
 var _breath: Tween
+var _wobble: Tween
+var _idle_texture: Texture2D
+var _win_texture: Texture2D
 var _fill: Polygon2D
 var _ink: Line2D
 var _ghost: Label
@@ -93,7 +100,11 @@ var _bubble_layers: Array[Control] = []
 var _kanji_box: Control
 
 
-## `textures` holds "standee", "car" and "portrait" (any may be null: that element is simply not drawn).
+## True while the standee shows its victory pose.
+var is_celebrating: bool = false
+
+## `textures` holds "standee", "standee_win", "car" and "portrait" (any may be null: that element is simply not
+## drawn; a missing "standee_win" just means the standee keeps its idle pose).
 func setup(finisher_place: int, entry: Dictionary, gap_text: String, fastest_bonus: bool, textures: Dictionary, animate: bool) -> void:
 	place = clampi(finisher_place, 0, 2)
 	_animate = animate
@@ -109,7 +120,9 @@ func setup(finisher_place: int, entry: Dictionary, gap_text: String, fastest_bon
 	_content.add_child(rank_label)
 	_build_kanji_box(color)
 	_build_bubble(color, textures.get("portrait") as Texture2D)
-	standee = _sticker(textures.get("standee") as Texture2D)
+	_idle_texture = textures.get("standee") as Texture2D
+	_win_texture = textures.get("standee_win") as Texture2D
+	standee = _sticker(_idle_texture)
 	_content.add_child(standee)
 	car = _sticker(textures.get("car") as Texture2D)
 	_content.add_child(car)
@@ -145,6 +158,7 @@ func _ready() -> void:
 
 func _exit_tree() -> void:
 	stop_breathing()
+	_stop_wobble()
 
 
 ## Lays every element out for a panel `panel_size` big (the triptych changes the width while it focuses).
@@ -225,6 +239,32 @@ func start_breathing() -> void:
 	_breath = create_tween().set_loops()
 	_breath.tween_property(standee, "scale:y", 1.0 + BREATH_SCALE, BREATH_PERIOD * 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	_breath.tween_property(standee, "scale:y", 1.0, BREATH_PERIOD * 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+
+## Swaps the standee between its idle and victory art. Both images share one canvas with the soles on the same
+## row, so the swap needs no relayout; with `animate` the standee also gives a short tilt on the beat.
+func set_celebrating(on: bool, animate: bool) -> void:
+	if on == is_celebrating or standee == null:
+		return
+	if on and _win_texture == null:
+		return
+	is_celebrating = on
+	standee.texture = _win_texture if on else _idle_texture
+	_stop_wobble()
+	if not (animate and _animate and is_inside_tree()):
+		return
+	_wobble = create_tween()
+	_wobble.tween_property(standee, "rotation_degrees", -WOBBLE_DEGREES, WOBBLE_SECONDS * 0.25).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_wobble.tween_property(standee, "rotation_degrees", WOBBLE_DEGREES * 0.6, WOBBLE_SECONDS * 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	_wobble.tween_property(standee, "rotation_degrees", 0.0, WOBBLE_SECONDS * 0.4).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
+func _stop_wobble() -> void:
+	if _wobble != null and _wobble.is_valid():
+		_wobble.kill()
+	_wobble = null
+	if standee != null:
+		standee.rotation_degrees = 0.0
 
 
 func stop_breathing() -> void:
