@@ -56,6 +56,7 @@ Semua perintah berikut dapat dijalankan dari terminal repositori:
 | **Uji Gate Fitment Roda & Sasis** | `godot --headless --path . -s scratch/fit_cars.gd` |
 | **Automasi Pipeline Mobil GT3 Baru** | `powershell -File scratch/make_car.ps1 -Car <slug_mobil>` |
 | **Bake Sprite Mobil Podium (13 mobil)** | `godot --rendering-driver d3d12 --resolution 1280x800 --path . -s tools/bake_podium_car_sprites.gd` (native, butuh renderer; `-- <slug>` untuk satu mobil, `-- --sheet` untuk lembar kontak di `temp/podium_sprites_sheet.png`). Jalankan ulang bila model atau livery mobil berubah |
+| **Bangun Standee Podium (26 driver)** | `py tools/build_driver_standees.py` (`--slot <n>` untuk satu driver; membaca `full_body_base.png` + `pose_win.png`, lalu `godot --headless --path . --import`) |
 | **Cek Status Git & LFS** | `git status -s` dan `git lfs status` |
 | **Health Check Genex** | `npx genex doctor` |
 
@@ -73,7 +74,8 @@ La_Voiture/
 │   └── audio/              # SFX, musik synthwave, engine loops, suara radio TTS Kokoro
 │
 ├── reference-assets/       # Referensi visual, kanon karakter & portrait runtime
-│   └── characters/         # Duo driver per tim (full_body_concept.png, radio_portrait.png)
+│   └── characters/         # Duo driver per tim (full_body_base.png, pose_win.png, radio_portrait.png)
+│                           # Prompt generate: CHARACTER-IMAGE-PROMPTS.md; standee runtime di assets/characters/standees/<slug>[_win].png
 │                           # PERHATIAN: radio_portrait.png dimuat oleh UI game saat runtime!
 │
 ├── scenes/                 # Scene Godot (.tscn) terorganisasi per modul domain
