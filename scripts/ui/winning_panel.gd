@@ -18,12 +18,14 @@ const SLANT_PX: float = 90.0
 const INK_PX: float = 16.0
 const PANEL_HEIGHT: float = 940.0
 const NAME_MAX_WIDTH: float = 640.0
-const NAME_FONT_PX: int = 80
+const NAME_FONT_PX: int = 68
 const CAR_WIDTH_FRACTION: float = 0.76
 const CAR_MAX_WIDTH: float = 760.0
 const CAR_FLOOR_GAP: float = 34.0
 ## The standee art is 720 x 1328: the 1280 px figure plus 48 px of headroom for a raised fist, so the figure stays 640 px tall.
-const STANDEE_HEIGHT: float = 664.0
+const STANDEE_HEIGHT: float = 570.0
+## The soles sit this far above the panel bottom, so they hide behind the car instead of poking out under it.
+const STANDEE_FOOT_LIFT: float = 36.0
 const BUBBLE_PX: float = 230.0
 ## The standee stands left of centre so the name tag, right-aligned under the bubble, does not cover its face.
 const STANDEE_CENTER_FRACTION: float = 0.40
@@ -34,7 +36,7 @@ const NAME_LEFT_LIMIT: float = 230.0
 const REFERENCE_WIDTH: float = 700.0
 const MIN_FIT: float = 0.6
 const ELLIPSIS: String = "…"
-const EPITHET_Y: float = 436.0
+const NAME_Y: float = 246.0
 const OUTLINE_PX: float = 5.0
 const STICKER_PAD_PX: float = 40.0
 const BREATH_PERIOD: float = 2.4
@@ -186,33 +188,33 @@ func relayout(panel_size: Vector2) -> void:
 	_content.size = layout
 	var inset: float = right_inset / content_scale
 	rank_label.position = Vector2(140.0, 6.0)
-	_kanji_box.position = Vector2(150.0, 190.0)
+	_kanji_box.position = Vector2(150.0, 170.0)
 	var bubble_at := Vector2(layout.x - inset - 64.0 - BUBBLE_PX, 22.0)
 	for layer: Control in _bubble_layers:
 		layer.position = bubble_at + layer.get_meta(&"offset", Vector2.ZERO) as Vector2
 
 	if standee.texture != null:
 		var standee_size := Vector2(STANDEE_HEIGHT * _aspect(standee.texture), STANDEE_HEIGHT)
-		_fit_sticker(standee, standee_size, Vector2(layout.x * STANDEE_CENTER_FRACTION - standee_size.x * 0.5, layout.y - STANDEE_HEIGHT))
+		_fit_sticker(standee, standee_size, Vector2(layout.x * STANDEE_CENTER_FRACTION - standee_size.x * 0.5, layout.y - STANDEE_FOOT_LIFT - STANDEE_HEIGHT))
 		standee.pivot_offset = Vector2(standee_size.x * 0.5, standee_size.y)
 	if car.texture != null:
 		var car_width: float = minf(layout.x * CAR_WIDTH_FRACTION, CAR_MAX_WIDTH)
 		var car_size := Vector2(car_width, car_width / _aspect(car.texture))
 		_fit_sticker(car, car_size, Vector2((layout.x - car_width) * 0.5, layout.y - CAR_FLOOR_GAP - car_size.y))
 	if crown != null:
-		crown.position = Vector2(standee.position.x + standee.size.x * 0.5 - crown.size.x * 0.5, layout.y - STANDEE_HEIGHT - crown.size.y + 24.0)
+		crown.position = Vector2(standee.position.x + standee.size.x * 0.5 - crown.size.x * 0.5, standee.position.y - crown.size.y + 24.0)
 
 	var right_edge: float = layout.x - inset
-	name_label.position = Vector2(right_edge - 36.0 - name_label.size.x, 262.0)
+	name_label.position = Vector2(right_edge - 36.0 - name_label.size.x, NAME_Y)
 	# A tag wider than the room left of the bubble shrinks towards its right edge instead of running over the kanji box.
 	var room: float = right_edge - 36.0 - NAME_LEFT_LIMIT
 	var shrink: float = clampf(room / maxf(name_label.size.x, 1.0), 0.6, 1.0)
 	name_label.pivot_offset = Vector2(name_label.size.x, name_label.size.y * 0.5)
 	name_label.scale = Vector2(shrink, shrink)
 	result_label.position = Vector2(120.0, layout.y - 70.0)
-	epithet_box.position = Vector2(130.0, EPITHET_Y)
-	engine_plate.position = Vector2(right_edge - 30.0 - engine_plate.size.x, 352.0)
-	sfx_label.position = Vector2(right_edge - 44.0 - sfx_label.size.x, 450.0)
+	epithet_box.position = Vector2(130.0, result_label.position.y - epithet_box.size.y - 44.0)
+	engine_plate.position = Vector2(right_edge - 40.0 - engine_plate.size.x, NAME_Y + 84.0)
+	sfx_label.position = Vector2(right_edge - 44.0 - sfx_label.size.x, NAME_Y + 180.0)
 
 
 ## "#NN NAME" in capitals, cut with an ellipsis so it stays on one line at the smallest tag font.

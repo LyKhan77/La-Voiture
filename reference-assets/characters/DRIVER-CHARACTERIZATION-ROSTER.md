@@ -4,6 +4,8 @@
 **Gaya Visual:** Cel-Shaded Toon Anime $\times$ Manga Halftone Neo-Brutalism $\times$ Streetwear NFS Unbound  
 **Pendekatan:** Hybrid (Karakter Orisinil berbasis Livery Tim dengan Inspirasi Persona Legenda Balap Dunia Nyata)
 
+> **Errata Fase 31 (keputusan developer):** di game, hanya **R. Silva, A. Rossi, dan R. Takahashi** yang wanita. Elena Novak (`#10`), Priya Aoki (`#14`), dan Clara Weiss (`#16`) di dokumen ini dibawakan sebagai **pria** oleh potret `radio_portrait.png` dan suara radio (`RadioVoice.DRIVER_VOICES`). Potret adalah sumber kanon; teks gender di dokumen ini tidak diubah supaya narasi aslinya tetap terbaca.
+
 ---
 
 ## 1. Filosofi Desain Karakter (Design Philosophy)

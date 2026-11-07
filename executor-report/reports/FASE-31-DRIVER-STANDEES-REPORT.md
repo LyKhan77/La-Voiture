@@ -40,13 +40,22 @@
 - Regresi penuh 116/116 suite, 0 failing (irisan 0-19, 20-34, 35-52, 53-72, 73-82, 83-92, 93-115).
 - Screenshot native 1080p: `executor-report/screenshots/phases/phase-31/` (intro idle, fokus P3, P2, P1, final, reduce motion).
 
+## Perbaikan tata letak panel (setelah review screenshot)
+
+Pose menang lebih tinggi dari pose lama, sehingga elemen panel saling menimpa. Perubahan di `scripts/ui/winning_panel.gd`:
+
+- Tag nama: font 80 ke 68 px, `NAME_Y` 246; berakhir di atas kepalan tangan dan helm. Plat mesin dan SFX mengikuti `NAME_Y`.
+- Standee: `STANDEE_HEIGHT` 570 dan `STANDEE_FOOT_LIFT` 36, sehingga telapak kaki tersembunyi di balik mobil (sebelumnya menyembul di bawah bumper). Mahkota mengikuti posisi standee.
+- Kotak kanji naik ke y 170; tag julukan pindah ke atas tag hasil (kiri bawah), tidak lagi memotong badan.
+- "TOYOTA GR SUPRA GT" yang tampak terpotong ternyata nama asli di `Roster.CAR_NAMES` (tanpa 3), bukan clipping.
+- `tests/test_winning_panel.gd` (31 assertion): tag nama di atas kanvas standee, julukan di atas tag hasil, telapak kaki setinggi `STANDEE_FOOT_LIFT`. 4 suite winning, 0 failing.
+- `DRIVER-CHARACTERIZATION-ROSTER.md`: catatan errata di atas bagian 1 (teks karakter asli tidak diubah).
+
 ## Belum selesai / keputusan terbuka
 
 - 52 berkas `full_body_concept.png(.import)` dan `scratch/process_character_cutout.py` kini tidak dipakai kode apa pun. Keduanya dihapus (`git rm`) atas izin developer; tetap ada di riwayat git.
-- Tag nama menutupi sebagian wajah standee pada panel fokus. Ini sudah ada pada standee lama (lihat `phases/phase-20/a-5-final.png`) dan belum diubah.
-- `DRIVER-CHARACTERIZATION-ROSTER.md` masih menulis Novak, Aoki, Weiss sebagai wanita (ASK FIRST).
 - Smoke test native 3 lap dan 60 FPS tidak dijalankan: perubahan hanya menyentuh scene podium.
 
 ## Tidak di-commit
 
-`.playwright-mcp/`, `.tmp_cutinspect/`, `tools/elevenlabs/` (skrip API yang ditolak 402), berkas `.uid` yang tidak terkait, dan seluruh isi `temp/`.
+Folder scratch `.playwright-mcp/`, `.tmp_cutinspect/`, `tools/elevenlabs/` sudah dihapus. Tidak di-commit: berkas `.uid` yang tidak terkait, dan seluruh isi `temp/`.

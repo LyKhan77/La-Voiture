@@ -100,8 +100,13 @@ func _run() -> void:
 	check(is_equal_approx(p1.content_scale, WinningPanel.MIN_FIT), "The content never shrinks below the minimum scale")
 	p1.relayout(Vector2(1200.0, 940.0))
 	check(is_equal_approx(p1.car.size.x, WinningPanel.CAR_MAX_WIDTH), "The car width is capped at %d px in a wide panel" % int(WinningPanel.CAR_MAX_WIDTH))
-	check(is_equal_approx(p1.standee.size.y, WinningPanel.STANDEE_HEIGHT) and is_equal_approx(p1.standee.position.y + p1.standee.size.y, 940.0),
-		"The standee canvas is STANDEE_HEIGHT tall and stands on the panel floor")
+	check(is_equal_approx(p1.standee.size.y, WinningPanel.STANDEE_HEIGHT) and is_equal_approx(p1.standee.position.y + p1.standee.size.y, 940.0 - WinningPanel.STANDEE_FOOT_LIFT),
+		"The standee canvas is STANDEE_HEIGHT tall and its soles sit STANDEE_FOOT_LIFT above the panel floor")
+	p1.relayout(Vector2(700.0, 940.0))
+	check(p1.name_label.position.y + p1.name_label.size.y <= p1.standee.position.y + 16.0,
+		"The name tag ends above the standee canvas, clear of the raised fist and helmet (%.0f vs %.0f)" % [p1.name_label.position.y + p1.name_label.size.y, p1.standee.position.y])
+	check(p1.epithet_box.position.y + p1.epithet_box.size.y <= p1.result_label.position.y,
+		"The epithet tag stacks above the result tag instead of overlapping it")
 
 	p2.dim_amount = 1.0
 	check(is_equal_approx(p2.modulate.r, 0.5) and is_equal_approx(p2.background.modulate.r, 0.5), "Dim darkens content and background to half brightness")
