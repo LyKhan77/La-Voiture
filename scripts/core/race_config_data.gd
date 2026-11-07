@@ -24,6 +24,9 @@ var time_of_day: int = 0
 var race_dynamics: int = 1
 var car1_starting_compound: int = 0
 var car2_starting_compound: int = 1
+## Start fuel of each player car in kg; negative means "take the crew pick" (GtFuelPlan.crew_pick_kg).
+var car1_start_fuel_kg: float = -1.0
+var car2_start_fuel_kg: float = -1.0
 ## New exhibitions roll independently; restarts retain the exact same simulation.
 var race_seed: int = randi_range(1, 2147483647)
 
@@ -92,15 +95,24 @@ func weather_archetype(seed_value: int) -> int:
 			return Weather.Archetype.LATE_MONSOON
 	return Weather.Archetype.DRY_SUNNY
 
+## Start fuel of player car `car_slot` (0 or 1) for a car burning `fuel_use` kg per lap: the pick, or the crew pick.
+func start_fuel_for(car_slot: int, fuel_use: float) -> float:
+	var pick: float = car1_start_fuel_kg if car_slot == 0 else car2_start_fuel_kg
+	if pick < 0.0:
+		return GtFuelPlan.crew_pick_kg(total_laps, fuel_use)
+	return GtFuelPlan.clamp_kg(pick)
+
 func apply_to_race(race: GtRace) -> void:
 	race.set_player_team(selected_team_id)
 	# Qualifying sorts the grid; ids, not array indices, identify the teammates.
 	var car1: GtCar = race.get_car(selected_team_id * 2)
 	if car1 != null:
 		car1.compound = car1_starting_compound
+		car1.fuel = start_fuel_for(0, car1.fuel_use)
 	var car2: GtCar = race.get_car(selected_team_id * 2 + 1)
 	if car2 != null:
 		car2.compound = car2_starting_compound
+		car2.fuel = start_fuel_for(1, car2.fuel_use)
 	var weather: GtWeather = race.weather
 	apply_weather(weather)
 	race.incidents_enabled = race_dynamics != 0

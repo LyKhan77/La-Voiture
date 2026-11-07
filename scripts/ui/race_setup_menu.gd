@@ -704,6 +704,9 @@ func _on_card_pressed(slot: int) -> void:
 
 func _on_laps_selected(index: int) -> void:
 	config.total_laps = LAPS[clampi(index, 0, LAPS.size() - 1)]
+	# A fuel pick made for another race length no longer fits: fall back to the crew pick.
+	config.car1_start_fuel_kg = -1.0
+	config.car2_start_fuel_kg = -1.0
 	_refresh_summary()
 	_refresh_meteo()
 	AudioManager.click(self)

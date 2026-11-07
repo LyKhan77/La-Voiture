@@ -44,6 +44,19 @@ static func fuel_margin_laps(car: GtCar, pace_mode: int, fuel_mode: int, laps_le
 	return minf(car.fuel / burn - laps_left, MAX_MARGIN_LAPS)
 
 
+## The garage verdict on a start load: from the mandatory-stop length it must reach the stop window (DANGER below
+## the window-open distance, WATCH when the stop has to come early); a shorter race needs the full distance.
+static func start_fuel_verdict(kg: float, total_laps: int, fuel_use: float) -> int:
+	var laps_of_fuel: float = kg / maxf(fuel_use, 0.01)
+	if total_laps >= GtTypes.MANDATORY_MIN_LAPS:
+		if laps_of_fuel < GtTypes.STOP_WINDOW_OPEN * float(total_laps):
+			return DANGER
+		return WATCH if laps_of_fuel < 0.35 * float(total_laps) else OK
+	if laps_of_fuel < float(total_laps):
+		return DANGER
+	return WATCH if laps_of_fuel < float(total_laps) * 1.03 else OK
+
+
 ## Laps of burn under which a car that has a stop ahead is told it will not last to it.
 const FUEL_ALARM_LAPS: float = 1.5
 
