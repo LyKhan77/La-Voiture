@@ -269,7 +269,7 @@ func update_car(car: GtCar, ctx: Variant, dt: float) -> void:
 		car.lateral = 7.4 if car.lateral >= 0.0 else -7.4
 		car.impact_jolt = 1.0
 		var terminal_sector: int = car.current_sector + 1
-		race.set_flag(GtTypes.Flag.SC, terminal_sector, "SAFETY CAR DEPLOYED - TERMINAL DAMAGE (#%d %s)" % [car.number, car.code], 28.0)
+		race.raise_sc(terminal_sector, "SAFETY CAR DEPLOYED - TERMINAL DAMAGE (#%d %s)" % [car.number, car.code], 28.0)
 	if car.is_dnf:
 		car.v = 0.0
 		car.v_lat = 0.0

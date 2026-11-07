@@ -214,7 +214,7 @@ func _collision_incident(car_a: GtCar, car_b: GtCar, s: float, lateral: float) -
 		victim.lateral = 7.4 if victim.lateral >= 0.0 else -7.4
 		victim.impact_jolt = 1.0
 		_emit_collision(GtTypes.CollisionKind.HEAVY, car_a.code, car_b.code, s, lateral)
-		race.set_flag(GtTypes.Flag.SC, sector, "SAFETY CAR DEPLOYED - CRASH SEC %d (%s)" % [sector, victim.code], 32.0)
+		race.raise_sc(sector, "SAFETY CAR DEPLOYED - CRASH SEC %d (%s)" % [sector, victim.code], 32.0)
 		if victim.team_id == race.player_team_id:
 			race.push_radio(victim, "driver", "Heavy crash! I'm out of the race, suspension sheared off!", true)
 		else:
@@ -257,7 +257,7 @@ func solo_incident(car: GtCar) -> void:
 		car.lateral = 7.4 if car.lateral >= 0.0 else -7.4
 		car.impact_jolt = 1.0
 		_emit_collision(GtTypes.CollisionKind.HEAVY, car.code, "WALL", car.s, car.lateral)
-		race.set_flag(GtTypes.Flag.SC, sector, "SAFETY CAR DEPLOYED - CRASH SEC %d (#%d)" % [sector, car.number], 32.0)
+		race.raise_sc(sector, "SAFETY CAR DEPLOYED - CRASH SEC %d (#%d)" % [sector, car.number], 32.0)
 		if car.team_id == race.player_team_id:
 			race.push_radio(car, "driver", "Massive crash! I'm into the wall, car is destroyed!", true)
 		else:

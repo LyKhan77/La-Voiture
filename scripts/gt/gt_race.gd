@@ -66,6 +66,9 @@ var race_control: Dictionary = {
 var safety_car: Dictionary = {
 	"active": false, "phase": GtTypes.SafetyCarPhase.HIDDEN, "s": 0.0, "v": 0.0, "lateral": 0.0, "lights_on": false,
 }
+## A heavy crash waiting out its VSC window: {"at": race time, "sector", "message", "duration"}, empty when none.
+var _sc_pending: Dictionary = {}
+var _sc_serial: int = 0
 
 var last_incident_time: float = -999.0
 ## Race time at which the winner took the flag; every other car finishes at its next line crossing.
@@ -438,6 +441,28 @@ static func sc_pit_entry_lateral_in(s_lap: float, layout: Dictionary) -> float:
 	return lerpf(edge, fast, smoothstep(0.0, 60.0, s_rel))
 
 
+## Seconds (8 to 15) a heavy crash stays a VSC before the safety car comes out; its own hash stream keeps seeds replayable.
+static func sc_escalation_delay_s(seed_value: int, serial: int) -> float:
+	var rng := GtRng.new(((seed_value * 1103515245) ^ ((serial + 1) * 0x9E3779B1) ^ 0x7C5A11E3) & 0x7FFFFFFF)
+	return lerpf(8.0, 15.0, rng.next())
+
+
+## A heavy crash: VSC first (the pit lane stays open, a window to gamble on a stop), the safety car after the
+## escalation delay. A crash during the window or while the safety car is out never spawns a second one.
+func raise_sc(sector: int, message: String, duration: float = 28.0) -> void:
+	var sc_out: bool = int(race_control["flag"]) == GtTypes.Flag.SC and bool(safety_car["active"])
+	if sc_out:
+		set_flag(GtTypes.Flag.SC, sector, message, duration)
+		return
+	if not _sc_pending.is_empty():
+		return
+	var delay: float = sc_escalation_delay_s(race_seed, _sc_serial)
+	_sc_serial += 1
+	_sc_pending = {"at": time + delay, "sector": sector, "message": message, "duration": duration}
+	# The VSC outlives the delay by a second so the escalation, not the VSC timer, ends it.
+	set_flag(GtTypes.Flag.VSC, sector, "VIRTUAL SAFETY CAR - INCIDENT IN SECTOR %d" % sector, delay + 1.0)
+
+
 ## Speed cap of a car racing up to the uncollected safety car `gap_to_sc` metres ahead: 27 m/s close in, up to
 ## SC_LEADER_CATCHUP_MAX_MPS when far away.
 static func sc_catchup_cap(gap_to_sc: float) -> float:
@@ -544,6 +569,10 @@ func _sc_queue_ready(leader: GtCar) -> bool:
 
 
 func _update_race_control(dt: float) -> void:
+	if not _sc_pending.is_empty() and time >= float(_sc_pending["at"]):
+		var pending: Dictionary = _sc_pending
+		_sc_pending = {}
+		set_flag(GtTypes.Flag.SC, int(pending["sector"]), String(pending["message"]), float(pending["duration"]))
 	var flag: int = race_control["flag"]
 	if flag == GtTypes.Flag.YELLOW or flag == GtTypes.Flag.VSC:
 		race_control["timer"] = float(race_control["timer"]) - dt
