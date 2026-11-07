@@ -54,7 +54,7 @@ Pose menang lebih tinggi dari pose lama, sehingga elemen panel saling menimpa. P
 ## Belum selesai / keputusan terbuka
 
 - 52 berkas `full_body_concept.png(.import)` dan `scratch/process_character_cutout.py` kini tidak dipakai kode apa pun. Keduanya dihapus (`git rm`) atas izin developer; tetap ada di riwayat git.
-- Smoke test native 3 lap dan 60 FPS tidak dijalankan: perubahan hanya menyentuh scene podium.
+- Smoke native `scratch/smoke_race.gd -- apex_ring 0` (1080p, RTX 3050 Laptop, 3 lap, 20 mobil): 20/20 finis, frame rata-rata 16,67 ms (60,0 FPS), p95 16,80 ms, terburuk 22,22 ms, podium terbuka, 0 orphan node setelah world dibebaskan.
 
 ## Tidak di-commit
 
