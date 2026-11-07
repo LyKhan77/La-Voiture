@@ -210,6 +210,13 @@
 		"spoken": "Window closes in two laps. Box now."
 	},
 	{
+		"id": "eng_fuel_short_box",
+		"speaker": "engineer",
+		"pattern": "^Fuel is short\\. Box this lap for fuel\\.$",
+		"file": "res://assets/audio/radio/voice/eng_fuel_short_box.wav",
+		"spoken": "Fuel is short. Box this lap for fuel."
+	},
+	{
 		"id": "eng_strat_easing_inter",
 		"speaker": "engineer",
 		"pattern": "^Rain easing \\(\\d+% water\\)\\. Suggest box this lap for INTERMEDIATE tyres\\.$",
