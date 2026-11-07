@@ -46,7 +46,9 @@ func _run() -> void:
 	await _scenario("apex_ring", "six cars box at once", func(cars: Array) -> Array: return [cars[0].id, cars[2].id, cars[4].id, cars[6].id, cars[8].id, cars[10].id], true)
 	await _scenario("neo_wangan", "six cars box at once", func(cars: Array) -> Array: return [cars[0].id, cars[1].id, cars[2].id, cars[3].id, cars[4].id, cars[5].id], true)
 	await _scenario("brianza", "six cars box at once", func(cars: Array) -> Array: return [cars[0].id, cars[1].id, cars[2].id, cars[3].id, cars[4].id, cars[5].id], true)
-	await _scenario("monte_azure", "six cars box at once", func(cars: Array) -> Array: return [cars[0].id, cars[1].id, cars[2].id, cars[3].id, cars[4].id, cars[5].id], true)
+	# Fase 32: a stop now includes refuel time, which shifts the stop timing; on Monte Azure this pick no longer forces a
+	# hold (0 held frames). The hold animation is still asserted on apex_ring, neo_wangan, brianza and ardennes.
+	await _scenario("monte_azure", "six cars box at once", func(cars: Array) -> Array: return [cars[0].id, cars[1].id, cars[2].id, cars[3].id, cars[4].id, cars[5].id], false)
 	# Every third car held 0-1 frames here (frame timing makes the world run vary); nose to tail holds ~11.
 	await _scenario("ardennes", "six cars box at once", func(cars: Array) -> Array: return [cars[0].id, cars[1].id, cars[2].id, cars[3].id, cars[4].id, cars[5].id], true)
 	quit(1 if failures else 0)

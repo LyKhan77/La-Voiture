@@ -192,7 +192,7 @@ func _build_grid(count: int, _seed_value: int, target_teams: Array[int] = []) ->
 		car.prev_lateral = lat
 		car.target_lateral = lat
 		car.defend_target_lateral = lat
-		car.fuel = car.fuel_use * float(laps) * 1.05
+		car.fuel = GtFuelPlan.crew_pick_kg(laps, car.fuel_use)
 		car.fuel_burn_rate = car.fuel_use
 		car.position = index + 1
 		cars.append(car)

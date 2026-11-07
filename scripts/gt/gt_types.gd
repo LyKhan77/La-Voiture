@@ -37,6 +37,14 @@ const PACE_FUEL_MULT: Array[float] = [0.85, 0.93, 1.0, 1.12, 1.25]
 const PACE_TARGET_TEMP: Array[float] = [80.0, 86.0, 92.0, 104.0, 116.0]
 ## Fuel burn multiplier by FuelMode (CONSERVE, STANDARD, PUSH).
 const FUEL_MODE_BURN_MULT: Array[float] = [0.80, 1.0, 1.25]
+## Fuel tank, refuel speed and the pace a kilogram of fuel costs (start values, Fase 32 balance tuning).
+const TANK_CAP_KG: float = 110.0
+const REFUEL_S_PER_KG: float = 0.06
+const FUEL_WEIGHT_PACE_PER_KG: float = 0.0004
+## Races of this many laps or more carry a mandatory pit stop, done inside this share of the distance.
+const MANDATORY_MIN_LAPS: int = 10
+const STOP_WINDOW_OPEN: float = 0.20
+const STOP_WINDOW_CLOSE: float = 0.80
 ## ERS battery per second while deploying (index ErsMode: DEPLOY and OVERTAKE only), and harvest charge per second.
 const ERS_DRAIN_PER_S: Array[float] = [0.0, 0.0, 12.0, 24.0]
 const ERS_HARVEST_PER_S: float = 4.0

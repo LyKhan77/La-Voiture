@@ -351,7 +351,7 @@ func update_car(car: GtCar, ctx: Variant, dt: float) -> void:
 		fuel_burn_mult *= 1.0 + car.damage / 100.0 * 0.15
 
 	# --- target speed
-	var fuel_factor: float = 1.0 - 0.0004 * car.fuel
+	var fuel_factor: float = 1.0 - GtTypes.FUEL_WEIGHT_PACE_PER_KG * car.fuel
 	var error_factor: float = 0.85 if car.error_timer > 0.0 else 1.0
 	var damage_factor: float = 1.0 - car.damage / 100.0 * 0.22
 	# Water takes grip from the corners only: the blend runs over 0.0025..0.0045 of curvature, centred
@@ -804,7 +804,7 @@ func _wear_and_fuel(car: GtCar, ds: float, wear_rate_mult: float, fuel_burn_mult
 		car.fuel_stage = GtTypes.FuelStage.LIMP
 	elif car.fuel < 1.2 and absf(curv_now) > 0.008:
 		car.fuel_stage = GtTypes.FuelStage.SPUTTER
-	elif car.fuel < 3.0:
+	elif GtForecast.fuel_alarm(race, car):
 		if car.fuel_stage == GtTypes.FuelStage.OPTIMAL:
 			race.push_radio(car, "engineer", "Fuel critical! Switch to CONSERVE immediately or we won't see the chequered flag!")
 		car.fuel_stage = GtTypes.FuelStage.WARNING
@@ -1015,7 +1015,8 @@ func enter_pit_lane(car: GtCar, compound: int = -1) -> void:
 	pit.compound = chosen
 	var has_damage: bool = car.damage > 0.0
 	var extra: float = minf(4.2, 1.4 + car.damage / 100.0 * 3.0) if has_damage else 0.0
-	pit.duration = GtTypes.PIT_STOP_TIME + extra
+	var refuel_kg: float = maxf(0.0, GtFuelPlan.refuel_target_kg(float(race.laps - car.lap + 1), car.fuel_use) - car.fuel)
+	pit.duration = GtTypes.PIT_STOP_TIME + extra + refuel_kg * GtTypes.REFUEL_S_PER_KG
 	pit.repairing_damage = has_damage
 	pit.initial_damage = car.damage
 	pit.initial_fuel = car.fuel
@@ -1265,7 +1266,7 @@ func _service_car(car: GtCar, pit: GtPit, dt: float) -> void:
 	if progress >= 0.55:
 		car.compound = pit.compound
 	car.damage = maxf(0.0, pit.initial_damage * (1.0 - progress))
-	var needed: float = minf(110.0, maxf(pit.initial_fuel, float(race.laps - car.lap + 1) * car.fuel_use * 1.08))
+	var needed: float = maxf(pit.initial_fuel, GtFuelPlan.refuel_target_kg(float(race.laps - car.lap + 1), car.fuel_use))
 	car.fuel = pit.initial_fuel + (needed - pit.initial_fuel) * progress
 	if pit.timer < pit.duration - 0.4:
 		pit.lift_y = minf(0.15, pit.timer * 0.45)

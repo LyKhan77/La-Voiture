@@ -44,6 +44,24 @@ static func fuel_margin_laps(car: GtCar, pace_mode: int, fuel_mode: int, laps_le
 	return minf(car.fuel / burn - laps_left, MAX_MARGIN_LAPS)
 
 
+## Laps of burn under which a car that has a stop ahead is told it will not last to it.
+const FUEL_ALARM_LAPS: float = 1.5
+
+
+## The "fuel critical" call: the car cannot reach the finish and has no stop left to fix that (or has a stop pending
+## but the tank will not last to it). A load that is enough for the finish never rings it, however little is left.
+static func fuel_alarm(race: GtRace, car: GtCar) -> bool:
+	var margin: float = fuel_margin_laps(car, car.pace_mode, car.fuel_mode, laps_left(race, car))
+	if margin >= 0.0:
+		return false
+	var progress: float = car.s / (float(race.laps) * race.track.length)
+	var stop_ahead: bool = race.laps >= GtTypes.MANDATORY_MIN_LAPS and not car.mandatory_stop_done \
+			and progress < GtTypes.STOP_WINDOW_CLOSE - 0.05
+	if not stop_ahead:
+		return true
+	return car.fuel / maxf(burn_per_lap(car, car.pace_mode, car.fuel_mode), 0.01) < FUEL_ALARM_LAPS
+
+
 ## Seconds of deploying the battery lasts in `ers_mode`; INF when the mode does not deploy.
 static func ers_seconds(battery: float, ers_mode: int) -> float:
 	var drain: float = GtTypes.ERS_DRAIN_PER_S[ers_mode]
