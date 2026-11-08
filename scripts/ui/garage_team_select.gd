@@ -55,8 +55,13 @@ const COMPOUND_NOTES: Array[String] = [
 ]
 ## Kanji stamps exist only for the drivers the roster document gives one (field slot -> stamp).
 const DRIVER_KANJI: Dictionary = {0: "「疾風」"}
-## One press of a fuel step button, kg.
-const FUEL_STEP_KG: float = 2.0
+const FUEL_CHIP_X: Array[float] = [28.0, 92.0, 176.0]
+const FUEL_CHIP_W: Array[float] = [60.0, 80.0, 54.0]
+const FUEL_TIPS: Array[String] = [
+	"Light start: quicker at first, but you must stop for fuel early.",
+	"Balanced start: reaches the middle of the stop window, then you must top up. The AI teams' choice.",
+	"Full tank: no fuel worries. The crew's recommendation, but the car is heavier and slower.",
+]
 const WHEEL_X: float = 236.0
 const WHEEL_STEP: float = 108.0
 const ROW_Y: float = 42.0
@@ -217,42 +222,51 @@ func select_compound(car_slot: int, compound: int) -> void:
 	_refresh_compounds()
 	if _built:
 		AudioManager.click(self)
-## CREW PICK for start fuel: the fuel plan's load for this race length and the selected team's burn.
+## The crew's recommended start fuel (the starred preset) for this race length and the selected team's burn.
 func get_crew_pick_fuel(_car_slot: int = 0) -> float:
 	var laps: int = config.total_laps if config != null else 5
-	return GtFuelPlan.crew_pick_kg(laps, _team_fuel_use())
+	return GtFuelPlan.preset_kg(GtFuelPlan.crew_preset(laps), laps, _team_fuel_use())
 func _team_fuel_use() -> float:
 	return GtData.FUEL_USE[clampi(selected_team, 0, GtData.FUEL_USE.size() - 1)]
 func _chosen_fuel(car_slot: int) -> float:
 	return config.start_fuel_for(car_slot, _team_fuel_use())
-## Start fuel for car 1 (slot 0) or car 2 (slot 1), clamped to the tank; the two stay independent.
-func select_fuel(car_slot: int, kg: float) -> void:
+## Start fuel preset for car 1 (slot 0) or car 2 (slot 1); the two stay independent.
+func select_fuel_preset(car_slot: int, preset: int) -> void:
 	if config == null:
 		config = ConfigScript.get_config()
-	var load_kg: float = GtFuelPlan.clamp_kg(kg)
+	var value: int = clampi(preset, GtFuelPlan.Preset.LIGHT, GtFuelPlan.Preset.FULL)
 	if clampi(car_slot, 0, 1) == 0:
-		config.car1_start_fuel_kg = load_kg
+		config.car1_fuel_preset = value
 	else:
-		config.car2_start_fuel_kg = load_kg
+		config.car2_fuel_preset = value
 	_refresh_fuel()
 	if _built:
 		AudioManager.click(self)
-func _step_fuel(car_slot: int, delta_kg: float) -> void:
-	select_fuel(car_slot, _chosen_fuel(car_slot) + delta_kg)
+func _chosen_preset(car_slot: int) -> int:
+	var raw: int = config.car1_fuel_preset if car_slot == 0 else config.car2_fuel_preset
+	return GtFuelPlan.effective_preset(raw, config.total_laps)
 func _refresh_fuel() -> void:
 	if fuel_controls.is_empty() or config == null:
 		return
 	var burn: float = _team_fuel_use()
-	var pick: float = get_crew_pick_fuel(0)
+	var crew: int = GtFuelPlan.crew_preset(config.total_laps)
+	var chooses: bool = config.total_laps >= GtTypes.MANDATORY_MIN_LAPS
 	var verdict_words: Array[String] = ["OK", "WATCH", "DANGER"]
 	var verdict_colors: Array[Color] = [T.ACCENT_ACID_LIME, T.ACCENT_CYBER_YELLOW, TyreWheelButton.HAZARD]
 	for car_slot: int in range(2):
-		var kg: float = _chosen_fuel(car_slot)
+		var preset: int = _chosen_preset(car_slot)
+		var kg: float = config.start_fuel_for(car_slot, burn)
 		var verdict: int = GtForecast.start_fuel_verdict(kg, config.total_laps, burn)
+		var chips: Array = fuel_controls[car_slot]["chips"]
+		for index: int in range(chips.size()):
+			var chip: Button = chips[index]
+			chip.set_pressed_no_signal(index == preset)
+			chip.disabled = not chooses and index != GtFuelPlan.Preset.FULL
+			chip.tooltip_text = FUEL_TIPS[index] if chooses else "A race this short has no mandatory stop: the tank is full."
 		var label: Label = fuel_controls[car_slot]["label"]
-		label.text = "%d KG // %s%s" % [roundi(kg), verdict_words[verdict], " ★" if absf(kg - pick) < 0.5 else ""]
+		label.text = "%s // %d KG // %s%s" % [GtFuelPlan.PRESET_LABEL[preset], roundi(kg), verdict_words[verdict], " ★" if preset == crew else ""]
 		label.add_theme_color_override("font_color", verdict_colors[verdict])
-		label.tooltip_text = "Car %d start fuel %.1f kg = %.1f laps of fuel. Crew pick %d kg." % [car_slot + 1, kg, kg / maxf(burn, 0.01), roundi(pick)]
+		label.tooltip_text = "Car %d start fuel %.1f kg = %.1f laps of fuel. Crew pick %d kg." % [car_slot + 1, kg, kg / maxf(burn, 0.01), roundi(get_crew_pick_fuel(0))]
 func launch(force: bool = false) -> void:
 	if _launching or not is_inside_tree():
 		return
@@ -492,19 +506,19 @@ func _build_strategy_deck() -> void:
 		var row_y: float = ROW_Y + float(car_slot) * ROW_STEP
 		var row_label := _badge(deck, "CarRow%d" % (car_slot + 1), "CAR %d // --" % (car_slot + 1), Vector2(28, row_y + 6.0), 20, car_slot == 0)
 		_car_row_labels.append(row_label)
-		var compat_label := _text(deck, "CarCompat%d" % (car_slot + 1), "", Vector2(28, row_y + 52.0),
+		var compat_label := _text(deck, "CarCompat%d" % (car_slot + 1), "", Vector2(28, row_y + 48.0),
 			Vector2(200, 18), FONT_MONO, 11, T.ACCENT_ACID_LIME)
 		_compatibility_labels.append(compat_label)
-		var fuel_down := _chip("Car%dFuelDown" % (car_slot + 1), "-", false, Vector2(28.0, row_y + 72.0), Vector2(40.0, 26.0), 2, 16)
-		var fuel_up := _chip("Car%dFuelUp" % (car_slot + 1), "+", false, Vector2(190.0, row_y + 72.0), Vector2(40.0, 26.0), 2, 16)
-		var fuel_label := _text(deck, "Car%dFuelLabel" % (car_slot + 1), "", Vector2(72.0, row_y + 76.0), Vector2(116.0, 18.0), FONT_MONO, 11, T.TEXT_SECONDARY, HORIZONTAL_ALIGNMENT_CENTER)
-		fuel_down.tooltip_text = "Car %d start fuel: 2 kg less" % (car_slot + 1)
-		fuel_up.tooltip_text = "Car %d start fuel: 2 kg more" % (car_slot + 1)
-		fuel_down.pressed.connect(_step_fuel.bind(car_slot, -FUEL_STEP_KG))
-		fuel_up.pressed.connect(_step_fuel.bind(car_slot, FUEL_STEP_KG))
-		deck.add_child(fuel_down)
-		deck.add_child(fuel_up)
-		fuel_controls.append({"label": fuel_label, "down": fuel_down, "up": fuel_up})
+		var fuel_chips: Array[Button] = []
+		for preset: int in range(GtFuelPlan.PRESET_LABEL.size()):
+			var chip := _chip("Car%dFuel%s" % [car_slot + 1, GtFuelPlan.PRESET_LABEL[preset].capitalize()], GtFuelPlan.PRESET_LABEL[preset], false,
+				Vector2(FUEL_CHIP_X[preset], row_y + 62.0), Vector2(FUEL_CHIP_W[preset], 18.0), 2, 11)
+			chip.toggle_mode = true
+			chip.pressed.connect(select_fuel_preset.bind(car_slot, preset))
+			deck.add_child(chip)
+			fuel_chips.append(chip)
+		var fuel_label := _text(deck, "Car%dFuelLabel" % (car_slot + 1), "", Vector2(28.0, row_y + 91.0), Vector2(204.0, 13.0), FONT_MONO, 11, T.TEXT_SECONDARY)
+		fuel_controls.append({"label": fuel_label, "chips": fuel_chips})
 		for compound: int in range(COMPOUND_NAMES.size()):
 			var wheel := TyreWheelButton.new()
 			wheel.name = "Car%dCompound%s" % [car_slot + 1, COMPOUND_BUTTON_NAMES[compound]]

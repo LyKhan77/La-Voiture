@@ -1,7 +1,7 @@
 extends SceneTree
 
-## Fase 32 Task 4: per-car start fuel in the Team Garage with a crew pick, the verdict, the clamp, and the hand-off to
-## the race grid (player cars carry the pick, rivals carry the crew pick).
+## Fase 32 Task 4: per-car start fuel presets (LIGHT, BALANCED, FULL) in the Team Garage with the crew pick star and the verdict, and the
+## hand-off to the race grid (player cars carry the pick, rivals carry the crew pick).
 ## Run: godot --headless --path . -s res://tests/test_garage_fuel_choice.gd
 
 const TrackScene := preload("res://scenes/race_world/circuits/apex_ring/apex_circuit.tscn")
@@ -38,33 +38,35 @@ func _run() -> void:
 	root.add_child(garage)
 	await process_frame
 	var burn: float = GtData.FUEL_USE[0]
-	check(is_equal_approx(garage.get_crew_pick_fuel(0), GtFuelPlan.crew_pick_kg(15, burn)), "the garage crew pick is the fuel plan's pick for this team")
-	check(config.car1_start_fuel_kg == -1.0 and config.car2_start_fuel_kg == -1.0, "both cars start on the crew pick")
+	check(is_equal_approx(garage.get_crew_pick_fuel(0), 15.0 * burn * 1.08), "the crew recommends the full distance for this team")
+	check(config.car1_fuel_preset == GtFuelPlan.Preset.FULL and config.car2_fuel_preset == GtFuelPlan.Preset.FULL, "both cars start on FULL")
+	check(is_equal_approx(config.start_fuel_for(0, burn), 15.0 * burn * 1.08) and is_equal_approx(config.start_fuel_for(1, burn), 15.0 * burn * 1.08), "so a player who touches nothing starts with the whole distance")
 	var label: Label = garage.fuel_controls[0]["label"]
-	check(label.text.contains("★") and label.text.contains("OK"), "the crew pick shows the star and an OK verdict (%s)" % label.text)
+	check(label.text.contains("★") and label.text.contains("OK") and label.text.contains("FULL"), "the default shows FULL, the star and an OK verdict (%s)" % label.text)
+	var chips: Array = garage.fuel_controls[0]["chips"]
+	check(chips.size() == 3 and chips[2].button_pressed and not chips[0].button_pressed and not chips[1].button_pressed, "three preset chips, FULL lit")
 
-	garage.select_fuel(0, -5.0)
-	check(config.car1_start_fuel_kg == 0.0, "negative fuel clamps to empty")
-	garage.select_fuel(0, 9999.0)
-	check(config.car1_start_fuel_kg == Types.TANK_CAP_KG, "huge fuel clamps to the tank cap")
-	garage.select_fuel(1, 6.0)
-	check(config.car2_start_fuel_kg == 6.0 and config.car1_start_fuel_kg == Types.TANK_CAP_KG, "the two cars choose independently")
-	var low_label: Label = garage.fuel_controls[1]["label"]
-	check(low_label.text.contains("DANGER"), "a load too small to reach the stop window shows DANGER and is still allowed (%s)" % low_label.text)
+	chips[0].pressed.emit()
+	check(config.car1_fuel_preset == GtFuelPlan.Preset.LIGHT and chips[0].button_pressed and not chips[1].button_pressed, "LIGHT chip selects LIGHT and lights alone")
+	check(label.text.contains("LIGHT") and label.text.contains("WATCH") and not label.text.contains("★"), "LIGHT reads WATCH and carries no star (%s)" % label.text)
+	check(is_equal_approx(config.start_fuel_for(0, burn), GtFuelPlan.preset_kg(GtFuelPlan.Preset.LIGHT, 15, burn)), "the config turns the preset into kg for the team")
+	garage.fuel_controls[1]["chips"][2].pressed.emit()
+	check(config.car2_fuel_preset == GtFuelPlan.Preset.FULL and config.car1_fuel_preset == GtFuelPlan.Preset.LIGHT, "the two cars choose independently")
+	chips[0].pressed.emit()
+	check(chips[0].button_pressed, "pressing the lit chip again keeps it lit")
 
-	garage.select_fuel(0, garage.get_crew_pick_fuel(0))
-	var before: float = config.car1_start_fuel_kg
-	garage.fuel_controls[0]["up"].pressed.emit()
-	check(is_equal_approx(config.car1_start_fuel_kg, before + 2.0), "the up button adds 2 kg")
-	garage.fuel_controls[0]["down"].pressed.emit()
-	garage.fuel_controls[0]["down"].pressed.emit()
-	check(is_equal_approx(config.car1_start_fuel_kg, before - 2.0), "the down button takes 2 kg")
-
-	garage.select_fuel(0, 77.0)
 	garage.select_team(2)
 	await process_frame
-	check(config.car1_start_fuel_kg == 77.0, "changing the team leaves a manual pick alone")
-	check(is_equal_approx(garage.get_crew_pick_fuel(0), GtFuelPlan.crew_pick_kg(15, GtData.FUEL_USE[2])), "the crew pick follows the new team's fuel use")
+	check(config.car1_fuel_preset == GtFuelPlan.Preset.LIGHT, "changing the team keeps the preset")
+	check(is_equal_approx(config.start_fuel_for(0, GtData.FUEL_USE[2]), GtFuelPlan.preset_kg(GtFuelPlan.Preset.LIGHT, 15, GtData.FUEL_USE[2])), "and its kg follows the new team's fuel use")
+	config.total_laps = 5
+	garage._refresh_fuel()
+	check(chips[0].disabled and chips[1].disabled and not chips[2].disabled and chips[2].button_pressed, "a 5 lap race disables LIGHT and BALANCED and lights FULL")
+	check(label.text.contains("FULL") and label.text.contains("OK") and label.text.contains("★"), "FULL is the crew pick below 10 laps (%s)" % label.text)
+	check(is_equal_approx(config.start_fuel_for(0, burn), 5.0 * burn * 1.08), "and the grid load is the full distance")
+	config.total_laps = 15
+	garage._refresh_fuel()
+	check(not chips[0].disabled and chips[0].button_pressed, "back at 15 laps the chips are live again and the pick stands")
 	garage.queue_free()
 	await process_frame
 
@@ -89,24 +91,24 @@ func _test_hand_off_to_the_grid(config_script: Script) -> void:
 	var config = config_script.reset()
 	config.total_laps = 15
 	config.selected_team_id = 0
-	config.car1_start_fuel_kg = 31.0
-	config.car2_start_fuel_kg = -1.0
+	config.car1_fuel_preset = GtFuelPlan.Preset.FULL
+	config.car2_fuel_preset = GtFuelPlan.Preset.BALANCED
 	var race := RaceScript.new(track, 15, 5, DRY, 20)
 	config.apply_to_race(race)
 	var car1: GtCar = race.get_car(0)
 	var car2: GtCar = race.get_car(1)
-	check(is_equal_approx(car1.fuel, 31.0), "car 1 carries its chosen fuel on the grid")
-	check(is_equal_approx(car2.fuel, GtFuelPlan.crew_pick_kg(15, car2.fuel_use)), "car 2 on the crew pick carries the crew pick")
+	check(is_equal_approx(car1.fuel, GtFuelPlan.preset_kg(GtFuelPlan.Preset.FULL, 15, car1.fuel_use)), "car 1 carries its chosen preset on the grid")
+	check(is_equal_approx(car2.fuel, GtFuelPlan.crew_pick_kg(15, car2.fuel_use)), "car 2 on BALANCED carries the crew pick")
 	var rival: GtCar = null
 	for car: GtCar in race.cars:
 		if car.team_id != 0:
 			rival = car
 			break
 	check(rival != null and is_equal_approx(rival.fuel, GtFuelPlan.crew_pick_kg(15, rival.fuel_use)), "rivals carry the crew pick")
-	config.car1_start_fuel_kg = 9999.0
+	config.car1_fuel_preset = 99
 	var race2 := RaceScript.new(track, 15, 5, DRY, 20)
 	config.apply_to_race(race2)
-	check(race2.get_car(0).fuel == Types.TANK_CAP_KG, "an out-of-range pick is clamped when it reaches the grid")
+	check(is_equal_approx(race2.get_car(0).fuel, GtFuelPlan.preset_kg(GtFuelPlan.Preset.FULL, 15, race2.get_car(0).fuel_use)), "an out-of-range preset clamps when it reaches the grid")
 	race.dispose()
 	race2.dispose()
 	ribbon.queue_free()

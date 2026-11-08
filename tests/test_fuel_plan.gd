@@ -31,6 +31,7 @@ func _run() -> void:
 	root.add_child(ribbon)
 	var track := TrackScript.new(ribbon, 14.0)
 	_test_plan_functions()
+	_test_presets()
 	_test_grid_fuel(track)
 	_test_refuel_time_in_the_stop(track)
 	_test_fuel_alarm(track)
@@ -49,6 +50,29 @@ func _test_plan_functions() -> void:
 	check(GtFuelPlan.clamp_kg(INF) == 0.0 and GtFuelPlan.clamp_kg(NAN) == 0.0, "non-finite fuel clamps to empty")
 	check(is_equal_approx(GtFuelPlan.refuel_target_kg(10.0, 3.0), 10.0 * 3.0 * 1.08), "refuel target is laps left times burn plus 8%")
 	check(GtFuelPlan.refuel_target_kg(100.0, 3.0) == GtTypes.TANK_CAP_KG, "refuel target stops at the tank cap")
+
+
+func _test_presets() -> void:
+	var burn: float = 3.0
+	var light: float = GtFuelPlan.preset_kg(GtFuelPlan.Preset.LIGHT, 15, burn)
+	var balanced: float = GtFuelPlan.preset_kg(GtFuelPlan.Preset.BALANCED, 15, burn)
+	var full: float = GtFuelPlan.preset_kg(GtFuelPlan.Preset.FULL, 15, burn)
+	check(is_equal_approx(light, 0.30 * 15.0 * burn * 1.08), "LIGHT carries 30% of the distance plus 8%")
+	check(is_equal_approx(balanced, GtFuelPlan.crew_pick_kg(15, burn)), "BALANCED is the pick the AI teams carry")
+	check(is_equal_approx(full, 15.0 * burn * 1.08), "FULL carries the whole distance plus 8%")
+	check(light < balanced and balanced < full, "the presets are ordered light < balanced < full")
+	check(GtFuelPlan.preset_kg(GtFuelPlan.Preset.FULL, 15, 30.0) == GtTypes.TANK_CAP_KG, "a preset never exceeds the tank")
+	for laps: int in [3, 5, 9]:
+		var all_full: bool = true
+		for preset: int in range(3):
+			all_full = all_full and is_equal_approx(GtFuelPlan.preset_kg(preset, laps, burn), float(laps) * burn * 1.08)
+		check(all_full, "every preset is the full distance in a %d lap race (no mandatory stop)" % laps)
+		check(GtFuelPlan.effective_preset(GtFuelPlan.Preset.LIGHT, laps) == GtFuelPlan.Preset.FULL, "so LIGHT shows as FULL at %d laps" % laps)
+	check(GtFuelPlan.effective_preset(GtFuelPlan.Preset.LIGHT, 10) == GtFuelPlan.Preset.LIGHT, "from 10 laps the preset stands")
+	check(GtFuelPlan.crew_preset(15) == GtFuelPlan.Preset.FULL and GtFuelPlan.crew_preset(5) == GtFuelPlan.Preset.FULL, "the crew recommends FULL at every race length")
+	check(GtFuelPlan.effective_preset(99, 15) == GtFuelPlan.Preset.FULL and GtFuelPlan.effective_preset(-3, 15) == GtFuelPlan.Preset.LIGHT, "an out-of-range preset clamps")
+	check(GtForecast.start_fuel_verdict(light, 15, burn) == GtForecast.WATCH, "LIGHT reaches the window but must stop early: WATCH")
+	check(GtForecast.start_fuel_verdict(balanced, 15, burn) == GtForecast.OK and GtForecast.start_fuel_verdict(full, 15, burn) == GtForecast.OK, "BALANCED and FULL are OK")
 
 
 func _test_grid_fuel(track: TrackScript) -> void:
