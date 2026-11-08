@@ -192,6 +192,9 @@ static func _field_rain_share(race: GtRace) -> float:
 const NEUTRAL_TACTIC: Dictionary = {"aggression": 0.5, "fuel_save": 0.5, "ers_greed": 0.5, "cover_gap_s": 2.0, "stop_bias": 0.0}
 ## Seconds behind a car (or in front of one) that counts as a fight.
 const BATTLE_GAP_S: float = 1.5
+## Laps of fuel that must be left over, at AGGRESSIVE burn, before a team goes AGGRESSIVE. A 3 lap sprint carries the
+## distance plus 8% only, so aggression there used to leave ten cars 0.1 lap short and in the pits for it.
+const AGGRESSIVE_FUEL_MARGIN_LAPS: float = 0.3
 ## Road distance within which another car counts as ahead or behind.
 const NEIGHBOUR_RANGE_M: float = 200.0
 
@@ -263,7 +266,7 @@ static func choose_modes(race: GtRace, car: GtCar, tp: Dictionary) -> Dictionary
 	var pace: int = GtTypes.PaceMode.STANDARD
 	if tyre_life_at_finish(car, GtTypes.PaceMode.STANDARD, stint) < GtForecast.TYRE_WATCH_LIFE:
 		pace = GtTypes.PaceMode.LIGHT
-	elif battling and aggression > 0.5 and tyre_life_at_finish(car, GtTypes.PaceMode.AGGRESSIVE, stint) >= GtForecast.TYRE_WATCH_LIFE:
+	elif battling and aggression > 0.5 and tyre_life_at_finish(car, GtTypes.PaceMode.AGGRESSIVE, stint) >= GtForecast.TYRE_WATCH_LIFE 			and GtForecast.fuel_margin_laps(car, GtTypes.PaceMode.AGGRESSIVE, GtTypes.FuelMode.STANDARD, stint) >= AGGRESSIVE_FUEL_MARGIN_LAPS:
 		pace = GtTypes.PaceMode.AGGRESSIVE
 	if left <= 2.0 and aggression > 0.7 and tyre_life_at_finish(car, GtTypes.PaceMode.ATTACK, left) >= GtForecast.TYRE_DANGER_LIFE \
 			and GtForecast.fuel_margin_laps(car, GtTypes.PaceMode.ATTACK, GtTypes.FuelMode.STANDARD, left) >= 0.3:

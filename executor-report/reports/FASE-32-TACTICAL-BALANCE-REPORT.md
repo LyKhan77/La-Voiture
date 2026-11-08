@@ -78,6 +78,16 @@ Pemicu: developer finis P3 di lintasan pada balapan 10 lap tanpa pit, lalu klasi
 - **TTS:** 8 baris engineer dan 14 baris driver x 8 suara = 120 klip Kokoro baru (`tools/audio/radio_lines.mjs`, lokal, tanpa genex karena pipeline radio proyek sudah memakai Kokoro); manifest 342 baris. `tests/test_radio_calls.gd` memastikan tiap baris punya klip untuk semua 20 slot driver dengan suara yang benar.
 - Tes baru: `test_radio_calls` (jendela terlewat, jawaban driver, stop terhitung atau tidak, lap terakhir, baterai, steward, info jendela, finis dengan penalti, reaksi chequered, variasi dan determinisme, klip, baris klasifikasi, catatan podium, label deck). Screenshot: `05-missed-window-banner-deck-radio.png`, `06-podium-penalty-note.png`, `07-leaderboard-pen-tag.png`.
 
+## Sirkuit Sprint (3 lap): pemeriksaan balance
+
+Diukur dengan `temp/probe_sprint.gd` di Neo-Wangan dan Monte Azure (3 lap, tangki FULL = jarak penuh plus 8%). Temuan:
+
+- **Bug AI diperbaiki.** Pemilih mode memperbolehkan AGGRESSIVE tanpa memeriksa bahan bakar (hanya ATTACK yang diperiksa). Dengan tangki sprint yang hanya +8%, sekitar 10 dari 20 rival bertarung dengan AGGRESSIVE, kekurangan sekitar 0,1 lap bahan bakar, lalu pit di lap 2 hanya untuk itu: 10 stop (11 di Monte Azure), selisih pemenang ke terakhir 40-46 s. Kini AGGRESSIVE butuh sisa bahan bakar 0,3 lap pada burn AGGRESSIVE (`GtStrategy.AGGRESSIVE_FUEL_MARGIN_LAPS`): 0 stop, 0 DNF, selisih 13-17 s di Apex, Neo-Wangan, dan Monte Azure (`tests/test_sprint_balance.gd`, 14 cek).
+- **Aturan yang berlaku di sprint:** tanpa pit wajib, tangki selalu FULL (LIGHT dan BALANCED dinonaktifkan), SC dan VSC sama dengan GP.
+- **Pilihan ban hampir tidak berarti.** Di STANDARD, selisih SOFT/MEDIUM/HARD hanya sekitar 1,3 s dalam 3 lap (keausan 18/13/6%). Ini disengaja untuk balapan sependek itu, tetapi terasa datar dibanding GP.
+- **Bahan bakar adalah satu-satunya harga agresi.** Satu mobil solo dengan AGGRESSIVE atau ATTACK sepanjang 3 lap kehabisan bahan bakar (DNF); ATTACK sekitar 18-25 s lebih cepat tetapi hanya bisa dipakai sebagian jarak. Pemain melihat ini lewat verdict deck, tidak ada peringatan khusus sprint.
+- **Belum diukur:** Kurogane (kalender menandainya bukan sprint), hujan pada sprint, dan SC pada sprint.
+
 ## Temuan Minor yang ditunda
 
 Cover stop ikut menyapu rekan setim dan mobil lapped (batasi ke mobil tepat di belakang); waktu isi ulang dihitung untuk satu lap bahan bakar lebih banyak dari yang ditambahkan (sama untuk semua tim); kerusakan sekecil apa pun membuat stop "forced"; AUTO lebih lambat dari rival (cooldown 25 s, tanpa aturan cover); determinisme hanya diuji dengan insiden mati; `_test_rule_shape` tidak membuang race yang dibuatnya; smoke native memakai 10 lap (bukan 15), pemain tidak pit, dan tanpa screenshot podium.
