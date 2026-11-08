@@ -621,6 +621,10 @@ func _update_stop_label(car: GtCar) -> void:
 		stop_label.text = "STOP DONE"
 		stop_label.add_theme_color_override("font_color", T.ACCENT_ACID_LIME)
 		return
+	if bool(status["missed"]):
+		stop_label.text = "+%d S PENALTY" % roundi(float(status["penalty_s"]))
+		stop_label.add_theme_color_override("font_color", T.ACCENT_ANIME_CRIMSON)
+		return
 	stop_label.text = "STOP L%d-L%d // REQUIRED" % [int(status["open_lap"]), int(status["close_lap"])]
 	stop_label.add_theme_color_override("font_color", T.ACCENT_CYBER_YELLOW if bool(status["window_open"]) else T.TEXT_SECONDARY)
 

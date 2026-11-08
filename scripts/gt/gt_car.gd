@@ -39,6 +39,15 @@ var mandatory_penalty_applied: bool = false
 var mandatory_reminded: bool = false
 ## The engineer has already told this car that its fuel will not last to the stop it still owes.
 var fuel_stop_reminded: bool = false
+## The window for the mandatory stop closed with no counting stop: the penalty at the flag is certain (announced once).
+var mandatory_missed: bool = false
+## Seconds added at the flag for the missed stop (0 when the stop was made or the race has none).
+var mandatory_penalty_s: float = 0.0
+## The engineer has already said the window is open (MANUAL desk without the coach), that the last lap began, or
+## that the battery is low (re-armed once it recharges).
+var window_info_called: bool = false
+var last_lap_called: bool = false
+var ers_low_called: bool = false
 var position: int = 0
 ## Own control-line crossing required after a Safety Car restart; -1 outside restart.
 var sc_restart_line_s: float = -1.0

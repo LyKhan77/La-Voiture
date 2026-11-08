@@ -95,6 +95,8 @@ func _decide(case_file: Dictionary) -> void:
 		offender.penalty_owed_s += PENALTY_S
 		case_file["verdict"] = Verdict.PENALTY
 		text = "+%ds TIME PENALTY // CAR #%d: CAUSING A COLLISION" % [int(PENALTY_S), offender.number]
+		if offender.team_id == race.player_team_id:
+			race.push_radio(offender, "engineer", "Steward penalty: +%d seconds. Serve it in the pit box or it is added at the flag." % int(PENALTY_S), true)
 	case_file["text"] = text
 	race.steward_event.emit({
 		"phase": "verdict", "case_id": case_file["id"], "kind": case_file["kind"], "verdict": case_file["verdict"],

@@ -41,6 +41,8 @@ var toggle_button: Button
 var restart_button: Button
 var exit_button: Button
 var fastest_label: Label
+## Tells the player why a car finished lower than it crossed the line (a missed mandatory stop); hidden otherwise.
+var note_label: Label
 var is_leaderboard_open: bool = false
 var director: WinningCutDirector
 var _stage: Control
@@ -100,15 +102,29 @@ static func capture_results(race: GtRace) -> Dictionary:
 	for car: GtCar in final_order:
 		rows.append({"id": car.id, "team_id": car.team_id, "driver_name": car.driver_name,
 			"team_name": car.team_name, "number": car.number, "code": car.code,
-			"time": race.classified_time(car), "best_lap": car.best_lap,
+			"time": race.classified_time(car), "best_lap": car.best_lap, "penalty_s": car.penalty_owed_s,
 			"laps": floori(car.s / race.track.length), "is_dnf": car.is_dnf,
 			"points": awards.drivers[car.id]})
 	var fastest_data: Dictionary = {}
 	if fastest != null:
 		fastest_data = {"id": fastest.id, "code": fastest.code, "time": fastest.best_lap,
 			"bonus": 1 if not fastest.is_dnf and final_order.find(fastest) < 10 else 0}
-	return {"order": rows, "winner_car": Roster.CAR_SLUGS[final_order[0].team_id] if not rows.is_empty() else "",
+	return {"order": rows, "notes": _penalty_notes(race, final_order), "winner_car": Roster.CAR_SLUGS[final_order[0].team_id] if not rows.is_empty() else "",
 		"team_points": awards.teams, "fastest_lap": fastest_data}
+
+
+## One line per player car that lost places to a missed mandatory stop: where it crossed the line and where it is classified.
+static func _penalty_notes(race: GtRace, final_order: Array[GtCar]) -> Array[String]:
+	var road: Array[GtCar] = []
+	for car: GtCar in final_order:
+		if car.finished_at >= 0.0 and not car.is_dnf:
+			road.append(car)
+	road.sort_custom(func(a: GtCar, b: GtCar) -> bool: return a.finished_at < b.finished_at)
+	var notes: Array[String] = []
+	for car: GtCar in final_order:
+		if car.team_id == race.player_team_id and car.mandatory_penalty_s > 0.0 and not car.is_dnf:
+			notes.append("#%d %s ROAD P%d -> P%d (+%ds)" % [car.number, car.code, road.find(car) + 1, final_order.find(car) + 1, roundi(car.mandatory_penalty_s)])
+	return notes
 
 
 static func capture_departure(viewport: Viewport) -> void:
@@ -157,6 +173,7 @@ func _ready() -> void:
 	get_viewport().size_changed.connect(_fit)
 	_fit()
 	Settings.apply_to_tree(self)
+	note_label.reset_size() # the settings may have scaled its font
 	toggle_button.grab_focus()
 	var hub: AudioManager = AudioManager.of(self)
 	if hub != null:
@@ -379,6 +396,11 @@ func _build_ui() -> void:
 	_cut_label = Kit.plate("", T.ACCENT_ANIME_CRIMSON, 26)
 	_cut_label.position = Vector2(1500.0, 10.0)
 	_stage.add_child(_cut_label)
+	note_label = Kit.plate("", T.ACCENT_ANIME_CRIMSON, 17)
+	note_label.name = "PenaltyNote"
+	note_label.position = Vector2(630.0, 24.0)
+	note_label.visible = false
+	_stage.add_child(note_label)
 	var actions := HBoxContainer.new()
 	actions.position = Vector2(580, 1018)
 	actions.add_theme_constant_override("separation", 16)
@@ -425,6 +447,12 @@ func _build_ui() -> void:
 	fastest_label = _text(leaderboard, "NO TIMED LAP", Vector2(20, 582), 16, INK_PURPLE)
 	_text(leaderboard, "/// CONSTRUCTORS' HAUL", Vector2(20, 632), 25, T.ACCENT_ACID_LIME, UI.HEADER)
 	leaderboard.hide()
+
+
+## " PEN+30s" when the car's classified time includes a penalty (a missed mandatory stop or a steward time), else "".
+static func penalty_tag(row: Dictionary) -> String:
+	var penalty: float = float(row.get("penalty_s", 0.0))
+	return " PEN+%ds" % roundi(penalty) if penalty > 0.0 and not bool(row.get("is_dnf", false)) else ""
 
 
 func _gap(row: Dictionary, winner: Dictionary) -> String:
@@ -477,7 +505,7 @@ func _populate() -> void:
 		for place: int in range(mini(3, order.size())):
 			var entry: Dictionary = order[place]
 			entries.append(entry)
-			gaps.append(_gap(entry, winner))
+			gaps.append(_gap(entry, winner) + penalty_tag(entry))
 			textures.append(_panel_textures(entry))
 		if int(fastest.get("bonus", 0)) == 1:
 			bonus_ids.append(int(fastest.id))
@@ -495,8 +523,13 @@ func _populate() -> void:
 		var entry: Dictionary = order[i]
 		var best: bool = int(fastest.get("id", -1)) == int(entry.id)
 		var suffix: String = " +1 PT" if best and int(fastest.get("bonus", 0)) == 1 else (" FL" if best else "")
-		var text: String = "%02d %-3s %-12s %10s %2d%s" % [i + 1, entry.code, entry.driver_name, _gap(entry, winner_row), entry.points, suffix]
+		var text: String = "%02d %-3s %-12s %10s %2d%s%s" % [i + 1, entry.code, entry.driver_name, _gap(entry, winner_row), entry.points, suffix, penalty_tag(entry)]
 		timing_rows.append(_text(leaderboard, text, Vector2(20, 98 + i * 23), 16, INK_PURPLE if best else Kit.INK))
+	var notes: Array = results.get("notes", [])
+	note_label.visible = not notes.is_empty()
+	if note_label.visible:
+		note_label.text = "STOP MISSED // %s" % "  //  ".join(PackedStringArray(notes))
+		note_label.reset_size()
 	if not fastest.is_empty():
 		fastest_label.text = "FL %s / %s / %s" % [fastest.code, format_time(float(fastest.time)), "+1 PT BONUS" if int(fastest.bonus) == 1 else "NO BONUS"]
 	var team_points: Dictionary = results.get("team_points", {})

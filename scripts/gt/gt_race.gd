@@ -84,9 +84,17 @@ const DRIVER_RADIO_COOLDOWN_S: float = 15.0
 var driver_radio_cooldown: Dictionary = {}
 ## The engineer answers a driver call of the player team this many seconds of sim time later.
 const RADIO_REPLY_DELAY_S: float = 2.5
+## A driver's spoken acknowledgement comes this long after the engineer's call, once the engineer has finished.
+const RADIO_ACK_DELAY_S: float = 3.0
+## A call that follows another one (a stop's result after "Good stop", the penalty note after the chequered flag).
+const RADIO_FOLLOW_UP_DELAY_S: float = 2.5
+const RADIO_PENALTY_NOTE_DELAY_S: float = 4.0
+## An ERS battery under this share, while deploying, draws the engineer's call; it re-arms above the second figure.
+const ERS_LOW_CALL_PCT: float = 15.0
+const ERS_REARM_PCT: float = 40.0
 
 var _radio_counter: int = 0
-var _pending_replies: Array[Dictionary] = [] # {"due", "car_id", "reply_to", "driver_text"}
+var _pending_replies: Array[Dictionary] = [] # {"due", "car_id", "reply_to", "speaker", "text" or "driver_text"}
 var _flood_called: Dictionary = {} # car id -> true while a flood episode has been called
 var _suggestion_cooldowns: Dictionary = {} # "car-type" -> time
 var _strategy_profiles: Dictionary = {} # team id -> GtStrategy.profile
@@ -214,7 +222,10 @@ func mark_finished(car: GtCar) -> void:
 		flag_time = time
 	if mandatory_stop_required() and not car.mandatory_stop_done and not car.is_dnf and not car.mandatory_penalty_applied:
 		car.mandatory_penalty_applied = true
-		car.penalty_owed_s += mandatory_penalty_s()
+		car.mandatory_penalty_s = mandatory_penalty_s()
+		car.penalty_owed_s += car.mandatory_penalty_s
+		if car.team_id == player_team_id:
+			queue_radio(car, "engineer", "Penalty added for the missed mandatory stop: +%d seconds. The classification will change." % roundi(car.mandatory_penalty_s), RADIO_PENALTY_NOTE_DELAY_S)
 
 
 ## Races of 10 laps or more carry one mandatory stop (spec 5a).
@@ -233,10 +244,15 @@ func note_stop_completed(car: GtCar, forced: bool, entry_progress: float = -1.0)
 	if not mandatory_stop_required():
 		return
 	var progress: float = entry_progress if entry_progress >= 0.0 else race_progress(car)
-	if progress > GtTypes.STOP_WINDOW_CLOSE:
-		return
-	if progress >= GtTypes.STOP_WINDOW_OPEN or forced:
+	var was_done: bool = car.mandatory_stop_done
+	if progress <= GtTypes.STOP_WINDOW_CLOSE and (progress >= GtTypes.STOP_WINDOW_OPEN or forced):
 		car.mandatory_stop_done = true
+	if car.team_id != player_team_id or was_done:
+		return
+	if car.mandatory_stop_done:
+		queue_radio(car, "engineer", "Stop counts. Mandatory stop complete.", RADIO_FOLLOW_UP_DELAY_S)
+	else:
+		queue_radio(car, "engineer", "That stop does not count toward the mandatory stop.", RADIO_FOLLOW_UP_DELAY_S)
 
 
 ## The first and last lap (1-based, x = first, y = last) in which calling a stop makes it count. A stop called in lap L
@@ -261,15 +277,21 @@ func mandatory_stop_status(car: GtCar) -> Dictionary:
 		"required": mandatory_stop_required(), "done": car.mandatory_stop_done,
 		"window_open": lap_number >= window.x and lap_number <= window.y,
 		"open_lap": window.x, "close_lap": window.y,
-		"penalty_s": mandatory_penalty_s(),
+		"penalty_s": mandatory_penalty_s(), "missed": car.mandatory_missed,
 	}
 
 
-## Once per car: the engineer tells a player car with no counting stop that the window closes in two laps.
+## What the engineer tells the player's cars as the race goes on: the last lap, a drained battery, and the mandatory stop
+## (a stop that will not be made in time, then the miss itself).
 func _check_stop_reminders() -> void:
+	_check_player_calls()
 	if not mandatory_stop_required():
 		return
 	var window: Vector2i = stop_window_laps()
+	for car: GtCar in cars:
+		if not car.mandatory_missed and not car.mandatory_stop_done and not car.is_dnf and car.finished_at < 0.0 and car.pit == null \
+				and maxi(car.lap, 0) + 1 > window.y:
+			_announce_missed_window(car)
 	for car: GtCar in cars:
 		if car.team_id != player_team_id or car.mandatory_stop_done or car.is_dnf or car.finished_at >= 0.0 or car.pit != null:
 			continue
@@ -279,9 +301,38 @@ func _check_stop_reminders() -> void:
 			car.fuel_stop_reminded = true
 			push_radio(car, "engineer", "Fuel is short. Box this lap for fuel.", true)
 			continue
-		if not car.mandatory_reminded and lap_number >= window.y - 1:
+		if not car.mandatory_reminded and lap_number >= window.y - 1 and lap_number <= window.y:
 			car.mandatory_reminded = true
 			push_radio(car, "engineer", "Window closes in two laps. Box now.", true)
+
+
+## The window closed with no counting stop: the penalty at the flag is certain. The banner (a stewards-style verdict) is
+## raised for any car; the engineer speaks to the player's cars only.
+func _announce_missed_window(car: GtCar) -> void:
+	car.mandatory_missed = true
+	var penalty: int = roundi(mandatory_penalty_s())
+	steward_event.emit({
+		"phase": "verdict", "case_id": -1, "kind": -1, "verdict": GtStewards.Verdict.PENALTY, "car_id": car.id,
+		"text": "+%ds TIME PENALTY // CAR #%d: MANDATORY STOP MISSED" % [penalty, car.number], "time": time,
+	})
+	if car.team_id == player_team_id:
+		push_radio(car, "engineer", "Window missed. +%d seconds will be added at the flag." % penalty, true)
+
+
+## Last lap and low battery, once per car (the battery call re-arms once the pack has recharged).
+func _check_player_calls() -> void:
+	for car: GtCar in cars:
+		if car.team_id != player_team_id or car.is_dnf or car.finished_at >= 0.0 or car.pit != null:
+			continue
+		if not car.last_lap_called and maxi(car.lap, 0) + 1 >= laps:
+			car.last_lap_called = true
+			push_radio(car, "engineer", "Last lap. Bring it home.")
+		var deploying: bool = car.ers_mode == GtTypes.ErsMode.DEPLOY or car.ers_mode == GtTypes.ErsMode.OVERTAKE
+		if car.ers_low_called and car.ers_battery >= ERS_REARM_PCT:
+			car.ers_low_called = false
+		elif not car.ers_low_called and deploying and car.ers_battery < ERS_LOW_CALL_PCT:
+			car.ers_low_called = true
+			push_radio(car, "engineer", "Battery is low. Switch ERS to HARVEST to recharge.")
 
 
 func is_finished() -> bool:
@@ -790,7 +841,7 @@ func _tick_driver_radio_cooldowns(dt: float) -> void:
 func push_radio(car: GtCar, speaker: String, text: String, force: bool = false, rival: bool = false, reply_to: int = -1) -> void:
 	if not force and not rival and car.team_id != player_team_id:
 		return
-	if speaker == "driver" and not force:
+	if speaker == "driver" and not force and reply_to < 0:
 		driver_radio_cooldown[car.id] = DRIVER_RADIO_COOLDOWN_S
 	last_radio_time = time
 	_radio_counter += 1
@@ -803,11 +854,16 @@ func push_radio(car: GtCar, speaker: String, text: String, force: bool = false, 
 		radio_history.pop_front()
 	latest_radio = message
 	if speaker == "driver" and not rival and car.team_id == player_team_id and GtRadioReplies.reply_for(text, car, weather.track_water_pct) != "":
-		_pending_replies.append({"due": time + RADIO_REPLY_DELAY_S, "car_id": car.id, "reply_to": _radio_counter, "driver_text": text})
+		_pending_replies.append({"due": time + RADIO_REPLY_DELAY_S, "car_id": car.id, "reply_to": _radio_counter, "speaker": "engineer", "driver_text": text})
+	elif speaker == "engineer" and not rival and car.team_id == player_team_id:
+		var ack: String = GtRadioReplies.driver_ack(text, car, race_seed, _radio_counter)
+		if ack != "":
+			_pending_replies.append({"due": time + RADIO_ACK_DELAY_S, "car_id": car.id, "reply_to": _radio_counter, "speaker": "driver", "text": ack})
 	radio_message.emit(message)
 
 
-## Sends the engineer answers that fell due; the text is made now, from the car as it is now.
+## Sends what fell due: the engineer's answers to a driver call (made now, from the car as it is now), a driver's
+## acknowledgement of an engineer call, and calls queued to follow another one.
 func _flush_replies() -> void:
 	var waiting: Array[Dictionary] = []
 	for reply: Dictionary in _pending_replies:
@@ -815,14 +871,20 @@ func _flush_replies() -> void:
 			waiting.append(reply)
 			continue
 		var car: GtCar = get_car(int(reply["car_id"]))
-		if car != null:
-			var text: String = GtRadioReplies.reply_for(String(reply["driver_text"]), car, weather.track_water_pct)
-			if text != "":
-				push_radio(car, "engineer", text, false, false, int(reply["reply_to"]))
+		if car == null:
+			continue
+		var speaker: String = String(reply.get("speaker", "engineer"))
+		var text: String = String(reply["text"]) if reply.has("text") else GtRadioReplies.reply_for(String(reply["driver_text"]), car, weather.track_water_pct)
+		if text != "":
+			push_radio(car, speaker, text, false, false, int(reply["reply_to"]))
 	_pending_replies = waiting
 
 
-## A car of the player team on slicks calls the flooded track once per episode (water over the wet line, until it drops below the inter line).
+## Sends `text` from `car` after `delay_s` of race time (to the player's team only, like any call that is not urgent).
+func queue_radio(car: GtCar, speaker: String, text: String, delay_s: float) -> void:
+	_pending_replies.append({"due": time + delay_s, "car_id": car.id, "reply_to": -1, "speaker": speaker, "text": text})
+
+
 func _check_flood_radio() -> void:
 	var water: float = weather.track_water_pct
 	if water < GtForecast.INTER_WATER_PCT:
@@ -1065,8 +1127,10 @@ func _decide_stop(car: GtCar) -> void:
 	if car.team_id == player_team_id:
 		var due: int = GtStrategy.mandatory_call(self, car, GtStrategy.NEUTRAL_TACTIC)
 		if due >= 0:
+			var info: String = "" if car.window_info_called else "Mandatory stop window is open."
+			car.window_info_called = true
 			suggest_tactic(car, GtTypes.TacticType.PIT, due, "BOX (MANDATORY) FOR %s" % GtTypes.COMPOUND_NAME[due],
-				"Mandatory stop window is open. Suggest box this lap for %s tyres." % GtTypes.COMPOUND_NAME[due])
+				"Mandatory stop window is open. Suggest box this lap for %s tyres." % GtTypes.COMPOUND_NAME[due], info)
 		elif tactic_mode == GtTypes.TacticMode.AUTO:
 			# The engineer on AUTO also boxes a car that cannot reach the flag on its fuel (a MANUAL desk gets the fuel alarm).
 			var for_fuel: int = GtStrategy.fuel_call(self, car)
