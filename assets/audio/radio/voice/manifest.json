@@ -217,6 +217,62 @@
 		"spoken": "Fuel is short. Box this lap for fuel."
 	},
 	{
+		"id": "eng_window_missed",
+		"speaker": "engineer",
+		"pattern": "^Window missed\\. \\+\\d+ seconds will be added at the flag\\.$",
+		"file": "res://assets/audio/radio/voice/eng_window_missed.wav",
+		"spoken": "Window missed. A time penalty will be added at the flag."
+	},
+	{
+		"id": "eng_window_open_info",
+		"speaker": "engineer",
+		"pattern": "^Mandatory stop window is open\\.$",
+		"file": "res://assets/audio/radio/voice/eng_window_open_info.wav",
+		"spoken": "Mandatory stop window is open."
+	},
+	{
+		"id": "eng_stop_counts",
+		"speaker": "engineer",
+		"pattern": "^Stop counts\\. Mandatory stop complete\\.$",
+		"file": "res://assets/audio/radio/voice/eng_stop_counts.wav",
+		"spoken": "Stop counts. Mandatory stop complete."
+	},
+	{
+		"id": "eng_stop_not_counted",
+		"speaker": "engineer",
+		"pattern": "^That stop does not count toward the mandatory stop\\.$",
+		"file": "res://assets/audio/radio/voice/eng_stop_not_counted.wav",
+		"spoken": "That stop does not count toward the mandatory stop."
+	},
+	{
+		"id": "eng_last_lap",
+		"speaker": "engineer",
+		"pattern": "^Last lap\\. Bring it home\\.$",
+		"file": "res://assets/audio/radio/voice/eng_last_lap.wav",
+		"spoken": "Last lap. Bring it home."
+	},
+	{
+		"id": "eng_steward_penalty",
+		"speaker": "engineer",
+		"pattern": "^Steward penalty: \\+\\d+ seconds\\. Serve it in the pit box or it is added at the flag\\.$",
+		"file": "res://assets/audio/radio/voice/eng_steward_penalty.wav",
+		"spoken": "Steward penalty. Serve it in the pit box, or it is added at the flag."
+	},
+	{
+		"id": "eng_battery_low",
+		"speaker": "engineer",
+		"pattern": "^Battery is low\\. Switch ERS to HARVEST to recharge\\.$",
+		"file": "res://assets/audio/radio/voice/eng_battery_low.wav",
+		"spoken": "Battery is low. Switch E R S to harvest to recharge."
+	},
+	{
+		"id": "eng_penalty_note",
+		"speaker": "engineer",
+		"pattern": "^Penalty added for the missed mandatory stop: \\+\\d+ seconds\\. The classification will change\\.$",
+		"file": "res://assets/audio/radio/voice/eng_penalty_note.wav",
+		"spoken": "Penalty added for the missed mandatory stop. The final classification will change."
+	},
+	{
 		"id": "eng_strat_easing_inter",
 		"speaker": "engineer",
 		"pattern": "^Rain easing \\(\\d+% water\\)\\. Suggest box this lap for INTERMEDIATE tyres\\.$",
@@ -1695,6 +1751,902 @@
 		"pattern": "^Suspension has snapped from the flat tyre! I can't steer, retiring the car!$",
 		"file": "res://assets/audio/radio/voice/drv_suspension_emma.wav",
 		"spoken": "Suspension has snapped from the flat tyre! I can't steer, retiring the car!",
+		"voice": "bf_emma"
+	},
+	{
+		"id": "drv_ack_box_a",
+		"speaker": "driver",
+		"pattern": "^Copy, box this lap\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_box_a.wav",
+		"spoken": "Copy, box this lap.",
+		"voice": "am_eric"
+	},
+	{
+		"id": "drv_ack_box_a_f",
+		"speaker": "driver",
+		"pattern": "^Copy, box this lap\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_box_a_f.wav",
+		"spoken": "Copy, box this lap.",
+		"voice": "af_bella"
+	},
+	{
+		"id": "drv_ack_box_a_michael",
+		"speaker": "driver",
+		"pattern": "^Copy, box this lap\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_box_a_michael.wav",
+		"spoken": "Copy, box this lap.",
+		"voice": "am_michael"
+	},
+	{
+		"id": "drv_ack_box_a_fenrir",
+		"speaker": "driver",
+		"pattern": "^Copy, box this lap\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_box_a_fenrir.wav",
+		"spoken": "Copy, box this lap.",
+		"voice": "am_fenrir"
+	},
+	{
+		"id": "drv_ack_box_a_puck",
+		"speaker": "driver",
+		"pattern": "^Copy, box this lap\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_box_a_puck.wav",
+		"spoken": "Copy, box this lap.",
+		"voice": "am_puck"
+	},
+	{
+		"id": "drv_ack_box_a_george",
+		"speaker": "driver",
+		"pattern": "^Copy, box this lap\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_box_a_george.wav",
+		"spoken": "Copy, box this lap.",
+		"voice": "bm_george"
+	},
+	{
+		"id": "drv_ack_box_a_heart",
+		"speaker": "driver",
+		"pattern": "^Copy, box this lap\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_box_a_heart.wav",
+		"spoken": "Copy, box this lap.",
+		"voice": "af_heart"
+	},
+	{
+		"id": "drv_ack_box_a_emma",
+		"speaker": "driver",
+		"pattern": "^Copy, box this lap\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_box_a_emma.wav",
+		"spoken": "Copy, box this lap.",
+		"voice": "bf_emma"
+	},
+	{
+		"id": "drv_ack_box_b",
+		"speaker": "driver",
+		"pattern": "^Understood, coming in\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_box_b.wav",
+		"spoken": "Understood, coming in.",
+		"voice": "am_eric"
+	},
+	{
+		"id": "drv_ack_box_b_f",
+		"speaker": "driver",
+		"pattern": "^Understood, coming in\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_box_b_f.wav",
+		"spoken": "Understood, coming in.",
+		"voice": "af_bella"
+	},
+	{
+		"id": "drv_ack_box_b_michael",
+		"speaker": "driver",
+		"pattern": "^Understood, coming in\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_box_b_michael.wav",
+		"spoken": "Understood, coming in.",
+		"voice": "am_michael"
+	},
+	{
+		"id": "drv_ack_box_b_fenrir",
+		"speaker": "driver",
+		"pattern": "^Understood, coming in\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_box_b_fenrir.wav",
+		"spoken": "Understood, coming in.",
+		"voice": "am_fenrir"
+	},
+	{
+		"id": "drv_ack_box_b_puck",
+		"speaker": "driver",
+		"pattern": "^Understood, coming in\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_box_b_puck.wav",
+		"spoken": "Understood, coming in.",
+		"voice": "am_puck"
+	},
+	{
+		"id": "drv_ack_box_b_george",
+		"speaker": "driver",
+		"pattern": "^Understood, coming in\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_box_b_george.wav",
+		"spoken": "Understood, coming in.",
+		"voice": "bm_george"
+	},
+	{
+		"id": "drv_ack_box_b_heart",
+		"speaker": "driver",
+		"pattern": "^Understood, coming in\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_box_b_heart.wav",
+		"spoken": "Understood, coming in.",
+		"voice": "af_heart"
+	},
+	{
+		"id": "drv_ack_box_b_emma",
+		"speaker": "driver",
+		"pattern": "^Understood, coming in\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_box_b_emma.wav",
+		"spoken": "Understood, coming in.",
+		"voice": "bf_emma"
+	},
+	{
+		"id": "drv_ack_last_a",
+		"speaker": "driver",
+		"pattern": "^Last lap, copy\\. Bringing it home\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_last_a.wav",
+		"spoken": "Last lap, copy. Bringing it home.",
+		"voice": "am_eric"
+	},
+	{
+		"id": "drv_ack_last_a_f",
+		"speaker": "driver",
+		"pattern": "^Last lap, copy\\. Bringing it home\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_last_a_f.wav",
+		"spoken": "Last lap, copy. Bringing it home.",
+		"voice": "af_bella"
+	},
+	{
+		"id": "drv_ack_last_a_michael",
+		"speaker": "driver",
+		"pattern": "^Last lap, copy\\. Bringing it home\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_last_a_michael.wav",
+		"spoken": "Last lap, copy. Bringing it home.",
+		"voice": "am_michael"
+	},
+	{
+		"id": "drv_ack_last_a_fenrir",
+		"speaker": "driver",
+		"pattern": "^Last lap, copy\\. Bringing it home\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_last_a_fenrir.wav",
+		"spoken": "Last lap, copy. Bringing it home.",
+		"voice": "am_fenrir"
+	},
+	{
+		"id": "drv_ack_last_a_puck",
+		"speaker": "driver",
+		"pattern": "^Last lap, copy\\. Bringing it home\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_last_a_puck.wav",
+		"spoken": "Last lap, copy. Bringing it home.",
+		"voice": "am_puck"
+	},
+	{
+		"id": "drv_ack_last_a_george",
+		"speaker": "driver",
+		"pattern": "^Last lap, copy\\. Bringing it home\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_last_a_george.wav",
+		"spoken": "Last lap, copy. Bringing it home.",
+		"voice": "bm_george"
+	},
+	{
+		"id": "drv_ack_last_a_heart",
+		"speaker": "driver",
+		"pattern": "^Last lap, copy\\. Bringing it home\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_last_a_heart.wav",
+		"spoken": "Last lap, copy. Bringing it home.",
+		"voice": "af_heart"
+	},
+	{
+		"id": "drv_ack_last_a_emma",
+		"speaker": "driver",
+		"pattern": "^Last lap, copy\\. Bringing it home\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_last_a_emma.wav",
+		"spoken": "Last lap, copy. Bringing it home.",
+		"voice": "bf_emma"
+	},
+	{
+		"id": "drv_ack_last_b",
+		"speaker": "driver",
+		"pattern": "^Copy\\. Everything I have left\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_last_b.wav",
+		"spoken": "Copy. Everything I have left.",
+		"voice": "am_eric"
+	},
+	{
+		"id": "drv_ack_last_b_f",
+		"speaker": "driver",
+		"pattern": "^Copy\\. Everything I have left\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_last_b_f.wav",
+		"spoken": "Copy. Everything I have left.",
+		"voice": "af_bella"
+	},
+	{
+		"id": "drv_ack_last_b_michael",
+		"speaker": "driver",
+		"pattern": "^Copy\\. Everything I have left\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_last_b_michael.wav",
+		"spoken": "Copy. Everything I have left.",
+		"voice": "am_michael"
+	},
+	{
+		"id": "drv_ack_last_b_fenrir",
+		"speaker": "driver",
+		"pattern": "^Copy\\. Everything I have left\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_last_b_fenrir.wav",
+		"spoken": "Copy. Everything I have left.",
+		"voice": "am_fenrir"
+	},
+	{
+		"id": "drv_ack_last_b_puck",
+		"speaker": "driver",
+		"pattern": "^Copy\\. Everything I have left\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_last_b_puck.wav",
+		"spoken": "Copy. Everything I have left.",
+		"voice": "am_puck"
+	},
+	{
+		"id": "drv_ack_last_b_george",
+		"speaker": "driver",
+		"pattern": "^Copy\\. Everything I have left\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_last_b_george.wav",
+		"spoken": "Copy. Everything I have left.",
+		"voice": "bm_george"
+	},
+	{
+		"id": "drv_ack_last_b_heart",
+		"speaker": "driver",
+		"pattern": "^Copy\\. Everything I have left\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_last_b_heart.wav",
+		"spoken": "Copy. Everything I have left.",
+		"voice": "af_heart"
+	},
+	{
+		"id": "drv_ack_last_b_emma",
+		"speaker": "driver",
+		"pattern": "^Copy\\. Everything I have left\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_last_b_emma.wav",
+		"spoken": "Copy. Everything I have left.",
+		"voice": "bf_emma"
+	},
+	{
+		"id": "drv_ack_fuel",
+		"speaker": "driver",
+		"pattern": "^Copy, fuel is tight\\. Coming in\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_fuel.wav",
+		"spoken": "Copy, fuel is tight. Coming in.",
+		"voice": "am_eric"
+	},
+	{
+		"id": "drv_ack_fuel_f",
+		"speaker": "driver",
+		"pattern": "^Copy, fuel is tight\\. Coming in\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_fuel_f.wav",
+		"spoken": "Copy, fuel is tight. Coming in.",
+		"voice": "af_bella"
+	},
+	{
+		"id": "drv_ack_fuel_michael",
+		"speaker": "driver",
+		"pattern": "^Copy, fuel is tight\\. Coming in\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_fuel_michael.wav",
+		"spoken": "Copy, fuel is tight. Coming in.",
+		"voice": "am_michael"
+	},
+	{
+		"id": "drv_ack_fuel_fenrir",
+		"speaker": "driver",
+		"pattern": "^Copy, fuel is tight\\. Coming in\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_fuel_fenrir.wav",
+		"spoken": "Copy, fuel is tight. Coming in.",
+		"voice": "am_fenrir"
+	},
+	{
+		"id": "drv_ack_fuel_puck",
+		"speaker": "driver",
+		"pattern": "^Copy, fuel is tight\\. Coming in\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_fuel_puck.wav",
+		"spoken": "Copy, fuel is tight. Coming in.",
+		"voice": "am_puck"
+	},
+	{
+		"id": "drv_ack_fuel_george",
+		"speaker": "driver",
+		"pattern": "^Copy, fuel is tight\\. Coming in\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_fuel_george.wav",
+		"spoken": "Copy, fuel is tight. Coming in.",
+		"voice": "bm_george"
+	},
+	{
+		"id": "drv_ack_fuel_heart",
+		"speaker": "driver",
+		"pattern": "^Copy, fuel is tight\\. Coming in\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_fuel_heart.wav",
+		"spoken": "Copy, fuel is tight. Coming in.",
+		"voice": "af_heart"
+	},
+	{
+		"id": "drv_ack_fuel_emma",
+		"speaker": "driver",
+		"pattern": "^Copy, fuel is tight\\. Coming in\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_fuel_emma.wav",
+		"spoken": "Copy, fuel is tight. Coming in.",
+		"voice": "bf_emma"
+	},
+	{
+		"id": "drv_ack_missed",
+		"speaker": "driver",
+		"pattern": "^Understood\\. We take the penalty\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_missed.wav",
+		"spoken": "Understood. We take the penalty.",
+		"voice": "am_eric"
+	},
+	{
+		"id": "drv_ack_missed_f",
+		"speaker": "driver",
+		"pattern": "^Understood\\. We take the penalty\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_missed_f.wav",
+		"spoken": "Understood. We take the penalty.",
+		"voice": "af_bella"
+	},
+	{
+		"id": "drv_ack_missed_michael",
+		"speaker": "driver",
+		"pattern": "^Understood\\. We take the penalty\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_missed_michael.wav",
+		"spoken": "Understood. We take the penalty.",
+		"voice": "am_michael"
+	},
+	{
+		"id": "drv_ack_missed_fenrir",
+		"speaker": "driver",
+		"pattern": "^Understood\\. We take the penalty\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_missed_fenrir.wav",
+		"spoken": "Understood. We take the penalty.",
+		"voice": "am_fenrir"
+	},
+	{
+		"id": "drv_ack_missed_puck",
+		"speaker": "driver",
+		"pattern": "^Understood\\. We take the penalty\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_missed_puck.wav",
+		"spoken": "Understood. We take the penalty.",
+		"voice": "am_puck"
+	},
+	{
+		"id": "drv_ack_missed_george",
+		"speaker": "driver",
+		"pattern": "^Understood\\. We take the penalty\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_missed_george.wav",
+		"spoken": "Understood. We take the penalty.",
+		"voice": "bm_george"
+	},
+	{
+		"id": "drv_ack_missed_heart",
+		"speaker": "driver",
+		"pattern": "^Understood\\. We take the penalty\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_missed_heart.wav",
+		"spoken": "Understood. We take the penalty.",
+		"voice": "af_heart"
+	},
+	{
+		"id": "drv_ack_missed_emma",
+		"speaker": "driver",
+		"pattern": "^Understood\\. We take the penalty\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_missed_emma.wav",
+		"spoken": "Understood. We take the penalty.",
+		"voice": "bf_emma"
+	},
+	{
+		"id": "drv_ack_stop_ok",
+		"speaker": "driver",
+		"pattern": "^Copy, the stop counts\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_stop_ok.wav",
+		"spoken": "Copy, the stop counts.",
+		"voice": "am_eric"
+	},
+	{
+		"id": "drv_ack_stop_ok_f",
+		"speaker": "driver",
+		"pattern": "^Copy, the stop counts\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_stop_ok_f.wav",
+		"spoken": "Copy, the stop counts.",
+		"voice": "af_bella"
+	},
+	{
+		"id": "drv_ack_stop_ok_michael",
+		"speaker": "driver",
+		"pattern": "^Copy, the stop counts\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_stop_ok_michael.wav",
+		"spoken": "Copy, the stop counts.",
+		"voice": "am_michael"
+	},
+	{
+		"id": "drv_ack_stop_ok_fenrir",
+		"speaker": "driver",
+		"pattern": "^Copy, the stop counts\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_stop_ok_fenrir.wav",
+		"spoken": "Copy, the stop counts.",
+		"voice": "am_fenrir"
+	},
+	{
+		"id": "drv_ack_stop_ok_puck",
+		"speaker": "driver",
+		"pattern": "^Copy, the stop counts\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_stop_ok_puck.wav",
+		"spoken": "Copy, the stop counts.",
+		"voice": "am_puck"
+	},
+	{
+		"id": "drv_ack_stop_ok_george",
+		"speaker": "driver",
+		"pattern": "^Copy, the stop counts\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_stop_ok_george.wav",
+		"spoken": "Copy, the stop counts.",
+		"voice": "bm_george"
+	},
+	{
+		"id": "drv_ack_stop_ok_heart",
+		"speaker": "driver",
+		"pattern": "^Copy, the stop counts\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_stop_ok_heart.wav",
+		"spoken": "Copy, the stop counts.",
+		"voice": "af_heart"
+	},
+	{
+		"id": "drv_ack_stop_ok_emma",
+		"speaker": "driver",
+		"pattern": "^Copy, the stop counts\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_stop_ok_emma.wav",
+		"spoken": "Copy, the stop counts.",
+		"voice": "bf_emma"
+	},
+	{
+		"id": "drv_ack_stop_no",
+		"speaker": "driver",
+		"pattern": "^Understood\\. I need another stop\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_stop_no.wav",
+		"spoken": "Understood. I need another stop.",
+		"voice": "am_eric"
+	},
+	{
+		"id": "drv_ack_stop_no_f",
+		"speaker": "driver",
+		"pattern": "^Understood\\. I need another stop\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_stop_no_f.wav",
+		"spoken": "Understood. I need another stop.",
+		"voice": "af_bella"
+	},
+	{
+		"id": "drv_ack_stop_no_michael",
+		"speaker": "driver",
+		"pattern": "^Understood\\. I need another stop\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_stop_no_michael.wav",
+		"spoken": "Understood. I need another stop.",
+		"voice": "am_michael"
+	},
+	{
+		"id": "drv_ack_stop_no_fenrir",
+		"speaker": "driver",
+		"pattern": "^Understood\\. I need another stop\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_stop_no_fenrir.wav",
+		"spoken": "Understood. I need another stop.",
+		"voice": "am_fenrir"
+	},
+	{
+		"id": "drv_ack_stop_no_puck",
+		"speaker": "driver",
+		"pattern": "^Understood\\. I need another stop\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_stop_no_puck.wav",
+		"spoken": "Understood. I need another stop.",
+		"voice": "am_puck"
+	},
+	{
+		"id": "drv_ack_stop_no_george",
+		"speaker": "driver",
+		"pattern": "^Understood\\. I need another stop\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_stop_no_george.wav",
+		"spoken": "Understood. I need another stop.",
+		"voice": "bm_george"
+	},
+	{
+		"id": "drv_ack_stop_no_heart",
+		"speaker": "driver",
+		"pattern": "^Understood\\. I need another stop\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_stop_no_heart.wav",
+		"spoken": "Understood. I need another stop.",
+		"voice": "af_heart"
+	},
+	{
+		"id": "drv_ack_stop_no_emma",
+		"speaker": "driver",
+		"pattern": "^Understood\\. I need another stop\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_stop_no_emma.wav",
+		"spoken": "Understood. I need another stop.",
+		"voice": "bf_emma"
+	},
+	{
+		"id": "drv_ack_steward",
+		"speaker": "driver",
+		"pattern": "^Copy\\. I will serve it in the pits\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_steward.wav",
+		"spoken": "Copy. I will serve it in the pits.",
+		"voice": "am_eric"
+	},
+	{
+		"id": "drv_ack_steward_f",
+		"speaker": "driver",
+		"pattern": "^Copy\\. I will serve it in the pits\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_steward_f.wav",
+		"spoken": "Copy. I will serve it in the pits.",
+		"voice": "af_bella"
+	},
+	{
+		"id": "drv_ack_steward_michael",
+		"speaker": "driver",
+		"pattern": "^Copy\\. I will serve it in the pits\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_steward_michael.wav",
+		"spoken": "Copy. I will serve it in the pits.",
+		"voice": "am_michael"
+	},
+	{
+		"id": "drv_ack_steward_fenrir",
+		"speaker": "driver",
+		"pattern": "^Copy\\. I will serve it in the pits\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_steward_fenrir.wav",
+		"spoken": "Copy. I will serve it in the pits.",
+		"voice": "am_fenrir"
+	},
+	{
+		"id": "drv_ack_steward_puck",
+		"speaker": "driver",
+		"pattern": "^Copy\\. I will serve it in the pits\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_steward_puck.wav",
+		"spoken": "Copy. I will serve it in the pits.",
+		"voice": "am_puck"
+	},
+	{
+		"id": "drv_ack_steward_george",
+		"speaker": "driver",
+		"pattern": "^Copy\\. I will serve it in the pits\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_steward_george.wav",
+		"spoken": "Copy. I will serve it in the pits.",
+		"voice": "bm_george"
+	},
+	{
+		"id": "drv_ack_steward_heart",
+		"speaker": "driver",
+		"pattern": "^Copy\\. I will serve it in the pits\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_steward_heart.wav",
+		"spoken": "Copy. I will serve it in the pits.",
+		"voice": "af_heart"
+	},
+	{
+		"id": "drv_ack_steward_emma",
+		"speaker": "driver",
+		"pattern": "^Copy\\. I will serve it in the pits\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_steward_emma.wav",
+		"spoken": "Copy. I will serve it in the pits.",
+		"voice": "bf_emma"
+	},
+	{
+		"id": "drv_ack_battery",
+		"speaker": "driver",
+		"pattern": "^Copy, harvesting\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_battery.wav",
+		"spoken": "Copy, harvesting.",
+		"voice": "am_eric"
+	},
+	{
+		"id": "drv_ack_battery_f",
+		"speaker": "driver",
+		"pattern": "^Copy, harvesting\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_battery_f.wav",
+		"spoken": "Copy, harvesting.",
+		"voice": "af_bella"
+	},
+	{
+		"id": "drv_ack_battery_michael",
+		"speaker": "driver",
+		"pattern": "^Copy, harvesting\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_battery_michael.wav",
+		"spoken": "Copy, harvesting.",
+		"voice": "am_michael"
+	},
+	{
+		"id": "drv_ack_battery_fenrir",
+		"speaker": "driver",
+		"pattern": "^Copy, harvesting\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_battery_fenrir.wav",
+		"spoken": "Copy, harvesting.",
+		"voice": "am_fenrir"
+	},
+	{
+		"id": "drv_ack_battery_puck",
+		"speaker": "driver",
+		"pattern": "^Copy, harvesting\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_battery_puck.wav",
+		"spoken": "Copy, harvesting.",
+		"voice": "am_puck"
+	},
+	{
+		"id": "drv_ack_battery_george",
+		"speaker": "driver",
+		"pattern": "^Copy, harvesting\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_battery_george.wav",
+		"spoken": "Copy, harvesting.",
+		"voice": "bm_george"
+	},
+	{
+		"id": "drv_ack_battery_heart",
+		"speaker": "driver",
+		"pattern": "^Copy, harvesting\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_battery_heart.wav",
+		"spoken": "Copy, harvesting.",
+		"voice": "af_heart"
+	},
+	{
+		"id": "drv_ack_battery_emma",
+		"speaker": "driver",
+		"pattern": "^Copy, harvesting\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_battery_emma.wav",
+		"spoken": "Copy, harvesting.",
+		"voice": "bf_emma"
+	},
+	{
+		"id": "drv_ack_penalty_note",
+		"speaker": "driver",
+		"pattern": "^Understood\\. I should have boxed\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_penalty_note.wav",
+		"spoken": "Understood. I should have boxed.",
+		"voice": "am_eric"
+	},
+	{
+		"id": "drv_ack_penalty_note_f",
+		"speaker": "driver",
+		"pattern": "^Understood\\. I should have boxed\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_penalty_note_f.wav",
+		"spoken": "Understood. I should have boxed.",
+		"voice": "af_bella"
+	},
+	{
+		"id": "drv_ack_penalty_note_michael",
+		"speaker": "driver",
+		"pattern": "^Understood\\. I should have boxed\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_penalty_note_michael.wav",
+		"spoken": "Understood. I should have boxed.",
+		"voice": "am_michael"
+	},
+	{
+		"id": "drv_ack_penalty_note_fenrir",
+		"speaker": "driver",
+		"pattern": "^Understood\\. I should have boxed\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_penalty_note_fenrir.wav",
+		"spoken": "Understood. I should have boxed.",
+		"voice": "am_fenrir"
+	},
+	{
+		"id": "drv_ack_penalty_note_puck",
+		"speaker": "driver",
+		"pattern": "^Understood\\. I should have boxed\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_penalty_note_puck.wav",
+		"spoken": "Understood. I should have boxed.",
+		"voice": "am_puck"
+	},
+	{
+		"id": "drv_ack_penalty_note_george",
+		"speaker": "driver",
+		"pattern": "^Understood\\. I should have boxed\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_penalty_note_george.wav",
+		"spoken": "Understood. I should have boxed.",
+		"voice": "bm_george"
+	},
+	{
+		"id": "drv_ack_penalty_note_heart",
+		"speaker": "driver",
+		"pattern": "^Understood\\. I should have boxed\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_penalty_note_heart.wav",
+		"spoken": "Understood. I should have boxed.",
+		"voice": "af_heart"
+	},
+	{
+		"id": "drv_ack_penalty_note_emma",
+		"speaker": "driver",
+		"pattern": "^Understood\\. I should have boxed\\.$",
+		"file": "res://assets/audio/radio/voice/drv_ack_penalty_note_emma.wav",
+		"spoken": "Understood. I should have boxed.",
+		"voice": "bf_emma"
+	},
+	{
+		"id": "drv_finish_win",
+		"speaker": "driver",
+		"pattern": "^Yes! We did it! Thank you, team!$",
+		"file": "res://assets/audio/radio/voice/drv_finish_win.wav",
+		"spoken": "Yes! We did it! Thank you, team!",
+		"voice": "am_eric"
+	},
+	{
+		"id": "drv_finish_win_f",
+		"speaker": "driver",
+		"pattern": "^Yes! We did it! Thank you, team!$",
+		"file": "res://assets/audio/radio/voice/drv_finish_win_f.wav",
+		"spoken": "Yes! We did it! Thank you, team!",
+		"voice": "af_bella"
+	},
+	{
+		"id": "drv_finish_win_michael",
+		"speaker": "driver",
+		"pattern": "^Yes! We did it! Thank you, team!$",
+		"file": "res://assets/audio/radio/voice/drv_finish_win_michael.wav",
+		"spoken": "Yes! We did it! Thank you, team!",
+		"voice": "am_michael"
+	},
+	{
+		"id": "drv_finish_win_fenrir",
+		"speaker": "driver",
+		"pattern": "^Yes! We did it! Thank you, team!$",
+		"file": "res://assets/audio/radio/voice/drv_finish_win_fenrir.wav",
+		"spoken": "Yes! We did it! Thank you, team!",
+		"voice": "am_fenrir"
+	},
+	{
+		"id": "drv_finish_win_puck",
+		"speaker": "driver",
+		"pattern": "^Yes! We did it! Thank you, team!$",
+		"file": "res://assets/audio/radio/voice/drv_finish_win_puck.wav",
+		"spoken": "Yes! We did it! Thank you, team!",
+		"voice": "am_puck"
+	},
+	{
+		"id": "drv_finish_win_george",
+		"speaker": "driver",
+		"pattern": "^Yes! We did it! Thank you, team!$",
+		"file": "res://assets/audio/radio/voice/drv_finish_win_george.wav",
+		"spoken": "Yes! We did it! Thank you, team!",
+		"voice": "bm_george"
+	},
+	{
+		"id": "drv_finish_win_heart",
+		"speaker": "driver",
+		"pattern": "^Yes! We did it! Thank you, team!$",
+		"file": "res://assets/audio/radio/voice/drv_finish_win_heart.wav",
+		"spoken": "Yes! We did it! Thank you, team!",
+		"voice": "af_heart"
+	},
+	{
+		"id": "drv_finish_win_emma",
+		"speaker": "driver",
+		"pattern": "^Yes! We did it! Thank you, team!$",
+		"file": "res://assets/audio/radio/voice/drv_finish_win_emma.wav",
+		"spoken": "Yes! We did it! Thank you, team!",
+		"voice": "bf_emma"
+	},
+	{
+		"id": "drv_finish_podium",
+		"speaker": "driver",
+		"pattern": "^Podium! Great job, everyone!$",
+		"file": "res://assets/audio/radio/voice/drv_finish_podium.wav",
+		"spoken": "Podium! Great job, everyone!",
+		"voice": "am_eric"
+	},
+	{
+		"id": "drv_finish_podium_f",
+		"speaker": "driver",
+		"pattern": "^Podium! Great job, everyone!$",
+		"file": "res://assets/audio/radio/voice/drv_finish_podium_f.wav",
+		"spoken": "Podium! Great job, everyone!",
+		"voice": "af_bella"
+	},
+	{
+		"id": "drv_finish_podium_michael",
+		"speaker": "driver",
+		"pattern": "^Podium! Great job, everyone!$",
+		"file": "res://assets/audio/radio/voice/drv_finish_podium_michael.wav",
+		"spoken": "Podium! Great job, everyone!",
+		"voice": "am_michael"
+	},
+	{
+		"id": "drv_finish_podium_fenrir",
+		"speaker": "driver",
+		"pattern": "^Podium! Great job, everyone!$",
+		"file": "res://assets/audio/radio/voice/drv_finish_podium_fenrir.wav",
+		"spoken": "Podium! Great job, everyone!",
+		"voice": "am_fenrir"
+	},
+	{
+		"id": "drv_finish_podium_puck",
+		"speaker": "driver",
+		"pattern": "^Podium! Great job, everyone!$",
+		"file": "res://assets/audio/radio/voice/drv_finish_podium_puck.wav",
+		"spoken": "Podium! Great job, everyone!",
+		"voice": "am_puck"
+	},
+	{
+		"id": "drv_finish_podium_george",
+		"speaker": "driver",
+		"pattern": "^Podium! Great job, everyone!$",
+		"file": "res://assets/audio/radio/voice/drv_finish_podium_george.wav",
+		"spoken": "Podium! Great job, everyone!",
+		"voice": "bm_george"
+	},
+	{
+		"id": "drv_finish_podium_heart",
+		"speaker": "driver",
+		"pattern": "^Podium! Great job, everyone!$",
+		"file": "res://assets/audio/radio/voice/drv_finish_podium_heart.wav",
+		"spoken": "Podium! Great job, everyone!",
+		"voice": "af_heart"
+	},
+	{
+		"id": "drv_finish_podium_emma",
+		"speaker": "driver",
+		"pattern": "^Podium! Great job, everyone!$",
+		"file": "res://assets/audio/radio/voice/drv_finish_podium_emma.wav",
+		"spoken": "Podium! Great job, everyone!",
+		"voice": "bf_emma"
+	},
+	{
+		"id": "drv_finish_other",
+		"speaker": "driver",
+		"pattern": "^Chequered flag\\. Good effort, team\\.$",
+		"file": "res://assets/audio/radio/voice/drv_finish_other.wav",
+		"spoken": "Chequered flag. Good effort, team.",
+		"voice": "am_eric"
+	},
+	{
+		"id": "drv_finish_other_f",
+		"speaker": "driver",
+		"pattern": "^Chequered flag\\. Good effort, team\\.$",
+		"file": "res://assets/audio/radio/voice/drv_finish_other_f.wav",
+		"spoken": "Chequered flag. Good effort, team.",
+		"voice": "af_bella"
+	},
+	{
+		"id": "drv_finish_other_michael",
+		"speaker": "driver",
+		"pattern": "^Chequered flag\\. Good effort, team\\.$",
+		"file": "res://assets/audio/radio/voice/drv_finish_other_michael.wav",
+		"spoken": "Chequered flag. Good effort, team.",
+		"voice": "am_michael"
+	},
+	{
+		"id": "drv_finish_other_fenrir",
+		"speaker": "driver",
+		"pattern": "^Chequered flag\\. Good effort, team\\.$",
+		"file": "res://assets/audio/radio/voice/drv_finish_other_fenrir.wav",
+		"spoken": "Chequered flag. Good effort, team.",
+		"voice": "am_fenrir"
+	},
+	{
+		"id": "drv_finish_other_puck",
+		"speaker": "driver",
+		"pattern": "^Chequered flag\\. Good effort, team\\.$",
+		"file": "res://assets/audio/radio/voice/drv_finish_other_puck.wav",
+		"spoken": "Chequered flag. Good effort, team.",
+		"voice": "am_puck"
+	},
+	{
+		"id": "drv_finish_other_george",
+		"speaker": "driver",
+		"pattern": "^Chequered flag\\. Good effort, team\\.$",
+		"file": "res://assets/audio/radio/voice/drv_finish_other_george.wav",
+		"spoken": "Chequered flag. Good effort, team.",
+		"voice": "bm_george"
+	},
+	{
+		"id": "drv_finish_other_heart",
+		"speaker": "driver",
+		"pattern": "^Chequered flag\\. Good effort, team\\.$",
+		"file": "res://assets/audio/radio/voice/drv_finish_other_heart.wav",
+		"spoken": "Chequered flag. Good effort, team.",
+		"voice": "af_heart"
+	},
+	{
+		"id": "drv_finish_other_emma",
+		"speaker": "driver",
+		"pattern": "^Chequered flag\\. Good effort, team\\.$",
+		"file": "res://assets/audio/radio/voice/drv_finish_other_emma.wav",
+		"spoken": "Chequered flag. Good effort, team.",
 		"voice": "bf_emma"
 	}
 ]

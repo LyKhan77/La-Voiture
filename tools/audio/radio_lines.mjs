@@ -63,6 +63,16 @@ for (const c of ["HARD", "MEDIUM", "SOFT", "INTERMEDIATE", "WET"]) {
 add("eng_mandatory_window", "engineer", "^Mandatory stop window is open\\. Suggest box this lap for \\w+ tyres\\.$", "Mandatory stop window is open. Suggest box this lap.");
 add("eng_mandatory_closing", "engineer", "^Window closes in two laps\\. Box now\\.$", "Window closes in two laps. Box now.");
 add("eng_fuel_short_box", "engineer", "^Fuel is short\\. Box this lap for fuel\\.$", "Fuel is short. Box this lap for fuel.");
+// FASE 32 radio round: what the rules do to the player's cars (GtRace._check_player_calls, _announce_missed_window,
+// note_stop_completed, mark_finished and GtStewards._decide).
+add("eng_window_missed", "engineer", "^Window missed\\. \\+\\d+ seconds will be added at the flag\\.$", "Window missed. A time penalty will be added at the flag.");
+add("eng_window_open_info", "engineer", "^Mandatory stop window is open\\.$", "Mandatory stop window is open.");
+add("eng_stop_counts", "engineer", "^Stop counts\\. Mandatory stop complete\\.$", "Stop counts. Mandatory stop complete.");
+add("eng_stop_not_counted", "engineer", "^That stop does not count toward the mandatory stop\\.$", "That stop does not count toward the mandatory stop.");
+add("eng_last_lap", "engineer", "^Last lap\\. Bring it home\\.$", "Last lap. Bring it home.");
+add("eng_steward_penalty", "engineer", "^Steward penalty: \\+\\d+ seconds\\. Serve it in the pit box or it is added at the flag\\.$", "Steward penalty. Serve it in the pit box, or it is added at the flag.");
+add("eng_battery_low", "engineer", "^Battery is low\\. Switch ERS to HARVEST to recharge\\.$", "Battery is low. Switch E R S to harvest to recharge.");
+add("eng_penalty_note", "engineer", "^Penalty added for the missed mandatory stop: \\+\\d+ seconds\\. The classification will change\\.$", "Penalty added for the missed mandatory stop. The final classification will change.");
 // FASE 19 strategist calls (GtRace._strategy_call_text).
 add("eng_strat_easing_inter", "engineer", "^Rain easing \\(\\d+% water\\)\\. Suggest box this lap for INTERMEDIATE tyres\\.$", "The rain is easing. Suggest box this lap for intermediate tyres.");
 add("eng_strat_cooking", "engineer", "^The (INTERMEDIATE|WET) tyres are cooking on the dry line\\. Box now for \\w+ tyres\\.$", "The rain tyres are cooking on the dry line. Box now, box now!");
@@ -134,5 +144,21 @@ add("drv_engine_died", "driver", "^Engine died! No fuel, no fuel! I'm stopping o
 add("drv_puncture", "driver", "^Puncture! The tyre has delaminated!$", "Puncture! The tyre has delaminated!");
 add("drv_blowout", "driver", "^I'm spinning! Tyre blew out on the high speed section!$", "I'm spinning! Tyre blew out on the high speed section!");
 add("drv_suspension", "driver", "^Suspension has snapped from the flat tyre! I can't steer, retiring the car!$", "Suspension has snapped from the flat tyre! I can't steer, retiring the car!");
+
+// The driver's spoken acknowledgements of the engineer's calls (GtRadioReplies.driver_ack); two wordings for the common ones.
+add("drv_ack_box_a", "driver", "^Copy, box this lap\\.$", "Copy, box this lap.");
+add("drv_ack_box_b", "driver", "^Understood, coming in\\.$", "Understood, coming in.");
+add("drv_ack_last_a", "driver", "^Last lap, copy\\. Bringing it home\\.$", "Last lap, copy. Bringing it home.");
+add("drv_ack_last_b", "driver", "^Copy\\. Everything I have left\\.$", "Copy. Everything I have left.");
+add("drv_ack_fuel", "driver", "^Copy, fuel is tight\\. Coming in\\.$", "Copy, fuel is tight. Coming in.");
+add("drv_ack_missed", "driver", "^Understood\\. We take the penalty\\.$", "Understood. We take the penalty.");
+add("drv_ack_stop_ok", "driver", "^Copy, the stop counts\\.$", "Copy, the stop counts.");
+add("drv_ack_stop_no", "driver", "^Understood\\. I need another stop\\.$", "Understood. I need another stop.");
+add("drv_ack_steward", "driver", "^Copy\\. I will serve it in the pits\\.$", "Copy. I will serve it in the pits.");
+add("drv_ack_battery", "driver", "^Copy, harvesting\\.$", "Copy, harvesting.");
+add("drv_ack_penalty_note", "driver", "^Understood\\. I should have boxed\\.$", "Understood. I should have boxed.");
+add("drv_finish_win", "driver", "^Yes! We did it! Thank you, team!$", "Yes! We did it! Thank you, team!");
+add("drv_finish_podium", "driver", "^Podium! Great job, everyone!$", "Podium! Great job, everyone!");
+add("drv_finish_other", "driver", "^Chequered flag\\. Good effort, team\\.$", "Chequered flag. Good effort, team.");
 
 export const LINES = lines;
